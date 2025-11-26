@@ -1,0 +1,36 @@
+{
+  "username": "knadh",
+  "name": "Kailash Nadh",
+  "email": "kailash@nadh.in",
+  "location": "Bengaluru",
+  "bio": "Hobbyist developer / CTO @zerodha / Volunteer @fossunited @rainmatter-foundation  @indic-archive ",
+  "avatar_url": "https://avatars.githubusercontent.com/u/547147?v=4",
+  "portfolio_url": "https://nadh.in",
+  "public_repos": 61,
+  "top_repos": [
+    {
+      "name": "autocomp.js",
+      "description": "A super tiny Javascript autocomplete / autosuggestions library. Zero dependencies, ~800 bytes min+gzip.",
+      "stars": 322,
+      "forks": 6,
+      "url": "https://github.com/knadh/autocomp.js",
+      "language": "HTML",
+      "last_updated": "2025-10-26T09:48:24Z"
+    }
+  ],
+  "total_stars": 32556,
+  "languages": {
+    "Go": 37.7,
+    "Python": 17.8,
+    "JavaScript": 15.3,
+    "HTML": 13.1,
+    "CSS": 5.8,
+    "Rust": 4.9,
+    "Zig": 3.3,
+    "Shell": 1.4,
+    "TSQL": 0.4,
+    "Makefile": 0.3
+  },
+  "contributions": 100,
+  "last_active_date": "2025-11-26T05:25:16+00:00"
+}
