@@ -9,16 +9,52 @@
   "public_repos": 61,
   "top_repos": [
     {
+      "name": "tinyrouter.js",
+      "description": "A tiny, zero-dependency lib for frontend routing and navigation on top of `window.history`",
+      "stars": 59,
+      "forks": 4,
+      "url": "https://github.com/knadh/tinyrouter.js",
+      "language": "JavaScript",
+      "last_updated": "2025-11-18T17:15:33Z"
+    },
+    {
+      "name": "highlighted-input.js",
+      "description": "Super tiny, zero dep Javascript lib that highlights specific keywords and tags in an <input> field.",
+      "stars": 41,
+      "forks": 1,
+      "url": "https://github.com/knadh/highlighted-input.js",
+      "language": "JavaScript",
+      "last_updated": "2025-04-26T15:45:08Z"
+    },
+    {
+      "name": "yesqlr",
+      "description": "Parse SQL files with multiple named queries into a map for easy organisation and management of SQL queries. Port of goyesql.",
+      "stars": 36,
+      "forks": 4,
+      "url": "https://github.com/knadh/yesqlr",
+      "language": "Rust",
+      "last_updated": "2025-07-13T09:26:52Z"
+    },
+    {
+      "name": "floatype.js",
+      "description": "A tiny, zero-dependency, floating autocomplete / autosuggestion widget for textareas.",
+      "stars": 107,
+      "forks": 12,
+      "url": "https://github.com/knadh/floatype.js",
+      "language": "JavaScript",
+      "last_updated": "2024-08-26T08:12:47Z"
+    },
+    {
       "name": "autocomp.js",
       "description": "A super tiny Javascript autocomplete / autosuggestions library. Zero dependencies, ~800 bytes min+gzip.",
-      "stars": 322,
+      "stars": 332,
       "forks": 6,
       "url": "https://github.com/knadh/autocomp.js",
       "language": "HTML",
       "last_updated": "2025-10-26T09:48:24Z"
     }
   ],
-  "total_stars": 32556,
+  "total_stars": 33148,
   "languages": {
     "Go": 37.7,
     "Python": 17.8,
