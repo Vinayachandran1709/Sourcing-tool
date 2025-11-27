@@ -1,7 +1,8 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime
 from sqlalchemy.dialects.postgresql import JSON  # NEW: Import JSON type
 from database import Base
-from datetime import datetime
+from datetime import datetime, timezone
+import math
 
 class Profile(Base):
     """
@@ -73,9 +74,9 @@ class Profile(Base):
         """
         
         # ===== DEFINE THRESHOLDS =====
-        EXCELLENT_STARS = 1500
-        EXCELLENT_REPOS = 80
-        EXCELLENT_CONTRIBUTIONS = 700
+        EXCELLENT_STARS = 3000
+        EXCELLENT_REPOS = 100
+        EXCELLENT_CONTRIBUTIONS = 1000
         MAX_LANGUAGES = 10
         ACTIVE_DAYS_THRESHOLD = 90
         
@@ -112,11 +113,11 @@ class Profile(Base):
         
         # ===== CALCULATE WEIGHTED TOTAL =====
         final_score = (
-            (stars_score * 0.30) +      # 30% weight
-            (repos_score * 0.20) +      # 20% weight
-            (contributions_score * 0.25) +  # 25% weight
-            (recency_score * 0.15) +    # 15% weight
-            (language_score * 0.10)     # 10% weight
+            (stars_score * 0.25) +          # was 0.30
+            (repos_score * 0.15) +          # was 0.20
+            (contributions_score * 0.30) +   # was 0.25
+            (recency_score * 0.20) +         # was 0.15
+            (language_score * 0.10)          # same
         )
         
         # Round to integer and cap at 100
@@ -137,8 +138,9 @@ class Profile(Base):
         if value >= excellent_threshold:
             return 100
         
-        # Linear scale up to threshold
-        score = (value / excellent_threshold) * 100
+        # Square root scaling gives more credit to mid-range values
+        ratio = value / excellent_threshold
+        score = math.sqrt(ratio) * 100
         return min(100, score)
     
     def _calculate_recency_score(self, last_active, threshold_days):
@@ -161,7 +163,6 @@ class Profile(Base):
         
         # Ensure last_active is timezone-aware
         if last_active.tzinfo is None:
-            from datetime import timezone
             last_active = last_active.replace(tzinfo=timezone.utc)
         
         days_ago = (now - last_active).days
