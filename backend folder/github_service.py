@@ -1,5 +1,6 @@
 import httpx
 import os
+import asyncio
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
@@ -307,11 +308,13 @@ async def get_user_details(username: str):
     - Activity metrics
     - Last activity date
     
+    ⭐ NOW FILTERS OUT ORGANIZATIONS - returns None if account is an organization
+    
     Args:
         username: GitHub username
     
     Returns:
-        Dictionary with all user details or None if user not found
+        Dictionary with all user details or None if user not found OR is an organization
     """
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
@@ -331,6 +334,12 @@ async def get_user_details(username: str):
             return None
         
         user_data = user_response.json()
+        
+        # ⭐ NEW: CHECK IF ORGANIZATION - SKIP IF TRUE
+        account_type = user_data.get("type", "User")
+        if account_type == "Organization":
+            print(f"⏭️  Skipped {username} (Organization, not individual developer)")
+            return None
         
         # ===== STEP 2: Get user's repositories =====
         print(f"Fetching repositories for {username}...")
@@ -382,3 +391,116 @@ async def get_user_details(username: str):
             "contributions": contributions,
             "last_active_date": last_active
         }
+    
+
+# ADD these new functions at the END of your existing github_service.py
+
+async def search_github_users_paginated(language: str, location: str = None, min_repos: int = 0, max_pages: int = 10):
+    """
+    Search GitHub with pagination to get 200-300 profiles instead of just 30.
+    
+    Args:
+        language: Programming language
+        location: User location
+        min_repos: Minimum repositories
+        max_pages: Number of pages to fetch (default 10 = 300 profiles)
+    
+    Returns:
+        List of all user dictionaries from all pages
+    """
+    all_users = []
+    
+    print(f"🔍 Fetching up to {max_pages} pages of results...")
+    
+    for page in range(1, max_pages + 1):
+        print(f"   Page {page}/{max_pages}...", end=" ")
+        
+        # Build search query
+        query_parts = []
+        if language:
+            query_parts.append(f"language:{language}")
+        if location:
+            query_parts.append(f"location:{location}")
+        if min_repos > 0:
+            query_parts.append(f"repos:>{min_repos}")
+        
+        query = "+".join(query_parts)
+        
+        headers = {
+            "Authorization": f"token {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(
+                    f"{GITHUB_API_URL}/search/users?q={query}&per_page=30&page={page}",
+                    headers=headers,
+                    timeout=30.0
+                )
+                
+                if response.status_code != 200:
+                    print(f"❌ Error {response.status_code}")
+                    break
+                
+                data = response.json()
+                users = data.get("items", [])
+                
+                if not users:
+                    print("✅ No more results")
+                    break
+                
+                all_users.extend(users)
+                print(f"✅ Got {len(users)} users")
+                
+                # Respect rate limits
+                await asyncio.sleep(1)
+                
+            except Exception as e:
+                print(f"❌ Error: {e}")
+                break
+    
+    print(f"\n📊 Total users fetched: {len(all_users)}")
+    return all_users
+
+async def get_multiple_user_details(usernames: list):
+    """
+    Fetch detailed info for multiple users efficiently.
+    ⭐ NOW SKIPS ORGANIZATIONS AUTOMATICALLY
+    
+    Args:
+        usernames: List of GitHub usernames
+    
+    Returns:
+        List of user detail dictionaries (organizations excluded)
+    """
+    all_details = []
+    total = len(usernames)
+    skipped_orgs = 0
+    
+    print(f"\n📥 Fetching details for {total} users...")
+    
+    for i, username in enumerate(usernames, 1):
+        print(f"   [{i}/{total}] {username}...", end=" ")
+        
+        try:
+            details = await get_user_details(username)
+            if details:
+                all_details.append(details)
+                print("✅")
+            else:
+                skipped_orgs += 1
+                print("⏭️  (Organization)")
+        except Exception as e:
+            print(f"❌ Error: {e}")
+        
+        # Rate limit respect
+        if i % 10 == 0:
+            print(f"   💤 Cooling down (fetched {i})...")
+            await asyncio.sleep(2)
+    
+    print(f"\n✅ Successfully fetched {len(all_details)}/{total} profiles")
+    if skipped_orgs > 0:
+        print(f"🏢 Filtered out {skipped_orgs} organizations\n")
+    
+    return all_details

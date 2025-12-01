@@ -1,20 +1,15 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
-from sqlalchemy.dialects.postgresql import JSON  # NEW: Import JSON type
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
+from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.sql import func  # ⭐ ADD THIS
 from database import Base
-from datetime import datetime, timezone
+from datetime import datetime, timezone  # ✅ ADD timezone
 import math
 
 class Profile(Base):
-    """
-    Enhanced Profile model with new fields for:
-    - Language distribution
-    - Top repositories
-    - Activity tracking
-    - Developer scoring
-    """
+    """Enhanced Profile model"""
     __tablename__ = "profiles"
     
-    # ===== EXISTING COLUMNS (Don't change these) =====
+    # Existing columns
     id = Column(Integer, primary_key=True, index=True)
     github_username = Column(String, unique=True, index=True)
     name = Column(String, nullable=True)
@@ -27,169 +22,121 @@ class Profile(Base):
     portfolio_url = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     selected = Column(Boolean, default=False)
-    last_fetched = Column(DateTime, default=datetime.utcnow)
     
-    # ===== NEW COLUMNS (Added for enhanced MVP) =====
+    # ✅ FIXED: Use server_default=func.now() instead of default=datetime.utcnow
+    last_fetched = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Languages distribution: {"Python": 65, "JavaScript": 20, "Go": 15}
+    # Enhanced columns
     languages_data = Column(JSON, nullable=True)
-    
-    # Top 5 repositories with stats
-    # Format: [
-    #   {
-    #     "name": "awesome-project",
-    #     "description": "A cool project",
-    #     "stars": 234,
-    #     "forks": 12,
-    #     "url": "https://github.com/user/repo",
-    #     "last_updated": "2024-01-10"
-    #   },
-    #   ...
-    # ]
     top_repos = Column(JSON, nullable=True)
-    
-    # Last time developer was active (last commit/activity)
-    last_active_date = Column(DateTime, nullable=True)
-    
-    # Total stars across all repositories
+    last_active_date = Column(DateTime(timezone=True), nullable=True)
     total_stars = Column(Integer, default=0)
-    
-    # Calculated developer score (0-100)
     developer_score = Column(Integer, default=0)
+    
+    # Caching columns
+    cached_at = Column(DateTime(timezone=True), server_default=func.now())
+    source = Column(String, default="github")
 
-        # ===== NEW METHOD: Calculate Developer Score =====
     def calculate_developer_score(self):
-        """
-        Calculate developer score (0-100) based on multiple factors.
-        
-        Weights:
-        - Stars: 30%
-        - Repositories: 20%
-        - Contributions: 25%
-        - Recency: 15%
-        - Language diversity: 10%
-        
-        Returns:
-            Integer score between 0 and 100
-        """
-        
-        # ===== DEFINE THRESHOLDS =====
+        """Calculate developer score (0-100)"""
         EXCELLENT_STARS = 3000
         EXCELLENT_REPOS = 100
         EXCELLENT_CONTRIBUTIONS = 1000
         MAX_LANGUAGES = 10
         ACTIVE_DAYS_THRESHOLD = 90
         
-        # ===== COMPONENT 1: Stars Score (30% weight) =====
-        stars_score = self._normalize_score(
-            value=self.total_stars or 0,
-            excellent_threshold=EXCELLENT_STARS
-        )
+        stars_score = self._normalize_score(self.total_stars or 0, EXCELLENT_STARS)
+        repos_score = self._normalize_score(self.public_repos or 0, EXCELLENT_REPOS)
+        contributions_score = self._normalize_score(self.contributions_last_year or 0, EXCELLENT_CONTRIBUTIONS)
+        recency_score = self._calculate_recency_score(self.last_active_date, ACTIVE_DAYS_THRESHOLD)
         
-        # ===== COMPONENT 2: Repositories Score (20% weight) =====
-        repos_score = self._normalize_score(
-            value=self.public_repos or 0,
-            excellent_threshold=EXCELLENT_REPOS
-        )
-        
-        # ===== COMPONENT 3: Contributions Score (25% weight) =====
-        contributions_score = self._normalize_score(
-            value=self.contributions_last_year or 0,
-            excellent_threshold=EXCELLENT_CONTRIBUTIONS
-        )
-        
-        # ===== COMPONENT 4: Recency Score (15% weight) =====
-        recency_score = self._calculate_recency_score(
-            last_active=self.last_active_date,
-            threshold_days=ACTIVE_DAYS_THRESHOLD
-        )
-        
-        # ===== COMPONENT 5: Language Diversity Score (10% weight) =====
         num_languages = len(self.languages_data) if self.languages_data else 0
-        language_score = self._normalize_score(
-            value=num_languages,
-            excellent_threshold=MAX_LANGUAGES
-        )
+        language_score = self._normalize_score(num_languages, MAX_LANGUAGES)
         
-        # ===== CALCULATE WEIGHTED TOTAL =====
         final_score = (
-            (stars_score * 0.25) +          # was 0.30
-            (repos_score * 0.15) +          # was 0.20
-            (contributions_score * 0.30) +   # was 0.25
-            (recency_score * 0.20) +         # was 0.15
-            (language_score * 0.10)          # same
+            (stars_score * 0.25) +
+            (repos_score * 0.15) +
+            (contributions_score * 0.30) +
+            (recency_score * 0.20) +
+            (language_score * 0.10)
         )
         
-        # Round to integer and cap at 100
         score = int(round(final_score))
-        return min(100, max(0, score))  # Ensure between 0-100
+        return min(100, max(0, score))
     
     def _normalize_score(self, value, excellent_threshold):
-        """
-        Normalize a value to 0-100 scale based on threshold.
-        
-        Args:
-            value: The actual value (e.g., 500 stars)
-            excellent_threshold: Value considered "excellent" (e.g., 1500 stars)
-        
-        Returns:
-            Score between 0 and 100
-        """
         if value >= excellent_threshold:
             return 100
-        
-        # Square root scaling gives more credit to mid-range values
         ratio = value / excellent_threshold
         score = math.sqrt(ratio) * 100
         return min(100, score)
     
     def _calculate_recency_score(self, last_active, threshold_days):
-        """
-        Calculate recency score based on last activity date.
-        
-        Args:
-            last_active: datetime object of last activity
-            threshold_days: Days to consider "recently active"
-        
-        Returns:
-            Score between 0 and 100
-        """
         if not last_active:
-            # No activity data, give benefit of doubt
             return 50
-        
-        # Calculate days since last activity
         now = datetime.now(timezone.utc)
-        
-        # Ensure last_active is timezone-aware
         if last_active.tzinfo is None:
             last_active = last_active.replace(tzinfo=timezone.utc)
-        
         days_ago = (now - last_active).days
         
         if days_ago <= threshold_days:
-            # Recently active: full points
             return 100
         elif days_ago <= threshold_days * 2:
-            # Somewhat active: 75 points
             return 75
         elif days_ago <= threshold_days * 4:
-            # Moderately inactive: 50 points
             return 50
         elif days_ago <= threshold_days * 8:
-            # Quite inactive: 25 points
             return 25
         else:
-            # Very inactive (2+ years): minimal points
             return 10
 
 
-# Keep OutreachLog model as-is (no changes needed)
 class OutreachLog(Base):
+    """Email outreach tracking"""
     __tablename__ = "outreach_logs"
     
     id = Column(Integer, primary_key=True, index=True)
-    profile_id = Column(Integer)
-    email_sent_at = Column(DateTime, default=datetime.utcnow)
+    profile_id = Column(Integer, ForeignKey("profiles.id"))
+    
+    # ✅ FIXED
+    email_sent_at = Column(DateTime(timezone=True), server_default=func.now())
     email_status = Column(String)
     error_message = Column(String, nullable=True)
+
+
+class SearchHistory(Base):
+    """Track all searches performed"""
+    __tablename__ = "search_history"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    filters = Column(JSON)
+    profiles_found = Column(Integer)
+    
+    # ✅ FIXED
+    searched_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class EmailOutreach(Base):
+    """Track bulk email campaigns"""
+    __tablename__ = "email_outreach"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"))
+    subject = Column(Text)
+    body = Column(Text)
+    status = Column(String, default="sent")
+    
+    # ✅ FIXED
+    sent_at = Column(DateTime(timezone=True), server_default=func.now())
+    company_email = Column(String)
+
+
+class ProfileView(Base):
+    """Track which profiles were shown in search results"""
+    __tablename__ = "profile_views"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    profile_id = Column(Integer, ForeignKey("profiles.id"))
+    
+    # ✅ FIXED
+    viewed_at = Column(DateTime(timezone=True), server_default=func.now())

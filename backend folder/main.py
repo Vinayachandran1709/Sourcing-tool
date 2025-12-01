@@ -3,18 +3,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import datetime, timezone, timedelta  # ⭐ ADDED timezone, timedelta
 
 # Import from your existing files
 from database import get_db
-from models import Profile, OutreachLog
+from models import Profile, OutreachLog, EmailOutreach, SearchHistory, ProfileView  # ⭐ ADDED new models
 from github_service import search_github_users, get_user_details
+
+# ⭐ NEW IMPORTS - Added for enhanced functionality
+from profile_cache_service import ProfileCacheService
+from email_service import EmailService
 
 # ===== INITIALIZE FASTAPI APP =====
 app = FastAPI(
     title="Developer Sourcing Tool API",
     description="API for searching and managing GitHub developer profiles",
-    version="1.0.0"
+    version="2.0.0"  # ⭐ UPDATED version
 )
 
 # ===== CORS MIDDLEWARE (allows frontend to call API) =====
@@ -73,144 +77,112 @@ class EmailRequest(BaseModel):
 def root():
     """Welcome endpoint"""
     return {
-        "message": "Developer Sourcing Tool API",
-        "version": "1.0.0",
+        "message": "Developer Sourcing Tool API - Enhanced Edition",
+        "version": "2.0.0",
+        "features": [
+            "Intelligent search with profile caching",
+            "Fetches 200-300 profiles per search (not just 30)",
+            "Email outreach with bulk sending",
+            "Outreach history tracking"
+        ],
         "endpoints": {
             "search": "/api/search-profiles",
             "profiles": "/api/profiles",
+            "bulk_email": "/api/send-bulk-emails",
+            "outreach_history": "/api/outreach-history",
             "docs": "/docs"
         }
     }
 
-# ===== ENDPOINT 1: SEARCH AND SAVE PROFILES =====
+# ===== ENDPOINT 1: ENHANCED SEARCH (REPLACES OLD ONE) =====
 
 @app.post("/api/search-profiles")
 async def search_profiles(search: SearchRequest, db: Session = Depends(get_db)):
     """
-    Search GitHub and save enhanced profiles to database.
-    Now includes: language data, top repos, developer scoring.
+    ⭐ ENHANCED SEARCH - NEW VERSION:
+    1. Searches cached profiles in DB first (instant)
+    2. Fetches 200-300 fresh profiles from GitHub (paginated)
+    3. Saves all new profiles to DB
+    4. Returns merged, deduplicated results
+    
+    This solves the GitHub 30-profile limit by automatically fetching multiple pages.
     """
     
-    print(f"\n🔍 Searching for: {search.language} developers")
-    if search.location:
-        print(f"   📍 Location: {search.location}")
-    print(f"   📦 Min repos: {search.min_repos}")
-    print(f"   📊 Min contributions: {search.min_contributions}")
+    print(f"\n🔍 ENHANCED SEARCH")
+    print(f"   Language: {search.language}")
+    print(f"   Location: {search.location or 'Any'}")
+    print(f"   Min repos: {search.min_repos}")
+    print(f"   Min contributions: {search.min_contributions}")
     print()
     
-    # Search GitHub
-    github_results = await search_github_users(
+    # STEP 1: Search cached profiles
+    print("📦 Step 1: Searching database cache...")
+    filters = {
+        "language": search.language,
+        "location": search.location,
+        "min_repos": search.min_repos
+    }
+    cached_profiles = ProfileCacheService.search_cached_profiles(db, filters)
+    print(f"   ✅ Found {len(cached_profiles)} cached profiles\n")
+    
+    # STEP 2: Fetch fresh profiles from GitHub (PAGINATED - gets 200-300 profiles)
+    print("🌐 Step 2: Fetching fresh profiles from GitHub...")
+    from github_service import search_github_users_paginated, get_multiple_user_details
+    
+    github_users = await search_github_users_paginated(
         language=search.language,
         location=search.location,
-        min_repos=search.min_repos
+        min_repos=search.min_repos,
+        max_pages=10  # Fetch 10 pages = ~300 profiles
     )
     
-    if "error" in github_results:
-        raise HTTPException(status_code=500, detail=github_results["error"])
+    # Get usernames
+    usernames = [user["login"] for user in github_users[:100]]  # Limit to 100 for reasonable API usage
     
-    saved_profiles = []
-    skipped_count = 0
+    # Fetch detailed info
+    github_details = await get_multiple_user_details(usernames)
     
-    # Loop through search results
-    for user in github_results.get("items", []):
-        username = user.get("login")
-        
-        print(f"Processing: {username}")
-        
-        # Check if profile already exists
-        existing_profile = db.query(Profile).filter(
-            Profile.github_username == username
-        ).first()
-        
-        if existing_profile:
-            print(f"  ℹ️  Profile exists, updating...")
-            # Update existing profile with fresh data
-            user_details = await get_user_details(username)
-            
-            if not user_details:
-                print(f"  ❌ Could not fetch details")
-                skipped_count += 1
-                continue
-            
-            # Update all fields
-            existing_profile.name = user_details.get("name")
-            existing_profile.email = user_details.get("email")
-            existing_profile.location = user_details.get("location")
-            existing_profile.bio = user_details.get("bio")
-            existing_profile.public_repos = user_details.get("public_repos", 0)
-            existing_profile.contributions_last_year = user_details.get("contributions", 0)
-            existing_profile.total_stars = user_details.get("total_stars", 0)
-            existing_profile.last_active_date = user_details.get("last_active_date")
-            existing_profile.languages_data = user_details.get("languages")
-            existing_profile.top_repos = user_details.get("top_repos")
-            existing_profile.avatar_url = user_details.get("avatar_url")
-            existing_profile.portfolio_url = user_details.get("portfolio_url")
-            existing_profile.last_fetched = datetime.utcnow()
-            
-            # Calculate and save developer score
-            score = existing_profile.calculate_developer_score()
-            existing_profile.developer_score = score
-            
-            db.commit()
-            db.refresh(existing_profile)
-            
-            print(f"  ✅ Updated (Score: {score}/100)")
-            saved_profiles.append(existing_profile)
-            continue
-        
-        # Get detailed user info for new profiles
-        user_details = await get_user_details(username)
-        
-        if not user_details:
-            print(f"  ❌ Could not fetch details")
-            skipped_count += 1
-            continue
-        
-        # Filter by contributions if needed
-        if user_details["contributions"] < search.min_contributions:
-            print(f"  ⏭️  Skipped (low contributions: {user_details['contributions']})")
-            skipped_count += 1
-            continue
-        
-        # Create new profile with ALL data
-        new_profile = Profile(
-            github_username=user_details["username"],
-            name=user_details["name"],
-            email=user_details["email"],
-            location=user_details["location"],
-            bio=user_details["bio"],
-            public_repos=user_details["public_repos"],
-            primary_language=search.language,
-            contributions_last_year=user_details["contributions"],
-            total_stars=user_details["total_stars"],
-            last_active_date=user_details["last_active_date"],
-            languages_data=user_details["languages"],
-            top_repos=user_details["top_repos"],
-            avatar_url=user_details["avatar_url"],
-            portfolio_url=user_details["portfolio_url"],
-            last_fetched=datetime.utcnow()
-        )
-        
-        # Calculate and save developer score
-        score = new_profile.calculate_developer_score()
-        new_profile.developer_score = score
-        
-        db.add(new_profile)
-        db.commit()
-        db.refresh(new_profile)
-        
-        print(f"  ✅ Saved (Score: {score}/100)")
-        saved_profiles.append(new_profile)
+    # Filter by min_contributions
+    if search.min_contributions > 0:
+        github_details = [
+            d for d in github_details 
+            if d.get("contributions", 0) >= search.min_contributions
+        ]
     
-    print(f"\n📊 Results:")
-    print(f"   ✅ Saved/Updated: {len(saved_profiles)}")
-    print(f"   ⏭️  Skipped: {skipped_count}")
+    print(f"   ✅ Fetched {len(github_details)} detailed profiles from GitHub\n")
+    
+    # STEP 3: Save GitHub profiles to DB
+    print("💾 Step 3: Saving new profiles to database...")
+    saved_github_profiles = ProfileCacheService.save_profiles_to_db(db, github_details)
+    print(f"   ✅ Saved/updated {len(saved_github_profiles)} profiles\n")
+    
+    # STEP 4: Merge cached + GitHub profiles (remove duplicates)
+    print("🔀 Step 4: Merging and deduplicating results...")
+    all_profiles = ProfileCacheService.merge_and_deduplicate(cached_profiles, saved_github_profiles)
+    
+    # Sort by score
+    all_profiles.sort(key=lambda p: p.developer_score, reverse=True)
+    print(f"   ✅ Final result: {len(all_profiles)} unique profiles\n")
+    
+    # STEP 5: Log search history
+    ProfileCacheService.log_search(db, filters, len(all_profiles))
+    
+    # STEP 6: Log profile views
+    profile_ids = [p.id for p in all_profiles]
+    ProfileCacheService.log_profile_views(db, profile_ids)
+    
+    print("✅ Search complete!\n")
+    print(f"📊 Summary:")
+    print(f"   From cache: {len(cached_profiles)}")
+    print(f"   From GitHub: {len(github_details)}")
+    print(f"   Total unique: {len(all_profiles)}")
     print()
     
     return {
-        "total_found": len(saved_profiles),
-        "skipped": skipped_count,
-        "profiles": saved_profiles
+        "total_found": len(all_profiles),
+        "from_cache": len(cached_profiles),
+        "from_github": len(github_details),
+        "profiles": all_profiles[:200]  # Return top 200
     }
 
 # ===== ENDPOINT 2: GET ALL PROFILES WITH FILTERS =====
@@ -293,7 +265,6 @@ def get_all_profiles(
     
     # Filter by recent activity
     if active_within_days:
-        from datetime import timezone, timedelta
         cutoff_date = datetime.now(timezone.utc) - timedelta(days=active_within_days)
         query = query.filter(
             Profile.last_active_date >= cutoff_date
@@ -379,7 +350,7 @@ def toggle_profile_selection(profile_id: int, db: Session = Depends(get_db)):
 
 # ===== ENDPOINT 5: GET SELECTED PROFILES =====
 
-@app.get("/api/profiles/selected", response_model=List[ProfileResponse])
+@app.get("/api/selected-profiles", response_model=List[ProfileResponse])
 def get_selected_profiles(db: Session = Depends(get_db)):
     """
     Get all profiles marked as selected.
@@ -391,44 +362,150 @@ def get_selected_profiles(db: Session = Depends(get_db)):
     
     return profiles
 
-# ===== ENDPOINT 6: SEND EMAILS (PLACEHOLDER) =====
+# ===== ENDPOINT 6: SEND BULK EMAILS (NEW - REPLACES OLD PLACEHOLDER) =====
 
-@app.post("/api/send-emails")
-def send_emails(email_request: EmailRequest, db: Session = Depends(get_db)):
+@app.post("/api/send-bulk-emails")
+def send_bulk_emails(email_request: EmailRequest, db: Session = Depends(get_db)):
     """
-    Send bulk emails to selected profiles.
+    ⭐ NEW: Send bulk emails to selected profiles.
     
-    Note: This is a placeholder. Email sending will be implemented in Phase 6.
+    Request body:
+    {
+        "profile_ids": [1, 2, 3],
+        "subject": "Job Opportunity at TechCorp",
+        "body": "Hi {{name}}, we have an exciting opportunity for you..."
+    }
+    
+    Note: Requires COMPANY_EMAIL and COMPANY_EMAIL_PASSWORD in .env
     """
+    import os
     
-    # Get profiles
-    profiles = db.query(Profile).filter(
-        Profile.id.in_(email_request.profile_ids)
-    ).all()
+    # Get company email credentials from environment
+    company_email = os.getenv("COMPANY_EMAIL")
+    company_password = os.getenv("COMPANY_EMAIL_PASSWORD")
     
-    if not profiles:
+    if not company_email or not company_password:
         raise HTTPException(
-            status_code=404,
-            detail="No profiles found with provided IDs"
+            status_code=500,
+            detail="Email credentials not configured. Add COMPANY_EMAIL and COMPANY_EMAIL_PASSWORD to .env file."
         )
     
-    # Placeholder - actual email sending would go here
-    sent_count = 0
-    failed_count = 0
+    # Get profiles
+    profiles = db.query(Profile).filter(Profile.id.in_(email_request.profile_ids)).all()
     
+    if not profiles:
+        raise HTTPException(status_code=404, detail="No profiles found")
+    
+    # Prepare recipients (only those with email)
+    recipients = []
+    for p in profiles:
+        if p.email and '@' in p.email:
+            recipients.append({
+                "email": p.email,
+                "name": p.name or p.github_username
+            })
+    
+    if not recipients:
+        raise HTTPException(status_code=400, detail="None of the selected profiles have valid email addresses")
+    
+    # Send emails
+    print(f"\n📧 Sending emails to {len(recipients)} developers...")
+    results = EmailService.send_bulk_emails(
+        company_email=company_email,
+        company_password=company_password,
+        recipients=recipients,
+        subject=email_request.subject,
+        body_template=email_request.body
+    )
+    
+    # Log outreach in database
     for profile in profiles:
-        if profile.email:
-            # TODO: Implement actual email sending in Phase 6
-            print(f"Would send email to: {profile.email}")
-            sent_count += 1
-        else:
-            failed_count += 1
+        if profile.email and '@' in profile.email:
+            status = "sent" if any(r["email"] == profile.email for r in recipients) else "failed"
+            outreach_log = EmailOutreach(
+                profile_id=profile.id,
+                subject=email_request.subject,
+                body=email_request.body,
+                status=status,
+                company_email=company_email
+                # ✅ sent_at handled by database automatically
+            )
+            db.add(outreach_log)
+    
+    db.commit()
+    
+    print(f"✅ Sent: {results['sent']}, Failed: {results['failed']}\n")
     
     return {
-        "message": "Email sending not yet implemented",
-        "would_send_to": sent_count,
-        "missing_email": failed_count,
-        "profiles": [p.github_username for p in profiles]
+        "sent": results["sent"],
+        "failed": results["failed"],
+        "errors": results["errors"],
+        "recipients": [r["email"] for r in recipients]
+    }
+
+# ===== ENDPOINT 7: GET OUTREACH HISTORY (NEW) =====
+
+@app.get("/api/outreach-history")
+def get_outreach_history(limit: int = 100, db: Session = Depends(get_db)):
+    """
+    ⭐ NEW: Get email outreach history.
+    
+    Shows all emails sent to developers with their status.
+    """
+    
+    outreach_logs = db.query(EmailOutreach).order_by(
+        EmailOutreach.sent_at.desc()
+    ).limit(limit).all()
+    
+    results = []
+    for log in outreach_logs:
+        profile = db.query(Profile).filter(Profile.id == log.profile_id).first()
+        if profile:  # Safety check
+            results.append({
+                "id": log.id,
+                "profile": {
+                    "id": profile.id,
+                    "name": profile.name,
+                    "github_username": profile.github_username,
+                    "email": profile.email
+                },
+                "subject": log.subject,
+                "status": log.status,
+                "sent_at": log.sent_at,
+                "company_email": log.company_email
+            })
+    
+    return {
+        "outreach_history": results,
+        "total": len(results)
+    }
+
+# ===== ENDPOINT 8: GET SEARCH HISTORY (NEW) =====
+
+@app.get("/api/search-history")
+def get_search_history(limit: int = 50, db: Session = Depends(get_db)):
+    """
+    ⭐ NEW: Get search history.
+    
+    Shows all searches performed with their filters and results count.
+    """
+    
+    search_logs = db.query(SearchHistory).order_by(
+        SearchHistory.searched_at.desc()
+    ).limit(limit).all()
+    
+    results = []
+    for log in search_logs:
+        results.append({
+            "id": log.id,
+            "filters": log.filters,
+            "profiles_found": log.profiles_found,
+            "searched_at": log.searched_at
+        })
+    
+    return {
+        "search_history": results,
+        "total": len(results)
     }
 
 # ===== HEALTH CHECK ENDPOINT =====
@@ -438,7 +515,14 @@ def health_check():
     """Check if API is running"""
     return {
         "status": "healthy",
-        "timestamp": datetime.utcnow().isoformat()
+        "version": "2.0.0",
+        "timestamp": datetime.now(timezone.utc).isoformat(),  # ✅ FIXED
+        "features": {
+            "profile_caching": True,
+            "pagination": True,
+            "email_outreach": True,
+            "history_tracking": True
+        }
     }
 
 # ===== RUN WITH UVICORN =====
