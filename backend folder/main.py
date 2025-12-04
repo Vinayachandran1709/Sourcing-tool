@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime, timezone, timedelta  # ⭐ ADDED timezone, timedelta
+from waitlist_routes import router as waitlist_router
 
 # Import from your existing files
 from database import get_db
@@ -20,6 +21,7 @@ app = FastAPI(
     description="API for searching and managing GitHub developer profiles",
     version="2.0.0"  # ⭐ UPDATED version
 )
+app.include_router(waitlist_router)
 
 # ===== CORS MIDDLEWARE (allows frontend to call API) =====
 app.add_middleware(

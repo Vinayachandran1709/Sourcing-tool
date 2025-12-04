@@ -6,20 +6,20 @@ const Navbar = () => {
   return (
     <nav style={styles.navbar}>
       <div style={styles.container}>
-        <Link to="/" style={styles.logo}>
+        <Link to="/app/search" style={styles.logo}>
           <Search size={24} />
           <span>Developer Sourcing Tool</span>
         </Link>
         <div style={styles.links}>
-          <Link to="/" style={styles.link}>
+          <Link to="/app/search" style={styles.link}>
             <Search size={18} />
             <span>Search</span>
           </Link>
-          <Link to="/outreach" style={styles.link}>
+          <Link to="/app/outreach" style={styles.link}>
             <Mail size={18} />
             <span>Email Outreach</span>
           </Link>
-          <Link to="/history" style={styles.link}>
+          <Link to="/app/history" style={styles.link}>
             <History size={18} />
             <span>History</span>
           </Link>
