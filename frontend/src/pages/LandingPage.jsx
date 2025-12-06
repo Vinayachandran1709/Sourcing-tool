@@ -277,7 +277,7 @@ const LandingPage = () => {
                 <div style={styles.modalIcon}>
                   <Package size={56} color="#FF6B35" />
                 </div>
-                <h2 style={styles.modalTitle}>Join the Beta Revolution</h2>
+                <h2 style={styles.modalTitle}>Join the Hiring Revolution</h2>
                 <p style={styles.modalSubtitle}>Be among the first to transform your developer hiring</p>
 
                 <form onSubmit={handleWaitlistSubmit} style={styles.form}>
@@ -323,7 +323,7 @@ const LandingPage = () => {
                 <CheckCircle size={72} color="#10b981" />
                 <h3 style={styles.successTitle}>You're On The List!</h3>
                 <p style={styles.successText}>
-                  We'll notify you when beta opens. Get ready for lightning-fast hiring! ⚡
+                  We'll notify you once the site goes live. Get ready for lightning-fast hiring! ⚡
                 </p>
               </div>
             )}
