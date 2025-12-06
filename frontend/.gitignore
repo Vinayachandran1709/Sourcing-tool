@@ -21,3 +21,9 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Testing files - don't commit
+App-Testing.js
+
+# Reminder
+TESTING-REMINDER.txt
