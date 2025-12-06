@@ -66,7 +66,7 @@ const LandingPage = () => {
           setShowWaitlistModal(false);
           setSubmitted(false);
           setWaitlistData({ name: '', company: '', email: '' });
-        }, 2500);
+        }, 1200);
       }
     } catch (error) {
       alert('Failed to join waitlist. Please try again.');
@@ -94,7 +94,7 @@ const LandingPage = () => {
           setShowContactModal(false);
           setSubmitted(false);
           setContactData({ name: '', email: '', message: '' });
-        }, 2500);
+        }, 1200);
       }
     } catch (error) {
       alert('Failed to send message. Please try again.');
