@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Rocket, Sparkles, Zap, Users, Mail, Send, X, CheckCircle, Target, TrendingUp, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Package, Sparkles, Mail, Send, X, CheckCircle, Target, TrendingUp, Layers } from 'lucide-react';
 
 const LandingPage = () => {
   const [showWaitlistModal, setShowWaitlistModal] = useState(false);
@@ -8,6 +8,44 @@ const LandingPage = () => {
   const [contactData, setContactData] = useState({ name: '', email: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Typing animation state
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+  const [currentText, setCurrentText] = useState('');
+  const [isDeleting, setIsDeleting] = useState(false);
+  const words = ['Faster', 'Better', 'Easier'];
+
+  // Typing animation effect
+  useEffect(() => {
+    const typingSpeed = isDeleting ? 50 : 100;
+    const pauseDuration = 2000;
+
+    const handleTyping = () => {
+      const currentWord = words[currentWordIndex];
+
+      if (!isDeleting) {
+        // Typing forward
+        if (currentText.length < currentWord.length) {
+          setCurrentText(currentWord.substring(0, currentText.length + 1));
+        } else {
+          // Finished typing, wait then start deleting
+          setTimeout(() => setIsDeleting(true), pauseDuration);
+        }
+      } else {
+        // Deleting
+        if (currentText.length > 0) {
+          setCurrentText(currentText.substring(0, currentText.length - 1));
+        } else {
+          // Finished deleting, move to next word
+          setIsDeleting(false);
+          setCurrentWordIndex((prevIndex) => (prevIndex + 1) % words.length);
+        }
+      }
+    };
+
+    const timer = setTimeout(handleTyping, typingSpeed);
+    return () => clearTimeout(timer);
+  }, [currentText, isDeleting, currentWordIndex, words]);
 
   const handleWaitlistSubmit = async (e) => {
     e.preventDefault();
@@ -67,73 +105,103 @@ const LandingPage = () => {
 
   return (
     <div style={styles.page}>
-      {/* ANIMATED BACKGROUND */}
-      <div style={styles.animatedBg}>
-        <div style={styles.particle1}></div>
-        <div style={styles.particle2}></div>
-        <div style={styles.particle3}></div>
-        <div style={styles.particle4}></div>
-        <div style={styles.particle5}></div>
+      {/* WAVE BACKGROUND */}
+      <div style={styles.waveContainer}>
+        <svg style={styles.wave} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+          <path fill="#f0f7ff" fillOpacity="0.4" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,122.7C672,117,768,139,864,149.3C960,160,1056,160,1152,138.7C1248,117,1344,75,1392,53.3L1440,32L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
+        <svg style={styles.wave2} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320">
+          <path fill="#e6f2ff" fillOpacity="0.3" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,218.7C672,235,768,245,864,234.7C960,224,1056,192,1152,181.3C1248,171,1344,181,1392,186.7L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+        </svg>
       </div>
+
+      {/* TOP HEADER WITH LOGO */}
+      <header style={styles.header}>
+        <div style={styles.headerContainer}>
+          <div style={styles.logoSection}>
+            <Package size={32} color="#FF6B35" />
+            <span style={styles.logoText}>TalentBox</span>
+          </div>
+        </div>
+      </header>
 
       {/* HERO SECTION */}
       <section style={styles.hero}>
         <div style={styles.heroContent}>
-          {/* Floating Badge */}
-          <div style={styles.floatingBadge}>
-            <Sparkles size={18} />
-            <span>Revolutionizing Developer Recruitment</span>
-            <div style={styles.pulse}></div>
+          {/* Top Badge with animated border */}
+          <div style={styles.topBadge}>
+            <div style={styles.animatedBorder}></div>
+            <div style={styles.badgeContent}>
+              <Sparkles size={18} color="#FF6B35" />
+              <span>Building the future of full-stack talent sourcing – starting with developers.</span>
+            </div>
           </div>
 
-          {/* Main Title with Gradient */}
+          {/* Main Headline with Typing Animation */}
           <h1 style={styles.mainTitle}>
-            Find Your Next
+            <span style={styles.staticText}>Find the Right Developers </span>
+            <span style={styles.animatedWordContainer}>
+              <span style={styles.animatedWord}>
+                {currentText}
+                <span style={styles.cursor}>|</span>
+              </span>
+            </span>
             <br />
-            <span style={styles.gradientText}>Superstar Developer</span>
-            <br />
-            In Minutes, Not Months
+            <span style={styles.staticText}>Before Your Competitors Do</span>
           </h1>
 
-          {/* Subtitle */}
+          {/* Subheadline */}
           <p style={styles.heroSubtitle}>
-            AI-powered platform that instantly sources <strong>200+ qualified developers</strong> from GitHub,
-            scores them intelligently, and sends <strong>personalized outreach emails</strong> that get 
-            <span style={styles.highlight}> 45% response rates</span>. Stop manual recruiting. Start hiring.
+            Instantly match with developers who fit your exact needs, validate their expertise 
+            with AI-powered scoring and specialization insights, and send personalized outreach 
+            that gets replies.
           </p>
 
           {/* CTA Buttons */}
           <div style={styles.ctaGroup}>
             <button onClick={() => setShowWaitlistModal(true)} style={styles.primaryBtn}>
-              <Rocket size={22} />
+              <Package size={20} />
               <span>Join Beta Waitlist</span>
-              <div style={styles.btnShine}></div>
             </button>
             <button onClick={() => setShowContactModal(true)} style={styles.secondaryBtn}>
-              <Mail size={22} />
-              <span>Contact Sales</span>
+              <Mail size={20} />
+              <span>Contact Us</span>
             </button>
           </div>
+        </div>
+      </section>
 
-          {/* Stats Bar */}
-          <div style={styles.statsContainer}>
-            <div style={styles.statBox}>
-              <Target size={32} color="#fbbf24" />
-              <div style={styles.statNumber}>200+</div>
-              <div style={styles.statLabel}>Profiles Per Search</div>
+      {/* STATS SECTION */}
+      <section style={styles.statsSection}>
+        <div style={styles.statsGrid}>
+          <div style={styles.statCard}>
+            <div style={styles.statIcon}>
+              <Target size={36} color="#FF6B35" />
             </div>
-            <div style={styles.divider}></div>
-            <div style={styles.statBox}>
-              <TrendingUp size={32} color="#10b981" />
-              <div style={styles.statNumber}>45%</div>
-              <div style={styles.statLabel}>Response Rate</div>
+            <h3 style={styles.statTitle}>AI-Powered Developer Scoring</h3>
+            <p style={styles.statText}>
+              Instantly evaluate real skill levels with AI-generated developer scores.
+            </p>
+          </div>
+
+          <div style={styles.statCard}>
+            <div style={styles.statIcon}>
+              <TrendingUp size={36} color="#FF6B35" />
             </div>
-            <div style={styles.divider}></div>
-            <div style={styles.statBox}>
-              <Clock size={32} color="#3b82f6" />
-              <div style={styles.statNumber}>10x</div>
-              <div style={styles.statLabel}>Faster Hiring</div>
+            <h3 style={styles.statTitle}>60%+ Reply Rate on Outreach</h3>
+            <p style={styles.statText}>
+              Personalized, targeted emails that get real engagement.
+            </p>
+          </div>
+
+          <div style={styles.statCard}>
+            <div style={styles.statIcon}>
+              <Layers size={36} color="#FF6B35" />
             </div>
+            <h3 style={styles.statTitle}>Search by Specialization</h3>
+            <p style={styles.statText}>
+              Find developers by niche skills, stacks, and tech focus in seconds.
+            </p>
           </div>
         </div>
       </section>
@@ -141,9 +209,11 @@ const LandingPage = () => {
       {/* VIDEO DEMO SECTION */}
       <section style={styles.videoSection}>
         <div style={styles.sectionHeader}>
-          <Zap size={36} color="#fbbf24" />
           <h2 style={styles.sectionTitle}>See It In Action</h2>
-          <p style={styles.sectionSubtitle}>Watch how companies hire developers in under 5 minutes</p>
+          <p style={styles.sectionSubtitle}>
+            Watch how modern teams cut through noise and source<br />
+            the right developers in just a few steps.
+          </p>
         </div>
 
         <div style={styles.videoContainer}>
@@ -165,36 +235,30 @@ const LandingPage = () => {
       {/* FEATURES SECTION */}
       <section style={styles.featuresSection}>
         <div style={styles.featuresGrid}>
-          <div style={{...styles.featureCard, ...styles.featureCard1}}>
-            <div style={styles.featureIcon}>
-              <Users size={40} />
-            </div>
-            <h3 style={styles.featureTitle}>Smart GitHub Sourcing</h3>
+          <div style={styles.featureCard}>
+            <div style={styles.featureNumber}>1</div>
+            <h3 style={styles.featureTitle}>Smarter Talent Discovery</h3>
             <p style={styles.featureText}>
-              Fetch 200-300 developer profiles per search with intelligent pagination. 
-              No more 30-profile GitHub API limits.
+              Find high-fit developers based on skills, specialization, location, and real 
+              activity signals – all in one powerful search workflow.
             </p>
           </div>
 
-          <div style={{...styles.featureCard, ...styles.featureCard2}}>
-            <div style={styles.featureIcon}>
-              <Zap size={40} />
-            </div>
-            <h3 style={styles.featureTitle}>AI-Powered Scoring</h3>
+          <div style={styles.featureCard}>
+            <div style={styles.featureNumber}>2</div>
+            <h3 style={styles.featureTitle}>Intelligent Developer Scoring</h3>
             <p style={styles.featureText}>
-              Automatic developer ranking (0-100) based on stars, repos, contributions, 
-              activity, and tech stack diversity.
+              Instantly understand developer quality with automated 0–100 scoring built on 
+              contributions, repos, stars, consistency, and tech stack depth.
             </p>
           </div>
 
-          <div style={{...styles.featureCard, ...styles.featureCard3}}>
-            <div style={styles.featureIcon}>
-              <Send size={40} />
-            </div>
-            <h3 style={styles.featureTitle}>Personalized Outreach</h3>
+          <div style={styles.featureCard}>
+            <div style={styles.featureNumber}>3</div>
+            <h3 style={styles.featureTitle}>High-Conversion Outreach</h3>
             <p style={styles.featureText}>
-              Send bulk emails with {'{{name}}'} personalization. Achieve 45% response 
-              rates vs 2-5% with generic emails.
+              Send personalized, targeted messages at scale and see significantly higher 
+              response rates than traditional cold outreach.
             </p>
           </div>
         </div>
@@ -211,7 +275,7 @@ const LandingPage = () => {
             {!submitted ? (
               <>
                 <div style={styles.modalIcon}>
-                  <Rocket size={56} color="#4f46e5" />
+                  <Package size={56} color="#FF6B35" />
                 </div>
                 <h2 style={styles.modalTitle}>Join the Beta Revolution</h2>
                 <p style={styles.modalSubtitle}>Be among the first to transform your developer hiring</p>
@@ -278,10 +342,12 @@ const LandingPage = () => {
             {!submitted ? (
               <>
                 <div style={styles.modalIcon}>
-                  <Mail size={56} color="#10b981" />
+                  <Mail size={56} color="#FF6B35" />
                 </div>
                 <h2 style={styles.modalTitle}>Get In Touch</h2>
-                <p style={styles.modalSubtitle}>Questions? Partnerships? Let's talk!</p>
+                <p style={styles.modalSubtitle}>
+                  Got a question, request, or requirement? Write to us – we'll get back within 2 hours.
+                </p>
 
                 <form onSubmit={handleContactSubmit} style={styles.form}>
                   <input
@@ -305,7 +371,7 @@ const LandingPage = () => {
                   <textarea
                     value={contactData.message}
                     onChange={(e) => setContactData({...contactData, message: e.target.value})}
-                    placeholder="Tell us what you're looking for..."
+                    placeholder="Write your message here"
                     style={{...styles.input, minHeight: '120px', resize: 'vertical'}}
                     required
                     disabled={loading}
@@ -325,7 +391,7 @@ const LandingPage = () => {
                 <CheckCircle size={72} color="#10b981" />
                 <h3 style={styles.successTitle}>Message Sent!</h3>
                 <p style={styles.successText}>
-                  We'll get back to you within 24 hours. Thanks for reaching out! 🚀
+                  We'll get back to you within 2 hours. Thanks for reaching out! 🚀
                 </p>
               </div>
             )}
@@ -337,279 +403,295 @@ const LandingPage = () => {
       <footer style={styles.footer}>
         <div style={styles.footerContent}>
           <div style={styles.footerBrand}>
-            <Rocket size={32} />
-            <span>DevSourcer</span>
+            <Package size={32} />
+            <span>TalentBox</span>
           </div>
-          <p style={styles.footerText}>© 2025 DevSourcer. Revolutionizing developer recruitment.</p>
+          <p style={styles.footerText}>© 2025 TalentBox. Revolutionizing developer recruitment.</p>
         </div>
       </footer>
     </div>
   );
 };
 
-// STYLES
+// ========================================
+// STYLES WITH TYPING ANIMATION
+// ========================================
+
 const styles = {
   page: {
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: "'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif",
     minHeight: '100vh',
-    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%)',
+    background: 'linear-gradient(135deg, #ffffff 0%, #f8fbff 50%, #f0f7ff 100%)',
     position: 'relative',
     overflow: 'hidden',
   },
 
-  // Animated Background
-  animatedBg: {
+  // Wave background decoration
+  waveContainer: {
     position: 'absolute',
+    bottom: 0,
+    left: 0,
     width: '100%',
     height: '100%',
-    top: 0,
-    left: 0,
     pointerEvents: 'none',
+    zIndex: 0,
   },
 
-  particle1: {
+  wave: {
     position: 'absolute',
-    width: '300px',
-    height: '300px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%)',
-    top: '10%',
-    left: '5%',
-    animation: 'float 20s ease-in-out infinite',
+    bottom: 0,
+    width: '100%',
+    height: 'auto',
+    opacity: 0.7,
   },
 
-  particle2: {
+  wave2: {
     position: 'absolute',
-    width: '200px',
-    height: '200px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%)',
-    top: '50%',
-    right: '10%',
-    animation: 'float 15s ease-in-out infinite 5s',
+    bottom: 0,
+    width: '100%',
+    height: 'auto',
+    opacity: 0.5,
   },
 
-  particle3: {
-    position: 'absolute',
-    width: '150px',
-    height: '150px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%)',
-    bottom: '20%',
-    left: '15%',
-    animation: 'float 18s ease-in-out infinite 10s',
+  // Header with logo
+  header: {
+    position: 'relative',
+    zIndex: 100,
+    padding: '1.5rem 2rem',
+    background: 'rgba(255,255,255,0.95)',
+    backdropFilter: 'blur(10px)',
+    borderBottom: '1px solid rgba(0,0,0,0.06)',
   },
 
-  particle4: {
-    position: 'absolute',
-    width: '250px',
-    height: '250px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 70%)',
-    top: '30%',
-    right: '30%',
-    animation: 'float 22s ease-in-out infinite 2s',
+  headerContainer: {
+    maxWidth: '1200px',
+    margin: '0 auto',
   },
 
-  particle5: {
-    position: 'absolute',
-    width: '180px',
-    height: '180px',
-    borderRadius: '50%',
-    background: 'radial-gradient(circle, rgba(255,255,255,0.07) 0%, transparent 70%)',
-    bottom: '30%',
-    right: '20%',
-    animation: 'float 16s ease-in-out infinite 8s',
+  logoSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+
+  logoText: {
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#1a1a1a',
+    letterSpacing: '-0.02em',
   },
 
   // Hero Section
   hero: {
     position: 'relative',
-    minHeight: '100vh',
+    minHeight: '85vh',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '3rem 2rem',
+    padding: '3rem 2rem 2rem',
     zIndex: 10,
   },
 
   heroContent: {
-    maxWidth: '1000px',
+    maxWidth: '950px',
     textAlign: 'center',
-    color: '#fff',
   },
 
-  floatingBadge: {
+  // Animated badge with light running border
+  topBadge: {
     position: 'relative',
-    display: 'inline-flex',
+    display: 'inline-block',
+    marginBottom: '3rem',
+  },
+
+  animatedBorder: {
+    position: 'absolute',
+    top: '-2px',
+    left: '-2px',
+    right: '-2px',
+    bottom: '-2px',
+    borderRadius: '50px',
+    background: 'linear-gradient(90deg, #FF6B35, #FFD700, #FF6B35, #FFD700)',
+    backgroundSize: '350% 100%',  // Slightly wider (was 300%)
+    animation: 'borderGlow 2.5s linear infinite',  // Slightly faster (was 3s)
+    opacity: 0.75,  // Slightly more visible (was 0.6)
+    zIndex: -1,
+  },
+
+  badgeContent: {
+    position: 'relative',
+    display: 'flex',
     alignItems: 'center',
     gap: '10px',
-    padding: '14px 28px',
-    background: 'rgba(255,255,255,0.15)',
-    backdropFilter: 'blur(12px)',
+    padding: '12px 28px',
+    background: '#fff',
     borderRadius: '50px',
-    border: '2px solid rgba(255,255,255,0.3)',
-    fontSize: '15px',
-    fontWeight: '700',
-    marginBottom: '2.5rem',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
-  },
-
-  pulse: {
-    position: 'absolute',
-    width: '100%',
-    height: '100%',
-    borderRadius: '50px',
-    border: '2px solid rgba(255,255,255,0.5)',
-    animation: 'pulse 2s ease-out infinite',
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#1a1a1a',
+    boxShadow: '0 2px 12px rgba(0,0,0,0.06)',
   },
 
   mainTitle: {
-    fontSize: 'clamp(2.5rem, 6vw, 5rem)',
-    fontWeight: '900',
-    lineHeight: '1.1',
-    marginBottom: '2rem',
-    textShadow: '0 4px 30px rgba(0,0,0,0.3)',
+    fontSize: 'clamp(2.2rem, 5vw, 4rem)',
+    fontWeight: '600',
+    lineHeight: '1.2',
+    marginBottom: '3rem',
+    color: '#1a1a1a',
+    letterSpacing: '-0.03em',
+    maxWidth: '950px',
+    margin: '0 auto 3rem',
+    whiteSpace: 'normal',  // Added
+    wordSpacing: 'normal',  // Added
   },
 
-  gradientText: {
-    background: 'linear-gradient(90deg, #fbbf24 0%, #f59e0b 50%, #fbbf24 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundSize: '200% auto',
-    animation: 'shimmer 3s linear infinite',
+  // Animated typing word
+  animatedWord: {
+    fontFamily: "'Space Grotesk', 'Courier New', monospace",
+    fontWeight: '700',
+    color: '#FF6B35',
+    display: 'inline-block',
+    minWidth: '220px',  // Changed from 180px to 220px
+    textAlign: 'left',
+    verticalAlign: 'baseline',  // Added to prevent vertical shift
+  },
+
+  cursor: {
+    display: 'inline-block',
+    animation: 'blink 1s infinite',
+    marginLeft: '2px',
   },
 
   heroSubtitle: {
-    fontSize: 'clamp(1.1rem, 2vw, 1.4rem)',
-    lineHeight: '1.8',
-    marginBottom: '3rem',
-    color: 'rgba(255,255,255,0.95)',
-    maxWidth: '800px',
-    margin: '0 auto 3rem',
-  },
-
-  highlight: {
-    color: '#fbbf24',
-    fontWeight: '700',
+    fontSize: 'clamp(1.05rem, 2vw, 1.25rem)',
+    lineHeight: '1.7',
+    color: '#4a4a4a',
+    marginBottom: '2.5rem',
+    maxWidth: '750px',
+    margin: '0 auto 2.5rem',
+    fontWeight: '400',
   },
 
   ctaGroup: {
     display: 'flex',
-    gap: '1.5rem',
+    gap: '1rem',
     justifyContent: 'center',
-    marginBottom: '4rem',
     flexWrap: 'wrap',
   },
 
   primaryBtn: {
-    position: 'relative',
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '20px 44px',
-    fontSize: '1.2rem',
-    fontWeight: '800',
-    background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
-    color: '#000',
+    gap: '10px',
+    padding: '16px 36px',
+    fontSize: '1.05rem',
+    fontWeight: '600',
+    background: '#FF6B35',
+    color: '#fff',
     border: 'none',
-    borderRadius: '50px',
+    borderRadius: '10px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
-    boxShadow: '0 12px 40px rgba(251,191,36,0.4)',
-    overflow: 'hidden',
-  },
-
-  btnShine: {
-    position: 'absolute',
-    top: 0,
-    left: '-100%',
-    width: '100%',
-    height: '100%',
-    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent)',
-    animation: 'shine 3s ease-in-out infinite',
+    boxShadow: '0 4px 16px rgba(255,107,53,0.3)',
   },
 
   secondaryBtn: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '20px 44px',
-    fontSize: '1.2rem',
-    fontWeight: '800',
-    background: 'rgba(255,255,255,0.1)',
-    backdropFilter: 'blur(10px)',
-    color: '#fff',
-    border: '3px solid rgba(255,255,255,0.3)',
-    borderRadius: '50px',
+    gap: '10px',
+    padding: '16px 36px',
+    fontSize: '1.05rem',
+    fontWeight: '600',
+    background: '#fff',
+    color: '#1a1a1a',
+    border: '2px solid #e5e5e5',
+    borderRadius: '10px',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
   },
 
-  statsContainer: {
+  // Stats Section
+  statsSection: {
+    position: 'relative',
+    zIndex: 10,
+    padding: '4rem 2rem',
+    background: 'rgba(255,255,255,0.8)',
+    backdropFilter: 'blur(10px)',
+    borderTop: '1px solid rgba(0,0,0,0.06)',
+    borderBottom: '1px solid rgba(0,0,0,0.06)',
+  },
+
+  statsGrid: {
+    maxWidth: '1100px',
+    margin: '0 auto',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+    gap: '2.5rem',
+  },
+
+  statCard: {
+    textAlign: 'center',
+    padding: '1.5rem',
+  },
+
+  statIcon: {
+    width: '70px',
+    height: '70px',
+    margin: '0 auto 1.5rem',
+    background: '#fff5f2',
+    borderRadius: '16px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '3rem',
-    padding: '2.5rem',
-    background: 'rgba(255,255,255,0.1)',
-    backdropFilter: 'blur(12px)',
-    borderRadius: '24px',
-    border: '2px solid rgba(255,255,255,0.2)',
-    flexWrap: 'wrap',
+    boxShadow: '0 4px 12px rgba(255,107,53,0.08)',
   },
 
-  statBox: {
-    textAlign: 'center',
+  statTitle: {
+    fontSize: '1.35rem',
+    fontWeight: '700',
+    color: '#1a1a1a',
+    marginBottom: '0.75rem',
+    lineHeight: '1.3',
   },
 
-  statNumber: {
-    fontSize: '3rem',
-    fontWeight: '900',
-    color: '#fbbf24',
-    marginTop: '0.5rem',
-  },
-
-  statLabel: {
-    fontSize: '0.95rem',
-    color: 'rgba(255,255,255,0.85)',
-    fontWeight: '600',
-    marginTop: '0.5rem',
-  },
-
-  divider: {
-    width: '2px',
-    height: '80px',
-    background: 'rgba(255,255,255,0.3)',
+  statText: {
+    fontSize: '1rem',
+    lineHeight: '1.6',
+    color: '#666',
+    fontWeight: '400',
   },
 
   // Video Section
   videoSection: {
-    padding: '6rem 2rem',
-    background: 'rgba(0,0,0,0.2)',
-    backdropFilter: 'blur(20px)',
+    position: 'relative',
+    zIndex: 10,
+    padding: '5rem 2rem',
+    background: 'transparent',
   },
 
   sectionHeader: {
     textAlign: 'center',
     marginBottom: '3rem',
-    color: '#fff',
   },
 
   sectionTitle: {
-    fontSize: 'clamp(2rem, 4vw, 3.5rem)',
-    fontWeight: '900',
-    marginTop: '1rem',
+    fontSize: 'clamp(1.8rem, 4vw, 2.8rem)',
+    fontWeight: '800',
+    color: '#1a1a1a',
     marginBottom: '1rem',
+    letterSpacing: '-0.02em',
   },
 
   sectionSubtitle: {
-    fontSize: '1.2rem',
-    color: 'rgba(255,255,255,0.8)',
+    fontSize: '1.15rem',
+    color: '#666',
+    maxWidth: '700px',
+    margin: '0 auto',
+    lineHeight: '1.7',
   },
 
   videoContainer: {
-    maxWidth: '1100px',
+    maxWidth: '1000px',
     margin: '0 auto',
   },
 
@@ -618,8 +700,10 @@ const styles = {
     paddingBottom: '56.25%',
     height: 0,
     overflow: 'hidden',
-    borderRadius: '28px',
-    boxShadow: '0 25px 70px rgba(0,0,0,0.5)',
+    borderRadius: '18px',
+    boxShadow: '0 20px 60px rgba(0,0,0,0.12)',
+    border: '1px solid rgba(0,0,0,0.08)',
+    background: '#fff',
   },
 
   iframe: {
@@ -628,16 +712,20 @@ const styles = {
     left: 0,
     width: '100%',
     height: '100%',
-    borderRadius: '28px',
+    borderRadius: '18px',
   },
 
   // Features Section
   featuresSection: {
-    padding: '6rem 2rem',
+    position: 'relative',
+    zIndex: 10,
+    padding: '5rem 2rem',
+    background: 'rgba(255,255,255,0.6)',
+    backdropFilter: 'blur(10px)',
   },
 
   featuresGrid: {
-    maxWidth: '1200px',
+    maxWidth: '1100px',
     margin: '0 auto',
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
@@ -645,50 +733,42 @@ const styles = {
   },
 
   featureCard: {
-    padding: '3rem',
-    background: 'rgba(255,255,255,0.1)',
-    backdropFilter: 'blur(12px)',
-    borderRadius: '28px',
-    border: '2px solid rgba(255,255,255,0.2)',
-    transition: 'all 0.4s ease',
-    cursor: 'pointer',
+    padding: '2.5rem',
+    background: 'rgba(255,255,255,0.9)',
+    borderRadius: '18px',
+    border: '1px solid rgba(0,0,0,0.06)',
+    transition: 'all 0.3s ease',
+    position: 'relative',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
   },
 
-  featureCard1: {
-    borderColor: 'rgba(59,130,246,0.5)',
-  },
-
-  featureCard2: {
-    borderColor: 'rgba(251,191,36,0.5)',
-  },
-
-  featureCard3: {
-    borderColor: 'rgba(16,185,129,0.5)',
-  },
-
-  featureIcon: {
-    width: '90px',
-    height: '90px',
-    borderRadius: '22px',
-    background: 'rgba(255,255,255,0.15)',
+  featureNumber: {
+    width: '50px',
+    height: '50px',
+    borderRadius: '14px',
+    background: '#FF6B35',
+    color: '#fff',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+    fontSize: '1.5rem',
+    fontWeight: '800',
     marginBottom: '1.5rem',
-    color: '#fff',
   },
 
   featureTitle: {
-    fontSize: '1.75rem',
-    fontWeight: '800',
-    color: '#fff',
+    fontSize: '1.5rem',
+    fontWeight: '700',
+    color: '#1a1a1a',
     marginBottom: '1rem',
+    lineHeight: '1.3',
   },
 
   featureText: {
     fontSize: '1.05rem',
     lineHeight: '1.7',
-    color: 'rgba(255,255,255,0.85)',
+    color: '#666',
+    fontWeight: '400',
   },
 
   // Modal Styles
@@ -698,8 +778,8 @@ const styles = {
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'rgba(0,0,0,0.75)',
-    backdropFilter: 'blur(8px)',
+    background: 'rgba(0,0,0,0.6)',
+    backdropFilter: 'blur(4px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -709,29 +789,29 @@ const styles = {
 
   modal: {
     position: 'relative',
-    background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
-    borderRadius: '32px',
-    padding: '3.5rem',
-    maxWidth: '550px',
+    background: '#fff',
+    borderRadius: '20px',
+    padding: '3rem',
+    maxWidth: '520px',
     width: '100%',
-    border: '3px solid rgba(251,191,36,0.3)',
-    boxShadow: '0 30px 100px rgba(0,0,0,0.6)',
+    boxShadow: '0 25px 80px rgba(0,0,0,0.15)',
+    border: '1px solid #e5e5e5',
   },
 
   closeBtn: {
     position: 'absolute',
     top: '1.5rem',
     right: '1.5rem',
-    background: 'rgba(255,255,255,0.1)',
+    background: '#f5f5f5',
     border: 'none',
     borderRadius: '50%',
-    width: '45px',
-    height: '45px',
+    width: '40px',
+    height: '40px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     cursor: 'pointer',
-    color: '#fff',
+    color: '#666',
     transition: 'all 0.2s',
   },
 
@@ -741,53 +821,54 @@ const styles = {
   },
 
   modalTitle: {
-    fontSize: '2.2rem',
-    fontWeight: '900',
-    color: '#fbbf24',
+    fontSize: '1.8rem',
+    fontWeight: '700',
+    color: '#1a1a1a',
     textAlign: 'center',
-    marginBottom: '0.75rem',
+    marginBottom: '0.5rem',
   },
 
   modalSubtitle: {
-    fontSize: '1.05rem',
-    color: 'rgba(255,255,255,0.75)',
+    fontSize: '1rem',
+    color: '#666',
     textAlign: 'center',
     marginBottom: '2rem',
+    lineHeight: '1.5',
   },
 
   form: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '1.5rem',
+    gap: '1rem',
   },
 
   input: {
     width: '100%',
-    padding: '18px 24px',
-    fontSize: '1.05rem',
-    background: 'rgba(255,255,255,0.05)',
-    border: '2px solid rgba(251,191,36,0.3)',
-    borderRadius: '16px',
-    color: '#fff',
+    padding: '14px 18px',
+    fontSize: '1rem',
+    background: '#fafafa',
+    border: '1px solid #e5e5e5',
+    borderRadius: '10px',
+    color: '#1a1a1a',
     transition: 'all 0.3s',
-    fontFamily: 'Arial, sans-serif',
+    fontFamily: 'inherit',
   },
 
   submitBtn: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '12px',
-    padding: '20px',
-    fontSize: '1.15rem',
-    fontWeight: '700',
-    background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
-    color: '#000',
+    gap: '10px',
+    padding: '16px',
+    fontSize: '1.05rem',
+    fontWeight: '600',
+    background: '#FF6B35',
+    color: '#fff',
     border: 'none',
-    borderRadius: '16px',
+    borderRadius: '10px',
     cursor: 'pointer',
     transition: 'all 0.3s',
-    marginTop: '1rem',
+    marginTop: '0.5rem',
   },
 
   successState: {
@@ -796,43 +877,46 @@ const styles = {
   },
 
   successTitle: {
-    fontSize: '2rem',
-    fontWeight: '800',
+    fontSize: '1.8rem',
+    fontWeight: '700',
     color: '#10b981',
-    margin: '1.5rem 0 1rem',
+    margin: '1rem 0',
   },
 
   successText: {
-    fontSize: '1.15rem',
-    color: 'rgba(255,255,255,0.85)',
+    fontSize: '1.05rem',
+    color: '#666',
     lineHeight: '1.6',
   },
 
   // Footer
   footer: {
+    position: 'relative',
+    zIndex: 10,
     padding: '3rem 2rem',
-    background: 'rgba(0,0,0,0.3)',
-    borderTop: '2px solid rgba(251,191,36,0.2)',
+    background: 'rgba(255,255,255,0.8)',
+    backdropFilter: 'blur(10px)',
+    borderTop: '1px solid rgba(0,0,0,0.06)',
   },
 
   footerContent: {
     maxWidth: '1200px',
     margin: '0 auto',
     textAlign: 'center',
-    color: '#fff',
   },
 
   footerBrand: {
     display: 'inline-flex',
     alignItems: 'center',
     gap: '12px',
-    fontSize: '1.6rem',
-    fontWeight: '900',
+    fontSize: '1.4rem',
+    fontWeight: '700',
+    color: '#1a1a1a',
     marginBottom: '1rem',
   },
 
   footerText: {
-    color: 'rgba(255,255,255,0.6)',
+    color: '#999',
     fontSize: '0.95rem',
   },
 };
@@ -840,50 +924,50 @@ const styles = {
 // Add CSS animations
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(0deg); }
-    50% { transform: translateY(-30px) rotate(5deg); }
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@700&display=swap');
+
+  @keyframes borderGlow {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
   }
 
-  @keyframes shimmer {
-    to { background-position: 200% center; }
-  }
-
-  @keyframes pulse {
-    0% { transform: scale(1); opacity: 1; }
-    100% { transform: scale(1.5); opacity: 0; }
-  }
-
-  @keyframes shine {
-    0% { left: -100%; }
-    100% { left: 200%; }
+  @keyframes blink {
+    0%, 50% { opacity: 1; }
+    51%, 100% { opacity: 0; }
   }
 
   button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 50px rgba(251,191,36,0.5);
+    transform: translateY(-2px);
+  }
+
+  .primaryBtn:hover {
+    box-shadow: 0 6px 24px rgba(255,107,53,0.4);
+  }
+
+  .secondaryBtn:hover {
+    background: #fafafa;
+    border-color: #FF6B35;
   }
 
   .featureCard:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.1);
+    border-color: rgba(255,107,53,0.3);
   }
 
   input:focus, textarea:focus {
     outline: none;
-    border-color: #fbbf24;
-    box-shadow: 0 0 0 3px rgba(251,191,36,0.1);
+    border-color: #FF6B35;
+    background: #fff;
+  }
+
+  .closeBtn:hover {
+    background: #e5e5e5;
   }
 
   @media (max-width: 768px) {
-    .statsContainer {
-      flex-direction: column;
-      gap: 2rem !important;
-    }
-    
-    .divider {
-      width: 80%;
-      height: 2px;
+    .statsGrid, .featuresGrid {
+      grid-template-columns: 1fr !important;
     }
   }
 `;
