@@ -12,7 +12,7 @@ import LandingPage from './pages/LandingPage';
 
 // Dashboard Pages
 import DashboardLayout from './components/dashboard/DashboardLayout';
-import SearchDashboard from './components/dashboard/SearchDashboard';
+import SearchDashboard from './pages/Dashboard/SearchDashboard';
 import OutreachHistoryPage from './pages/Dashboard/OutreachHistoryPage';
 import SearchHistoryPage from './pages/Dashboard/SearchHistoryPage';
 import SubscriptionPage from './pages/Dashboard/SubscriptionPage';
