@@ -1,132 +1,66 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Package } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { Package, Menu, X } from 'lucide-react';
 
 const Navbar = () => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogoClick = (e) => {
+    e.preventDefault();
+    if (location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      navigate('/');
+      setTimeout(() => window.scrollTo({ top: 0, behavior: 'smooth' }), 100);
+    }
+  };
+
   return (
-    <header style={styles.header}>
-      <div style={styles.container}>
-        {/* Logo */}
-        <Link to="/" style={styles.logo}>
+    <nav style={styles.navbar}>
+      <div style={styles.navContainer}>
+        <a href="/" onClick={handleLogoClick} style={styles.logo}>
           <Package size={28} color="#FF6B35" />
           <span style={styles.logoText}>TalentBox</span>
-        </Link>
+        </a>
 
-        {/* Navigation */}
-        <nav style={styles.nav}>
-          <Link to="/" style={styles.navLink}>Home</Link>
+        <div style={styles.navLinks}>
           <Link to="/pricing" style={styles.navLink}>Pricing</Link>
           <Link to="/contact" style={styles.navLink}>Contact</Link>
-        </nav>
-
-        {/* Auth Buttons */}
-        <div style={styles.authButtons}>
-          <Link to="/login" style={styles.loginBtn}>Log In</Link>
-          <Link to="/signup" style={styles.signupBtn}>
-            Get Started
-          </Link>
+          <Link to="/login" style={styles.navLink}>Log in</Link>
+          <Link to="/signup" style={styles.signupBtn}>Start Free Trial</Link>
         </div>
+
+        <button style={styles.mobileMenuBtn} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
-    </header>
+
+      {mobileMenuOpen && (
+        <div style={styles.mobileMenu}>
+          <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
+          <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+          <Link to="/login" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Log in</Link>
+          <Link to="/signup" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Start Free Trial</Link>
+        </div>
+      )}
+    </nav>
   );
 };
 
 const styles = {
-  header: {
-    position: 'sticky',
-    top: 0,
-    zIndex: 100,
-    background: 'rgba(255,255,255,0.95)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid #e5e7eb',
-    padding: '1rem 0',
-    fontFamily: "'Outfit', sans-serif",
-  },
-
-  container: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '0 2rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-
-  logo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '10px',
-    textDecoration: 'none',
-  },
-
-  logoText: {
-    fontSize: '1.25rem',
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
-
-  nav: {
-    display: 'flex',
-    gap: '2rem',
-    flex: 1,
-    justifyContent: 'center',
-  },
-
-  navLink: {
-    fontSize: '0.9375rem',
-    fontWeight: '600',
-    color: '#6b7280',
-    textDecoration: 'none',
-    transition: 'color 0.2s',
-  },
-
-  authButtons: {
-    display: 'flex',
-    gap: '1rem',
-    alignItems: 'center',
-  },
-
-  loginBtn: {
-    padding: '0.625rem 1.25rem',
-    fontSize: '0.9375rem',
-    fontWeight: '600',
-    color: '#1a1a1a',
-    textDecoration: 'none',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    transition: 'all 0.2s',
-  },
-
-  signupBtn: {
-    padding: '0.625rem 1.25rem',
-    fontSize: '0.9375rem',
-    fontWeight: '600',
-    color: '#fff',
-    background: '#FF6B35',
-    textDecoration: 'none',
-    borderRadius: '8px',
-    transition: 'all 0.2s',
-  },
+  navbar: { position: 'sticky', top: 0, background: '#ffffff', borderBottom: '1px solid #f3f4f6', zIndex: 1000, fontFamily: "'Outfit', sans-serif" },
+  navContainer: { maxWidth: '1200px', margin: '0 auto', padding: '1rem 2rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
+  logo: { display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', cursor: 'pointer' },
+  logoText: { fontSize: '1.5rem', fontWeight: '700', color: '#1a1a1a' },
+  navLinks: { display: 'flex', alignItems: 'center', gap: '2rem' },
+  navLink: { color: '#4b5563', textDecoration: 'none', fontWeight: '500', fontSize: '0.9375rem', transition: 'color 0.2s' },
+  signupBtn: { padding: '0.625rem 1.25rem', background: '#FF6B35', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '0.9375rem' },
+  mobileMenuBtn: { display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: '#1a1a1a' },
+  mobileMenu: { display: 'none', flexDirection: 'column', padding: '1rem 2rem 2rem', background: '#ffffff', borderTop: '1px solid #f3f4f6' },
+  mobileLink: { padding: '0.75rem 0', color: '#4b5563', textDecoration: 'none', fontWeight: '500', borderBottom: '1px solid #f3f4f6' },
+  mobileSignupBtn: { marginTop: '1rem', padding: '0.75rem', background: '#FF6B35', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', textAlign: 'center' },
 };
-
-// Hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  a[style*="navLink"]:hover {
-    color: #FF6B35 !important;
-  }
-  
-  a[style*="loginBtn"]:hover {
-    border-color: #FF6B35 !important;
-    color: #FF6B35 !important;
-  }
-  
-  a[style*="signupBtn"]:hover {
-    background: #ff5722 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255,107,53,0.3);
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default Navbar;

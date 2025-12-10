@@ -1,185 +1,134 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Check, Sparkles, Clock, Zap } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { CheckCircle, X } from 'lucide-react';
-import { Link } from 'react-router-dom';
 
 const PricingPage = () => {
-  const [billingCycle, setBillingCycle] = useState('monthly'); // monthly or annual
+  const [isAnnual, setIsAnnual] = useState(false);
 
-  const plans = [
-    {
-      name: 'Starter',
-      price_monthly: 79,
-      price_annual: 790,
-      description: 'Perfect for small teams getting started',
-      features: [
-        '100 profile views/month',
-        '50 searches/month',
-        '20 AI-personalized emails/month',
-        'Basic developer scoring',
-        'Email support',
-        'Search history',
-        'Outreach tracking'
-      ],
-      notIncluded: [
-        'Team collaboration',
-        'API access',
-        'Custom integrations',
-        'Dedicated account manager'
-      ]
-    },
-    {
-      name: 'Professional',
-      price_monthly: 199,
-      price_annual: 1990,
-      description: 'For growing teams hiring regularly',
-      features: [
-        '500 profile views/month',
-        'Unlimited searches',
-        '100 AI-personalized emails/month',
-        'Advanced developer scoring',
-        'Priority email support',
-        'Team collaboration (up to 3 users)',
-        'Advanced analytics',
-        'Search history',
-        'Outreach tracking'
-      ],
-      notIncluded: [
-        'API access',
-        'Custom integrations',
-        'Dedicated account manager'
-      ],
-      popular: true
-    },
-    {
-      name: 'Scale',
-      price_monthly: 449,
-      price_annual: 4490,
-      description: 'For enterprises with high-volume hiring',
-      features: [
-        'Unlimited profile views',
-        'Unlimited searches',
-        '500 AI-personalized emails/month',
-        'Advanced developer scoring',
-        'Dedicated account manager',
-        'Team collaboration (unlimited users)',
-        'Custom integrations',
-        'API access',
-        'Advanced analytics',
-        'Priority support (24/7)',
-        'Custom training & onboarding'
-      ],
-      notIncluded: []
-    }
-  ];
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
-  const getPrice = (plan) => {
-    return billingCycle === 'monthly' ? plan.price_monthly : Math.floor(plan.price_annual / 12);
-  };
+  const starterMonthly = 79;
+  const starterAnnual = Math.round(starterMonthly * 12 * 0.83);
 
-  const getSavings = () => {
-    return billingCycle === 'annual' ? '17% savings' : null;
+  const handleEarlyAccess = () => {
+    const subject = encodeURIComponent('Professional Plan Early Access');
+    const body = encodeURIComponent(`Hi TalentBox Team,
+
+I'm interested in getting early access to the Professional plan.
+
+Company: 
+Team Size: 
+Current Hiring Needs: 
+
+Looking forward to hearing from you!`);
+    window.location.href = `mailto:vinay@talentbox.co?subject=${subject}&body=${body}`;
   };
 
   return (
     <div style={styles.page}>
       <Navbar />
 
-      {/* Hero Section */}
       <section style={styles.hero}>
         <div style={styles.container}>
           <h1 style={styles.title}>Simple, Transparent Pricing</h1>
-          <p style={styles.subtitle}>
-            Choose the plan that fits your hiring needs. Cancel anytime.
-          </p>
+          <p style={styles.subtitle}>Start free, upgrade when you're ready. No hidden fees.</p>
 
-          {/* Billing Toggle */}
-          <div style={styles.billingToggle}>
-            <button
-              onClick={() => setBillingCycle('monthly')}
-              style={{
-                ...styles.toggleBtn,
-                ...(billingCycle === 'monthly' ? styles.toggleBtnActive : {})
-              }}
-            >
-              Monthly
+          {/* Toggle */}
+          <div style={styles.toggleWrapper}>
+            <span style={{ ...styles.toggleLabel, color: !isAnnual ? '#1a1a1a' : '#9ca3af' }}>Monthly</span>
+            <button style={styles.toggle} onClick={() => setIsAnnual(!isAnnual)}>
+              <div style={{ ...styles.toggleKnob, transform: isAnnual ? 'translateX(28px)' : 'translateX(4px)' }} />
             </button>
-            <button
-              onClick={() => setBillingCycle('annual')}
-              style={{
-                ...styles.toggleBtn,
-                ...(billingCycle === 'annual' ? styles.toggleBtnActive : {})
-              }}
-            >
-              Annual
-              {getSavings() && <span style={styles.savingsBadge}>Save 17%</span>}
-            </button>
+            <span style={{ ...styles.toggleLabel, color: isAnnual ? '#1a1a1a' : '#9ca3af' }}>Annual</span>
+            <span style={styles.saveBadge}>Save 17%</span>
           </div>
         </div>
       </section>
 
-      {/* Pricing Cards */}
       <section style={styles.pricingSection}>
         <div style={styles.container}>
-          <div style={styles.plansGrid}>
-            {plans.map((plan) => (
-              <div 
-                key={plan.name}
-                style={{
-                  ...styles.planCard,
-                  ...(plan.popular ? styles.planCardPopular : {})
-                }}
-              >
-                {plan.popular && (
-                  <div style={styles.popularBadge}>Most Popular</div>
-                )}
-
-                <div style={styles.planHeader}>
-                  <h3 style={styles.planName}>{plan.name}</h3>
-                  <p style={styles.planDescription}>{plan.description}</p>
-                </div>
-
-                <div style={styles.planPrice}>
-                  <span style={styles.currency}>$</span>
-                  <span style={styles.amount}>{getPrice(plan)}</span>
-                  <span style={styles.period}>/month</span>
-                </div>
-
-                {billingCycle === 'annual' && (
-                  <p style={styles.billedAnnually}>
-                    Billed annually at ${plan.price_annual}
-                  </p>
-                )}
-
-                <Link to="/signup" style={styles.selectButton}>
-                  Get Started
-                </Link>
-
-                <div style={styles.featuresSection}>
-                  <p style={styles.featuresTitle}>What's included:</p>
-                  <ul style={styles.featuresList}>
-                    {plan.features.map((feature, index) => (
-                      <li key={index} style={styles.featureItem}>
-                        <CheckCircle size={18} color="#10b981" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  {plan.notIncluded.length > 0 && (
-                    <ul style={styles.featuresList}>
-                      {plan.notIncluded.map((feature, index) => (
-                        <li key={index} style={styles.featureItemDisabled}>
-                          <X size={18} color="#d1d5db" />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
+          <div style={styles.pricingGrid}>
+            
+            {/* Free Trial */}
+            <div style={styles.pricingCard}>
+              <div style={styles.cardHeader}>
+                <div style={styles.planIcon}><Clock size={24} color="#FF6B35" /></div>
+                <h3 style={styles.planName}>Free Trial</h3>
+                <p style={styles.planDesc}>Try TalentBox risk-free</p>
               </div>
-            ))}
+              <div style={styles.priceWrapper}>
+                <span style={styles.price}>$0</span>
+                <span style={styles.period}>/ 14 days</span>
+              </div>
+              <ul style={styles.featureList}>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 5 searches total</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 25 profile views</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 10 emails</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> All names & usernames visible</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Search history (read-only)</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Outreach tracking</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
+              </ul>
+              <Link to="/signup" style={styles.trialBtn}>Start Free Trial</Link>
+              <p style={styles.noCreditCard}>No credit card required</p>
+            </div>
+
+            {/* Starter */}
+            <div style={{ ...styles.pricingCard, ...styles.popularCard }}>
+              <div style={styles.popularBadge}>Most Popular</div>
+              <div style={styles.cardHeader}>
+                <div style={styles.planIcon}><Zap size={24} color="#FF6B35" /></div>
+                <h3 style={styles.planName}>Starter</h3>
+                <p style={styles.planDesc}>For growing teams</p>
+              </div>
+              <div style={styles.priceWrapper}>
+                <span style={styles.price}>${isAnnual ? Math.round(starterAnnual / 12) : starterMonthly}</span>
+                <span style={styles.period}>/ month</span>
+              </div>
+              {isAnnual && <p style={styles.billedAnnually}>Billed ${starterAnnual}/year</p>}
+              <ul style={styles.featureList}>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 profile views/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Unlimited searches</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 5 email templates</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 100 emails/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email support</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Search history (30 days)</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Outreach tracking</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email from your domain</li>
+              </ul>
+              <Link to="/signup" style={styles.primaryBtn}>Get Started</Link>
+            </div>
+
+            {/* Professional - Coming Soon */}
+            <div style={{ ...styles.pricingCard, ...styles.comingSoonCard }}>
+              <div style={styles.comingSoonBadge}>Coming Soon</div>
+              <div style={styles.cardHeader}>
+                <div style={styles.planIcon}><Sparkles size={24} color="#6366f1" /></div>
+                <h3 style={styles.planName}>Professional</h3>
+                <p style={styles.planDesc}>For scaling companies</p>
+              </div>
+              <div style={styles.priceWrapper}>
+                <span style={styles.comingSoonPrice}>Coming Soon</span>
+              </div>
+              <ul style={styles.featureList}>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Unlimited profile views</li>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Unlimited searches</li>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> 500+ emails/month</li>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Advanced AI scoring</li>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Priority 24/7 support</li>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Team collaboration</li>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Analytics dashboard</li>
+                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> API access</li>
+              </ul>
+              <button onClick={handleEarlyAccess} style={styles.earlyAccessBtn}>Get Early Access</button>
+              <p style={styles.earlyAccessNote}>Be first to know when we launch</p>
+            </div>
+
           </div>
         </div>
       </section>
@@ -188,34 +137,22 @@ const PricingPage = () => {
       <section style={styles.faqSection}>
         <div style={styles.container}>
           <h2 style={styles.faqTitle}>Frequently Asked Questions</h2>
-          
           <div style={styles.faqGrid}>
             <div style={styles.faqItem}>
-              <h4 style={styles.faqQuestion}>Can I change plans later?</h4>
-              <p style={styles.faqAnswer}>
-                Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.
-              </p>
+              <h4 style={styles.faqQuestion}>What happens after my free trial?</h4>
+              <p style={styles.faqAnswer}>Your trial data is deleted after 14 days unless you upgrade. No automatic charges.</p>
             </div>
-
-            <div style={styles.faqItem}>
-              <h4 style={styles.faqQuestion}>What happens when I hit my limits?</h4>
-              <p style={styles.faqAnswer}>
-                You'll receive a notification when you're close to your limits. You can upgrade anytime or wait until next billing cycle.
-              </p>
-            </div>
-
-            <div style={styles.faqItem}>
-              <h4 style={styles.faqQuestion}>Do you offer refunds?</h4>
-              <p style={styles.faqAnswer}>
-                Yes, we offer a 14-day money-back guarantee. If you're not satisfied, contact us for a full refund.
-              </p>
-            </div>
-
             <div style={styles.faqItem}>
               <h4 style={styles.faqQuestion}>Can I cancel anytime?</h4>
-              <p style={styles.faqAnswer}>
-                Absolutely. No long-term contracts. Cancel anytime from your dashboard.
-              </p>
+              <p style={styles.faqAnswer}>Yes! Cancel anytime from your dashboard. No questions asked.</p>
+            </div>
+            <div style={styles.faqItem}>
+              <h4 style={styles.faqQuestion}>What are email templates?</h4>
+              <p style={styles.faqAnswer}>Pre-built outreach templates you can customize. Starter includes 5 templates.</p>
+            </div>
+            <div style={styles.faqItem}>
+              <h4 style={styles.faqQuestion}>Do you offer refunds?</h4>
+              <p style={styles.faqAnswer}>Yes, we offer a 30-day money-back guarantee on all paid plans.</p>
             </div>
           </div>
         </div>
@@ -227,272 +164,54 @@ const PricingPage = () => {
 };
 
 const styles = {
-  page: {
-    minHeight: '100vh',
-    background: '#ffffff',
-    fontFamily: "'Outfit', sans-serif",
-  },
-
-  hero: {
-    padding: '4rem 2rem 3rem',
-    background: 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)',
-    textAlign: 'center',
-  },
-
-  container: {
-    maxWidth: '1400px',
-    margin: '0 auto',
-  },
-
-  title: {
-    fontSize: 'clamp(2.5rem, 5vw, 3.5rem)',
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: '1rem',
-  },
-
-  subtitle: {
-    fontSize: '1.25rem',
-    color: '#6b7280',
-    marginBottom: '3rem',
-  },
-
-  billingToggle: {
-    display: 'inline-flex',
-    gap: '0.5rem',
-    padding: '0.375rem',
-    background: '#f3f4f6',
-    borderRadius: '12px',
-  },
-
-  toggleBtn: {
-    position: 'relative',
-    padding: '0.75rem 2rem',
-    fontSize: '1rem',
-    fontWeight: '600',
-    background: 'transparent',
-    color: '#6b7280',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontFamily: "'Outfit', sans-serif",
-  },
-
-  toggleBtnActive: {
-    background: '#ffffff',
-    color: '#1a1a1a',
-    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-  },
-
-  savingsBadge: {
-    marginLeft: '0.5rem',
-    padding: '0.25rem 0.5rem',
-    background: '#10b981',
-    color: '#fff',
-    fontSize: '0.75rem',
-    borderRadius: '4px',
-    fontWeight: '700',
-  },
-
-  pricingSection: {
-    padding: '4rem 2rem',
-  },
-
-  plansGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
-    gap: '2rem',
-  },
-
-  planCard: {
-    position: 'relative',
-    padding: '2.5rem',
-    background: '#ffffff',
-    border: '2px solid #e5e7eb',
-    borderRadius: '16px',
-    transition: 'all 0.3s',
-  },
-
-  planCardPopular: {
-    borderColor: '#FF6B35',
-    transform: 'scale(1.05)',
-    boxShadow: '0 12px 40px rgba(255,107,53,0.15)',
-  },
-
-  popularBadge: {
-    position: 'absolute',
-    top: '-14px',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    padding: '0.5rem 1.5rem',
-    background: '#FF6B35',
-    color: '#fff',
-    fontSize: '0.8125rem',
-    fontWeight: '700',
-    borderRadius: '20px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-
-  planHeader: {
-    marginBottom: '2rem',
-    paddingBottom: '1.5rem',
-    borderBottom: '1px solid #f3f4f6',
-  },
-
-  planName: {
-    fontSize: '1.75rem',
-    fontWeight: '700',
-    color: '#1a1a1a',
-    marginBottom: '0.5rem',
-  },
-
-  planDescription: {
-    fontSize: '0.9375rem',
-    color: '#6b7280',
-  },
-
-  planPrice: {
-    display: 'flex',
-    alignItems: 'baseline',
-    marginBottom: '0.5rem',
-  },
-
-  currency: {
-    fontSize: '1.5rem',
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-
-  amount: {
-    fontSize: '3.5rem',
-    fontWeight: '700',
-    color: '#1a1a1a',
-    lineHeight: 1,
-  },
-
-  period: {
-    fontSize: '1.125rem',
-    color: '#6b7280',
-    marginLeft: '0.5rem',
-  },
-
-  billedAnnually: {
-    fontSize: '0.875rem',
-    color: '#10b981',
-    fontWeight: '600',
-    marginBottom: '1.5rem',
-  },
-
-  selectButton: {
-    display: 'block',
-    width: '100%',
-    padding: '1rem',
-    fontSize: '1.0625rem',
-    fontWeight: '600',
-    background: '#FF6B35',
-    color: '#fff',
-    textAlign: 'center',
-    textDecoration: 'none',
-    border: 'none',
-    borderRadius: '10px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    marginBottom: '2rem',
-  },
-
-  featuresSection: {
-    paddingTop: '1.5rem',
-    borderTop: '1px solid #f3f4f6',
-  },
-
-  featuresTitle: {
-    fontSize: '0.875rem',
-    fontWeight: '700',
-    color: '#1a1a1a',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-    marginBottom: '1rem',
-  },
-
-  featuresList: {
-    listStyle: 'none',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '0.875rem',
-  },
-
-  featureItem: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    fontSize: '0.9375rem',
-    color: '#1a1a1a',
-  },
-
-  featureItemDisabled: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    fontSize: '0.9375rem',
-    color: '#9ca3af',
-  },
-
-  faqSection: {
-    padding: '4rem 2rem',
-    background: '#f9fafb',
-  },
-
-  faqTitle: {
-    fontSize: 'clamp(2rem, 4vw, 2.5rem)',
-    fontWeight: '700',
-    color: '#1a1a1a',
-    textAlign: 'center',
-    marginBottom: '3rem',
-  },
-
-  faqGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-    gap: '2rem',
-  },
-
-  faqItem: {
-    padding: '1.5rem',
-    background: '#ffffff',
-    borderRadius: '12px',
-    border: '1px solid #e5e7eb',
-  },
-
-  faqQuestion: {
-    fontSize: '1.125rem',
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: '0.75rem',
-  },
-
-  faqAnswer: {
-    fontSize: '0.9375rem',
-    color: '#6b7280',
-    lineHeight: '1.7',
-  },
-};
-
-// Hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  a[style*="selectButton"]:hover {
-    background: #ff5722 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,107,53,0.3);
-  }
+  page: { minHeight: '100vh', background: '#ffffff', fontFamily: "'Outfit', sans-serif" },
+  hero: { padding: '4rem 2rem 2rem', background: 'linear-gradient(135deg, #ffffff 0%, #f8fbff 100%)', textAlign: 'center' },
+  container: { maxWidth: '1100px', margin: '0 auto' },
+  title: { fontSize: 'clamp(2.5rem, 5vw, 3.5rem)', fontWeight: '700', color: '#1a1a1a', marginBottom: '1rem' },
+  subtitle: { fontSize: '1.25rem', color: '#6b7280', marginBottom: '2rem' },
   
-  div[style*="planCard"]:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 16px 48px rgba(0,0,0,0.12) !important;
-  }
-`;
-document.head.appendChild(styleSheet);
+  toggleWrapper: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '1rem' },
+  toggleLabel: { fontSize: '1rem', fontWeight: '600', transition: 'color 0.2s' },
+  toggle: { width: '60px', height: '32px', background: '#FF6B35', borderRadius: '16px', border: 'none', cursor: 'pointer', position: 'relative' },
+  toggleKnob: { width: '24px', height: '24px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '4px', transition: 'transform 0.2s' },
+  saveBadge: { background: '#dcfce7', color: '#166534', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' },
+
+  pricingSection: { padding: '3rem 2rem 5rem' },
+  pricingGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', alignItems: 'start' },
+  pricingCard: { background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '16px', padding: '2rem', position: 'relative' },
+  popularCard: { border: '2px solid #FF6B35', boxShadow: '0 8px 32px rgba(255,107,53,0.15)' },
+  popularBadge: { position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#FF6B35', color: '#fff', padding: '0.375rem 1rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' },
+  comingSoonCard: { border: '2px dashed #c7d2fe', background: '#fafafe' },
+  comingSoonBadge: { position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#6366f1', color: '#fff', padding: '0.375rem 1rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' },
+  
+  cardHeader: { textAlign: 'center', marginBottom: '1.5rem' },
+  planIcon: { width: '56px', height: '56px', background: '#fff5f2', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1rem' },
+  planName: { fontSize: '1.5rem', fontWeight: '700', color: '#1a1a1a', margin: '0 0 0.25rem' },
+  planDesc: { fontSize: '0.9375rem', color: '#6b7280', margin: 0 },
+  
+  priceWrapper: { textAlign: 'center', marginBottom: '0.5rem' },
+  price: { fontSize: '3rem', fontWeight: '700', color: '#1a1a1a' },
+  period: { fontSize: '1rem', color: '#6b7280' },
+  billedAnnually: { fontSize: '0.875rem', color: '#6b7280', textAlign: 'center', margin: '0 0 1rem' },
+  comingSoonPrice: { fontSize: '1.5rem', fontWeight: '600', color: '#6366f1' },
+
+  featureList: { listStyle: 'none', padding: 0, margin: '1.5rem 0 2rem' },
+  featureItem: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', fontSize: '0.9375rem', color: '#1a1a1a' },
+  featureItemMuted: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', fontSize: '0.9375rem', color: '#9ca3af' },
+
+  trialBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#ffffff', color: '#FF6B35', border: '2px solid #FF6B35', borderRadius: '10px', textAlign: 'center', textDecoration: 'none', fontWeight: '600', fontSize: '1rem', boxSizing: 'border-box' },
+  primaryBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#FF6B35', color: '#ffffff', border: 'none', borderRadius: '10px', textAlign: 'center', textDecoration: 'none', fontWeight: '600', fontSize: '1rem', boxSizing: 'border-box' },
+  earlyAccessBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#6366f1', color: '#ffffff', border: 'none', borderRadius: '10px', textAlign: 'center', fontWeight: '600', fontSize: '1rem', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", boxSizing: 'border-box' },
+  
+  noCreditCard: { fontSize: '0.8125rem', color: '#6b7280', textAlign: 'center', marginTop: '0.75rem' },
+  earlyAccessNote: { fontSize: '0.8125rem', color: '#6b7280', textAlign: 'center', marginTop: '0.75rem' },
+
+  faqSection: { padding: '4rem 2rem', background: '#f9fafb' },
+  faqTitle: { fontSize: '2rem', fontWeight: '700', color: '#1a1a1a', textAlign: 'center', marginBottom: '2.5rem' },
+  faqGrid: { display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem', maxWidth: '900px', margin: '0 auto' },
+  faqItem: { background: '#ffffff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e5e7eb' },
+  faqQuestion: { fontSize: '1rem', fontWeight: '700', color: '#1a1a1a', marginBottom: '0.5rem', margin: '0 0 0.5rem' },
+  faqAnswer: { fontSize: '0.9375rem', color: '#6b7280', lineHeight: '1.6', margin: 0 },
+};
 
 export default PricingPage;

@@ -69,6 +69,7 @@ const ContactPage = () => {
               <p style={styles.infoText}>
                 Reach out to us directly or fill out the form. We're here to help!
               </p>
+              </div>
 
               <div style={styles.contactDetails}>
                 <div style={styles.contactItem}>
@@ -77,37 +78,13 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h4 style={styles.contactLabel}>Email</h4>
-                    <a href="mailto:hello@talentbox.com" style={styles.contactValue}>
-                      hello@talentbox.com
+                    <a href="mailto:vinay@talentbox.co" style={styles.contactValue}>
+                      vinay@talentbox.co
                     </a>
-                  </div>
-                </div>
-
-                <div style={styles.contactItem}>
-                  <div style={styles.iconBox}>
-                    <Phone size={24} color="#FF6B35" />
-                  </div>
-                  <div>
-                    <h4 style={styles.contactLabel}>Phone</h4>
-                    <a href="tel:+1234567890" style={styles.contactValue}>
-                      +1 (234) 567-890
-                    </a>
-                  </div>
-                </div>
-
-                <div style={styles.contactItem}>
-                  <div style={styles.iconBox}>
-                    <MapPin size={24} color="#FF6B35" />
-                  </div>
-                  <div>
-                    <h4 style={styles.contactLabel}>Office</h4>
-                    <p style={styles.contactValue}>
-                      San Francisco, CA
-                    </p>
                   </div>
                 </div>
               </div>
-            </div>
+
 
             {/* Contact Form */}
             <div style={styles.formSection}>
