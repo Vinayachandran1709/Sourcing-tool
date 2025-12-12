@@ -26,7 +26,13 @@ app.include_router(waitlist_router)
 # ===== CORS MIDDLEWARE (allows frontend to call API) =====
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify your frontend URL
+    allow_origins=[
+        "http://localhost:3000",
+        "https://waitlist.talentbox.co",
+        "https://talentbox.co",
+        "https://www.talentbox.co",
+        "https://app.talentbox.co",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
