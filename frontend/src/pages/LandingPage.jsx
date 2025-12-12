@@ -315,7 +315,7 @@ const styles = {
   mainTitle: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' },
   headlineLine1: { fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '600', color: '#1a1a1a', letterSpacing: '-0.03em', lineHeight: '1.2' },
   headlineLine2: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'clamp(2.5rem, 5vw, 4.5rem)' },
-  typingContainer: { display: 'inline-block', textAlign: 'left', width: '340px',marginLeft: 0},
+  typingContainer: { display: 'inline-block', textAlign: 'left', marginLeft: '-6px' },
   typingText: { fontSize: 'clamp(1.8rem, 4vw, 3.5rem)', fontWeight: '700', color: '#FF6B35', whiteSpace: 'nowrap', fontFamily: "'Space Grotesk', 'Courier New', monospace" },
   cursor: { color: '#FF6B35', animation: 'blink 1s infinite', fontWeight: '400', fontSize: 'clamp(1.8rem, 4vw, 3.5rem)' },
   headlineLine3: { fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '600', color: '#1a1a1a', letterSpacing: '-0.03em', lineHeight: '1.2' },
