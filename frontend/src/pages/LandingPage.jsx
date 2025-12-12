@@ -142,8 +142,7 @@ const LandingPage = () => {
             <span style={styles.headlineLine1}>Find the Best</span>
             <span style={styles.headlineLine2}>
               <span style={styles.typingContainer}>
-                <span style={styles.typingText}>{currentText}</span>
-                <span style={styles.cursor}>|</span>
+                <span style={styles.typingText}>{currentText}<span style={styles.cursor}>|</span></span>
               </span>
             </span>
             <span style={styles.headlineLine3}>Before Your Competitors Do</span>
@@ -315,10 +314,10 @@ const styles = {
   badgeContent: { position: 'relative', display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 28px', background: '#fff', borderRadius: '50px', fontSize: '14px', fontWeight: '500', color: '#1a1a1a', boxShadow: '0 2px 12px rgba(0,0,0,0.06)' },
   mainTitle: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginBottom: '2rem' },
   headlineLine1: { fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '600', color: '#1a1a1a', letterSpacing: '-0.03em', lineHeight: '1.2' },
-  headlineLine2: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'clamp(2.5rem, 5vw, 4.5rem)', width: '100%', overflow: 'hidden' },
-  typingContainer: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '100%', maxWidth: '500px', overflow: 'hidden' },
-  typingText: { fontSize: 'clamp(1.8rem, 4vw, 3.5rem)', fontWeight: '700', color: '#FF6B35', whiteSpace: 'nowrap', fontFamily: "'Space Grotesk', 'Courier New', monospace", textAlign: 'center', display: 'inline-block', minWidth: '280px' },
-  cursor: { display: 'inline-block', color: '#FF6B35', animation: 'blink 1s infinite', marginLeft: '2px', fontWeight: '400', fontSize: 'clamp(2rem, 4vw, 3.5rem)' },
+  headlineLine2: { display: 'flex', alignItems: 'center', justifyContent: 'center', height: 'clamp(2.5rem, 5vw, 4.5rem)' },
+  typingContainer: { display: 'inline-flex', alignItems: 'center', justifyContent: 'flex-start', width: '320px' },
+  typingText: { fontSize: 'clamp(1.8rem, 4vw, 3.5rem)', fontWeight: '700', color: '#FF6B35', whiteSpace: 'nowrap', fontFamily: "'Space Grotesk', 'Courier New', monospace" },
+  cursor: { color: '#FF6B35', animation: 'blink 1s infinite', fontWeight: '400', fontSize: 'clamp(1.8rem, 4vw, 3.5rem)' },
   headlineLine3: { fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '600', color: '#1a1a1a', letterSpacing: '-0.03em', lineHeight: '1.2' },
   heroSubtitle: { fontSize: 'clamp(1.05rem, 2vw, 1.25rem)', lineHeight: '1.7', color: '#4a4a4a', marginBottom: '2.5rem', maxWidth: '750px', margin: '0 auto 2.5rem', fontWeight: '400' },
   ctaGroup: { display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' },
