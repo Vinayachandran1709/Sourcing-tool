@@ -269,7 +269,7 @@ const LandingPage = () => {
               <>
                 <div style={styles.modalIcon}><Mail size={56} color="#FF6B35" /></div>
                 <h2 style={styles.modalTitle}>Get In Touch</h2>
-                <p style={styles.modalSubtitle}>Got a question, request, or requirement? Write to us – we'll get back within 2 hours.</p>
+                <p style={styles.modalSubtitle}>Got a question, request, or requirement? Write to us – we'll get back within 2 hours.<br /><br /><strong>Mail to us - <a href="mailto:vinay@talentbox.co" style={{color: '#FF6B35', textDecoration: 'none'}}>vinay@talentbox.co</a></strong></p>
                 <form onSubmit={handleContactSubmit} style={styles.form}>
                   <input type="text" value={contactData.name} onChange={(e) => setContactData({...contactData, name: e.target.value})} placeholder="Your Name" style={styles.input} required disabled={loading} />
                   <input type="email" value={contactData.email} onChange={(e) => setContactData({...contactData, email: e.target.value})} placeholder="Your Email" style={styles.input} required disabled={loading} />
@@ -317,8 +317,8 @@ const styles = {
   headlineLine1: { fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '600', color: '#1a1a1a', letterSpacing: '-0.03em', lineHeight: '1.2' },
   headlineLine2: { display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60px' },
   typingContainer: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', minWidth: '280px', maxWidth: '400px' },
-  typingText: { fontSize: 'clamp(1.5rem, 3vw, 2.5rem)', fontWeight: '700', color: '#FF6B35', whiteSpace: 'nowrap', fontFamily: "'Space Grotesk', 'Courier New', monospace" },
-  cursor: { display: 'inline-block', color: '#FF6B35', animation: 'blink 1s infinite', marginLeft: '2px', fontWeight: '400', fontSize: 'clamp(1.5rem, 3vw, 2.5rem)' },
+  typingText: { fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '700', color: '#FF6B35', whiteSpace: 'nowrap', fontFamily: "'Space Grotesk', 'Courier New', monospace" },
+  cursor: { display: 'inline-block', color: '#FF6B35', animation: 'blink 1s infinite', marginLeft: '2px', fontWeight: '400', fontSize: 'clamp(2rem, 4vw, 3.5rem)' },
   headlineLine3: { fontSize: 'clamp(2rem, 4vw, 3.5rem)', fontWeight: '600', color: '#1a1a1a', letterSpacing: '-0.03em', lineHeight: '1.2' },
   heroSubtitle: { fontSize: 'clamp(1.05rem, 2vw, 1.25rem)', lineHeight: '1.7', color: '#4a4a4a', marginBottom: '2.5rem', maxWidth: '750px', margin: '0 auto 2.5rem', fontWeight: '400' },
   ctaGroup: { display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' },
