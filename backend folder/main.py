@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime, timezone, timedelta  # ⭐ ADDED timezone, timedelta
+from auth_routes import router as auth_router
 from waitlist_routes import router as waitlist_router
 
 # Import from your existing files
@@ -22,6 +23,7 @@ app = FastAPI(
     version="2.0.0"  # ⭐ UPDATED version
 )
 app.include_router(waitlist_router)
+app.include_router(auth_router)
 
 # ===== CORS MIDDLEWARE (allows frontend to call API) =====
 app.add_middleware(

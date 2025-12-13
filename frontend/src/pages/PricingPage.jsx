@@ -93,12 +93,12 @@ Looking forward to hearing from you!`);
               <ul style={styles.featureList}>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 profile views/month</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Unlimited searches</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 5 email templates</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 100 emails/month</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email support</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by roles & expertise</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 emails/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Advanced developer scoring</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Save profiles to shortlist</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> One-click outreach</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Search history (30 days)</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Outreach tracking</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email from your domain</li>
               </ul>
               <Link to="/signup" style={styles.primaryBtn}>Get Started</Link>
