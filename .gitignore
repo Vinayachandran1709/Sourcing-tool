@@ -1,5 +1,6 @@
 venvfolder1/
 venv1/
+backend/venv/
 .env
 
 
