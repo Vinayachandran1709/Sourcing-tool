@@ -6,6 +6,10 @@ from pydantic import BaseModel
 from datetime import datetime, timezone, timedelta  # ⭐ ADDED timezone, timedelta
 from auth_routes import router as auth_router
 from waitlist_routes import router as waitlist_router
+from filter_service import FilterService
+from usage_service import UsageService
+from models import User, SavedList, SavedListProfile
+from lists_routes import router as lists_router
 
 # Import from your existing files
 from database import get_db
@@ -43,11 +47,26 @@ app.add_middleware(
 # ===== PYDANTIC MODELS FOR REQUEST/RESPONSE =====
 
 class SearchRequest(BaseModel):
-    """Request model for GitHub search"""
-    language: str
-    location: Optional[str] = None
-    min_repos: Optional[int] = 0
+    """Enhanced request model for search"""
+    # Role (required)
+    role: Optional[str] = None
+    
+    # Technical Skills
+    languages: Optional[List[str]] = []
+    frameworks: Optional[List[str]] = []
+    tools: Optional[List[str]] = []
+    
+    # Activity
+    min_stars: Optional[int] = 0
     min_contributions: Optional[int] = 0
+    recent_activity: Optional[str] = None  # "Last 30 days", "Last 90 days", "Last 6 months"
+    
+    # Location
+    location: Optional[str] = None
+    
+    # Legacy support
+    language: Optional[str] = None
+    min_repos: Optional[int] = 0
 
 class ProfileResponse(BaseModel):
     """Response model for profile data"""
@@ -104,95 +123,42 @@ def root():
         }
     }
 
-# ===== ENDPOINT 1: ENHANCED SEARCH (REPLACES OLD ONE) =====
-
 @app.post("/api/search-profiles")
 async def search_profiles(search: SearchRequest, db: Session = Depends(get_db)):
-    """
-    ⭐ ENHANCED SEARCH - NEW VERSION:
-    1. Searches cached profiles in DB first (instant)
-    2. Fetches 200-300 fresh profiles from GitHub (paginated)
-    3. Saves all new profiles to DB
-    4. Returns merged, deduplicated results
+    """Enhanced search with role-based filtering"""
     
-    This solves the GitHub 30-profile limit by automatically fetching multiple pages.
-    """
+    user_id = 1  # Mock for now
+    
+    try:
+        UsageService.check_limit(db, user_id, "search")
+    except HTTPException as e:
+        return {"error": e.detail, "limit_reached": True}
     
     print(f"\n🔍 ENHANCED SEARCH")
-    print(f"   Language: {search.language}")
-    print(f"   Location: {search.location or 'Any'}")
-    print(f"   Min repos: {search.min_repos}")
-    print(f"   Min contributions: {search.min_contributions}")
+    print(f"   Role: {search.role or 'Any'}")
+    print(f"   Languages: {search.languages or 'Any'}")
     print()
     
-    # STEP 1: Search cached profiles
-    print("📦 Step 1: Searching database cache...")
     filters = {
-        "language": search.language,
-        "location": search.location,
-        "min_repos": search.min_repos
+        "role": search.role,
+        "languages": search.languages or [search.language] if search.language else [],
+        "frameworks": search.frameworks,
+        "tools": search.tools,
+        "min_stars": search.min_stars,
+        "min_contributions": search.min_contributions,
+        "recent_activity": search.recent_activity,
+        "location": search.location
     }
-    cached_profiles = ProfileCacheService.search_cached_profiles(db, filters)
-    print(f"   ✅ Found {len(cached_profiles)} cached profiles\n")
     
-    # STEP 2: Fetch fresh profiles from GitHub (PAGINATED - gets 200-300 profiles)
-    print("🌐 Step 2: Fetching fresh profiles from GitHub...")
-    from github_service import search_github_users_paginated, get_multiple_user_details
+    profiles = FilterService.apply_filters(db, filters)
     
-    github_users = await search_github_users_paginated(
-        language=search.language,
-        location=search.location,
-        min_repos=search.min_repos,
-        max_pages=10  # Fetch 10 pages = ~300 profiles
-    )
+    print(f"   ✅ Found {len(profiles)} matching profiles\n")
     
-    # Get usernames
-    usernames = [user["login"] for user in github_users[:100]]  # Limit to 100 for reasonable API usage
-    
-    # Fetch detailed info
-    github_details = await get_multiple_user_details(usernames)
-    
-    # Filter by min_contributions
-    if search.min_contributions > 0:
-        github_details = [
-            d for d in github_details 
-            if d.get("contributions", 0) >= search.min_contributions
-        ]
-    
-    print(f"   ✅ Fetched {len(github_details)} detailed profiles from GitHub\n")
-    
-    # STEP 3: Save GitHub profiles to DB
-    print("💾 Step 3: Saving new profiles to database...")
-    saved_github_profiles = ProfileCacheService.save_profiles_to_db(db, github_details)
-    print(f"   ✅ Saved/updated {len(saved_github_profiles)} profiles\n")
-    
-    # STEP 4: Merge cached + GitHub profiles (remove duplicates)
-    print("🔀 Step 4: Merging and deduplicating results...")
-    all_profiles = ProfileCacheService.merge_and_deduplicate(cached_profiles, saved_github_profiles)
-    
-    # Sort by score
-    all_profiles.sort(key=lambda p: p.developer_score, reverse=True)
-    print(f"   ✅ Final result: {len(all_profiles)} unique profiles\n")
-    
-    # STEP 5: Log search history
-    ProfileCacheService.log_search(db, filters, len(all_profiles))
-    
-    # STEP 6: Log profile views
-    profile_ids = [p.id for p in all_profiles]
-    ProfileCacheService.log_profile_views(db, profile_ids)
-    
-    print("✅ Search complete!\n")
-    print(f"📊 Summary:")
-    print(f"   From cache: {len(cached_profiles)}")
-    print(f"   From GitHub: {len(github_details)}")
-    print(f"   Total unique: {len(all_profiles)}")
-    print()
+    UsageService.log_usage(db, user_id, "search", filters)
     
     return {
-        "total_found": len(all_profiles),
-        "from_cache": len(cached_profiles),
-        "from_github": len(github_details),
-        "profiles": all_profiles[:200]  # Return top 200
+        "total_found": len(profiles),
+        "profiles": profiles[:200]
     }
 
 # ===== ENDPOINT 2: GET ALL PROFILES WITH FILTERS =====
@@ -208,6 +174,7 @@ def get_all_profiles(
     active_within_days: int = None,
     sort_by: str = "score",
     limit: int = 100,
+    user_id: int = 1,
     db: Session = Depends(get_db)
 ):
     """
@@ -229,6 +196,12 @@ def get_all_profiles(
         /api/profiles?min_score=70&location=bangalore
         /api/profiles?has_email=true&sort_by=stars
     """
+    try:
+        UsageService.check_limit(db, user_id, "profile_view")
+    except HTTPException as e:
+        return {"error": e.detail, "limit_reached": True}
+    
+    # Start with base query
     
     # Start with base query
     query = db.query(Profile)
@@ -299,6 +272,10 @@ def get_all_profiles(
     
     # Execute query and return
     profiles = query.all()
+    
+    # Log profile views
+    for _ in profiles:
+        UsageService.log_usage(db, user_id, "profile_view")
     
     return profiles
 
@@ -517,6 +494,36 @@ def get_search_history(limit: int = 50, db: Session = Depends(get_db)):
         "search_history": results,
         "total": len(results)
     }
+
+# ===== ENDPOINT: FILTER BY SCORE =====
+
+@app.post("/api/filter-by-score")
+def filter_by_score(
+    profile_ids: List[int],
+    min_score: int = 0,
+    max_score: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Filter profiles by developer score AFTER initial search"""
+    profiles = db.query(Profile).filter(Profile.id.in_(profile_ids)).all()
+    filtered = FilterService.filter_by_score(profiles, min_score, max_score)
+    
+    return {
+        "total": len(filtered),
+        "profiles": filtered
+    }
+
+
+# ===== ENDPOINT: GET USAGE STATS =====
+
+@app.get("/api/usage-stats")
+def get_usage_stats(user_id: int = 1, db: Session = Depends(get_db)):
+    """Get current usage statistics for user"""
+    stats = UsageService.get_usage_stats(db, user_id)
+    return stats
+
+# ===== INCLUDE LISTS ROUTES =====
+app.include_router(lists_router)
 
 # ===== HEALTH CHECK ENDPOINT =====
 

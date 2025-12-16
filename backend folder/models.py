@@ -1,15 +1,53 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
 from sqlalchemy.dialects.postgresql import JSON
-from sqlalchemy.sql import func  # ⭐ ADD THIS
+from sqlalchemy.sql import func
 from database import Base
-from datetime import datetime, timezone  # ✅ ADD timezone
+from datetime import datetime, timezone
 import math
+
+# ===== USER MODEL =====
+
+class User(Base):
+    """Enhanced User model with subscription tracking"""
+    __tablename__ = "users"
+    
+    # Basic info
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False, unique=True, index=True)
+    company = Column(String, nullable=True)
+    password_hash = Column(String, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Subscription info
+    plan = Column(String, default="free")  # "free", "starter"
+    billing_cycle = Column(String, default="monthly")  # "monthly", "annual"
+    stripe_customer_id = Column(String, nullable=True)
+    stripe_subscription_id = Column(String, nullable=True)
+    subscription_status = Column(String, default="trial")  # "trial", "active", "cancelled", "expired"
+    trial_start_date = Column(DateTime(timezone=True), server_default=func.now())
+    trial_end_date = Column(DateTime(timezone=True), nullable=True)
+    subscription_start_date = Column(DateTime(timezone=True), nullable=True)
+    next_billing_date = Column(DateTime(timezone=True), nullable=True)
+    
+    # Additional info (collected on upgrade)
+    company_website = Column(String, nullable=True)
+    career_page_link = Column(String, nullable=True)
+    
+    # Usage tracking (reset monthly)
+    usage_searches = Column(Integer, default=0)
+    usage_profile_views = Column(Integer, default=0)
+    usage_emails_sent = Column(Integer, default=0)
+    usage_reset_date = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# ===== PROFILE MODEL =====
 
 class Profile(Base):
     """Enhanced Profile model"""
     __tablename__ = "profiles"
     
-    # Existing columns
+    # Existing columns (KEEP ALL OF THESE)
     id = Column(Integer, primary_key=True, index=True)
     github_username = Column(String, unique=True, index=True)
     name = Column(String, nullable=True)
@@ -22,20 +60,24 @@ class Profile(Base):
     portfolio_url = Column(String, nullable=True)
     avatar_url = Column(String, nullable=True)
     selected = Column(Boolean, default=False)
-    
-    # ✅ FIXED: Use server_default=func.now() instead of default=datetime.utcnow
     last_fetched = Column(DateTime(timezone=True), server_default=func.now())
     
-    # Enhanced columns
+    # Enhanced columns (KEEP ALL OF THESE)
     languages_data = Column(JSON, nullable=True)
     top_repos = Column(JSON, nullable=True)
     last_active_date = Column(DateTime(timezone=True), nullable=True)
     total_stars = Column(Integer, default=0)
     developer_score = Column(Integer, default=0)
     
-    # Caching columns
+    # Caching columns (KEEP ALL OF THESE)
     cached_at = Column(DateTime(timezone=True), server_default=func.now())
     source = Column(String, default="github")
+    
+    # NEW: Additional fields
+    phone_number = Column(String, nullable=True)  # Fetch but NEVER show to users
+    linkedin_url = Column(String, nullable=True)
+    twitter_url = Column(String, nullable=True)
+    personal_website = Column(String, nullable=True)
 
     def calculate_developer_score(self):
         """Calculate developer score (0-100)"""
@@ -91,14 +133,14 @@ class Profile(Base):
             return 10
 
 
+# ===== EXISTING MODELS (KEEP THESE) =====
+
 class OutreachLog(Base):
     """Email outreach tracking"""
     __tablename__ = "outreach_logs"
     
     id = Column(Integer, primary_key=True, index=True)
     profile_id = Column(Integer, ForeignKey("profiles.id"))
-    
-    # ✅ FIXED
     email_sent_at = Column(DateTime(timezone=True), server_default=func.now())
     email_status = Column(String)
     error_message = Column(String, nullable=True)
@@ -111,8 +153,6 @@ class SearchHistory(Base):
     id = Column(Integer, primary_key=True, index=True)
     filters = Column(JSON)
     profiles_found = Column(Integer)
-    
-    # ✅ FIXED
     searched_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -125,8 +165,6 @@ class EmailOutreach(Base):
     subject = Column(Text)
     body = Column(Text)
     status = Column(String, default="sent")
-    
-    # ✅ FIXED
     sent_at = Column(DateTime(timezone=True), server_default=func.now())
     company_email = Column(String)
 
@@ -137,6 +175,80 @@ class ProfileView(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     profile_id = Column(Integer, ForeignKey("profiles.id"))
-    
-    # ✅ FIXED
     viewed_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# ===== NEW MODELS FOR MVP =====
+
+class SavedList(Base):
+    """User's saved candidate lists"""
+    __tablename__ = "saved_lists"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    name = Column(String, nullable=False)
+    description = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
+class SavedListProfile(Base):
+    """Many-to-many relationship between lists and profiles"""
+    __tablename__ = "saved_list_profiles"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    list_id = Column(Integer, ForeignKey("saved_lists.id"), nullable=False)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+    added_at = Column(DateTime(timezone=True), server_default=func.now())
+    notes = Column(Text, nullable=True)
+
+
+class EmailTemplate(Base):
+    """Email templates for outreach campaigns"""
+    __tablename__ = "email_templates"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    name = Column(String, nullable=False)
+    template_type = Column(String, default="initial")  # "initial", "followup1", "followup2"
+    subject = Column(String, nullable=False)
+    body = Column(Text, nullable=False)
+    is_default = Column(Boolean, default=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class EmailCampaign(Base):
+    """Track email campaigns with sequences"""
+    __tablename__ = "email_campaigns"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+    
+    # Campaign details
+    campaign_name = Column(String, nullable=True)
+    enable_followups = Column(Boolean, default=True)
+    
+    # Email tracking
+    initial_sent_at = Column(DateTime(timezone=True), nullable=True)
+    followup1_sent_at = Column(DateTime(timezone=True), nullable=True)
+    followup2_sent_at = Column(DateTime(timezone=True), nullable=True)
+    
+    # Response tracking
+    replied_at = Column(DateTime(timezone=True), nullable=True)
+    reply_content = Column(Text, nullable=True)
+    
+    # Status
+    status = Column(String, default="pending")  # "pending", "active", "replied", "completed", "bounced"
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class UsageLog(Base):
+    """Detailed usage logging for analytics"""
+    __tablename__ = "usage_logs"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    action_type = Column(String, nullable=False)  # "search", "profile_view", "email_sent", "list_created"
+    details = Column(JSON, nullable=True)
+    timestamp = Column(DateTime(timezone=True), server_default=func.now())
