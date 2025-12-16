@@ -10,6 +10,7 @@ from filter_service import FilterService
 from usage_service import UsageService
 from models import User, SavedList, SavedListProfile
 from lists_routes import router as lists_router
+from email_routes import router as email_router
 
 # Import from your existing files
 from database import get_db
@@ -524,6 +525,7 @@ def get_usage_stats(user_id: int = 1, db: Session = Depends(get_db)):
 
 # ===== INCLUDE LISTS ROUTES =====
 app.include_router(lists_router)
+app.include_router(email_router)
 
 # ===== HEALTH CHECK ENDPOINT =====
 

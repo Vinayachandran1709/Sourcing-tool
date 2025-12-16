@@ -189,26 +189,6 @@ const LandingPage = () => {
       </section>
 
       {/* VIDEO SECTION */}
-      <section style={styles.videoSection}>
-        <div style={styles.sectionHeader}>
-          <h2 style={styles.sectionTitle}>See It In Action</h2>
-          <p style={styles.sectionSubtitle}>Watch how modern teams cut through noise and source<br />the right developers in just a few steps.</p>
-        </div>
-        <div style={styles.videoContainer}>
-          <div style={styles.videoWrapper}>
-            <iframe
-              width="100%"
-              height="100%"
-              src="https://www.youtube.com/embed/YOUR_VIDEO_ID_HERE"
-              title="Product Demo"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              style={styles.iframe}
-            ></iframe>
-          </div>
-        </div>
-      </section>
 
       {/* FEATURES SECTION */}
       <section style={styles.featuresSection}>
@@ -329,13 +309,6 @@ const styles = {
   statIcon: { width: '70px', height: '70px', margin: '0 auto 1.5rem', background: '#fff5f2', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(255,107,53,0.08)' },
   statTitle: { fontSize: '1.35rem', fontWeight: '700', color: '#1a1a1a', marginBottom: '0.75rem', lineHeight: '1.3' },
   statText: { fontSize: '1rem', lineHeight: '1.6', color: '#666', fontWeight: '400' },
-  videoSection: { position: 'relative', zIndex: 10, padding: '5rem 2rem', background: 'transparent' },
-  sectionHeader: { textAlign: 'center', marginBottom: '3rem' },
-  sectionTitle: { fontSize: 'clamp(1.8rem, 4vw, 2.8rem)', fontWeight: '800', color: '#1a1a1a', marginBottom: '1rem', letterSpacing: '-0.02em' },
-  sectionSubtitle: { fontSize: '1.15rem', color: '#666', maxWidth: '700px', margin: '0 auto', lineHeight: '1.7' },
-  videoContainer: { maxWidth: '1000px', margin: '0 auto' },
-  videoWrapper: { position: 'relative', paddingBottom: '56.25%', height: 0, overflow: 'hidden', borderRadius: '18px', boxShadow: '0 20px 60px rgba(0,0,0,0.12)', border: '1px solid rgba(0,0,0,0.08)', background: '#fff' },
-  iframe: { position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', borderRadius: '18px' },
   featuresSection: { position: 'relative', zIndex: 10, padding: '5rem 2rem', background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(10px)' },
   featuresGrid: { maxWidth: '1100px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '2.5rem' },
   featureCard: { padding: '2.5rem', background: 'rgba(255,255,255,0.9)', borderRadius: '18px', border: '1px solid rgba(0,0,0,0.06)', transition: 'all 0.3s ease', position: 'relative', boxShadow: '0 4px 16px rgba(0,0,0,0.04)' },

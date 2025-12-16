@@ -21,7 +21,7 @@ class ListsService:
         ).scalar()
         
         # Free plan: 1 list max
-        if user.subscription_plan == "free":
+        if user.plan == "free":
             if current_lists >= 1:
                 return {
                     "can_create": False,
@@ -33,7 +33,7 @@ class ListsService:
         return {
             "can_create": True,
             "current": current_lists,
-            "limit": "unlimited" if user.subscription_plan != "free" else 1
+            "limit": "unlimited" if user.plan != "free" else 1
         }
     
     @staticmethod
@@ -51,7 +51,7 @@ class ListsService:
         ).scalar()
         
         # Free plan: 25 profiles max per list
-        if user.subscription_plan == "free":
+        if user.plan == "free":
             if profile_count >= 25:
                 return {
                     "can_add": False,
@@ -63,7 +63,7 @@ class ListsService:
         return {
             "can_add": True,
             "current": profile_count,
-            "limit": "unlimited" if user.subscription_plan != "free" else 25
+            "limit": "unlimited" if user.plan != "free" else 25
         }
     
     @staticmethod
