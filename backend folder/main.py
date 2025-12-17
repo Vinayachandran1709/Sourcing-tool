@@ -11,6 +11,7 @@ from usage_service import UsageService
 from models import User, SavedList, SavedListProfile
 from lists_routes import router as lists_router
 from email_routes import router as email_router
+from razorpay_routes import router as razorpay_router
 
 # Import from your existing files
 from database import get_db
@@ -526,6 +527,7 @@ def get_usage_stats(user_id: int = 1, db: Session = Depends(get_db)):
 # ===== INCLUDE LISTS ROUTES =====
 app.include_router(lists_router)
 app.include_router(email_router)
+app.include_router(razorpay_router)
 
 # ===== HEALTH CHECK ENDPOINT =====
 
@@ -540,7 +542,8 @@ def health_check():
             "profile_caching": True,
             "pagination": True,
             "email_outreach": True,
-            "history_tracking": True
+            "history_tracking": True,
+            "razorpay_payments": True
         }
     }
 
