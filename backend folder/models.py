@@ -2,6 +2,15 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, Foreign
 from sqlalchemy.dialects.postgresql import JSON
 from sqlalchemy.sql import func
 from database import Base
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    ForeignKey,
+    DateTime,
+    ARRAY
+)
+from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import math
 
@@ -22,8 +31,8 @@ class User(Base):
     # Subscription info
     plan = Column(String, default="free")  # "free", "starter"
     billing_cycle = Column(String, default="monthly")  # "monthly", "annual"
-    stripe_customer_id = Column(String, nullable=True)
-    stripe_subscription_id = Column(String, nullable=True)
+    razorpay_customer_id = Column(String, nullable=True)
+    razorpay_subscription_id = Column(String, nullable=True)
     subscription_status = Column(String, default="trial")  # "trial", "active", "cancelled", "expired"
     trial_start_date = Column(DateTime(timezone=True), server_default=func.now())
     trial_end_date = Column(DateTime(timezone=True), nullable=True)
@@ -40,6 +49,10 @@ class User(Base):
     usage_emails_sent = Column(Integer, default=0)
     usage_reset_date = Column(DateTime(timezone=True), server_default=func.now())
 
+    # Relationships
+    saved_lists = relationship("SavedList", back_populates="user")
+    search_history = relationship("SearchHistory", back_populates="user")
+    profile_views = relationship("ProfileView", back_populates="user")
 
 # ===== PROFILE MODEL =====
 
@@ -147,14 +160,56 @@ class OutreachLog(Base):
 
 
 class SearchHistory(Base):
-    """Track all searches performed"""
+    """Track user search history with full parameters"""
     __tablename__ = "search_history"
     
     id = Column(Integer, primary_key=True, index=True)
-    filters = Column(JSON)
-    profiles_found = Column(Integer)
-    searched_at = Column(DateTime(timezone=True), server_default=func.now())
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    
+    # Search parameters (store everything for recreation)
+    search_type = Column(String, default="general")  # general, role-based, location-based
+    keywords = Column(String)  # Search keywords/query
+    role = Column(String)  # For role-based searches
+    location = Column(String)  # Location filter
+    min_followers = Column(Integer)  # Follower count filter
+    min_repos = Column(Integer)  # Repository count filter
+    languages = Column(ARRAY(String))  # Programming languages
+    frameworks = Column(ARRAY(String))  # Frameworks/tools
+    min_score = Column(Integer)  # Minimum developer score
+    
+    # Results metadata
+    results_count = Column(Integer, default=0)  # Number of results returned
+    top_profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=True)  # Top result
+    
+    # Timestamps
+    search_date = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    last_recreated = Column(DateTime(timezone=True), nullable=True)  # When user recreated this search
+    
+    # Relationships
+    user = relationship("User", back_populates="search_history")
+    top_profile = relationship("Profile", foreign_keys=[top_profile_id])
 
+class ProfileView(Base):
+    """Track when users view profiles"""
+    __tablename__ = "profile_views"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+    
+    # View metadata
+    viewed_from = Column(String)  # "search", "saved_list", "email_campaign", "direct"
+    search_history_id = Column(Integer, ForeignKey("search_history.id"), nullable=True)
+    
+    # Timestamps
+    first_viewed = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    last_viewed = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
+    view_count = Column(Integer, default=1)
+    
+    # Relationships
+    user = relationship("User", back_populates="profile_views")
+    profile = relationship("Profile")
+    search_history = relationship("SearchHistory", foreign_keys=[search_history_id])
 
 class EmailOutreach(Base):
     """Track bulk email campaigns"""
@@ -169,15 +224,6 @@ class EmailOutreach(Base):
     company_email = Column(String)
 
 
-class ProfileView(Base):
-    """Track which profiles were shown in search results"""
-    __tablename__ = "profile_views"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    profile_id = Column(Integer, ForeignKey("profiles.id"))
-    viewed_at = Column(DateTime(timezone=True), server_default=func.now())
-
-
 # ===== NEW MODELS FOR MVP =====
 
 class SavedList(Base):
@@ -187,9 +233,13 @@ class SavedList(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     name = Column(String, nullable=False)
-    description = Column(Text, nullable=True)
+    description = Column(Text)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
-    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+    
+    # Relationships
+    user = relationship("User", back_populates="saved_lists")
+    profiles = relationship("SavedListProfile", back_populates="saved_list", cascade="all, delete-orphan")
 
 
 class SavedListProfile(Base):
@@ -201,6 +251,10 @@ class SavedListProfile(Base):
     profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
     added_at = Column(DateTime(timezone=True), server_default=func.now())
     notes = Column(Text, nullable=True)
+    
+    # Relationships
+    saved_list = relationship("SavedList", back_populates="profiles")
+    profile = relationship("Profile")
 
 
 class EmailTemplate(Base):

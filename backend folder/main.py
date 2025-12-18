@@ -12,6 +12,9 @@ from models import User, SavedList, SavedListProfile
 from lists_routes import router as lists_router
 from email_routes import router as email_router
 from razorpay_routes import router as razorpay_router
+from analytics_routes import router as analytics_router
+from search_history_routes import router as search_history_router
+
 
 # Import from your existing files
 from database import get_db
@@ -157,6 +160,22 @@ async def search_profiles(search: SearchRequest, db: Session = Depends(get_db)):
     print(f"   ✅ Found {len(profiles)} matching profiles\n")
     
     UsageService.log_usage(db, user_id, "search", filters)
+    
+    # ⭐ NEW: Save search to history
+    from search_history_service import SearchHistoryService
+    search_params = {
+        "search_type": "role-based" if search.role else "general",
+        "keywords": None,  # You don't have a keywords field in SearchRequest
+        "role": search.role,
+        "location": search.location,
+        "min_followers": None,  # You don't have this field
+        "min_repos": search.min_repos if search.min_repos else 0,
+        "languages": search.languages if search.languages else [],
+        "frameworks": search.frameworks if search.frameworks else [],
+        "min_score": None  # You don't have this field, could add min_stars
+    }
+    top_profile_id = profiles[0]["id"] if profiles and len(profiles) > 0 else None
+    SearchHistoryService.save_search(db, user_id, search_params, len(profiles), top_profile_id)
     
     return {
         "total_found": len(profiles),
@@ -528,6 +547,8 @@ def get_usage_stats(user_id: int = 1, db: Session = Depends(get_db)):
 app.include_router(lists_router)
 app.include_router(email_router)
 app.include_router(razorpay_router)
+app.include_router(analytics_router)
+app.include_router(search_history_router)
 
 # ===== HEALTH CHECK ENDPOINT =====
 
