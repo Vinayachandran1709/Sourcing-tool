@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, Mail, History, Clock, CreditCard, Package } from 'lucide-react';
+import { Search, Mail, Clock, CreditCard, Package, Folder, Send, BarChart3 } from 'lucide-react';
 
 const DashboardSidebar = () => {
   const navItems = [
@@ -11,9 +11,21 @@ const DashboardSidebar = () => {
       description: 'Find developers'
     },
     {
+      name: 'Saved Lists',
+      path: '/dashboard/saved-lists',
+      icon: Folder,
+      description: 'Your shortlists'
+    },
+    {
+      name: 'Email Templates',
+      path: '/dashboard/email-templates',
+      icon: Mail,
+      description: 'Outreach templates'
+    },
+    {
       name: 'Outreach History',
       path: '/dashboard/outreach-history',
-      icon: Mail,
+      icon: Send,
       description: 'Email campaigns'
     },
     {
@@ -21,6 +33,12 @@ const DashboardSidebar = () => {
       path: '/dashboard/search-history',
       icon: Clock,
       description: 'Past searches'
+    },
+    {
+      name: 'Analytics',
+      path: '/dashboard/analytics',
+      icon: BarChart3,
+      description: 'Insights & stats'
     },
     {
       name: 'Subscription',
@@ -32,10 +50,15 @@ const DashboardSidebar = () => {
 
   return (
     <aside style={styles.sidebar}>
-      {/* Logo */}
-      <div style={styles.logo}>
-        <Package size={28} color="#FF6B35" />
-        <span style={styles.logoText}>TalentBox</span>
+      {/* Logo Section */}
+      <div style={styles.logoSection}>
+        <div style={styles.logoIcon}>
+          <Package size={28} color="#FF6B35" />
+        </div>
+        <div style={styles.logoText}>
+          <span style={styles.logoName}>TalentBox</span>
+          <span style={styles.logoTagline}>Developer Sourcing</span>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -51,10 +74,12 @@ const DashboardSidebar = () => {
                 ...(isActive ? styles.navItemActive : {})
               })}
             >
-              <Icon size={20} />
-              <div style={styles.navItemText}>
-                <div style={styles.navItemName}>{item.name}</div>
-                <div style={styles.navItemDesc}>{item.description}</div>
+              <div style={styles.navItemIcon}>
+                <Icon size={20} />
+              </div>
+              <div style={styles.navItemContent}>
+                <span style={styles.navItemName}>{item.name}</span>
+                <span style={styles.navItemDesc}>{item.description}</span>
               </div>
             </NavLink>
           );
@@ -63,14 +88,13 @@ const DashboardSidebar = () => {
 
       {/* Footer */}
       <div style={styles.footer}>
-        <div style={styles.footerText}>TalentBox v1.0</div>
+        <div style={styles.footerText}>
+          TalentBox MVP v1.0
+        </div>
         <div style={styles.footerLinks}>
-          <a href="https://twitter.com/talentbox" target="_blank" rel="noopener noreferrer" style={styles.footerLink}>
-            Twitter
-          </a>
-          <a href="https://linkedin.com/company/talentbox" target="_blank" rel="noopener noreferrer" style={styles.footerLink}>
-            LinkedIn
-          </a>
+          <a href="/contact" style={styles.footerLink}>Support</a>
+          <span style={styles.footerDivider}>•</span>
+          <a href="/pricing" style={styles.footerLink}>Pricing</a>
         </div>
       </div>
     </aside>
@@ -81,104 +105,146 @@ const styles = {
   sidebar: {
     width: '260px',
     height: '100vh',
-    position: 'fixed',
-    left: 0,
-    top: 0,
     background: '#ffffff',
     borderRight: '1px solid #e5e7eb',
     display: 'flex',
     flexDirection: 'column',
+    position: 'fixed',
+    left: 0,
+    top: 0,
     fontFamily: "'Outfit', sans-serif",
+    overflowY: 'auto',
   },
 
-  logo: {
+  logoSection: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
+    gap: '0.875rem',
     padding: '1.5rem 1.25rem',
-    borderBottom: '1px solid #f3f4f6',
+    borderBottom: '1px solid #e5e7eb',
+  },
+
+  logoIcon: {
+    width: '42px',
+    height: '42px',
+    background: '#fff5f2',
+    borderRadius: '10px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 
   logoText: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+
+  logoName: {
     fontSize: '1.25rem',
     fontWeight: '700',
     color: '#1a1a1a',
+    lineHeight: 1.2,
+  },
+
+  logoTagline: {
+    fontSize: '0.75rem',
+    color: '#6b7280',
+    marginTop: '0.125rem',
   },
 
   nav: {
     flex: 1,
-    padding: '1.5rem 1rem',
+    padding: '1rem 0.75rem',
     display: 'flex',
     flexDirection: 'column',
-    gap: '0.5rem',
-    overflowY: 'auto',
+    gap: '0.375rem',
   },
 
   navItem: {
     display: 'flex',
     alignItems: 'center',
     gap: '0.875rem',
-    padding: '0.875rem 1rem',
+    padding: '0.75rem 1rem',
     borderRadius: '10px',
     textDecoration: 'none',
     color: '#6b7280',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.2s',
     cursor: 'pointer',
   },
 
   navItemActive: {
     background: '#fff5f2',
     color: '#FF6B35',
-    fontWeight: '600',
   },
 
-  navItemText: {
+  navItemIcon: {
+    width: '20px',
+    height: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexShrink: 0,
+  },
+
+  navItemContent: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '2px',
+    gap: '0.125rem',
   },
 
   navItemName: {
     fontSize: '0.9375rem',
     fontWeight: '600',
+    lineHeight: 1.2,
   },
 
   navItemDesc: {
     fontSize: '0.75rem',
-    color: '#9ca3af',
+    opacity: 0.7,
   },
 
   footer: {
     padding: '1.25rem',
-    borderTop: '1px solid #f3f4f6',
+    borderTop: '1px solid #e5e7eb',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem',
   },
 
   footerText: {
     fontSize: '0.8125rem',
     color: '#9ca3af',
-    marginBottom: '0.75rem',
+    fontWeight: '500',
   },
 
   footerLinks: {
     display: 'flex',
-    gap: '1rem',
+    alignItems: 'center',
+    gap: '0.5rem',
   },
 
   footerLink: {
     fontSize: '0.8125rem',
     color: '#6b7280',
     textDecoration: 'none',
-    fontWeight: '500',
     transition: 'color 0.2s',
+  },
+
+  footerDivider: {
+    color: '#d1d5db',
+    fontSize: '0.75rem',
   },
 };
 
-// Add hover effects
+// Hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
-  a[style*="navItem"]:hover:not([style*="navItemActive"]) {
+  a[style*="navItem"]:hover {
     background: #f9fafb !important;
-    color: #1a1a1a !important;
+  }
+  
+  a[style*="navItemActive"]:hover {
+    background: #fff5f2 !important;
   }
   
   a[style*="footerLink"]:hover {

@@ -1,7 +1,11 @@
 import React from 'react';
-import { Bell, User, Settings, LogOut } from 'lucide-react';
+import { Bell, User, LogOut } from 'lucide-react';
+import { useAuth } from '../../contexts/AuthContext';
 
 const DashboardHeader = ({ title, subtitle }) => {
+  const { user, logout, getDaysRemainingInTrial } = useAuth();
+  const daysRemaining = getDaysRemainingInTrial();
+
   return (
     <header style={styles.header}>
       <div style={styles.headerContent}>
@@ -13,6 +17,16 @@ const DashboardHeader = ({ title, subtitle }) => {
 
         {/* Right Side - User Menu */}
         <div style={styles.rightSection}>
+          {/* Trial Warning */}
+          {daysRemaining !== null && daysRemaining <= 3 && (
+            <div style={styles.trialWarning}>
+              {daysRemaining === 0 
+                ? 'Trial ends today!' 
+                : `${daysRemaining} day${daysRemaining === 1 ? '' : 's'} left in trial`
+              }
+            </div>
+          )}
+
           {/* Notifications */}
           <button style={styles.iconButton}>
             <Bell size={20} />
@@ -25,10 +39,19 @@ const DashboardHeader = ({ title, subtitle }) => {
               <User size={18} />
             </div>
             <div style={styles.userInfo}>
-              <div style={styles.userName}>Demo User</div>
-              <div style={styles.userPlan}>Starter Plan</div>
+              <div style={styles.userName}>{user?.name || 'User'}</div>
+              <div style={styles.userPlan}>
+                {user?.subscription_plan === 'free_trial' ? 'Free Trial' : 
+                 user?.subscription_plan === 'starter' ? 'Starter Plan' : 
+                 'Pro Plan'}
+              </div>
             </div>
           </div>
+
+          {/* Logout Button */}
+          <button onClick={logout} style={styles.logoutButton} title="Logout">
+            <LogOut size={20} />
+          </button>
         </div>
       </div>
     </header>
@@ -75,6 +98,15 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '1rem',
+  },
+
+  trialWarning: {
+    padding: '0.5rem 1rem',
+    background: '#fef3c7',
+    color: '#92400e',
+    borderRadius: '8px',
+    fontSize: '0.8125rem',
+    fontWeight: '600',
   },
 
   iconButton: {
@@ -144,9 +176,23 @@ const styles = {
     fontSize: '0.75rem',
     color: '#6b7280',
   },
+
+  logoutButton: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '40px',
+    height: '40px',
+    background: 'transparent',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#ef4444',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
 };
 
-// Add hover effects
+// Hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   button[style*="iconButton"]:hover {
@@ -155,6 +201,10 @@ styleSheet.textContent = `
   
   div[style*="userMenu"]:hover {
     background: #f9fafb !important;
+  }
+  
+  button[style*="logoutButton"]:hover {
+    background: #fee2e2 !important;
   }
 `;
 document.head.appendChild(styleSheet);

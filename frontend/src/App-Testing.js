@@ -15,12 +15,12 @@ import LandingPage from './pages/LandingPage';
 // Dashboard Layout & Pages
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import SearchDashboard from './pages/Dashboard/SearchDashboard';
-import SavedListsPage from './pages/Dashboard/SavedListsPage';
-import EmailTemplatesPage from './pages/Dashboard/EmailTemplatesPage';
+import SavedListsPage from './pages/Dashboard/SavedListsPage.jsx';
+import EmailTemplatesPage from './pages/Dashboard/EmailTemplatesPage.jsx';
 import OutreachHistoryPage from './pages/Dashboard/OutreachHistoryPage';
 import SearchHistoryPage from './pages/Dashboard/SearchHistoryPage';
 import SubscriptionPage from './pages/Dashboard/SubscriptionPage';
-import AnalyticsPage from './pages/Dashboard/AnalyticsPage';
+import AnalyticsPage from './pages/Dashboard/AnalyticsPage.jsx';
 
 function App() {
   return (
