@@ -180,7 +180,7 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
         </div>
 
         <div style={styles.footer}>
-          
+          <a
             href={'https://github.com/' + profile.github_username}
             target="_blank"
             rel="noopener noreferrer"

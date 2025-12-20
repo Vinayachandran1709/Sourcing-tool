@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, User, Building, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const SignupPage = () => {
   const navigate = useNavigate();
+  const { signup, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({ name: '', email: '', company: '', password: '', confirmPassword: '' });
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -11,7 +13,13 @@ const SignupPage = () => {
   const [error, setError] = useState('');
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: '' });
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => { 
+    window.scrollTo(0, 0);
+    // If already authenticated, redirect to dashboard
+    if (isAuthenticated) {
+      navigate('/dashboard/search');
+    }
+  }, [isAuthenticated, navigate]);
 
   const checkPasswordStrength = (password) => {
     let score = 0;
@@ -35,29 +43,25 @@ const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (formData.password !== formData.confirmPassword) { setError('Passwords do not match'); return; }
-    if (formData.password.length < 8) { setError('Password must be at least 8 characters'); return; }
+    if (formData.password !== formData.confirmPassword) { 
+      setError('Passwords do not match'); 
+      return; 
+    }
+    if (formData.password.length < 8) { 
+      setError('Password must be at least 8 characters'); 
+      return; 
+    }
     setLoading(true);
 
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: formData.name, email: formData.email, company: formData.company, password: formData.password }),
-      });
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('user', JSON.stringify(data));
-        navigate('/dashboard/search');
-      } else {
-        const errorData = await response.json();
-        if (response.status === 409) setError('An account with this email already exists. Please log in instead.');
-        else setError(errorData.message || 'Signup failed. Please try again.');
-      }
-    } catch (error) {
-      console.log('Backend not available, simulating signup...');
-      setTimeout(() => navigate('/dashboard/search'), 1000);
-    } finally { setLoading(false); }
+    const result = await signup(formData.name, formData.email, formData.company, formData.password);
+
+    if (result.success) {
+      navigate('/dashboard/search');
+    } else {
+      setError(result.error || 'Signup failed. Please try again.');
+    }
+
+    setLoading(false);
   };
 
   const handleChange = (e) => {
@@ -66,7 +70,7 @@ const SignupPage = () => {
     if (error) setError('');
     if (name === 'password') setPasswordStrength(checkPasswordStrength(value));
   };
-
+  
   return (
     <div style={styles.page}>
       <div style={styles.leftSide}>

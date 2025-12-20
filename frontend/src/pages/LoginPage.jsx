@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const { login, isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -14,42 +16,26 @@ const LoginPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+    // If already authenticated, redirect to dashboard
+    if (isAuthenticated) {
+      navigate('/dashboard/search');
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setError('');
 
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+    const result = await login(formData.email, formData.password);
 
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('user', JSON.stringify(data));
-        navigate('/dashboard/search');
-      } else {
-        const errorData = await response.json();
-        if (response.status === 404) {
-          setError('No account found with this email. Please sign up first.');
-        } else if (response.status === 401) {
-          setError('Incorrect password. Please try again.');
-        } else {
-          setError(errorData.message || 'Login failed. Please try again.');
-        }
-      }
-    } catch (error) {
-      console.log('Backend not available, simulating login...');
-      setTimeout(() => {
-        navigate('/dashboard/search');
-      }, 1000);
-    } finally {
-      setLoading(false);
+    if (result.success) {
+      navigate('/dashboard/search');
+    } else {
+      setError(result.error || 'Login failed. Please try again.');
     }
+    
+    setLoading(false);
   };
 
   const handleChange = (e) => {
@@ -60,6 +46,7 @@ const LoginPage = () => {
     if (error) setError('');
   };
 
+  
   return (
     <div style={styles.page}>
       {/* Left Side - Branding */}
