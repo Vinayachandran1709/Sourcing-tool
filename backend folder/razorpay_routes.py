@@ -8,6 +8,9 @@ from razorpay_webhook_handler import RazorpayWebhookHandler
 from models import User
 import logging
 import json
+import hmac
+import hashlib 
+from datetime import datetime, timedelta  
 
 router = APIRouter(prefix="/api/razorpay", tags=["Razorpay Payments"])
 logger = logging.getLogger(__name__)
@@ -22,6 +25,20 @@ class CreateSubscriptionRequest(BaseModel):
 class UpdateCompanyInfoRequest(BaseModel):
     company_website: Optional[str] = None
     career_page_link: Optional[str] = None
+
+class CreateOrderRequest(BaseModel):
+    plan_name: str
+    billing_cycle: str  # 'monthly' or 'annual'
+    amount: int
+    currency: str = 'INR'
+
+class VerifyPaymentRequest(BaseModel):
+    razorpay_order_id: str
+    razorpay_payment_id: str
+    razorpay_signature: str
+    plan_name: str
+    billing_cycle: str
+
 
 # ===== SUBSCRIPTION ENDPOINTS =====
 
@@ -235,3 +252,119 @@ def get_subscription_info(user_id: int = 1, db: Session = Depends(get_db)):
         "company_website": user.company_website,
         "career_page_link": user.career_page_link
     }
+
+@router.post("/create-order")
+def create_order_for_checkout(
+    request: CreateOrderRequest,
+    user_id: int = 1,
+    db: Session = Depends(get_db)
+):
+    """Create Razorpay order for checkout modal (one-time payment)"""
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    try:
+        razorpay_service = RazorpayService()
+        
+        # Convert to paise and add GST
+        amount_in_paise = request.amount * 100
+        total_amount = int(amount_in_paise * 1.18)  # 18% GST
+        
+        # Create order (not subscription)
+        import razorpay
+        client = razorpay.Client(auth=(razorpay_service.key_id, razorpay_service.key_secret))
+        
+        order = client.order.create({
+            'amount': total_amount,
+            'currency': request.currency,
+            'receipt': f"order_{user.id}_{int(__import__('time').time())}",
+            'notes': {
+                'user_id': user.id,
+                'plan_name': request.plan_name,
+                'billing_cycle': request.billing_cycle
+            }
+        })
+        
+        return {
+            'success': True,
+            'order_id': order['id'],
+            'amount': order['amount'],
+            'currency': order['currency'],
+            'user': {
+                'id': user.id,
+                'email': user.email,
+                'name': user.name
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Order creation error: {e}")
+        raise HTTPException(status_code=500, detail=f"Failed to create order: {str(e)}")
+
+@router.post("/verify-payment")
+def verify_payment_and_activate(
+    request: VerifyPaymentRequest,
+    user_id: int = 1,
+    db: Session = Depends(get_db)
+):
+    """Verify payment signature and activate subscription"""
+    
+    user = db.query(User).filter(User.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    try:
+        razorpay_service = RazorpayService()
+        
+        # Verify signature
+        import hmac
+        import hashlib
+        
+        message = f"{request.razorpay_order_id}|{request.razorpay_payment_id}"
+        generated_signature = hmac.new(
+            razorpay_service.key_secret.encode(),
+            message.encode(),
+            hashlib.sha256
+        ).hexdigest()
+        
+        if generated_signature != request.razorpay_signature:
+            raise HTTPException(status_code=400, detail="Invalid payment signature")
+        
+        # Update user subscription
+        from datetime import datetime, timedelta
+        
+        user.plan = request.plan_name.lower()
+        user.billing_cycle = request.billing_cycle
+        user.subscription_status = 'active'
+        user.razorpay_payment_id = request.razorpay_payment_id
+        user.razorpay_order_id = request.razorpay_order_id
+        
+        # Set subscription dates
+        user.subscription_start_date = datetime.now()
+        if request.billing_cycle == 'monthly':
+            user.next_billing_date = datetime.now() + timedelta(days=30)
+        else:  # annual
+            user.next_billing_date = datetime.now() + timedelta(days=365)
+        
+        db.commit()
+        db.refresh(user)
+        
+        return {
+            'success': True,
+            'message': 'Payment verified and subscription activated',
+            'user': {
+                'id': user.id,
+                'subscription_plan': user.plan,
+                'subscription_status': user.subscription_status,
+                'next_billing_date': user.next_billing_date.isoformat() if user.next_billing_date else None
+            }
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Payment verification error: {e}")
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to verify payment: {str(e)}")

@@ -3,8 +3,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import './App.css';
-import CheckoutPage from './pages/CheckoutPage';
-import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 // Public Pages
 import HomePage from './pages/HomePage';
@@ -23,6 +21,8 @@ import OutreachHistoryPage from './pages/Dashboard/OutreachHistoryPage';
 import SearchHistoryPage from './pages/Dashboard/SearchHistoryPage';
 import SubscriptionPage from './pages/Dashboard/SubscriptionPage';
 import AnalyticsPage from './pages/Dashboard/AnalyticsPage.jsx';
+import CheckoutPage from './pages/CheckoutPage';
+import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
 function App() {
   return (
