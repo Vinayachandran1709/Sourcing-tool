@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import { CreditCard, Calendar, TrendingUp, Mail, Search, Eye, CheckCircle, X } from 'lucide-react';
 
 const SubscriptionPage = () => {
+  const navigate = useNavigate();
   // Mock user data - replace with real API call
   const [userData, setUserData] = useState({
     plan: 'Starter',
@@ -221,6 +223,11 @@ const SubscriptionPage = () => {
                 </div>
 
                 <button 
+                  onClick={() => {
+                    if (userData.plan !== plan.name) {
+                      navigate(`/checkout?plan=${plan.name}&cycle=monthly`);
+                    }
+                  }}
                   style={{
                     ...styles.selectPlanBtn,
                     ...(userData.plan === plan.name ? styles.currentPlanBtn : {})
