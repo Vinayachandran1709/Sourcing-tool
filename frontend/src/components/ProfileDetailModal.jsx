@@ -121,22 +121,34 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
           </div>
 
           {profile.languages_data && Object.keys(profile.languages_data).length > 0 && (
-            <div style={styles.section}>
-              <h3 style={styles.sectionTitle}>Programming Languages</h3>
-              <div style={styles.languagesGrid}>
-                {Object.entries(profile.languages_data)
-                  .sort((a, b) => b[1] - a[1])
-                  .map(([lang, percent]) => (
-                    <div key={lang} style={styles.languageItem}>
-                      <div style={styles.languageHeader}>
-                        <span style={styles.languageName}>{lang}</span>
-                        <span style={styles.languagePercent}>{percent}%</span>
-                      </div>
-                      <div style={styles.languageBar}>
-                        <div style={{...styles.languageBarFill, width: percent + '%'}}></div>
-                      </div>
-                    </div>
-                  ))}
+  <div style={styles.section}>
+    <h3 style={styles.sectionTitle}>Programming Languages</h3>
+    <div style={styles.languagesGrid}>
+      {(() => {
+        // Calculate total bytes
+        const languagesObj = typeof profile.languages_data === 'string' 
+          ? JSON.parse(profile.languages_data) 
+          : profile.languages_data;
+        
+        const total = Object.values(languagesObj).reduce((a, b) => a + b, 0);
+        
+        // Convert to percentages and sort
+        return Object.entries(languagesObj)
+          .map(([lang, bytes]) => [lang, ((bytes / total) * 100).toFixed(1)])
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 5) // Top 5 languages
+          .map(([lang, percent]) => (
+            <div key={lang} style={styles.languageItem}>
+              <div style={styles.languageHeader}>
+                <span style={styles.languageName}>{lang}</span>
+                <span style={styles.languagePercent}>{percent}%</span>
+              </div>
+              <div style={styles.languageBar}>
+                <div style={{...styles.languageBarFill, width: percent + '%'}}></div>
+              </div>
+            </div>
+                    ));
+                })()}
               </div>
             </div>
           )}

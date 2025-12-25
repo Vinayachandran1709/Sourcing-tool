@@ -9,6 +9,7 @@ from waitlist_routes import router as waitlist_router
 from filter_service import FilterService
 from usage_service import UsageService
 from models import User, SavedList, SavedListProfile
+from auth_middleware import get_current_user
 from lists_routes import router as lists_router
 from email_routes import router as email_router
 from razorpay_routes import router as razorpay_router
