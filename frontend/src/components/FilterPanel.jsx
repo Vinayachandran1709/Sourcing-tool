@@ -1,6 +1,68 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, X, Search } from 'lucide-react';
 
+// ===== CONSTANT DEFINITIONS (MUST BE OUTSIDE COMPONENT) =====
+const ROLE_OPTIONS = [
+  'Frontend Developer',
+  'Backend Developer',
+  'Full Stack Developer',
+  'Mobile Developer (iOS)',
+  'Mobile Developer (Android)',
+  'DevOps Engineer',
+  'Data Scientist',
+  'Machine Learning Engineer',
+  'QA Engineer',
+  'Security Engineer',
+  'Cloud Architect',
+  'Database Administrator',
+  'System Administrator',
+  'Technical Lead',
+  'Engineering Manager',
+  'Product Engineer'
+];
+
+const LANGUAGE_OPTIONS = [
+  'JavaScript',
+  'Python',
+  'Java',
+  'TypeScript',
+  'C++',
+  'C#',
+  'Go',
+  'Rust',
+  'Swift',
+  'Kotlin',
+  'Ruby',
+  'PHP',
+  'Scala',
+  'R',
+  'Dart'
+];
+
+const SKILL_OPTIONS = [
+  'React',
+  'Node.js',
+  'Angular',
+  'Vue.js',
+  'Django',
+  'Flask',
+  'Spring Boot',
+  'Express.js',
+  'Docker',
+  'Kubernetes',
+  'AWS',
+  'Azure',
+  'GCP',
+  'MongoDB',
+  'PostgreSQL',
+  'MySQL',
+  'Redis',
+  'GraphQL',
+  'REST API',
+  'TensorFlow'
+];
+
+// ===== COMPONENT STARTS HERE =====
 const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState({
@@ -14,12 +76,12 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
     location: initialFilters.location || '',
   });
 
-  // NEW: Search states for each dropdown
+  // Search states for each dropdown
   const [roleSearch, setRoleSearch] = useState('');
   const [languageSearch, setLanguageSearch] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
 
-  // NEW: Filtered options based on search
+  // Filtered options based on search
   const filteredRoles = useMemo(() => {
     if (!roleSearch) return ROLE_OPTIONS;
     return ROLE_OPTIONS.filter(role => 
@@ -313,223 +375,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
   );
 };
 
-  const roles = [
-    'Frontend Developer',
-    'Backend Developer',
-    'Full Stack Developer',
-    'DevOps Engineer',
-    'Data Scientist',
-    'ML Engineer',
-    'Mobile Developer (iOS)',
-    'Mobile Developer (Android)',
-    'QA Engineer',
-    'SRE',
-    'Security Engineer',
-    'Game Developer',
-    'Blockchain Developer',
-    'AR/VR Developer',
-    'Embedded Systems',
-    'Cloud Architect',
-  ];
-
-  const popularLanguages = [
-    'JavaScript', 'Python', 'Java', 'TypeScript', 'C++',
-    'C#', 'PHP', 'Ruby', 'Go', 'Rust',
-    'Swift', 'Kotlin', 'R', 'Scala', 'Dart'
-  ];
-
-  const popularSkills = [
-    'React', 'Node.js', 'Django', 'Flask', 'Spring Boot',
-    'Docker', 'Kubernetes', 'AWS', 'Azure', 'GCP',
-    'TensorFlow', 'PyTorch', 'MongoDB', 'PostgreSQL', 'Redis',
-    'GraphQL', 'REST API', 'CI/CD', 'Git', 'Linux'
-  ];
-
-  const handleChange = (field, value) => {
-    setFilters(prev => ({ ...prev, [field]: value }));
-  };
-
-  const handleArrayToggle = (field, value) => {
-    setFilters(prev => {
-      const currentArray = prev[field];
-      const newArray = currentArray.includes(value)
-        ? currentArray.filter(item => item !== value)
-        : [...currentArray, value];
-      return { ...prev, [field]: newArray };
-    });
-  };
-
-  const handleApply = () => {
-    onApplyFilters(filters);
-  };
-
-  const handleReset = () => {
-    const resetFilters = {
-      location: '',
-      role: '',
-      languages: [],
-      skills: [],
-      min_repos: 5,
-      min_followers: 0,
-      min_score: 0,
-      min_contributions: 0,
-    };
-    setFilters(resetFilters);
-    onApplyFilters(resetFilters);
-  };
-
-  return (
-    <div style={styles.panel}>
-      {/* Header */}
-      <div style={styles.header} onClick={() => setIsExpanded(!isExpanded)}>
-        <div style={styles.headerLeft}>
-          <Filter size={20} color="#FF6B35" />
-          <h3 style={styles.title}>Advanced Filters</h3>
-        </div>
-        <button style={styles.toggleBtn}>
-          {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
-        </button>
-      </div>
-
-      {/* Filter Content */}
-      {isExpanded && (
-        <div style={styles.content}>
-          {/* Basic Filters Row */}
-          <div style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>Location</label>
-              <input
-                type="text"
-                value={filters.location}
-                onChange={(e) => handleChange('location', e.target.value)}
-                placeholder="e.g., Bangalore, India"
-                style={styles.input}
-              />
-            </div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>Role</label>
-              <select
-                value={filters.role}
-                onChange={(e) => handleChange('role', e.target.value)}
-                style={styles.select}
-              >
-                <option value="">All Roles</option>
-                {roles.map(role => (
-                  <option key={role} value={role}>{role}</option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Languages */}
-          <div style={styles.section}>
-            <label style={styles.sectionLabel}>
-              Programming Languages ({filters.languages.length} selected)
-            </label>
-            <div style={styles.chipGrid}>
-              {popularLanguages.map(lang => (
-                <button
-                  key={lang}
-                  onClick={() => handleArrayToggle('languages', lang)}
-                  style={{
-                    ...styles.chip,
-                    ...(filters.languages.includes(lang) ? styles.chipActive : {})
-                  }}
-                >
-                  {lang}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Skills */}
-          <div style={styles.section}>
-            <label style={styles.sectionLabel}>
-              Skills & Frameworks ({filters.skills.length} selected)
-            </label>
-            <div style={styles.chipGrid}>
-              {popularSkills.map(skill => (
-                <button
-                  key={skill}
-                  onClick={() => handleArrayToggle('skills', skill)}
-                  style={{
-                    ...styles.chip,
-                    ...(filters.skills.includes(skill) ? styles.chipActive : {})
-                  }}
-                >
-                  {skill}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Numeric Filters */}
-          <div style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>Min Repositories</label>
-              <input
-                type="number"
-                value={filters.min_repos}
-                onChange={(e) => handleChange('min_repos', parseInt(e.target.value) || 0)}
-                min="0"
-                style={styles.input}
-              />
-            </div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>Min Followers</label>
-              <input
-                type="number"
-                value={filters.min_followers}
-                onChange={(e) => handleChange('min_followers', parseInt(e.target.value) || 0)}
-                min="0"
-                style={styles.input}
-              />
-            </div>
-          </div>
-
-          <div style={styles.row}>
-            <div style={styles.field}>
-              <label style={styles.label}>Min Developer Score (0-100)</label>
-              <input
-                type="number"
-                value={filters.min_score}
-                onChange={(e) => handleChange('min_score', parseInt(e.target.value) || 0)}
-                min="0"
-                max="100"
-                style={styles.input}
-              />
-            </div>
-
-            <div style={styles.field}>
-              <label style={styles.label}>Min Contributions (Last Year)</label>
-              <input
-                type="number"
-                value={filters.min_contributions}
-                onChange={(e) => handleChange('min_contributions', parseInt(e.target.value) || 0)}
-                min="0"
-                style={styles.input}
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div style={styles.actions}>
-            <button onClick={handleReset} style={styles.resetBtn}>
-              <X size={18} />
-              <span>Reset Filters</span>
-            </button>
-            <button onClick={handleApply} style={styles.applyBtn}>
-              <Filter size={18} />
-              <span>Apply Filters</span>
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-
+// ===== STYLES (OUTSIDE COMPONENT) =====
 const styles = {
   container: {
     backgroundColor: '#ffffff',
@@ -578,7 +424,6 @@ const styles = {
     fontWeight: 600,
     color: '#374151',
   },
-  // NEW: Searchable dropdown styles
   searchableDropdown: {
     position: 'relative',
   },
@@ -719,35 +564,5 @@ const styles = {
     fontFamily: 'Outfit, sans-serif',
   },
 };
-
-// Hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  input:focus, select:focus {
-    outline: none;
-    border-color: #FF6B35 !important;
-  }
-  
-  button[style*="chip"]:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  }
-  
-  button[style*="resetBtn"]:hover {
-    border-color: #FF6B35 !important;
-    color: #FF6B35 !important;
-  }
-  
-  button[style*="applyBtn"]:hover {
-    background: #ff5722 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255,107,53,0.3);
-  }
-  
-  div[style*="header"]:hover {
-    background: #fafafa !important;
-  }
-`;
-document.head.appendChild(styleSheet);
 
 export default FilterPanel;

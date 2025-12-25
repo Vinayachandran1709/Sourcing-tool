@@ -74,86 +74,92 @@ export const AuthProvider = ({ children }) => {
   }, [user]);
 
   const login = async (email, password) => {
-    try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+  try {
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password }),
+    });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Login failed');
-      }
-
-      const data = await response.json();
-      
-      // Store user and token
-      const userData = {
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        company: data.user.company,
-        subscription_plan: data.user.subscription_plan,
-        trial_end_date: data.user.trial_end_date,
-        searches_used: data.user.searches_used,
-        profile_views_used: data.user.profile_views_used,
-        email_credits_used: data.user.email_credits_used,
-      };
-
-      setUser(userData);
-      setToken(data.token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
-
-      return { success: true };
-    } catch (error) {
-      console.error('Login error:', error);
-      return { success: false, error: error.message };
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || errorData.message || 'Login failed');  // ← Changed to 'detail' (FastAPI standard)
     }
-  };
 
-  const signup = async (name, email, company, password) => {
-    try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, company, password }),
-      });
+    const data = await response.json();
+    
+    // Store user and token with safe defaults
+    const userData = {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      company: data.user.company || '',  // ← Add default
+      subscription_plan: data.user.subscription_plan || 'free_trial',  // ← Safe default
+      subscription_status: data.user.subscription_status || 'trial',  // ← Safe default
+      trial_end_date: data.user.trial_end_date || null,
+      // These might not be returned by backend, use safe defaults
+      searches_used: data.user.searches_used || 0,
+      profile_views_used: data.user.profile_views_used || 0,
+      email_credits_used: data.user.email_credits_used || 0,
+    };
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Signup failed');
-      }
+    setUser(userData);
+    setToken(data.token);
+    setIsAuthenticated(true);  // ← Add this!
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', data.token);
 
-      const data = await response.json();
-      
-      // Store user and token
-      const userData = {
-        id: data.user.id,
-        name: data.user.name,
-        email: data.user.email,
-        company: data.user.company,
-        subscription_plan: data.user.subscription_plan,
-        trial_end_date: data.user.trial_end_date,
-        searches_used: data.user.searches_used || 0,
-        profile_views_used: data.user.profile_views_used || 0,
-        email_credits_used: data.user.email_credits_used || 0,
-      };
+    return { success: true };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: false, error: error.message };
+  }
+};
 
-      setUser(userData);
-      setToken(data.token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      localStorage.setItem('token', data.token);
+const signup = async (name, email, company, password) => {
+  try {
+    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+    const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, company, password }),
+    });
 
-      return { success: true };
-    } catch (error) {
-      console.error('Signup error:', error);
-      return { success: false, error: error.message };
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || errorData.message || 'Signup failed');  // ← Changed to 'detail'
     }
-  };
+
+    const data = await response.json();
+    
+    // Store user and token with safe defaults
+    const userData = {
+      id: data.user.id,
+      name: data.user.name,
+      email: data.user.email,
+      company: data.user.company || '',  // ← Add default
+      subscription_plan: data.user.subscription_plan || 'free_trial',  // ← Safe default
+      subscription_status: data.user.subscription_status || 'trial',  // ← Safe default
+      trial_end_date: data.user.trial_end_date || null,
+      // These might not be returned by backend, use safe defaults
+      searches_used: data.user.searches_used || 0,
+      profile_views_used: data.user.profile_views_used || 0,
+      email_credits_used: data.user.email_credits_used || 0,
+    };
+
+    setUser(userData);
+    setToken(data.token);
+    setIsAuthenticated(true);  // ← Add this!
+    localStorage.setItem('user', JSON.stringify(userData));
+    localStorage.setItem('token', data.token);
+
+    return { success: true };
+  } catch (error) {
+    console.error('Signup error:', error);
+    return { success: false, error: error.message };
+  }
+};
 
   const logout = () => {
     setUser(null);

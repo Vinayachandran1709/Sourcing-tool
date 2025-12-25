@@ -181,12 +181,46 @@ async def search_profiles(
         "frameworks": search.frameworks if search.frameworks else [],
         "min_score": None
     }
-    top_profile_id = profiles[0]["id"] if profiles and len(profiles) > 0 else None
+    # Get top profile ID (use .id for objects, not ["id"] for dicts)
+    top_profile_id = profiles[0].id if profiles and len(profiles) > 0 else None
+    
+    # Save search history
     SearchHistoryService.save_search(db, user_id, search_params, len(profiles), top_profile_id)
     
+    # Convert Profile objects to dictionaries for JSON response
+    profile_dicts = []
+    for profile in profiles[:200]:
+        # Check if profile is already a dict or an object
+        if isinstance(profile, dict):
+            profile_dicts.append(profile)
+        else:
+            # Convert SQLAlchemy object to dict
+            profile_dict = {
+                "id": profile.id,
+                "github_username": profile.github_username,
+                "name": profile.name,
+                "email": profile.email,
+                "location": profile.location,
+                "bio": profile.bio,
+                "public_repos": profile.public_repos,
+                "primary_language": profile.primary_language,
+                "total_stars": getattr(profile, 'total_stars', 0),
+                "developer_score": getattr(profile, 'developer_score', 0),
+                "avatar_url": getattr(profile, 'avatar_url', None),
+                "total_contributions": getattr(profile, 'total_contributions', 0),
+                "followers": getattr(profile, 'followers', 0),
+                "languages_data": getattr(profile, 'languages_data', None),
+                "top_repos": getattr(profile, 'top_repos', None),
+                "selected": False
+            }
+            profile_dicts.append(profile_dict)
+    
     return {
+        "success": True,
         "total_found": len(profiles),
-        "profiles": profiles[:200]
+        "profiles": profile_dicts,
+        "from_cache": len(profiles),  # Assuming all from DB/cache for now
+        "from_github": 0
     }
 
 # ===== ENDPOINT 2: GET ALL PROFILES WITH FILTERS =====
@@ -202,7 +236,7 @@ def get_all_profiles(
     active_within_days: int = None,
     sort_by: str = "score",
     limit: int = 100,
-    current_user: User = Depends(get_current_user),  # CHANGED!
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -225,48 +259,9 @@ def get_all_profiles(
         /api/profiles?has_email=true&sort_by=stars
     """
     try:
-        UsageService.check_limit(db, current_user.id, "profile_view")  # CHANGED user_id to current_user.id
+        UsageService.check_limit(db, current_user.id, "profile_view")
     except HTTPException as e:
         return {"error": e.detail, "limit_reached": True}
-    
-    # Rest of the code stays the same...
-    # Just change user_id to current_user.id in the log_usage call at the bottom
-    
-    # ... (all the filter logic stays the same) ...
-    
-    # Execute query and return
-    profiles = query.all()
-    
-    # Log profile views
-    for _ in profiles:
-        UsageService.log_usage(db, current_user.id, "profile_view")  # CHANGED!
-    
-    return profiles
-    """
-    Get all profiles with optional filters and sorting.
-    
-    Query Parameters:
-        min_score: Minimum developer score (0-100)
-        max_score: Maximum developer score (0-100)
-        min_stars: Minimum total stars
-        has_email: Filter by email availability (true/false)
-        location: Filter by location (partial match)
-        language: Filter by primary language
-        active_within_days: Filter by recent activity (e.g., 30, 90)
-        sort_by: Sort field (score, stars, repos, activity)
-        limit: Maximum results to return (default 100)
-    
-    Examples:
-        /api/profiles?min_score=70
-        /api/profiles?min_score=70&location=bangalore
-        /api/profiles?has_email=true&sort_by=stars
-    """
-    try:
-        UsageService.check_limit(db, user_id, "profile_view")
-    except HTTPException as e:
-        return {"error": e.detail, "limit_reached": True}
-    
-    # Start with base query
     
     # Start with base query
     query = db.query(Profile)
@@ -340,7 +335,7 @@ def get_all_profiles(
     
     # Log profile views
     for _ in profiles:
-        UsageService.log_usage(db, user_id, "profile_view")
+        UsageService.log_usage(db, current_user.id, "profile_view")
     
     return profiles
 

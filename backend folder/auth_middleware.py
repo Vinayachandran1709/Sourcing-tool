@@ -68,20 +68,22 @@ def get_current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
     
-    # Check if trial has expired
-    if user.subscription_plan == 'free_trial' and user.trial_end_date:
-        if datetime.utcnow() > user.trial_end_date:
+    # Check if trial has expired (with safe attribute access)
+    if hasattr(user, 'subscription_plan') and user.subscription_plan == 'free_trial':
+        if hasattr(user, 'trial_end_date') and user.trial_end_date:
+            if datetime.utcnow() > user.trial_end_date:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Your free trial has expired. Please upgrade your plan.",
+                )
+
+    # Check if subscription is active (with safe attribute access)
+    if hasattr(user, 'subscription_status'):
+        if user.subscription_status not in ['active', 'trialing', 'trial']:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Your free trial has expired. Please upgrade your plan.",
+                detail="Your subscription is not active. Please check your payment status.",
             )
-    
-    # Check if subscription is active
-    if user.subscription_status not in ['active', 'trialing']:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Your subscription is not active. Please check your payment status.",
-        )
     
     return user
 
