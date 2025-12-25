@@ -130,10 +130,16 @@ def root():
     }
 
 @app.post("/api/search-profiles")
-async def search_profiles(search: SearchRequest, db: Session = Depends(get_db)):
+async def search_profiles(
+    search: SearchRequest,
+    current_user: User = Depends(get_current_user),  # ADD THIS
+    db: Session = Depends(get_db)
+):
     """Enhanced search with role-based filtering"""
     
-    user_id = 1  # Mock for now
+    # REMOVE: user_id = 1  # Mock for now
+    # ADD: Use current_user.id instead
+    user_id = current_user.id  # From JWT token
     
     try:
         UsageService.check_limit(db, user_id, "search")
@@ -166,14 +172,14 @@ async def search_profiles(search: SearchRequest, db: Session = Depends(get_db)):
     from search_history_service import SearchHistoryService
     search_params = {
         "search_type": "role-based" if search.role else "general",
-        "keywords": None,  # You don't have a keywords field in SearchRequest
+        "keywords": None,
         "role": search.role,
         "location": search.location,
-        "min_followers": None,  # You don't have this field
+        "min_followers": None,
         "min_repos": search.min_repos if search.min_repos else 0,
         "languages": search.languages if search.languages else [],
         "frameworks": search.frameworks if search.frameworks else [],
-        "min_score": None  # You don't have this field, could add min_stars
+        "min_score": None
     }
     top_profile_id = profiles[0]["id"] if profiles and len(profiles) > 0 else None
     SearchHistoryService.save_search(db, user_id, search_params, len(profiles), top_profile_id)
@@ -196,9 +202,46 @@ def get_all_profiles(
     active_within_days: int = None,
     sort_by: str = "score",
     limit: int = 100,
-    user_id: int = 1,
+    current_user: User = Depends(get_current_user),  # CHANGED!
     db: Session = Depends(get_db)
 ):
+    """
+    Get all profiles with optional filters and sorting.
+    
+    Query Parameters:
+        min_score: Minimum developer score (0-100)
+        max_score: Maximum developer score (0-100)
+        min_stars: Minimum total stars
+        has_email: Filter by email availability (true/false)
+        location: Filter by location (partial match)
+        language: Filter by primary language
+        active_within_days: Filter by recent activity (e.g., 30, 90)
+        sort_by: Sort field (score, stars, repos, activity)
+        limit: Maximum results to return (default 100)
+    
+    Examples:
+        /api/profiles?min_score=70
+        /api/profiles?min_score=70&location=bangalore
+        /api/profiles?has_email=true&sort_by=stars
+    """
+    try:
+        UsageService.check_limit(db, current_user.id, "profile_view")  # CHANGED user_id to current_user.id
+    except HTTPException as e:
+        return {"error": e.detail, "limit_reached": True}
+    
+    # Rest of the code stays the same...
+    # Just change user_id to current_user.id in the log_usage call at the bottom
+    
+    # ... (all the filter logic stays the same) ...
+    
+    # Execute query and return
+    profiles = query.all()
+    
+    # Log profile views
+    for _ in profiles:
+        UsageService.log_usage(db, current_user.id, "profile_view")  # CHANGED!
+    
+    return profiles
     """
     Get all profiles with optional filters and sorting.
     
@@ -331,7 +374,11 @@ def get_profile_details(profile_id: int, db: Session = Depends(get_db)):
 # ===== ENDPOINT 4: TOGGLE PROFILE SELECTION =====
 
 @app.patch("/api/profiles/{profile_id}/toggle-select")
-def toggle_profile_selection(profile_id: int, db: Session = Depends(get_db)):
+def toggle_profile_selection(
+    profile_id: int,
+    current_user: User = Depends(get_current_user),  # ADD THIS
+    db: Session = Depends(get_db)
+):
     """
     Toggle selection status of a profile.
     
@@ -374,7 +421,11 @@ def get_selected_profiles(db: Session = Depends(get_db)):
 # ===== ENDPOINT 6: SEND BULK EMAILS (NEW - REPLACES OLD PLACEHOLDER) =====
 
 @app.post("/api/send-bulk-emails")
-def send_bulk_emails(email_request: EmailRequest, db: Session = Depends(get_db)):
+def send_bulk_emails(
+    email_request: EmailRequest,
+    current_user: User = Depends(get_current_user),  # ADD THIS
+    db: Session = Depends(get_db)
+):
     """
     ⭐ NEW: Send bulk emails to selected profiles.
     
@@ -388,6 +439,12 @@ def send_bulk_emails(email_request: EmailRequest, db: Session = Depends(get_db))
     Note: Requires COMPANY_EMAIL and COMPANY_EMAIL_PASSWORD in .env
     """
     import os
+    
+    # Check email usage limits FIRST
+    try:
+        UsageService.check_limit(db, current_user.id, "email_sent")
+    except HTTPException as e:
+        raise e
     
     # Get company email credentials from environment
     company_email = os.getenv("COMPANY_EMAIL")
@@ -437,9 +494,11 @@ def send_bulk_emails(email_request: EmailRequest, db: Session = Depends(get_db))
                 body=email_request.body,
                 status=status,
                 company_email=company_email
-                # ✅ sent_at handled by database automatically
             )
             db.add(outreach_log)
+    
+    # Log usage for each email sent
+    UsageService.log_usage(db, current_user.id, "email_sent", {"count": len(recipients)})
     
     db.commit()
     
@@ -455,13 +514,19 @@ def send_bulk_emails(email_request: EmailRequest, db: Session = Depends(get_db))
 # ===== ENDPOINT 7: GET OUTREACH HISTORY (NEW) =====
 
 @app.get("/api/outreach-history")
-def get_outreach_history(limit: int = 100, db: Session = Depends(get_db)):
+def get_outreach_history(
+    limit: int = 100,
+    current_user: User = Depends(get_current_user),  # ADD THIS
+    db: Session = Depends(get_db)
+):
     """
     ⭐ NEW: Get email outreach history.
     
     Shows all emails sent to developers with their status.
     """
     
+    # Only show outreach history for current user
+    # Note: You'll need to add user_id to EmailOutreach model if not already there
     outreach_logs = db.query(EmailOutreach).order_by(
         EmailOutreach.sent_at.desc()
     ).limit(limit).all()
@@ -469,7 +534,7 @@ def get_outreach_history(limit: int = 100, db: Session = Depends(get_db)):
     results = []
     for log in outreach_logs:
         profile = db.query(Profile).filter(Profile.id == log.profile_id).first()
-        if profile:  # Safety check
+        if profile:
             results.append({
                 "id": log.id,
                 "profile": {
@@ -492,14 +557,21 @@ def get_outreach_history(limit: int = 100, db: Session = Depends(get_db)):
 # ===== ENDPOINT 8: GET SEARCH HISTORY (NEW) =====
 
 @app.get("/api/search-history")
-def get_search_history(limit: int = 50, db: Session = Depends(get_db)):
+def get_search_history(
+    limit: int = 50,
+    current_user: User = Depends(get_current_user),  # ADD THIS
+    db: Session = Depends(get_db)
+):
     """
     ⭐ NEW: Get search history.
     
     Shows all searches performed with their filters and results count.
     """
     
-    search_logs = db.query(SearchHistory).order_by(
+    # Only show search history for current user
+    search_logs = db.query(SearchHistory).filter(
+        SearchHistory.user_id == current_user.id  # ADD THIS FILTER
+    ).order_by(
         SearchHistory.searched_at.desc()
     ).limit(limit).all()
     
@@ -539,9 +611,12 @@ def filter_by_score(
 # ===== ENDPOINT: GET USAGE STATS =====
 
 @app.get("/api/usage-stats")
-def get_usage_stats(user_id: int = 1, db: Session = Depends(get_db)):
+def get_usage_stats(
+    current_user: User = Depends(get_current_user),  # ADD THIS
+    db: Session = Depends(get_db)
+):
     """Get current usage statistics for user"""
-    stats = UsageService.get_usage_stats(db, user_id)
+    stats = UsageService.get_usage_stats(db, current_user.id)
     return stats
 
 # ===== INCLUDE LISTS ROUTES =====

@@ -10,7 +10,7 @@ from models import User
 security = HTTPBearer()
 
 # SECRET_KEY - should match the one in auth_routes.py
-SECRET_KEY = "your-secret-key-keep-it-secret"  # TODO: Move to environment variable
+SECRET_KEY = "52b86e7f43a5d32c108b620e7b961cdc79b5394f748db3bc6e0da6a9e3b9f68e"
 ALGORITHM = "HS256"
 
 def get_current_user(

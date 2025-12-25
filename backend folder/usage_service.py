@@ -26,37 +26,79 @@ class UsageService:
     }
     
     @staticmethod
-    def check_limit(db: Session, user_id: int, action_type: str) -> bool:
-        """Check if user can perform action"""
+    def check_limit(db: Session, user_id: int, action_type: str, count: int = 1) -> bool:
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
-            return False
+            raise HTTPException(status_code=404, detail="User not found")
         
         # Check if trial expired
         if user.subscription_status == "trial":
             if user.trial_end_date and datetime.now(timezone.utc) > user.trial_end_date:
                 user.subscription_status = "expired"
                 db.commit()
-                raise HTTPException(status_code=403, detail="Free trial expired. Please upgrade to continue.")
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "TRIAL_EXPIRED",
+                        "message": "Your free trial has expired. Please upgrade to continue.",
+                        "trial_end_date": user.trial_end_date.isoformat()
+                    }
+                )
         
         # Get plan limits
         limits = UsageService.PLAN_LIMITS.get(user.plan, UsageService.PLAN_LIMITS["free"])
         
-        # Check specific limits
+        # Check specific limits with detailed error messages
         if action_type == "search":
             limit = limits["searches"]
-            if limit != -1 and user.usage_searches >= limit:
-                raise HTTPException(status_code=403, detail=f"Search limit reached ({limit}). Upgrade to continue.")
+            current_usage = user.usage_searches or 0
+            
+            if limit != -1 and current_usage + count > limit:
+                raise HTTPException(
+                    status_code=429,
+                    detail={
+                        "error": "LIMIT_EXCEEDED",
+                        "message": f"Search limit exceeded. You have used {current_usage} of {limit} searches.",
+                        "current_usage": current_usage,
+                        "limit": limit,
+                        "usage_type": "searches",
+                        "upgrade_url": "/pricing"
+                    }
+                )
         
         elif action_type == "profile_view":
             limit = limits["profile_views"]
-            if limit != -1 and user.usage_profile_views >= limit:
-                raise HTTPException(status_code=403, detail=f"Profile view limit reached ({limit}). Upgrade to continue.")
+            current_usage = user.usage_profile_views or 0
+            
+            if limit != -1 and current_usage + count > limit:
+                raise HTTPException(
+                    status_code=429,
+                    detail={
+                        "error": "LIMIT_EXCEEDED",
+                        "message": f"Profile view limit exceeded. You have used {current_usage} of {limit} views.",
+                        "current_usage": current_usage,
+                        "limit": limit,
+                        "usage_type": "profile_views",
+                        "upgrade_url": "/pricing"
+                    }
+                )
         
         elif action_type == "email_sent":
             limit = limits["emails_sent"]
-            if limit != -1 and user.usage_emails_sent >= limit:
-                raise HTTPException(status_code=403, detail=f"Email limit reached ({limit}). Upgrade to continue.")
+            current_usage = user.usage_emails_sent or 0
+            
+            if limit != -1 and current_usage + count > limit:
+                raise HTTPException(
+                    status_code=429,
+                    detail={
+                        "error": "LIMIT_EXCEEDED",
+                        "message": f"Email limit exceeded. You have used {current_usage} of {limit} emails.",
+                        "current_usage": current_usage,
+                        "limit": limit,
+                        "usage_type": "email_credits",
+                        "upgrade_url": "/pricing"
+                    }
+                )
         
         return True
     
