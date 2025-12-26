@@ -26,7 +26,8 @@ class UpdateNotesRequest(BaseModel):
 # ===== ENDPOINTS =====
 
 @router.post("/create")
-def create_list(request: CreateListRequest, user_id: int = 1, db: Session = Depends(get_db)):
+def create_list(request: CreateListRequest, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_id = current_user["id"]
     """Create a new saved list"""
     try:
         new_list = ListsService.create_list(db, user_id, request.name, request.description)
@@ -45,7 +46,8 @@ def create_list(request: CreateListRequest, user_id: int = 1, db: Session = Depe
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/")
-def get_lists(user_id: int = 1, db: Session = Depends(get_db)):
+def get_lists(current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_id = current_user["id"]
     """Get all lists for user"""
     lists = ListsService.get_user_lists(db, user_id)
     return {"lists": lists, "total": len(lists)}
@@ -56,8 +58,9 @@ def get_list_profiles(list_id: int, user_id: int = 1, db: Session = Depends(get_
     profiles = ListsService.get_list_profiles(db, list_id, user_id)
     return {"profiles": profiles, "total": len(profiles)}
 
-@router.post("/{list_id}/add-profile")
-def add_profile(list_id: int, request: AddProfileRequest, db: Session = Depends(get_db)):
+@router.get("/{list_id}/profiles")
+def get_list_profiles(list_id: int, current_user: dict = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_id = current_user["id"]
     """Add a profile to a list"""
     result = ListsService.add_profile_to_list(db, list_id, request.profile_id, request.notes)
     return result
