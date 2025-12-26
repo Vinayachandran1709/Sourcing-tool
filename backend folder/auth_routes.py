@@ -1,17 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
-from sqlalchemy import Column, Integer, String, DateTime
-from sqlalchemy.sql import func
 from pydantic import BaseModel, EmailStr, validator
 from database import get_db
 from models import User 
 from passlib.context import CryptContext
-import hashlib
-import jwt  # ADD THIS
-from datetime import datetime, timedelta  # ADD THIS
+from datetime import datetime, timedelta, timezone
+import jwt
 import os
 from dotenv import load_dotenv
 import re
+from slowapi import Limiter
+from slowapi.util import get_remote_address
 
 # Load environment variables
 load_dotenv()
@@ -27,9 +26,12 @@ if not SECRET_KEY:
 
 # Password hashing context
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-ACCESS_TOKEN_EXPIRE_DAYS = 30
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
+
 
 # ===== REQUEST MODELS =====
 
@@ -38,18 +40,55 @@ class SignupRequest(BaseModel):
     email: EmailStr
     company: str
     password: str
+    
+    @validator('password')
+    def validate_password(cls, v):
+        if len(v) < 8:
+            raise ValueError('Password must be at least 8 characters long')
+        if not re.search(r'[A-Z]', v):
+            raise ValueError('Password must contain at least one uppercase letter')
+        if not re.search(r'[a-z]', v):
+            raise ValueError('Password must contain at least one lowercase letter')
+        if not re.search(r'\d', v):
+            raise ValueError('Password must contain at least one number')
+        return v
+    
+    @validator('name', 'company')
+    def validate_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Field cannot be empty')
+        return v.strip()
+    
+    @validator('email')
+    def validate_email_not_empty(cls, v):
+        if not v or not str(v).strip():
+            raise ValueError('Email cannot be empty')
+        return str(v).strip().lower()
 
 
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+    
+    @validator('email')
+    def validate_email_not_empty(cls, v):
+        if not v or not str(v).strip():
+            raise ValueError('Email cannot be empty')
+        return str(v).strip().lower()
+    
+    @validator('password')
+    def validate_password_not_empty(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Password cannot be empty')
+        return v
 
 
-# ===== HELPER =====
+# ===== HELPER FUNCTIONS =====
 
 def hash_password(password: str) -> str:
     """Hash a password using bcrypt"""
     return pwd_context.hash(password)
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash"""
@@ -67,18 +106,19 @@ def create_jwt_token(data: dict) -> str:
 # ===== ENDPOINTS =====
 
 @router.post("/signup")
-def signup(request: SignupRequest, db: Session = Depends(get_db)):
+@limiter.limit("3/minute")
+def signup(req: Request, request: SignupRequest, db: Session = Depends(get_db)):
     """Create new user account and return JWT token"""
     
     # Check if email exists
-    existing = db.query(User).filter(User.email == request.email).first()
+    existing = db.query(User).filter(User.email == request.email.lower()).first()
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
     
     # Create user
     user = User(
         name=request.name,
-        email=request.email,
+        email=request.email.lower(),
         company=request.company,
         password_hash=hash_password(request.password)
     )
@@ -88,11 +128,11 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
     db.refresh(user)
     
     # Generate JWT token for immediate login
-    token = create_access_token(user.id)
+    token = create_jwt_token({"user_id": user.id})
     
     return {
         "success": True,
-        "token": token,  # ADD THIS
+        "token": token,
         "user": {
             "id": user.id,
             "name": user.name,
@@ -106,23 +146,26 @@ def signup(request: SignupRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/login")
-def login(request: LoginRequest, db: Session = Depends(get_db)):
+@limiter.limit("5/minute")
+def login(req: Request, request: LoginRequest, db: Session = Depends(get_db)):
     """Login user and return JWT token"""
     
-    user = db.query(User).filter(User.email == request.email).first()
+    # Find user by email
+    user = db.query(User).filter(User.email == request.email.lower()).first()
     
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
-    if user.password_hash != hash_password(request.password):
-        raise HTTPException(status_code=401, detail="Incorrect password")
+    # Verify password using bcrypt
+    if not verify_password(request.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Generate JWT token
-    token = create_access_token(user.id)
+    token = create_jwt_token({"user_id": user.id})
     
     return {
         "success": True,
-        "token": token,  # ADD THIS
+        "token": token,
         "user": {
             "id": user.id,
             "name": user.name,
