@@ -13,6 +13,25 @@ load_dotenv()
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime, timezone, timedelta
+import logging
+import sys
+
+# ⭐ CONFIGURE LOGGING (Windows-compatible, no emojis in console)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler("talentbox.log", encoding='utf-8'),  # File supports UTF-8
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+
+logger = logging.getLogger(__name__)
+
+# Configure StreamHandler to avoid emoji issues on Windows
+for handler in logging.root.handlers:
+    if isinstance(handler, logging.StreamHandler) and handler.stream == sys.stdout:
+        handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
 
 # Import routers
 from auth_routes import router as auth_router
@@ -36,6 +55,13 @@ from search_history_service import SearchHistoryService
 
 # ===== INITIALIZE FASTAPI APP =====
 
+# ===== CONFIGURE CORS ORIGINS FIRST =====
+
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+
+
+# ===== INITIALIZE FASTAPI APP =====
+
 limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
@@ -44,13 +70,62 @@ app = FastAPI(
     description="API for GitHub developer sourcing and recruitment"
 )
 
+# Log initialization
+logger.info("TalentBox API initialized")
+logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
+logger.info(f"CORS origins: {CORS_ORIGINS}")
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
-# ===== CORS MIDDLEWARE =====
+# ⭐ GLOBAL ERROR HANDLERS
 
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle validation errors with user-friendly messages"""
+    logger.warning(f"Validation error on {request.url.path}: {exc.errors()}")
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "error": "VALIDATION_ERROR",
+            "message": "Invalid input data",
+            "details": exc.errors()
+        }
+    )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request: Request, exc: HTTPException):
+    """Handle HTTP exceptions with consistent format"""
+    logger.warning(f"HTTP {exc.status_code} on {request.url.path}: {exc.detail}")
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error": exc.detail if isinstance(exc.detail, str) else exc.detail.get("error", "ERROR"),
+            "message": exc.detail if isinstance(exc.detail, str) else exc.detail.get("message", str(exc.detail))
+        }
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Handle unexpected errors without exposing internals"""
+    logger.error(f"Unexpected error on {request.url.path}: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": "INTERNAL_SERVER_ERROR",
+            "message": "An unexpected error occurred. Please try again later."
+        }
+    )
+
+
+# ===== CORS MIDDLEWARE =====
 
 app.add_middleware(
     CORSMiddleware,
@@ -59,7 +134,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # ===== INCLUDE ROUTERS =====
 
@@ -142,6 +216,8 @@ async def search_profiles(
     """Enhanced search with role-based filtering"""
     user_id = current_user["id"]
     
+    logger.info(f"Search request from user {user_id}: role={search.role}, languages={search.languages}")
+    
     # Check usage limits
     try:
         UsageService.check_limit(db, user_id, "search")
@@ -168,6 +244,7 @@ async def search_profiles(
     profiles = FilterService.apply_filters(db, filters)
     
     print(f"   ✅ Found {len(profiles)} profiles\n")
+    logger.info(f"Search found {len(profiles)} profiles")
     
     # Log usage
     UsageService.log_usage(db, user_id, "search", filters)
@@ -366,6 +443,8 @@ def send_bulk_emails(
     """Send bulk emails to selected profiles"""
     user_id = current_user["id"]
     
+    logger.info(f"Bulk email request from user {user_id} for {len(email_request.profile_ids)} profiles")
+    
     # Check email limits
     try:
         UsageService.check_limit(db, user_id, "email_sent")
@@ -426,6 +505,7 @@ def send_bulk_emails(
     UsageService.log_usage(db, user_id, "email_sent", {"count": len(recipients)})
     db.commit()
     
+    logger.info(f"Bulk email complete: {results['sent']} sent, {results['failed']} failed")
     print(f"✅ Sent: {results['sent']}, Failed: {results['failed']}\n")
     
     return {
@@ -519,7 +599,8 @@ def health_check(db: Session = Depends(get_db)):
         from sqlalchemy import text
         db.execute(text("SELECT 1"))
         db_status = "healthy"
-    except Exception:
+    except Exception as e:
+        logger.error(f"Database health check failed: {e}")
         db_status = "unhealthy"
     
     return {

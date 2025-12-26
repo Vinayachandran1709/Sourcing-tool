@@ -9,6 +9,11 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 import os
+import logging
+
+# ⭐ SETUP LOGGING
+logger = logging.getLogger(__name__)
+
 
 class CampaignService:
     """Handle email campaign management and sending"""
@@ -67,16 +72,22 @@ class CampaignService:
             server.send_message(msg)
             server.quit()
             
+            logger.info(f"✅ Email sent to {recipient_email}")
             print(f"✅ Email sent to {recipient_email}")
             return True
             
         except Exception as e:
+            logger.error(f"❌ Failed to send email to {recipient_email}: {e}")
             print(f"❌ Failed to send email to {recipient_email}: {e}")
             return False
     
     @staticmethod
     def send_initial_email(db: Session, campaign_id: int, user_variables: Dict) -> Dict:
         """Send initial campaign email"""
+        
+        # ⭐ ADD LOGGING
+        logger.info(f"Sending initial email for campaign {campaign_id}")
+        
         campaign = db.query(EmailCampaign).filter(EmailCampaign.id == campaign_id).first()
         if not campaign:
             raise HTTPException(status_code=404, detail="Campaign not found")
@@ -132,6 +143,8 @@ class CampaignService:
             UsageService.log_usage(db, campaign.user_id, "email_sent", {"campaign_id": campaign_id})
             db.commit()
             
+            logger.info(f"Initial email sent successfully for campaign {campaign_id}")
+            
             return {
                 "success": True,
                 "message": "Initial email sent",
@@ -146,14 +159,22 @@ class CampaignService:
     def send_bulk_campaign(db: Session, user_id: int, profile_ids: List[int], 
                           campaign_name: str, user_variables: Dict, 
                           enable_followups: bool = True) -> Dict:
-        """Create and send campaigns to multiple profiles"""
+        """
+        Create and send campaigns to multiple profiles.
+        ⭐ NOW WITH TRANSACTION ROLLBACK using savepoints!
+        """
         results = {
             "sent": 0,
             "failed": 0,
             "errors": []
         }
         
+        logger.info(f"Starting bulk campaign for user {user_id}, {len(profile_ids)} profiles")
+        
         for profile_id in profile_ids:
+            # ⭐ CREATE SAVEPOINT for each campaign (allows individual rollback)
+            savepoint = db.begin_nested()
+            
             try:
                 # Create campaign
                 campaign = CampaignService.create_campaign(
@@ -162,11 +183,23 @@ class CampaignService:
                 
                 # Send initial email
                 CampaignService.send_initial_email(db, campaign.id, user_variables)
+                
+                # ⭐ COMMIT this individual campaign
+                savepoint.commit()
                 results["sent"] += 1
                 
             except Exception as e:
+                # ⭐ ROLLBACK only this campaign, continue with others
+                savepoint.rollback()
                 results["failed"] += 1
                 results["errors"].append(f"Profile {profile_id}: {str(e)}")
+                logger.error(f"❌ Failed to send to profile {profile_id}: {e}")
+                print(f"❌ Failed to send to profile {profile_id}: {e}")
+        
+        # ⭐ COMMIT all successful campaigns
+        db.commit()
+        
+        logger.info(f"Bulk campaign complete: {results['sent']} sent, {results['failed']} failed")
         
         return results
     
@@ -174,12 +207,6 @@ class CampaignService:
     def get_pending_followups(db: Session) -> List[EmailCampaign]:
         """Get campaigns that need follow-up emails sent"""
         now = datetime.now(timezone.utc)
-        
-        # Find campaigns where:
-        # - Initial sent 3+ days ago, no followup1 sent
-        # - Followup1 sent 4+ days ago, no followup2 sent
-        # - Not replied
-        # - Followups enabled
         
         campaigns = db.query(EmailCampaign).filter(
             EmailCampaign.enable_followups == True,

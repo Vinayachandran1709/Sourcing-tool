@@ -2,6 +2,8 @@ import httpx
 import os
 import asyncio
 from dotenv import load_dotenv
+from datetime import datetime
+from fastapi import HTTPException
 
 # Load environment variables from .env file
 load_dotenv()
@@ -9,6 +11,67 @@ load_dotenv()
 # Get GitHub token from environment
 GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 GITHUB_API_URL = "https://api.github.com"
+
+# Rate limit threshold (stop making requests when remaining < this)
+RATE_LIMIT_THRESHOLD = 100
+
+
+# ===== RATE LIMIT CHECKING =====
+
+async def check_github_rate_limit():
+    """
+    Check GitHub API rate limit before making requests.
+    Raises HTTPException if rate limit is too low.
+    Returns remaining requests count.
+    """
+    headers = {
+        "Authorization": f"token {GITHUB_TOKEN}",
+        "Accept": "application/vnd.github.v3+json"
+    }
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.get(
+                f"{GITHUB_API_URL}/rate_limit",
+                headers=headers,
+                timeout=10.0
+            )
+            
+            if response.status_code == 200:
+                data = response.json()
+                core = data['resources']['core']
+                remaining = core['remaining']
+                reset_timestamp = core['reset']
+                
+                # Convert reset timestamp to readable time
+                reset_time = datetime.fromtimestamp(reset_timestamp)
+                minutes_until_reset = (reset_time - datetime.now()).total_seconds() / 60
+                
+                print(f"📊 GitHub API Rate Limit: {remaining} requests remaining")
+                
+                # Check if we're below threshold
+                if remaining < RATE_LIMIT_THRESHOLD:
+                    raise HTTPException(
+                        status_code=429,
+                        detail={
+                            "error": "GITHUB_RATE_LIMIT_LOW",
+                            "message": f"GitHub API rate limit low. {remaining} requests remaining. Resets in {int(minutes_until_reset)} minutes.",
+                            "remaining": remaining,
+                            "reset_in_minutes": int(minutes_until_reset)
+                        }
+                    )
+                
+                return remaining
+            else:
+                print(f"⚠️ Failed to check rate limit: {response.status_code}")
+                return None
+                
+        except httpx.RequestError as e:
+            print(f"⚠️ Network error checking rate limit: {e}")
+            return None
+
+
+# ===== VALIDATION HELPERS =====
 
 def is_valid_user_data(details):
     """
@@ -38,9 +101,13 @@ def is_valid_user_data(details):
     
     return True
 
+
+# ===== SEARCH FUNCTIONS =====
+
 async def search_github_users(language: str, location: str = None, min_repos: int = 0):
     """
     Search GitHub users by programming language and location.
+    NOW WITH RATE LIMIT CHECK!
     
     Args:
         language: Programming language (e.g., "python", "javascript")
@@ -50,6 +117,9 @@ async def search_github_users(language: str, location: str = None, min_repos: in
     Returns:
         Dictionary with search results or error message
     """
+    
+    # ⭐ CHECK RATE LIMIT FIRST
+    await check_github_rate_limit()
     
     # Build search query string
     query_parts = []
@@ -65,7 +135,6 @@ async def search_github_users(language: str, location: str = None, min_repos: in
     
     # Join all parts with + symbol
     query = "+".join(query_parts)
-    # Example result: "language:python+location:bangalore+repos:>5"
     
     # Prepare authentication headers
     headers = {
@@ -85,6 +154,83 @@ async def search_github_users(language: str, location: str = None, min_repos: in
             return response.json()
         else:
             return {"error": f"GitHub API error: {response.status_code}"}
+
+
+async def search_github_users_paginated(language: str, location: str = None, min_repos: int = 0, max_pages: int = 10):
+    """
+    Search GitHub with pagination to get 200-300 profiles instead of just 30.
+    NOW WITH RATE LIMIT CHECK!
+    
+    Args:
+        language: Programming language
+        location: User location
+        min_repos: Minimum repositories
+        max_pages: Number of pages to fetch (default 10 = 300 profiles)
+    
+    Returns:
+        List of all user dictionaries from all pages
+    """
+    
+    # ⭐ CHECK RATE LIMIT FIRST
+    await check_github_rate_limit()
+    
+    all_users = []
+    
+    print(f"🔍 Fetching up to {max_pages} pages of results...")
+    
+    for page in range(1, max_pages + 1):
+        print(f"   Page {page}/{max_pages}...", end=" ")
+        
+        # Build search query
+        query_parts = []
+        if language:
+            query_parts.append(f"language:{language}")
+        if location:
+            query_parts.append(f"location:{location}")
+        if min_repos > 0:
+            query_parts.append(f"repos:>{min_repos}")
+        
+        query = "+".join(query_parts)
+        
+        headers = {
+            "Authorization": f"token {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github.v3+json"
+        }
+        
+        async with httpx.AsyncClient() as client:
+            try:
+                response = await client.get(
+                    f"{GITHUB_API_URL}/search/users?q={query}&per_page=30&page={page}",
+                    headers=headers,
+                    timeout=30.0
+                )
+                
+                if response.status_code != 200:
+                    print(f"❌ Error {response.status_code}")
+                    break
+                
+                data = response.json()
+                users = data.get("items", [])
+                
+                if not users:
+                    print("✅ No more results")
+                    break
+                
+                all_users.extend(users)
+                print(f"✅ Got {len(users)} users")
+                
+                # Respect rate limits
+                await asyncio.sleep(1)
+                
+            except Exception as e:
+                print(f"❌ Error: {e}")
+                break
+    
+    print(f"\n📊 Total users fetched: {len(all_users)}")
+    return all_users
+
+
+# ===== REPOSITORY FUNCTIONS =====
 
 async def get_user_repositories(username: str, max_repos: int = 100):
     """
@@ -134,6 +280,7 @@ async def get_user_repositories(username: str, max_repos: int = 100):
             print(f"❌ Exception fetching repos for {username}: {e}")
             return []
 
+
 def extract_top_repos(repos, top_n: int = 5):
     """
     Extract top N repositories with relevant information.
@@ -148,7 +295,7 @@ def extract_top_repos(repos, top_n: int = 5):
     top_repos = []
     
     try:
-        for repo in repos[:top_n]:  # Take only first N repos (already sorted by stars)
+        for repo in repos[:top_n]:
             repo_data = {
                 "name": repo.get("name", ""),
                 "description": repo.get("description", "No description") or "No description",
@@ -158,12 +305,13 @@ def extract_top_repos(repos, top_n: int = 5):
                 "language": repo.get("language", "Unknown"),
                 "last_updated": repo.get("pushed_at", "")
             }
-            top_repos.append(repo_data)  # ✅ FIXED: Now inside the loop!
+            top_repos.append(repo_data)
             
     except Exception as e:
         print(f"Error processing repos: {e}")
     
     return top_repos
+
 
 async def get_repo_languages(owner: str, repo_name: str):
     """
@@ -197,6 +345,7 @@ async def get_repo_languages(owner: str, repo_name: str):
         except Exception as e:
             print(f"Error fetching languages for {owner}/{repo_name}: {e}")
             return {}
+
 
 async def calculate_language_distribution(username: str, repos, max_repos_to_check: int = 20):
     """
@@ -249,6 +398,9 @@ async def calculate_language_distribution(username: str, repos, max_repos_to_che
     
     return sorted_percentages
 
+
+# ===== ACTIVITY FUNCTIONS =====
+
 async def get_last_activity_date(username: str):
     """
     Get the date of user's most recent activity.
@@ -282,7 +434,6 @@ async def get_last_activity_date(username: str):
                 return None
             
             # Events are already sorted by date (newest first)
-            # Get the first event's date
             most_recent_event = events[0]
             created_at = most_recent_event.get("created_at")
             
@@ -299,6 +450,9 @@ async def get_last_activity_date(username: str):
             print(f"Error fetching last activity for {username}: {e}")
             return None
 
+
+# ===== USER DETAILS FUNCTIONS =====
+
 async def get_user_details(username: str):
     """
     Get comprehensive details about a GitHub user including:
@@ -308,7 +462,7 @@ async def get_user_details(username: str):
     - Activity metrics
     - Last activity date
     
-    ⭐ NOW FILTERS OUT ORGANIZATIONS - returns None if account is an organization
+    ⭐ NOW WITH RATE LIMIT CHECK AND ORG FILTERING
     
     Args:
         username: GitHub username
@@ -316,6 +470,10 @@ async def get_user_details(username: str):
     Returns:
         Dictionary with all user details or None if user not found OR is an organization
     """
+    
+    # ⭐ CHECK RATE LIMIT FIRST
+    await check_github_rate_limit()
+    
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
@@ -335,7 +493,7 @@ async def get_user_details(username: str):
         
         user_data = user_response.json()
         
-        # ⭐ NEW: CHECK IF ORGANIZATION - SKIP IF TRUE
+        # ⭐ CHECK IF ORGANIZATION - SKIP IF TRUE
         account_type = user_data.get("type", "User")
         if account_type == "Organization":
             print(f"⏭️  Skipped {username} (Organization, not individual developer)")
@@ -391,77 +549,7 @@ async def get_user_details(username: str):
             "contributions": contributions,
             "last_active_date": last_active
         }
-    
 
-# ADD these new functions at the END of your existing github_service.py
-
-async def search_github_users_paginated(language: str, location: str = None, min_repos: int = 0, max_pages: int = 10):
-    """
-    Search GitHub with pagination to get 200-300 profiles instead of just 30.
-    
-    Args:
-        language: Programming language
-        location: User location
-        min_repos: Minimum repositories
-        max_pages: Number of pages to fetch (default 10 = 300 profiles)
-    
-    Returns:
-        List of all user dictionaries from all pages
-    """
-    all_users = []
-    
-    print(f"🔍 Fetching up to {max_pages} pages of results...")
-    
-    for page in range(1, max_pages + 1):
-        print(f"   Page {page}/{max_pages}...", end=" ")
-        
-        # Build search query
-        query_parts = []
-        if language:
-            query_parts.append(f"language:{language}")
-        if location:
-            query_parts.append(f"location:{location}")
-        if min_repos > 0:
-            query_parts.append(f"repos:>{min_repos}")
-        
-        query = "+".join(query_parts)
-        
-        headers = {
-            "Authorization": f"token {GITHUB_TOKEN}",
-            "Accept": "application/vnd.github.v3+json"
-        }
-        
-        async with httpx.AsyncClient() as client:
-            try:
-                response = await client.get(
-                    f"{GITHUB_API_URL}/search/users?q={query}&per_page=30&page={page}",
-                    headers=headers,
-                    timeout=30.0
-                )
-                
-                if response.status_code != 200:
-                    print(f"❌ Error {response.status_code}")
-                    break
-                
-                data = response.json()
-                users = data.get("items", [])
-                
-                if not users:
-                    print("✅ No more results")
-                    break
-                
-                all_users.extend(users)
-                print(f"✅ Got {len(users)} users")
-                
-                # Respect rate limits
-                await asyncio.sleep(1)
-                
-            except Exception as e:
-                print(f"❌ Error: {e}")
-                break
-    
-    print(f"\n📊 Total users fetched: {len(all_users)}")
-    return all_users
 
 async def get_multiple_user_details(usernames: list):
     """

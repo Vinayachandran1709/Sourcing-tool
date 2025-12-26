@@ -5,6 +5,7 @@ from models import SavedList, SavedListProfile, Profile, User
 from fastapi import HTTPException
 from datetime import datetime
 
+
 class ListsService:
     """Handle saved lists operations with usage limits"""
     
@@ -88,22 +89,41 @@ class ListsService:
     
     @staticmethod
     def get_user_lists(db: Session, user_id: int) -> List[Dict]:
-        """Get all lists for a user with profile counts"""
-        lists = db.query(SavedList).filter(SavedList.user_id == user_id).all()
+        """
+        Get all lists for a user with profile counts.
+        ⭐ OPTIMIZED - Single query with GROUP BY (fixes N+1 problem)
+        """
         
+        # ⭐ SINGLE QUERY with LEFT JOIN and GROUP BY
+        list_counts = db.query(
+            SavedList.id,
+            SavedList.name,
+            SavedList.description,
+            SavedList.created_at,
+            SavedList.updated_at,
+            func.count(SavedListProfile.id).label('profile_count')
+        ).outerjoin(
+            SavedListProfile, SavedList.id == SavedListProfile.list_id
+        ).filter(
+            SavedList.user_id == user_id
+        ).group_by(
+            SavedList.id,
+            SavedList.name,
+            SavedList.description,
+            SavedList.created_at,
+            SavedList.updated_at
+        ).all()
+        
+        # Convert to dictionaries
         result = []
-        for lst in lists:
-            profile_count = db.query(func.count(SavedListProfile.id)).filter(
-                SavedListProfile.list_id == lst.id
-            ).scalar()
-            
+        for lst in list_counts:
             result.append({
                 "id": lst.id,
                 "name": lst.name,
                 "description": lst.description,
-                "profile_count": profile_count,
-                "created_at": lst.created_at,
-                "updated_at": lst.updated_at
+                "profile_count": lst.profile_count,
+                "created_at": lst.created_at.isoformat() if lst.created_at else None,
+                "updated_at": lst.updated_at.isoformat() if lst.updated_at else None
             })
         
         return result
@@ -142,7 +162,7 @@ class ListsService:
                 "contributions_last_year": profile.contributions_last_year,
                 "avatar_url": profile.avatar_url,
                 "notes": list_profile.notes,
-                "added_at": list_profile.added_at
+                "added_at": list_profile.added_at.isoformat() if list_profile.added_at else None
             })
         
         return result

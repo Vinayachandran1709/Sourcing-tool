@@ -1,0 +1,5 @@
+2025-12-26 23:59:54,616 - __main__ - INFO - Environment: development
+2025-12-26 23:59:54,616 - __main__ - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 00:12:58,189 - __main__ - INFO - TalentBox API initialized
+2025-12-27 00:12:58,190 - __main__ - INFO - Environment: development
+2025-12-27 00:12:58,190 - __main__ - INFO - CORS origins: ['http://localhost:3000']
