@@ -4,35 +4,32 @@ from pydantic import BaseModel
 from typing import Optional, List
 from database import get_db
 from search_history_service import SearchHistoryService
-from models import User  # ADD THIS
+from models import User
 from auth_middleware import get_current_user
 
 router = APIRouter(prefix="/api/search-history", tags=["Search History"])
 
-# Request Models
+# ===== REQUEST MODELS =====
+
 class TrackProfileViewRequest(BaseModel):
     profile_id: int
     viewed_from: str = "direct"  # "search", "saved_list", "email_campaign", "direct"
     search_history_id: Optional[int] = None
 
-# ===== SEARCH HISTORY =====
+
+# ===== SEARCH HISTORY ENDPOINTS =====
 
 @router.get("/")
 def get_search_history(
     limit: int = Query(50, ge=1, le=100),
     days: Optional[int] = Query(None, description="Filter to last N days"),
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Get user's search history
+    """Get user's search history - Returns list of past searches with parameters and metadata"""
     
-    Returns list of past searches with parameters and metadata
-    """
+    searches = SearchHistoryService.get_user_search_history(db, current_user.id, limit, days)
     
-    searches = SearchHistoryService.get_user_search_history(db, current_user.id, limit, days)  # CHANGED
-    
-    # Rest stays the same...
     result = []
     for search in searches:
         result.append({
@@ -57,10 +54,11 @@ def get_search_history(
         "total": len(result)
     }
 
+
 @router.get("/{search_id}")
 def get_search_details(
     search_id: int,
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get detailed information about a specific search"""
@@ -89,19 +87,16 @@ def get_search_details(
         }
     }
 
+
 @router.post("/{search_id}/recreate")
 def recreate_search(
     search_id: int,
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Get parameters to recreate a past search
+    """Get parameters to recreate a past search - Returns all search parameters needed to rerun the search"""
     
-    Returns all search parameters needed to rerun the search
-    """
-    
-    params = SearchHistoryService.recreate_search(db, search_id, current_user.id)  # CHANGED
+    params = SearchHistoryService.recreate_search(db, search_id, current_user.id)
     
     if not params:
         raise HTTPException(status_code=404, detail="Search not found")
@@ -112,10 +107,11 @@ def recreate_search(
         "search_params": params
     }
 
+
 @router.delete("/{search_id}")
 def delete_search(
     search_id: int,
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Delete a search from history"""
@@ -130,26 +126,28 @@ def delete_search(
         "message": "Search deleted from history"
     }
 
+
 @router.get("/statistics/overview")
 def get_search_statistics(
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get search history statistics"""
     
-    stats = SearchHistoryService.get_search_statistics(db, current_user.id)  # CHANGED
+    stats = SearchHistoryService.get_search_statistics(db, current_user.id)
     
     return {
         "success": True,
         "data": stats
     }
 
-# ===== PROFILE VIEWS =====
+
+# ===== PROFILE VIEWS ENDPOINTS =====
 
 @router.post("/profile-views/track")
 def track_profile_view(
     request: TrackProfileViewRequest,
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """
@@ -164,7 +162,7 @@ def track_profile_view(
     
     view = SearchHistoryService.track_profile_view(
         db,
-        current_user.id,  # CHANGED
+        current_user.id,
         request.profile_id,
         request.viewed_from,
         request.search_history_id
@@ -176,20 +174,17 @@ def track_profile_view(
         "view_count": view.view_count
     }
 
+
 @router.get("/profile-views/")
 def get_profile_views(
     limit: int = Query(50, ge=1, le=100),
     days: Optional[int] = Query(None, description="Filter to last N days"),
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """
-    Get user's profile view history
+    """Get user's profile view history - Returns list of profiles with view metadata"""
     
-    Returns list of profiles with view metadata
-    """
-    
-    views = SearchHistoryService.get_user_profile_views(db, current_user.id, limit, days)  # CHANGED
+    views = SearchHistoryService.get_user_profile_views(db, current_user.id, limit, days)
     
     return {
         "success": True,
@@ -197,14 +192,15 @@ def get_profile_views(
         "total": len(views)
     }
 
+
 @router.get("/profile-views/statistics/overview")
 def get_profile_view_stats(
-    current_user: User = Depends(get_current_user),  # ADD THIS
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get profile view statistics"""
     
-    stats = SearchHistoryService.get_profile_view_stats(db, current_user.id)  # CHANGED
+    stats = SearchHistoryService.get_profile_view_stats(db, current_user.id)
     
     return {
         "success": True,

@@ -5,11 +5,13 @@ from typing import Optional, List
 from database import get_db
 from email_templates_service import EmailTemplatesService
 from campaign_service import CampaignService
+from auth_middleware import get_current_user
 from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/emails", tags=["Email Campaigns"])
 
-# Request Models
+# ===== REQUEST MODELS =====
+
 class CreateTemplateRequest(BaseModel):
     name: str
     template_type: str  # "initial", "followup1", "followup2", "custom"
@@ -32,17 +34,27 @@ class SendCampaignRequest(BaseModel):
 class MarkRepliedRequest(BaseModel):
     reply_content: Optional[str] = None
 
+
 # ===== TEMPLATE ENDPOINTS =====
 
 @router.post("/templates/create-defaults")
-def create_default_templates(user_id: int = 1, db: Session = Depends(get_db)):
+def create_default_templates(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Create default email templates for user"""
+    user_id = current_user["id"]
     EmailTemplatesService.create_default_templates(db, user_id)
     return {"message": "Default templates created"}
 
+
 @router.get("/templates")
-def get_templates(user_id: int = 1, db: Session = Depends(get_db)):
+def get_templates(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get all templates for user"""
+    user_id = current_user["id"]
     templates = EmailTemplatesService.get_user_templates(db, user_id)
     
     return {
@@ -54,15 +66,21 @@ def get_templates(user_id: int = 1, db: Session = Depends(get_db)):
                 "subject": t.subject,
                 "body": t.body,
                 "is_default": t.is_default,
-                "created_at": t.created_at
+                "created_at": t.created_at.isoformat() if t.created_at else None
             }
             for t in templates
         ]
     }
 
+
 @router.post("/templates/create")
-def create_template(request: CreateTemplateRequest, user_id: int = 1, db: Session = Depends(get_db)):
+def create_template(
+    request: CreateTemplateRequest,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Create custom template"""
+    user_id = current_user["id"]
     template = EmailTemplatesService.create_template(
         db, user_id, request.name, request.template_type, request.subject, request.body
     )
@@ -71,10 +89,16 @@ def create_template(request: CreateTemplateRequest, user_id: int = 1, db: Sessio
         "template_id": template.id
     }
 
+
 @router.put("/templates/{template_id}")
-def update_template(template_id: int, request: UpdateTemplateRequest, 
-                   user_id: int = 1, db: Session = Depends(get_db)):
+def update_template(
+    template_id: int,
+    request: UpdateTemplateRequest,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Update template"""
+    user_id = current_user["id"]
     template = EmailTemplatesService.update_template(
         db, template_id, user_id, request.name, request.subject, request.body
     )
@@ -87,17 +111,29 @@ def update_template(template_id: int, request: UpdateTemplateRequest,
         }
     }
 
+
 @router.delete("/templates/{template_id}")
-def delete_template(template_id: int, user_id: int = 1, db: Session = Depends(get_db)):
+def delete_template(
+    template_id: int,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Delete template"""
+    user_id = current_user["id"]
     result = EmailTemplatesService.delete_template(db, template_id, user_id)
     return result
+
 
 # ===== CAMPAIGN ENDPOINTS =====
 
 @router.post("/campaigns/send")
-def send_campaign(request: SendCampaignRequest, user_id: int = 1, db: Session = Depends(get_db)):
+def send_campaign(
+    request: SendCampaignRequest,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Send bulk email campaign with automated follow-ups"""
+    user_id = current_user["id"]
     
     user_variables = {
         "sender_name": request.sender_name,
@@ -118,24 +154,42 @@ def send_campaign(request: SendCampaignRequest, user_id: int = 1, db: Session = 
         "errors": results["errors"]
     }
 
+
 @router.get("/campaigns")
-def get_campaigns(status: Optional[str] = None, user_id: int = 1, db: Session = Depends(get_db)):
+def get_campaigns(
+    status: Optional[str] = None,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get all campaigns for user"""
+    user_id = current_user["id"]
     campaigns = CampaignService.get_user_campaigns(db, user_id, status)
     return {
         "campaigns": campaigns,
         "total": len(campaigns)
     }
 
+
 @router.post("/campaigns/{campaign_id}/reply")
-def mark_campaign_replied(campaign_id: int, request: MarkRepliedRequest, db: Session = Depends(get_db)):
+def mark_campaign_replied(
+    campaign_id: int,
+    request: MarkRepliedRequest,
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Mark campaign as replied (stops follow-ups)"""
+    user_id = current_user["id"]
     result = CampaignService.mark_as_replied(db, campaign_id, request.reply_content)
     return result
 
+
 @router.get("/campaigns/pending-followups")
-def get_pending_followups(db: Session = Depends(get_db)):
+def get_pending_followups(
+    current_user: dict = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     """Get campaigns that need follow-ups (for background worker)"""
+    user_id = current_user["id"]
     campaigns = CampaignService.get_pending_followups(db)
     
     return {
