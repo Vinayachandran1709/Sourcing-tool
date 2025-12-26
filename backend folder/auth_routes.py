@@ -1,17 +1,32 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.sql import func
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from database import get_db
 from models import User 
+from passlib.context import CryptContext
 import hashlib
 import jwt  # ADD THIS
 from datetime import datetime, timedelta  # ADD THIS
+import os
+from dotenv import load_dotenv
+import re
 
-# JWT Configuration (MUST MATCH auth_middleware.py)
-SECRET_KEY = "52b86e7f43a5d32c108b620e7b961cdc79b5394f748db3bc6e0da6a9e3b9f68e"
-ALGORITHM = "HS256"
+# Load environment variables
+load_dotenv()
+
+# Get configuration from environment
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_EXPIRATION_DAYS = int(os.getenv("JWT_EXPIRATION_DAYS", "30"))
+
+# Validate secret key
+if not SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY must be set in environment variables")
+
+# Password hashing context
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 ACCESS_TOKEN_EXPIRE_DAYS = 30
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
@@ -33,18 +48,20 @@ class LoginRequest(BaseModel):
 # ===== HELPER =====
 
 def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
+    """Hash a password using bcrypt"""
+    return pwd_context.hash(password)
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """Verify a password against its hash"""
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-def create_access_token(user_id: int) -> str:
-    """Create JWT access token"""
-    expire = datetime.utcnow() + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
-    to_encode = {
-        "user_id": user_id,
-        "exp": expire
-    }
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+def create_jwt_token(data: dict) -> str:
+    """Create a JWT token with expiration"""
+    to_encode = data.copy()
+    expire = datetime.now(timezone.utc) + timedelta(days=JWT_EXPIRATION_DAYS)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 # ===== ENDPOINTS =====

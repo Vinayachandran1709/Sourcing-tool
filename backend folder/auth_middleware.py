@@ -5,13 +5,21 @@ import jwt
 from datetime import datetime
 from database import get_db
 from models import User
+import os
+from dotenv import load_dotenv
 
 # Security scheme
 security = HTTPBearer()
 
-# SECRET_KEY - should match the one in auth_routes.py
-SECRET_KEY = "52b86e7f43a5d32c108b620e7b961cdc79b5394f748db3bc6e0da6a9e3b9f68e"
-ALGORITHM = "HS256"
+load_dotenv()
+
+# Get secret key from environment
+SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+
+# Validate secret key exists
+if not SECRET_KEY:
+    raise ValueError("JWT_SECRET_KEY must be set in environment variables")
 
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
