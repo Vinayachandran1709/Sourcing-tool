@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -39,7 +39,20 @@ api.interceptors.response.use(
   }
 );
 
-// Search & Profile APIs
+// ===== AUTHENTICATION APIs =====
+
+export const login = async (email, password) => {
+  const response = await api.post('/api/auth/login', { email, password });
+  return response.data;
+};
+
+export const signup = async (name, email, company, password) => {
+  const response = await api.post('/api/auth/signup', { name, email, company, password });
+  return response.data;
+};
+
+// ===== SEARCH & PROFILE APIs =====
+
 export const searchDevelopers = async (filters) => {
   const response = await api.post('/api/search-profiles', filters);
   return response.data;
@@ -47,6 +60,11 @@ export const searchDevelopers = async (filters) => {
 
 export const getProfiles = async (params) => {
   const response = await api.get('/api/profiles', { params });
+  return response.data;
+};
+
+export const getProfileDetails = async (profileId) => {
+  const response = await api.get(`/api/profiles/${profileId}`);
   return response.data;
 };
 
@@ -60,7 +78,8 @@ export const getSelectedProfiles = async () => {
   return response.data;
 };
 
-// Email APIs
+// ===== EMAIL APIs =====
+
 export const sendBulkEmails = async (emailData) => {
   const response = await api.post('/api/send-bulk-emails', emailData);
   return response.data;
@@ -71,68 +90,195 @@ export const getOutreachHistory = async (limit = 100) => {
   return response.data;
 };
 
-// Search History APIs
-export const getSearchHistory = async (limit = 50) => {
-  const response = await api.get('/api/search-history', { params: { limit } });
-  return response.data;
-};
+// ===== EMAIL TEMPLATES APIs (FIXED ENDPOINTS) =====
 
-// Saved Lists APIs
-export const getSavedLists = async () => {
-  const response = await api.get('/api/saved-lists');
-  return response.data;
-};
-
-export const createSavedList = async (name, description) => {
-  const response = await api.post('/api/saved-lists', { name, description });
-  return response.data;
-};
-
-export const deleteSavedList = async (listId) => {
-  const response = await api.delete(`/api/saved-lists/${listId}`);
-  return response.data;
-};
-
-export const addProfileToList = async (listId, profileId) => {
-  const response = await api.post(`/api/saved-lists/${listId}/profiles`, { profile_id: profileId });
-  return response.data;
-};
-
-export const removeProfileFromList = async (listId, profileId) => {
-  const response = await api.delete(`/api/saved-lists/${listId}/profiles/${profileId}`);
-  return response.data;
-};
-
-// Email Templates APIs
 export const getEmailTemplates = async () => {
-  const response = await api.get('/api/email-templates');
+  const response = await api.get('/api/emails/templates');
   return response.data;
 };
 
 export const createEmailTemplate = async (templateData) => {
-  const response = await api.post('/api/email-templates', templateData);
+  const response = await api.post('/api/emails/templates/create', templateData);
+  return response.data;
+};
+
+export const updateEmailTemplate = async (templateId, templateData) => {
+  const response = await api.put(`/api/emails/templates/${templateId}`, templateData);
   return response.data;
 };
 
 export const deleteEmailTemplate = async (templateId) => {
-  const response = await api.delete(`/api/email-templates/${templateId}`);
+  const response = await api.delete(`/api/emails/templates/${templateId}`);
   return response.data;
 };
 
-// Analytics APIs
-export const getAnalytics = async (timeRange = '7d') => {
+export const createDefaultTemplates = async () => {
+  const response = await api.post('/api/emails/templates/create-defaults');
+  return response.data;
+};
+
+// ===== EMAIL CAMPAIGNS APIs =====
+
+export const sendCampaign = async (campaignData) => {
+  const response = await api.post('/api/emails/campaigns/send', campaignData);
+  return response.data;
+};
+
+export const getCampaigns = async (status = null) => {
+  const params = status ? { status } : {};
+  const response = await api.get('/api/emails/campaigns', { params });
+  return response.data;
+};
+
+export const markCampaignReplied = async (campaignId, replyContent = null) => {
+  const response = await api.post(`/api/emails/campaigns/${campaignId}/reply`, { reply_content: replyContent });
+  return response.data;
+};
+
+// ===== SEARCH HISTORY APIs =====
+
+export const getSearchHistory = async (limit = 50, days = null) => {
+  const params = { limit };
+  if (days) params.days = days;
+  const response = await api.get('/api/search-history', { params });
+  return response.data;
+};
+
+export const getSearchDetails = async (searchId) => {
+  const response = await api.get(`/api/search-history/${searchId}`);
+  return response.data;
+};
+
+export const recreateSearch = async (searchId) => {
+  const response = await api.post(`/api/search-history/${searchId}/recreate`);
+  return response.data;
+};
+
+export const deleteSearch = async (searchId) => {
+  const response = await api.delete(`/api/search-history/${searchId}`);
+  return response.data;
+};
+
+export const getSearchStatistics = async () => {
+  const response = await api.get('/api/search-history/statistics/overview');
+  return response.data;
+};
+
+// ===== SAVED LISTS APIs (FIXED ENDPOINTS) =====
+
+export const getSavedLists = async () => {
+  const response = await api.get('/api/lists');
+  return response.data;
+};
+
+export const createSavedList = async (name, description = null) => {
+  const response = await api.post('/api/lists/create', { name, description });
+  return response.data;
+};
+
+export const updateSavedList = async (listId, name, description) => {
+  const response = await api.put(`/api/lists/${listId}`, { name, description });
+  return response.data;
+};
+
+export const deleteSavedList = async (listId) => {
+  const response = await api.delete(`/api/lists/${listId}`);
+  return response.data;
+};
+
+export const getListProfiles = async (listId) => {
+  const response = await api.get(`/api/lists/${listId}/profiles`);
+  return response.data;
+};
+
+export const addProfileToList = async (listId, profileId, notes = null) => {
+  const response = await api.post(`/api/lists/${listId}/add-profile`, { 
+    profile_id: profileId,
+    notes: notes
+  });
+  return response.data;
+};
+
+export const removeProfileFromList = async (listId, profileId) => {
+  const response = await api.delete(`/api/lists/${listId}/remove-profile/${profileId}`);
+  return response.data;
+};
+
+export const updateProfileNotes = async (listId, profileId, notes) => {
+  const response = await api.put(`/api/lists/${listId}/profiles/${profileId}/notes`, { notes });
+  return response.data;
+};
+
+export const getListLimits = async () => {
+  const response = await api.get('/api/lists/limits');
+  return response.data;
+};
+
+// ===== ANALYTICS APIs (FIXED ENDPOINTS) =====
+
+export const getAnalyticsOverview = async (timeRange = '7d') => {
   const response = await api.get('/api/analytics/overview', { params: { time_range: timeRange } });
   return response.data;
 };
 
-// User/Subscription APIs
-export const getCurrentUser = async () => {
-  const response = await api.get('/api/auth/me');
+export const getSearchesTrend = async (timeRange = '7d') => {
+  const response = await api.get('/api/analytics/searches-trend', { params: { time_range: timeRange } });
   return response.data;
 };
 
-export const updateUserProfile = async (updates) => {
-  const response = await api.patch('/api/auth/profile', updates);
+export const getEmailPerformance = async (timeRange = '7d') => {
+  const response = await api.get('/api/analytics/email-performance', { params: { time_range: timeRange } });
+  return response.data;
+};
+
+export const getTopRoles = async (timeRange = '7d') => {
+  const response = await api.get('/api/analytics/top-roles', { params: { time_range: timeRange } });
+  return response.data;
+};
+
+export const getDashboardMetrics = async () => {
+  const response = await api.get('/api/analytics/dashboard');
+  return response.data;
+};
+
+// ===== USAGE & SUBSCRIPTION APIs =====
+
+export const getUsageStats = async () => {
+  const response = await api.get('/api/usage-stats');
+  return response.data;
+};
+
+// ===== RAZORPAY PAYMENT APIs =====
+
+export const createRazorpayOrder = async (planId, billingCycle) => {
+  const response = await api.post('/api/razorpay/create-order', { 
+    plan_id: planId,
+    billing_cycle: billingCycle
+  });
+  return response.data;
+};
+
+export const verifyRazorpayPayment = async (paymentData) => {
+  const response = await api.post('/api/razorpay/verify-payment', paymentData);
+  return response.data;
+};
+
+export const getSubscriptionDetails = async () => {
+  const response = await api.get('/api/razorpay/subscription');
+  return response.data;
+};
+
+// ===== WAITLIST API (PUBLIC) =====
+
+export const joinWaitlist = async (name, company, email) => {
+  const response = await api.post('/api/public/waitlist/join', { name, company, email });
+  return response.data;
+};
+
+// ===== HEALTH CHECK =====
+
+export const healthCheck = async () => {
+  const response = await api.get('/api/health');
   return response.data;
 };
 

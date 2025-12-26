@@ -111,20 +111,20 @@ def create_jwt_token(data: dict) -> str:
 
 @router.post("/signup")
 @limiter.limit("3/minute")
-def signup(req: Request, request: SignupRequest, db: Session = Depends(get_db)):
+def signup(request: Request, signup_data: SignupRequest, db: Session = Depends(get_db)):
     """Create new user account and return JWT token"""
     
     # Check if email exists
-    existing = db.query(User).filter(User.email == request.email.lower()).first()
+    existing = db.query(User).filter(User.email == signup_data.email.lower()).first()
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
     
     # Create user
     user = User(
-        name=request.name,
-        email=request.email.lower(),
-        company=request.company,
-        password_hash=hash_password(request.password)
+        name=signup_data.name,
+        email=signup_data.email.lower(),
+        company=signup_data.company,
+        password_hash=hash_password(signup_data.password)
     )
     
     db.add(user)
@@ -151,17 +151,17 @@ def signup(req: Request, request: SignupRequest, db: Session = Depends(get_db)):
 
 @router.post("/login")
 @limiter.limit("5/minute")
-def login(req: Request, request: LoginRequest, db: Session = Depends(get_db)):
+def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_db)):
     """Login user and return JWT token"""
     
     # Find user by email
-    user = db.query(User).filter(User.email == request.email.lower()).first()
+    user = db.query(User).filter(User.email == login_data.email.lower()).first()
     
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Verify password using bcrypt
-    if not verify_password(request.password, user.password_hash):
+    if not verify_password(login_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
     # Generate JWT token
