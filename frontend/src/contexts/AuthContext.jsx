@@ -1,5 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -73,32 +74,23 @@ export const AuthProvider = ({ children }) => {
     return () => clearInterval(interval);
   }, [user]);
 
-  const login = async (email, password) => {
+const login = async (email, password) => {
   try {
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
+    const response = await api.post('/api/auth/login', {
+      email,
+      password
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || errorData.message || 'Login failed');  // ← Changed to 'detail' (FastAPI standard)
-    }
-
-    const data = await response.json();
+    const data = response.data;
     
-    // Store user and token with safe defaults
     const userData = {
       id: data.user.id,
       name: data.user.name,
       email: data.user.email,
-      company: data.user.company || '',  // ← Add default
-      subscription_plan: data.user.subscription_plan || 'free_trial',  // ← Safe default
-      subscription_status: data.user.subscription_status || 'trial',  // ← Safe default
+      company: data.user.company || '',
+      subscription_plan: data.user.subscription_plan || 'free_trial',
+      subscription_status: data.user.subscription_status || 'active',
       trial_end_date: data.user.trial_end_date || null,
-      // These might not be returned by backend, use safe defaults
       searches_used: data.user.searches_used || 0,
       profile_views_used: data.user.profile_views_used || 0,
       email_credits_used: data.user.email_credits_used || 0,
@@ -106,43 +98,39 @@ export const AuthProvider = ({ children }) => {
 
     setUser(userData);
     setToken(data.token);
-    setIsAuthenticated(true);  // ← Add this!
+    // ✅ REMOVED setIsAuthenticated(true) - it's computed from !!user
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', data.token);
 
+    navigate('/dashboard/search');  // ⭐ ADD REDIRECT
     return { success: true };
   } catch (error) {
     console.error('Login error:', error);
-    return { success: false, error: error.message };
+    const errorMessage = error.response?.data?.message || error.response?.data?.detail || error.message || 'Login failed';
+    return { success: false, error: errorMessage };
   }
 };
 
+
 const signup = async (name, email, company, password) => {
   try {
-    const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
-    const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, company, password }),
+    const response = await api.post('/api/auth/signup', {
+      name,
+      email,
+      company,
+      password
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || errorData.message || 'Signup failed');  // ← Changed to 'detail'
-    }
-
-    const data = await response.json();
+    const data = response.data;
     
-    // Store user and token with safe defaults
     const userData = {
       id: data.user.id,
       name: data.user.name,
       email: data.user.email,
-      company: data.user.company || '',  // ← Add default
-      subscription_plan: data.user.subscription_plan || 'free_trial',  // ← Safe default
-      subscription_status: data.user.subscription_status || 'trial',  // ← Safe default
+      company: data.user.company || '',
+      subscription_plan: data.user.subscription_plan || 'free_trial',
+      subscription_status: data.user.subscription_status || 'active',
       trial_end_date: data.user.trial_end_date || null,
-      // These might not be returned by backend, use safe defaults
       searches_used: data.user.searches_used || 0,
       profile_views_used: data.user.profile_views_used || 0,
       email_credits_used: data.user.email_credits_used || 0,
@@ -150,14 +138,16 @@ const signup = async (name, email, company, password) => {
 
     setUser(userData);
     setToken(data.token);
-    setIsAuthenticated(true);  // ← Add this!
+    // ✅ REMOVED setIsAuthenticated(true) - it's computed from !!user
     localStorage.setItem('user', JSON.stringify(userData));
     localStorage.setItem('token', data.token);
 
+    navigate('/dashboard/search');  // ⭐ ADD REDIRECT
     return { success: true };
   } catch (error) {
     console.error('Signup error:', error);
-    return { success: false, error: error.message };
+    const errorMessage = error.response?.data?.message || error.response?.data?.detail || error.message || 'Signup failed';
+    return { success: false, error: errorMessage };
   }
 };
 
