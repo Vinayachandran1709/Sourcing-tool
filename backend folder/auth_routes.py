@@ -90,7 +90,10 @@ class LoginRequest(BaseModel):
 # ===== HELPER FUNCTIONS =====
 
 def hash_password(password: str) -> str:
-    """Hash a password using bcrypt"""
+    """Hash password using bcrypt (max 72 bytes)"""
+    # Bcrypt has a 72-byte limit, truncate if needed
+    if len(password.encode('utf-8')) > 72:
+        password = password.encode('utf-8')[:72].decode('utf-8', errors='ignore')
     return pwd_context.hash(password)
 
 
