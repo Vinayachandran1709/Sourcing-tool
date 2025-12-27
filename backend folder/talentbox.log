@@ -4213,3 +4213,255 @@ WHERE users.id = %(id_1)s
 2025-12-27 13:31:23,056 - main - INFO - Search request from user 12: role=, languages=['JavaScript', 'Python']
 2025-12-27 13:31:23,529 - main - INFO - Search request from user 12: role=, languages=['JavaScript', 'Python']
 2025-12-27 13:31:29,569 - main - INFO - Search request from user 12: role=Frontend Developer, languages=['JavaScript']
+2025-12-27 18:29:23,509 - main - INFO - TalentBox API initialized
+2025-12-27 18:29:23,511 - main - INFO - Environment: development
+2025-12-27 18:29:23,512 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 18:30:03,218 - main - INFO - Search request from user 12: role=Frontend Developer, languages=['JavaScript']
+2025-12-27 18:30:03,499 - main - INFO - Search request from user 12: role=Frontend Developer, languages=['JavaScript']
+2025-12-27 18:30:51,961 - main - INFO - Search request from user 12: role=, languages=['JavaScript', 'Python', 'Java']
+2025-12-27 18:30:52,389 - main - INFO - Search request from user 12: role=, languages=['JavaScript', 'Python', 'Java']
+2025-12-27 18:30:56,493 - main - INFO - Search request from user 12: role=, languages=['JavaScript', 'Python', 'Java']
+2025-12-27 18:31:14,798 - main - INFO - Search request from user 12: role=, languages=['JavaScript']
+2025-12-27 18:32:40,816 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2025-12-27 18:32:48,189 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2025-12-27 18:33:59,463 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2025-12-27 18:33:59,770 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2025-12-27 19:32:46,309 - main - INFO - TalentBox API initialized
+2025-12-27 19:32:46,311 - main - INFO - Environment: development
+2025-12-27 19:32:46,311 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 19:33:20,585 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2025-12-27 19:33:20,977 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2025-12-27 19:33:53,760 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:34:13,128 - main - INFO - Search request from user 12: role=, languages=[]
+2025-12-27 19:34:24,174 - main - INFO - Search request from user 12: role=, languages=[]
+2025-12-27 19:34:49,059 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:35:47,530 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:40:13,366 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:40:24,422 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:42:50,931 - main - INFO - TalentBox API initialized
+2025-12-27 19:42:50,932 - main - INFO - Environment: development
+2025-12-27 19:42:50,933 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 19:42:57,181 - main - INFO - TalentBox API initialized
+2025-12-27 19:42:57,182 - main - INFO - Environment: development
+2025-12-27 19:42:57,184 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 19:43:01,541 - main - INFO - TalentBox API initialized
+2025-12-27 19:43:01,543 - main - INFO - Environment: development
+2025-12-27 19:43:01,544 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 19:44:04,138 - main - INFO - TalentBox API initialized
+2025-12-27 19:44:04,139 - main - INFO - Environment: development
+2025-12-27 19:44:04,140 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 19:44:54,987 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:44:55,383 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:45:08,063 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 19:55:14,235 - main - INFO - TalentBox API initialized
+2025-12-27 19:55:14,236 - main - INFO - Environment: development
+2025-12-27 19:55:14,237 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 19:55:18,363 - main - INFO - TalentBox API initialized
+2025-12-27 19:55:18,364 - main - INFO - Environment: development
+2025-12-27 19:55:18,366 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 19:55:22,401 - main - INFO - TalentBox API initialized
+2025-12-27 19:55:22,402 - main - INFO - Environment: development
+2025-12-27 19:55:22,403 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:01:32,901 - main - INFO - TalentBox API initialized
+2025-12-27 20:01:32,902 - main - INFO - Environment: development
+2025-12-27 20:01:32,903 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:01:36,037 - main - INFO - TalentBox API initialized
+2025-12-27 20:01:36,038 - main - INFO - Environment: development
+2025-12-27 20:01:36,039 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:01:49,400 - main - INFO - TalentBox API initialized
+2025-12-27 20:01:49,401 - main - INFO - Environment: development
+2025-12-27 20:01:49,402 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:01:53,204 - main - INFO - TalentBox API initialized
+2025-12-27 20:01:53,205 - main - INFO - Environment: development
+2025-12-27 20:01:53,207 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:11:39,604 - main - INFO - TalentBox API initialized
+2025-12-27 20:11:39,606 - main - INFO - Environment: development
+2025-12-27 20:11:39,606 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:13:58,459 - main - INFO - TalentBox API initialized
+2025-12-27 20:13:58,460 - main - INFO - Environment: development
+2025-12-27 20:13:58,461 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:14:41,463 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:14:41,864 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:27:29,160 - main - ERROR - Unexpected error on /api/search-profiles: (psycopg2.OperationalError) SSL connection has been closed unexpectedly
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.company AS users_company, users.password_hash AS users_password_hash, users.created_at AS users_created_at, users.plan AS users_plan, users.billing_cycle AS users_billing_cycle, users.razorpay_customer_id AS users_razorpay_customer_id, users.razorpay_subscription_id AS users_razorpay_subscription_id, users.subscription_status AS users_subscription_status, users.trial_start_date AS users_trial_start_date, users.trial_end_date AS users_trial_end_date, users.subscription_start_date AS users_subscription_start_date, users.next_billing_date AS users_next_billing_date, users.company_website AS users_company_website, users.career_page_link AS users_career_page_link, users.usage_searches AS users_usage_searches, users.usage_profile_views AS users_usage_profile_views, users.usage_emails_sent AS users_usage_emails_sent, users.usage_reset_date AS users_usage_reset_date 
+FROM users 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': 12, 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.OperationalError: SSL connection has been closed unexpectedly
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 381, in app
+    solved_result = await solve_dependencies(
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<6 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\dependencies\utils.py", line 647, in solve_dependencies
+    solved = await run_in_threadpool(call, **solved_result.values)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\auth_middleware.py", line 70, in get_current_user
+    user = db.query(User).filter(User.id == user_id).first()
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) SSL connection has been closed unexpectedly
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.company AS users_company, users.password_hash AS users_password_hash, users.created_at AS users_created_at, users.plan AS users_plan, users.billing_cycle AS users_billing_cycle, users.razorpay_customer_id AS users_razorpay_customer_id, users.razorpay_subscription_id AS users_razorpay_subscription_id, users.subscription_status AS users_subscription_status, users.trial_start_date AS users_trial_start_date, users.trial_end_date AS users_trial_end_date, users.subscription_start_date AS users_subscription_start_date, users.next_billing_date AS users_next_billing_date, users.company_website AS users_company_website, users.career_page_link AS users_career_page_link, users.usage_searches AS users_usage_searches, users.usage_profile_views AS users_usage_profile_views, users.usage_emails_sent AS users_usage_emails_sent, users.usage_reset_date AS users_usage_reset_date 
+FROM users 
+WHERE users.id = %(id_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'id_1': 12, 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/e3q8)
+2025-12-27 20:27:43,198 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:33:22,044 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:35:12,581 - main - INFO - TalentBox API initialized
+2025-12-27 20:35:12,582 - main - INFO - Environment: development
+2025-12-27 20:35:12,584 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 20:35:39,885 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:35:40,303 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:35:42,223 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:35:44,783 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:36:23,698 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:37:21,865 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 20:37:58,724 - main - INFO - Search request from user 12: role=, languages=['JavaScript']

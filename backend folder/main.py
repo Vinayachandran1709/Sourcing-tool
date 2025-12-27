@@ -213,7 +213,7 @@ async def search_profiles(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Enhanced search with role-based filtering"""
+    """Enhanced search with GitHub API integration"""
     user_id = current_user.id
     
     logger.info(f"Search request from user {user_id}: role={search.role}, languages={search.languages}")
@@ -227,6 +227,7 @@ async def search_profiles(
     print(f"\n🔍 SEARCH REQUEST")
     print(f"   Role: {search.role or 'Any'}")
     print(f"   Languages: {search.languages or 'Any'}")
+    print(f"   Location: {search.location or 'Any'}")
     
     # Build filters
     filters = {
@@ -237,13 +238,23 @@ async def search_profiles(
         "min_stars": search.min_stars,
         "min_contributions": search.min_contributions,
         "recent_activity": search.recent_activity,
-        "location": search.location
+        "location": search.location,
+        "min_repos": search.min_repos or 0
     }
     
-    # Apply filters
-    profiles = FilterService.apply_filters(db, filters)
+    # ⭐ NEW: Use hybrid search (database + GitHub API)
+    from github_integration_service import GitHubIntegrationService
     
-    print(f"   ✅ Found {len(profiles)} profiles\n")
+    try:
+        profiles = await GitHubIntegrationService.search_and_cache_profiles(
+            db, filters, max_github_results=30
+        )
+    except Exception as e:
+        logger.error(f"Search failed: {e}", exc_info=True)
+        # Fallback to database-only search
+        profiles = FilterService.apply_filters(db, filters)
+    
+    print(f"   ✅ Found {len(profiles)} total profiles\n")
     logger.info(f"Search found {len(profiles)} profiles")
     
     # Log usage
@@ -298,7 +309,6 @@ async def search_profiles(
         "from_cache": len(profiles),
         "from_github": 0
     }
-
 
 # ===== GET ALL PROFILES =====
 
