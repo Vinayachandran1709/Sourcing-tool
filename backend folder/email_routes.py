@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional, List
 from database import get_db
+from models import User  # ⭐ ADDED THIS IMPORT
 from email_templates_service import EmailTemplatesService
 from campaign_service import CampaignService
 from auth_middleware import get_current_user
@@ -39,22 +40,22 @@ class MarkRepliedRequest(BaseModel):
 
 @router.post("/templates/create-defaults")
 def create_default_templates(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Create default email templates for user"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     EmailTemplatesService.create_default_templates(db, user_id)
     return {"message": "Default templates created"}
 
 
 @router.get("/templates")
 def get_templates(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Get all templates for user"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     templates = EmailTemplatesService.get_user_templates(db, user_id)
     
     return {
@@ -76,11 +77,11 @@ def get_templates(
 @router.post("/templates/create")
 def create_template(
     request: CreateTemplateRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Create custom template"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     template = EmailTemplatesService.create_template(
         db, user_id, request.name, request.template_type, request.subject, request.body
     )
@@ -94,11 +95,11 @@ def create_template(
 def update_template(
     template_id: int,
     request: UpdateTemplateRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Update template"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     template = EmailTemplatesService.update_template(
         db, template_id, user_id, request.name, request.subject, request.body
     )
@@ -115,11 +116,11 @@ def update_template(
 @router.delete("/templates/{template_id}")
 def delete_template(
     template_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Delete template"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     result = EmailTemplatesService.delete_template(db, template_id, user_id)
     return result
 
@@ -129,11 +130,11 @@ def delete_template(
 @router.post("/campaigns/send")
 def send_campaign(
     request: SendCampaignRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Send bulk email campaign with automated follow-ups"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     
     user_variables = {
         "sender_name": request.sender_name,
@@ -158,11 +159,11 @@ def send_campaign(
 @router.get("/campaigns")
 def get_campaigns(
     status: Optional[str] = None,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Get all campaigns for user"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     campaigns = CampaignService.get_user_campaigns(db, user_id, status)
     return {
         "campaigns": campaigns,
@@ -174,22 +175,22 @@ def get_campaigns(
 def mark_campaign_replied(
     campaign_id: int,
     request: MarkRepliedRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Mark campaign as replied (stops follow-ups)"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     result = CampaignService.mark_as_replied(db, campaign_id, request.reply_content)
     return result
 
 
 @router.get("/campaigns/pending-followups")
 def get_pending_followups(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
     db: Session = Depends(get_db)
 ):
     """Get campaigns that need follow-ups (for background worker)"""
-    user_id = current_user["id"]
+    user_id = current_user.id  # ✅ CHANGED ["id"] to .id
     campaigns = CampaignService.get_pending_followups(db)
     
     return {
