@@ -2059,3 +2059,1376 @@ Traceback (most recent call last):
   File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\handlers\bcrypt.py", line 655, in _calc_checksum
     hash = _bcrypt.hashpw(secret, config)
 ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-12-27 10:40:19,292 - main - INFO - TalentBox API initialized
+2025-12-27 10:40:19,294 - main - INFO - Environment: development
+2025-12-27 10:40:19,295 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 10:41:51,073 - passlib.handlers.bcrypt - WARNING - (trapped) error reading bcrypt version
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\handlers\bcrypt.py", line 620, in _load_backend_mixin
+    version = _bcrypt.__about__.__version__
+              ^^^^^^^^^^^^^^^^^
+AttributeError: module 'bcrypt' has no attribute '__about__'
+2025-12-27 10:41:51,458 - main - ERROR - Unexpected error on /api/auth/signup: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\slowapi\extension.py", line 766, in sync_wrapper
+    response = func(*args, **kwargs)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\auth_routes.py", line 131, in signup
+    password_hash=hash_password(signup_data.password)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\auth_routes.py", line 98, in hash_password
+    return pwd_context.hash(password)
+           ~~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\context.py", line 2258, in hash
+    return record.hash(secret, **kwds)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 779, in hash
+    self.checksum = self._calc_checksum(secret)
+                    ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\handlers\bcrypt.py", line 591, in _calc_checksum
+    self._stub_requires_backend()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 2254, in _stub_requires_backend
+    cls.set_backend()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 2156, in set_backend
+    return owner.set_backend(name, dryrun=dryrun)
+           ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 2163, in set_backend
+    return cls.set_backend(name, dryrun=dryrun)
+           ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 2188, in set_backend
+    cls._set_backend(name, dryrun)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 2311, in _set_backend
+    super(SubclassBackendMixin, cls)._set_backend(name, dryrun)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 2224, in _set_backend
+    ok = loader(**kwds)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\handlers\bcrypt.py", line 626, in _load_backend_mixin
+    return mixin_cls._finalize_backend_mixin(name, dryrun)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\handlers\bcrypt.py", line 421, in _finalize_backend_mixin
+    if detect_wrap_bug(IDENT_2A):
+       ~~~~~~~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\handlers\bcrypt.py", line 380, in detect_wrap_bug
+    if verify(secret, bug_hash):
+       ~~~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\utils\handlers.py", line 792, in verify
+    return consteq(self._calc_checksum(secret), chk)
+                   ~~~~~~~~~~~~~~~~~~~^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\passlib\handlers\bcrypt.py", line 655, in _calc_checksum
+    hash = _bcrypt.hashpw(secret, config)
+ValueError: password cannot be longer than 72 bytes, truncate manually if necessary (e.g. my_password[:72])
+2025-12-27 10:57:33,523 - main - INFO - TalentBox API initialized
+2025-12-27 10:57:33,524 - main - INFO - Environment: development
+2025-12-27 10:57:33,525 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 11:05:34,200 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:05:35,973 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:05:36,377 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:05:37,503 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:06:16,006 - main - WARNING - HTTP 409 on /api/auth/signup: Email already registered
+2025-12-27 11:08:28,003 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:08:28,017 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:08:28,309 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:08:29,422 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:08:52,119 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:08:52,144 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:08:54,379 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:08:55,343 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:09:50,127 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:09:50,197 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:09:50,333 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:09:51,326 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:12:34,686 - main - INFO - TalentBox API initialized
+2025-12-27 11:12:34,688 - main - INFO - Environment: development
+2025-12-27 11:12:34,689 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 11:13:18,932 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:13:18,954 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:13:18,970 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:13:20,093 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:13:48,841 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:13:48,857 - main - ERROR - Unexpected error on /api/search-profiles: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 290, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 217, in search_profiles
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:13:49,031 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:13:50,056 - main - ERROR - Unexpected error on /api/lists/: 'User' object is not subscriptable
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\lists_routes.py", line 63, in get_lists
+    user_id = current_user["id"]
+              ~~~~~~~~~~~~^^^^^^
+TypeError: 'User' object is not subscriptable
+2025-12-27 11:17:58,372 - main - INFO - TalentBox API initialized
+2025-12-27 11:17:58,373 - main - INFO - Environment: development
+2025-12-27 11:17:58,374 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 11:18:01,718 - main - INFO - TalentBox API initialized
+2025-12-27 11:18:01,719 - main - INFO - Environment: development
+2025-12-27 11:18:01,720 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 11:19:01,989 - main - INFO - TalentBox API initialized
+2025-12-27 11:19:01,990 - main - INFO - Environment: development
+2025-12-27 11:19:01,991 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 11:19:52,063 - main - INFO - TalentBox API initialized
+2025-12-27 11:19:52,064 - main - INFO - Environment: development
+2025-12-27 11:19:52,065 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 11:19:54,738 - main - INFO - TalentBox API initialized
+2025-12-27 11:19:54,740 - main - INFO - Environment: development
+2025-12-27 11:19:54,741 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 11:38:22,185 - main - INFO - TalentBox API initialized
+2025-12-27 11:38:22,186 - main - INFO - Environment: development
+2025-12-27 11:38:22,188 - main - INFO - CORS origins: ['http://localhost:3000']

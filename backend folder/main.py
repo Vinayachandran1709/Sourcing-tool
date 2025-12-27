@@ -210,11 +210,11 @@ def root():
 @app.post("/api/search-profiles")
 async def search_profiles(
     search: SearchRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Enhanced search with role-based filtering"""
-    user_id = current_user["id"]
+    user_id = current_user.id
     
     logger.info(f"Search request from user {user_id}: role={search.role}, languages={search.languages}")
     
@@ -313,11 +313,11 @@ def get_all_profiles(
     active_within_days: int = None,
     sort_by: str = "score",
     limit: int = 100,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all profiles with optional filters and sorting"""
-    user_id = current_user["id"]
+    user_id = current_user.id
     
     try:
         UsageService.check_limit(db, user_id, "profile_view")
@@ -380,7 +380,7 @@ def get_all_profiles(
 @app.get("/api/profiles/{profile_id}", response_model=ProfileResponse)
 def get_profile_details(
     profile_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get full details for a specific profile"""
@@ -398,7 +398,7 @@ def get_profile_details(
 @app.patch("/api/profiles/{profile_id}/toggle-select")
 def toggle_profile_selection(
     profile_id: int,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Toggle selection status of a profile"""
@@ -423,7 +423,7 @@ def toggle_profile_selection(
 
 @app.get("/api/selected-profiles", response_model=List[ProfileResponse])
 def get_selected_profiles(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get all profiles marked as selected"""
@@ -437,11 +437,11 @@ def get_selected_profiles(
 @app.post("/api/send-bulk-emails")
 def send_bulk_emails(
     email_request: EmailRequest,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Send bulk emails to selected profiles"""
-    user_id = current_user["id"]
+    user_id = current_user.id
     
     logger.info(f"Bulk email request from user {user_id} for {len(email_request.profile_ids)} profiles")
     
@@ -521,11 +521,11 @@ def send_bulk_emails(
 @app.get("/api/outreach-history")
 def get_outreach_history(
     limit: int = 100,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get email outreach history"""
-    user_id = current_user["id"]
+    user_id = current_user.id
     
     outreach_logs = db.query(EmailOutreach).order_by(
         EmailOutreach.sent_at.desc()
@@ -562,7 +562,7 @@ def filter_by_score(
     profile_ids: List[int],
     min_score: int = 0,
     max_score: int = 100,
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Filter profiles by developer score"""
@@ -580,11 +580,11 @@ def filter_by_score(
 
 @app.get("/api/usage-stats")
 def get_usage_stats(
-    current_user: dict = Depends(get_current_user),
+    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     """Get current usage statistics for user"""
-    user_id = current_user["id"]
+    user_id = current_user.id
     stats = UsageService.get_usage_stats(db, user_id)
     return stats
 
