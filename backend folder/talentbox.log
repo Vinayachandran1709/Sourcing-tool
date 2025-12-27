@@ -4465,3 +4465,36 @@ WHERE users.id = %(id_1)s
 2025-12-27 20:36:23,698 - main - INFO - Search request from user 12: role=, languages=['Python']
 2025-12-27 20:37:21,865 - main - INFO - Search request from user 12: role=, languages=['Python']
 2025-12-27 20:37:58,724 - main - INFO - Search request from user 12: role=, languages=['JavaScript']
+2025-12-27 21:10:13,932 - main - INFO - TalentBox API initialized
+2025-12-27 21:10:13,936 - main - INFO - Environment: development
+2025-12-27 21:10:13,937 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:10:18,111 - main - INFO - TalentBox API initialized
+2025-12-27 21:10:18,113 - main - INFO - Environment: development
+2025-12-27 21:10:18,114 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:10:41,322 - main - INFO - TalentBox API initialized
+2025-12-27 21:10:41,323 - main - INFO - Environment: development
+2025-12-27 21:10:41,324 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:10:44,493 - main - INFO - TalentBox API initialized
+2025-12-27 21:10:44,494 - main - INFO - Environment: development
+2025-12-27 21:10:44,495 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:12:03,950 - main - INFO - TalentBox API initialized
+2025-12-27 21:12:03,954 - main - INFO - Environment: development
+2025-12-27 21:12:03,955 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:12:14,438 - main - INFO - TalentBox API initialized
+2025-12-27 21:12:14,439 - main - INFO - Environment: development
+2025-12-27 21:12:14,440 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:12:37,882 - main - INFO - TalentBox API initialized
+2025-12-27 21:12:37,883 - main - INFO - Environment: development
+2025-12-27 21:12:37,884 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:13:27,511 - main - INFO - Search request from user 12: role=, languages=['JavaScript']
+2025-12-27 21:13:27,839 - main - INFO - Search request from user 12: role=, languages=['JavaScript']
+2025-12-27 21:13:36,063 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 21:17:26,168 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 21:17:36,184 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-27 21:17:44,784 - main - INFO - Search request from user 12: role=Frontend Developer, languages=[]
+2025-12-27 21:36:31,708 - main - INFO - TalentBox API initialized
+2025-12-27 21:36:31,709 - main - INFO - Environment: development
+2025-12-27 21:36:31,710 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 21:36:34,294 - main - INFO - TalentBox API initialized
+2025-12-27 21:36:34,295 - main - INFO - Environment: development
+2025-12-27 21:36:34,296 - main - INFO - CORS origins: ['http://localhost:3000']

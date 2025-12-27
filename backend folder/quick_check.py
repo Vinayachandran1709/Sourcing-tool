@@ -1,5 +1,5 @@
 from database import SessionLocal
-from models import GitHubProfile, User
+from models import Profile, User
 from config import GITHUB_TOKEN
 
 db = SessionLocal()
@@ -20,24 +20,24 @@ if user_count > 0:
         print(f"   - {u.email} (ID: {u.id})")
 
 # Check Profiles
-profile_count = db.query(GitHubProfile).count()
+profile_count = db.query(Profile).count()
 print(f"\n3️⃣ GITHUB PROFILES: {profile_count}")
 
 if profile_count > 0:
     print("\n   📋 Sample profiles:")
-    profiles = db.query(GitHubProfile).limit(10).all()
+    profiles = db.query(Profile).limit(10).all()
     for p in profiles:
         print(f"   - {p.github_username} | {p.name or 'No name'} | Score: {p.developer_score}")
         
     # Check by location
-    bangalore = db.query(GitHubProfile).filter(
-        GitHubProfile.location.ilike('%bangalore%')
+    bangalore = db.query(Profile).filter(
+        Profile.location.ilike('%bangalore%')
     ).count()
     print(f"\n   🌍 Profiles with 'Bangalore' in location: {bangalore}")
     
     # Check by language
-    python_devs = db.query(GitHubProfile).filter(
-        GitHubProfile.languages.ilike('%python%')
+    python_devs = db.query(Profile).filter(
+        Profile.language.ilike('%python%')
     ).count()
     print(f"   🐍 Profiles with Python: {python_devs}")
 else:

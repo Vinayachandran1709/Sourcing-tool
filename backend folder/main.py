@@ -224,10 +224,12 @@ async def search_profiles(
     except HTTPException as e:
         return {"error": e.detail, "limit_reached": True}
     
-    print(f"\n🔍 SEARCH REQUEST")
+    print("\n" + "="*60)
+    print("SEARCH REQUEST RECEIVED")
     print(f"   Role: {search.role or 'Any'}")
     print(f"   Languages: {search.languages or 'Any'}")
     print(f"   Location: {search.location or 'Any'}")
+    print("="*60)
     
     # Build filters
     filters = {
@@ -243,18 +245,32 @@ async def search_profiles(
     }
     
     # ⭐ NEW: Use hybrid search (database + GitHub API)
-    from github_integration_service import GitHubIntegrationService
+    print("\nIMPORTING GitHubIntegrationService...")
+    try:
+        from github_integration_service import GitHubIntegrationService
+        print("SUCCESS: GitHubIntegrationService imported")
+    except Exception as e:
+        print(f"ERROR: Failed to import GitHubIntegrationService: {e}")
+        logger.error(f"Import failed: {e}", exc_info=True)
+        profiles = FilterService.apply_filters(db, filters)
+        print(f"FALLBACK: Using FilterService, found {len(profiles)} profiles\n")
+        return {"success": True, "total_found": len(profiles), "profiles": [], "from_cache": 0, "from_github": 0}
     
+    print("\nCALLING search_and_cache_profiles...")
     try:
         profiles = await GitHubIntegrationService.search_and_cache_profiles(
             db, filters, max_github_results=30
         )
+        print(f"SUCCESS: Got {len(profiles)} profiles from hybrid search")
     except Exception as e:
+        print(f"ERROR in search_and_cache_profiles: {type(e).__name__}: {str(e)}")
         logger.error(f"Search failed: {e}", exc_info=True)
         # Fallback to database-only search
+        print("FALLBACK: Using FilterService...")
         profiles = FilterService.apply_filters(db, filters)
+        print(f"FilterService returned {len(profiles)} profiles")
     
-    print(f"   ✅ Found {len(profiles)} total profiles\n")
+    print(f"\nFINAL: Returning {len(profiles)} profiles\n")
     logger.info(f"Search found {len(profiles)} profiles")
     
     # Log usage
@@ -309,6 +325,7 @@ async def search_profiles(
         "from_cache": len(profiles),
         "from_github": 0
     }
+
 
 # ===== GET ALL PROFILES =====
 
