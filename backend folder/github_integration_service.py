@@ -22,69 +22,76 @@ class GitHubIntegrationService:
     4. Returns combined results
     """
     
-    @staticmethod
-    async def search_and_cache_profiles(
-        db: Session,
-        filters: Dict,
-        max_github_results: int = 50
-    ) -> List[Profile]:
-        """
-        Main search function that combines database cache + GitHub API
-        
-        Args:
-            db: Database session
-            filters: Search filters (role, languages, location, etc.)
-            max_github_results: Maximum new profiles to fetch from GitHub
-        
-        Returns:
-            List of Profile objects (both cached and newly fetched)
-        """
-        
-        print(f"\n🔍 HYBRID SEARCH")
-        print(f"   Filters: {filters}")
-        
-        # ===== STEP 1: Search database cache =====
-        print("\n📦 Searching database cache...")
+@staticmethod
+async def search_and_cache_profiles(
+    db: Session,
+    filters: Dict,
+    max_github_results: int = 50
+) -> List[Profile]:
+    """
+    Main search function that combines database cache + GitHub API
+    """
+    
+    logger.info(f"🔍 HYBRID SEARCH STARTED")
+    logger.info(f"   Filters: {filters}")
+    
+    # ===== STEP 1: Search database cache =====
+    logger.info("📦 Searching database cache...")
+    try:
         cached_profiles = GitHubIntegrationService._search_database(db, filters)
+        logger.info(f"   ✅ Found {len(cached_profiles)} cached profiles")
         print(f"   ✅ Found {len(cached_profiles)} cached profiles")
-        
-        # ===== STEP 2: Fetch new profiles from GitHub =====
-        print("\n🌐 Fetching new profiles from GitHub API...")
-        
-        language = filters.get("languages", [])
-        primary_language = language[0] if language and len(language) > 0 else None
-        location = filters.get("location")
-        min_repos = filters.get("min_repos", 0)
-        
-        if not primary_language and not location:
-            print("   ⚠️ No language or location specified, skipping GitHub search")
-            return cached_profiles
-        
-        # Fetch from GitHub
+    except Exception as e:
+        logger.error(f"   ❌ Database search failed: {e}", exc_info=True)
+        print(f"   ❌ Database search failed: {e}")
+        cached_profiles = []
+    
+    # ===== STEP 2: Fetch new profiles from GitHub =====
+    logger.info("🌐 Fetching new profiles from GitHub API...")
+    
+    language = filters.get("languages", [])
+    primary_language = language[0] if language and len(language) > 0 else None
+    location = filters.get("location")
+    min_repos = filters.get("min_repos", 0)
+    
+    if not primary_language and not location:
+        logger.warning("   ⚠️ No language or location specified, skipping GitHub search")
+        print("   ⚠️ No language or location specified, skipping GitHub search")
+        return cached_profiles
+    
+    # Fetch from GitHub
+    try:
         new_profiles = await GitHubIntegrationService._fetch_from_github(
             db, primary_language, location, min_repos, max_github_results
         )
-        
+        logger.info(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
         print(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
-        
-        # ===== STEP 3: Combine results =====
-        all_profiles = cached_profiles + new_profiles
-        
-        # Remove duplicates (prefer cached versions)
-        seen_usernames = set()
-        unique_profiles = []
-        
-        for profile in all_profiles:
-            if profile.github_username not in seen_usernames:
-                seen_usernames.add(profile.github_username)
-                unique_profiles.append(profile)
-        
-        print(f"\n✅ Total unique profiles: {len(unique_profiles)}")
-        print(f"   - From cache: {len(cached_profiles)}")
-        print(f"   - From GitHub: {len(new_profiles)}")
-        
-        return unique_profiles
+    except Exception as e:
+        logger.error(f"   ❌ GitHub fetch failed: {e}", exc_info=True)
+        print(f"   ❌ GitHub fetch failed: {e}")
+        new_profiles = []
     
+    # ===== STEP 3: Combine results =====
+    all_profiles = cached_profiles + new_profiles
+    
+    # Remove duplicates (prefer cached versions)
+    seen_usernames = set()
+    unique_profiles = []
+    
+    for profile in all_profiles:
+        if profile.github_username not in seen_usernames:
+            seen_usernames.add(profile.github_username)
+            unique_profiles.append(profile)
+    
+    logger.info(f"✅ Total unique profiles: {len(unique_profiles)}")
+    logger.info(f"   - From cache: {len(cached_profiles)}")
+    logger.info(f"   - From GitHub: {len(new_profiles)}")
+    
+    print(f"\n✅ Total unique profiles: {len(unique_profiles)}")
+    print(f"   - From cache: {len(cached_profiles)}")
+    print(f"   - From GitHub: {len(new_profiles)}")
+    
+    return unique_profiles    
     
     @staticmethod
     def _search_database(db: Session, filters: Dict) -> List[Profile]:
@@ -196,12 +203,20 @@ class GitHubIntegrationService:
                     profile.developer_score = profile.calculate_developer_score()
                     
                     # Save to database
-                    db.add(profile)
-                    db.commit()
-                    db.refresh(profile)
-                    
-                    new_profiles.append(profile)
-                    print(f"✅ Score: {profile.developer_score}")
+                    # Save to database
+                    try:
+                        db.add(profile)
+                        db.commit()
+                        db.refresh(profile)
+                        
+                        new_profiles.append(profile)
+                        logger.info(f"✅ Saved {username}: Score {profile.developer_score}")
+                        print(f"✅ Score: {profile.developer_score}")
+                    except Exception as save_error:
+                        logger.error(f"❌ Failed to save {username}: {save_error}")
+                        print(f"❌ Save failed: {save_error}")
+                        db.rollback()
+                        continue
                     
                     # Rate limit protection
                     if i % 5 == 0:

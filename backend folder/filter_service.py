@@ -47,6 +47,7 @@ class FilterService:
     def apply_filters(db: Session, filters: Dict) -> List[Profile]:
         """Apply all filters and return matching profiles"""
         query = db.query(Profile)
+        logger.info(f"FilterService.apply_filters called with: {filters}")
         
         # HARD FILTERS (must match)
         
@@ -156,6 +157,8 @@ class FilterService:
         
         # Sort by adjusted score
         scored_profiles.sort(key=lambda p: p.adjusted_score, reverse=True)
+
+        logger.info(f"FilterService returning {len(scored_profiles)} profiles")
         
         return scored_profiles
     

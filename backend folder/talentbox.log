@@ -4498,3 +4498,36 @@ WHERE users.id = %(id_1)s
 2025-12-27 21:36:34,294 - main - INFO - TalentBox API initialized
 2025-12-27 21:36:34,295 - main - INFO - Environment: development
 2025-12-27 21:36:34,296 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 23:17:44,973 - main - INFO - TalentBox API initialized
+2025-12-27 23:17:44,974 - main - INFO - Environment: development
+2025-12-27 23:17:44,975 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-27 23:18:13,620 - main - INFO - Search request from user 12: role=Frontend Developer, languages=[]
+2025-12-27 23:18:14,022 - main - INFO - Search request from user 12: role=Frontend Developer, languages=[]
+2025-12-27 23:19:37,582 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-28 00:31:06,651 - main - INFO - TalentBox API initialized
+2025-12-28 00:31:06,653 - main - INFO - Environment: development
+2025-12-28 00:31:06,654 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:31:20,962 - main - INFO - TalentBox API initialized
+2025-12-28 00:31:20,963 - main - INFO - Environment: development
+2025-12-28 00:31:20,965 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:31:24,829 - main - INFO - TalentBox API initialized
+2025-12-28 00:31:24,830 - main - INFO - Environment: development
+2025-12-28 00:31:24,831 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:47:32,683 - main - INFO - TalentBox API initialized
+2025-12-28 00:47:32,684 - main - INFO - Environment: development
+2025-12-28 00:47:32,686 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:47:35,386 - main - INFO - TalentBox API initialized
+2025-12-28 00:47:35,387 - main - INFO - Environment: development
+2025-12-28 00:47:35,388 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:50:57,945 - main - INFO - TalentBox API initialized
+2025-12-28 00:50:57,946 - main - INFO - Environment: development
+2025-12-28 00:50:57,947 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:51:01,042 - main - INFO - TalentBox API initialized
+2025-12-28 00:51:01,043 - main - INFO - Environment: development
+2025-12-28 00:51:01,044 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:51:22,799 - main - INFO - TalentBox API initialized
+2025-12-28 00:51:22,799 - main - INFO - Environment: development
+2025-12-28 00:51:22,800 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-28 00:51:25,496 - main - INFO - TalentBox API initialized
+2025-12-28 00:51:25,497 - main - INFO - Environment: development
+2025-12-28 00:51:25,498 - main - INFO - CORS origins: ['http://localhost:3000']

@@ -37,7 +37,7 @@ if profile_count > 0:
     
     # Check by language
     python_devs = db.query(Profile).filter(
-        Profile.language.ilike('%python%')
+    Profile.primary_language.ilike('%python%')
     ).count()
     print(f"   🐍 Profiles with Python: {python_devs}")
 else:
