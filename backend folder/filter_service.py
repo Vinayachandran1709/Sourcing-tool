@@ -3,6 +3,11 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func, cast, String
 from models import Profile
 from datetime import datetime, timedelta, timezone
+import logging
+
+# ✅ FIX #7: Add logging configuration
+logger = logging.getLogger(__name__)
+
 
 class FilterService:
     """Handle advanced profile filtering"""
@@ -46,8 +51,10 @@ class FilterService:
     @staticmethod
     def apply_filters(db: Session, filters: Dict) -> List[Profile]:
         """Apply all filters and return matching profiles"""
+        # ✅ FIX #5: Add debug logging at start
+        logger.info(f"FilterService.apply_filters called with filters: {filters}")
+        
         query = db.query(Profile)
-        logger.info(f"FilterService.apply_filters called with: {filters}")
         
         # HARD FILTERS (must match)
         
@@ -158,6 +165,7 @@ class FilterService:
         # Sort by adjusted score
         scored_profiles.sort(key=lambda p: p.adjusted_score, reverse=True)
 
+        # ✅ FIX #5: Add debug logging at end
         logger.info(f"FilterService returning {len(scored_profiles)} profiles")
         
         return scored_profiles

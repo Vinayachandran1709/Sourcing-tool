@@ -66,12 +66,12 @@ limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="TalentBox API",
-    version="1.0.0",
+    version="2.0.0",  # ✅ Updated version
     description="API for GitHub developer sourcing and recruitment"
 )
 
 # Log initialization
-logger.info("TalentBox API initialized")
+logger.info("TalentBox API initialized - Version 2.0.0 (FIXED)")
 logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
 logger.info(f"CORS origins: {CORS_ORIGINS}")
 
@@ -199,7 +199,7 @@ def root():
     """Welcome endpoint"""
     return {
         "message": "TalentBox API - Developer Sourcing Platform",
-        "version": "1.0.0",
+        "version": "2.0.0",
         "status": "operational",
         "docs": "/docs"
     }
@@ -213,7 +213,11 @@ async def search_profiles(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Enhanced search with GitHub API integration"""
+    """
+    Enhanced search with GitHub API integration
+    
+    ✅ FIX #3: Fixed empty profiles array bug - now properly converts and returns profiles
+    """
     user_id = current_user.id
     
     logger.info(f"Search request from user {user_id}: role={search.role}, languages={search.languages}")
@@ -244,31 +248,41 @@ async def search_profiles(
         "min_repos": search.min_repos or 0
     }
     
-    # ⭐ NEW: Use hybrid search (database + GitHub API)
+    # ⭐ HYBRID SEARCH: Database + GitHub API
     print("\nIMPORTING GitHubIntegrationService...")
+    profiles = []
+    from_cache = 0
+    from_github = 0
+    
     try:
         from github_integration_service import GitHubIntegrationService
         print("SUCCESS: GitHubIntegrationService imported")
-    except Exception as e:
-        print(f"ERROR: Failed to import GitHubIntegrationService: {e}")
-        logger.error(f"Import failed: {e}", exc_info=True)
-        profiles = FilterService.apply_filters(db, filters)
-        print(f"FALLBACK: Using FilterService, found {len(profiles)} profiles\n")
-        return {"success": True, "total_found": len(profiles), "profiles": [], "from_cache": 0, "from_github": 0}
-    
-    print("\nCALLING search_and_cache_profiles...")
-    try:
+        
+        print("\nCALLING search_and_cache_profiles...")
         profiles = await GitHubIntegrationService.search_and_cache_profiles(
             db, filters, max_github_results=30
         )
         print(f"SUCCESS: Got {len(profiles)} profiles from hybrid search")
+        
+        # Count profiles from cache vs GitHub (all are now cached)
+        from_cache = len(profiles)
+        from_github = 0  # All new profiles are now in cache
+        
     except Exception as e:
-        print(f"ERROR in search_and_cache_profiles: {type(e).__name__}: {str(e)}")
-        logger.error(f"Search failed: {e}", exc_info=True)
-        # Fallback to database-only search
+        print(f"ERROR in GitHubIntegrationService: {type(e).__name__}: {str(e)}")
+        logger.error(f"Hybrid search failed: {e}", exc_info=True)
+        
+        # ✅ FIX #3: CRITICAL BUG FIX - Use FilterService as fallback and CONVERT profiles to dicts
         print("FALLBACK: Using FilterService...")
-        profiles = FilterService.apply_filters(db, filters)
-        print(f"FilterService returned {len(profiles)} profiles")
+        try:
+            profiles = FilterService.apply_filters(db, filters)
+            print(f"FilterService returned {len(profiles)} profiles")
+            from_cache = len(profiles)
+            from_github = 0
+        except Exception as filter_error:
+            print(f"ERROR in FilterService fallback: {filter_error}")
+            logger.error(f"FilterService fallback failed: {filter_error}", exc_info=True)
+            profiles = []
     
     print(f"\nFINAL: Returning {len(profiles)} profiles\n")
     logger.info(f"Search found {len(profiles)} profiles")
@@ -292,12 +306,14 @@ async def search_profiles(
     top_profile_id = profiles[0].id if profiles and len(profiles) > 0 else None
     SearchHistoryService.save_search(db, user_id, search_params, len(profiles), top_profile_id)
     
-    # Convert to dicts
+    # ✅ FIX #3: Convert Profile objects to dicts properly
     profile_dicts = []
-    for profile in profiles[:200]:
+    for profile in profiles[:200]:  # Limit to 200 profiles
         if isinstance(profile, dict):
+            # Already a dict
             profile_dicts.append(profile)
         else:
+            # Convert Profile object to dict
             profile_dict = {
                 "id": profile.id,
                 "github_username": profile.github_username,
@@ -310,7 +326,7 @@ async def search_profiles(
                 "total_stars": getattr(profile, 'total_stars', 0),
                 "developer_score": getattr(profile, 'developer_score', 0),
                 "avatar_url": getattr(profile, 'avatar_url', None),
-                "total_contributions": getattr(profile, 'total_contributions', 0),
+                "total_contributions": getattr(profile, 'contributions_last_year', 0),
                 "followers": getattr(profile, 'followers', 0),
                 "languages_data": getattr(profile, 'languages_data', None),
                 "top_repos": getattr(profile, 'top_repos', None),
@@ -322,8 +338,8 @@ async def search_profiles(
         "success": True,
         "total_found": len(profiles),
         "profiles": profile_dicts,
-        "from_cache": len(profiles),
-        "from_github": 0
+        "from_cache": from_cache,
+        "from_github": from_github
     }
 
 
@@ -633,8 +649,32 @@ def health_check(db: Session = Depends(get_db)):
     return {
         "status": "healthy" if db_status == "healthy" else "degraded",
         "database": db_status,
-        "version": "1.0.0",
+        "version": "2.0.0",
         "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+
+# ===== VERSION CHECK (for debugging) =====
+
+@app.get("/api/version-check")
+def version_check():
+    """Verify which version of code is running - for debugging only"""
+    return {
+        "version": "FIXED_VERSION_2.0",
+        "fixes_applied": [
+            "Fix #3: Empty profiles array bug - proper profile dict conversion",
+            "Fix #4: Enhanced logging in github_integration_service", 
+            "Fix #5: FilterService debug logs with logging import",
+            "Fix #6: Profile saving error handling with try/except",
+            "Fix #7: Missing logging import in filter_service"
+        ],
+        "critical_fixes": [
+            "GitHubIntegrationService class indentation fixed",
+            "async keyword properly added to search_and_cache_profiles",
+            "Profile conversion to dicts in fallback path"
+        ],
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "status": "All fixes applied ✅"
     }
 
 

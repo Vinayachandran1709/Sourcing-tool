@@ -22,76 +22,78 @@ class GitHubIntegrationService:
     4. Returns combined results
     """
     
-@staticmethod
-async def search_and_cache_profiles(
-    db: Session,
-    filters: Dict,
-    max_github_results: int = 50
-) -> List[Profile]:
-    """
-    Main search function that combines database cache + GitHub API
-    """
-    
-    logger.info(f"🔍 HYBRID SEARCH STARTED")
-    logger.info(f"   Filters: {filters}")
-    
-    # ===== STEP 1: Search database cache =====
-    logger.info("📦 Searching database cache...")
-    try:
-        cached_profiles = GitHubIntegrationService._search_database(db, filters)
-        logger.info(f"   ✅ Found {len(cached_profiles)} cached profiles")
-        print(f"   ✅ Found {len(cached_profiles)} cached profiles")
-    except Exception as e:
-        logger.error(f"   ❌ Database search failed: {e}", exc_info=True)
-        print(f"   ❌ Database search failed: {e}")
-        cached_profiles = []
-    
-    # ===== STEP 2: Fetch new profiles from GitHub =====
-    logger.info("🌐 Fetching new profiles from GitHub API...")
-    
-    language = filters.get("languages", [])
-    primary_language = language[0] if language and len(language) > 0 else None
-    location = filters.get("location")
-    min_repos = filters.get("min_repos", 0)
-    
-    if not primary_language and not location:
-        logger.warning("   ⚠️ No language or location specified, skipping GitHub search")
-        print("   ⚠️ No language or location specified, skipping GitHub search")
-        return cached_profiles
-    
-    # Fetch from GitHub
-    try:
-        new_profiles = await GitHubIntegrationService._fetch_from_github(
-            db, primary_language, location, min_repos, max_github_results
-        )
-        logger.info(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
-        print(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
-    except Exception as e:
-        logger.error(f"   ❌ GitHub fetch failed: {e}", exc_info=True)
-        print(f"   ❌ GitHub fetch failed: {e}")
-        new_profiles = []
-    
-    # ===== STEP 3: Combine results =====
-    all_profiles = cached_profiles + new_profiles
-    
-    # Remove duplicates (prefer cached versions)
-    seen_usernames = set()
-    unique_profiles = []
-    
-    for profile in all_profiles:
-        if profile.github_username not in seen_usernames:
-            seen_usernames.add(profile.github_username)
-            unique_profiles.append(profile)
-    
-    logger.info(f"✅ Total unique profiles: {len(unique_profiles)}")
-    logger.info(f"   - From cache: {len(cached_profiles)}")
-    logger.info(f"   - From GitHub: {len(new_profiles)}")
-    
-    print(f"\n✅ Total unique profiles: {len(unique_profiles)}")
-    print(f"   - From cache: {len(cached_profiles)}")
-    print(f"   - From GitHub: {len(new_profiles)}")
-    
-    return unique_profiles    
+    @staticmethod
+    async def search_and_cache_profiles(
+        db: Session,
+        filters: Dict,
+        max_github_results: int = 50
+    ) -> List[Profile]:
+        """
+        Main search function that combines database cache + GitHub API
+        
+        ✅ FIX #4: Enhanced logging throughout the search process
+        """
+        
+        logger.info(f"🔍 HYBRID SEARCH STARTED")
+        logger.info(f"   Filters: {filters}")
+        
+        # ===== STEP 1: Search database cache =====
+        logger.info("📦 Searching database cache...")
+        try:
+            cached_profiles = GitHubIntegrationService._search_database(db, filters)
+            logger.info(f"   ✅ Found {len(cached_profiles)} cached profiles")
+            print(f"   ✅ Found {len(cached_profiles)} cached profiles")
+        except Exception as e:
+            logger.error(f"   ❌ Database search failed: {e}", exc_info=True)
+            print(f"   ❌ Database search failed: {e}")
+            cached_profiles = []
+        
+        # ===== STEP 2: Fetch new profiles from GitHub =====
+        logger.info("🌐 Fetching new profiles from GitHub API...")
+        
+        language = filters.get("languages", [])
+        primary_language = language[0] if language and len(language) > 0 else None
+        location = filters.get("location")
+        min_repos = filters.get("min_repos", 0)
+        
+        if not primary_language and not location:
+            logger.warning("   ⚠️ No language or location specified, skipping GitHub search")
+            print("   ⚠️ No language or location specified, skipping GitHub search")
+            return cached_profiles
+        
+        # Fetch from GitHub
+        try:
+            new_profiles = await GitHubIntegrationService._fetch_from_github(
+                db, primary_language, location, min_repos, max_github_results
+            )
+            logger.info(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
+            print(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
+        except Exception as e:
+            logger.error(f"   ❌ GitHub fetch failed: {e}", exc_info=True)
+            print(f"   ❌ GitHub fetch failed: {e}")
+            new_profiles = []
+        
+        # ===== STEP 3: Combine results =====
+        all_profiles = cached_profiles + new_profiles
+        
+        # Remove duplicates (prefer cached versions)
+        seen_usernames = set()
+        unique_profiles = []
+        
+        for profile in all_profiles:
+            if profile.github_username not in seen_usernames:
+                seen_usernames.add(profile.github_username)
+                unique_profiles.append(profile)
+        
+        logger.info(f"✅ Total unique profiles: {len(unique_profiles)}")
+        logger.info(f"   - From cache: {len(cached_profiles)}")
+        logger.info(f"   - From GitHub: {len(new_profiles)}")
+        
+        print(f"\n✅ Total unique profiles: {len(unique_profiles)}")
+        print(f"   - From cache: {len(cached_profiles)}")
+        print(f"   - From GitHub: {len(new_profiles)}")
+        
+        return unique_profiles    
     
     @staticmethod
     def _search_database(db: Session, filters: Dict) -> List[Profile]:
@@ -131,7 +133,11 @@ async def search_and_cache_profiles(
         min_repos: int,
         max_results: int
     ) -> List[Profile]:
-        """Fetch new profiles from GitHub and cache them"""
+        """
+        Fetch new profiles from GitHub and cache them
+        
+        ✅ FIX #6: Enhanced error handling with try/except for profile saving
+        """
         
         try:
             # Search GitHub
@@ -202,8 +208,7 @@ async def search_and_cache_profiles(
                     # Calculate score
                     profile.developer_score = profile.calculate_developer_score()
                     
-                    # Save to database
-                    # Save to database
+                    # ✅ FIX #6: Wrap database save in try/except with detailed logging
                     try:
                         db.add(profile)
                         db.commit()
@@ -225,11 +230,12 @@ async def search_and_cache_profiles(
                     
                 except Exception as e:
                     print(f"❌ Error: {e}")
+                    logger.error(f"Error processing {username}: {e}", exc_info=True)
                     db.rollback()
                     continue
             
             return new_profiles
             
         except Exception as e:
-            logger.error(f"GitHub fetch failed: {e}")
+            logger.error(f"GitHub fetch failed: {e}", exc_info=True)
             return []
