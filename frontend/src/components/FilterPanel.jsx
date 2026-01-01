@@ -64,7 +64,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
     languages: initialFilters.languages || [],
     skills: initialFilters.skills || [],
     minScore: initialFilters.minScore || 0,
-    minFollowers: initialFilters.minFollowers || 0,
     minRepos: initialFilters.minRepos || 0,
     minContributions: initialFilters.minContributions || 0,
     location: initialFilters.location || '',
@@ -154,7 +153,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
       languages: [],
       skills: [],
       minScore: 0,
-      minFollowers: 0,
       minRepos: 0,
       minContributions: 0,
       location: '',
@@ -173,7 +171,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
     filters.languages.length > 0,
     filters.skills.length > 0,
     filters.minScore > 0,
-    filters.minFollowers > 0,
     filters.minRepos > 0,
     filters.minContributions > 0,
     filters.location,
@@ -387,21 +384,11 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
             </div>
           </div>
 
-          {/* Min Followers */}
+        {/* Min Repos (Soft Filter) */}
           <div style={styles.filterGroup}>
-            <label style={styles.label}>Minimum Followers</label>
-            <input
-              type="number"
-              placeholder="0"
-              value={filters.minFollowers}
-              onChange={(e) => setFilters({ ...filters, minFollowers: parseInt(e.target.value) || 0 })}
-              style={styles.input}
-            />
-          </div>
-
-          {/* Min Repos */}
-          <div style={styles.filterGroup}>
-            <label style={styles.label}>Minimum Public Repositories</label>
+            <label style={styles.label}>
+              Minimum Repositories (optional boost)
+            </label>
             <input
               type="number"
               placeholder="0"
@@ -409,6 +396,9 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
               onChange={(e) => setFilters({ ...filters, minRepos: parseInt(e.target.value) || 0 })}
               style={styles.input}
             />
+            <span style={styles.filterHint}>
+              Profiles with fewer repos will still appear, just ranked lower
+            </span>
           </div>
 
           {/* Min Contributions */}
@@ -678,6 +668,12 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.2s',
     fontFamily: 'Outfit, sans-serif',
+  },
+  filterHint: {
+    fontSize: '11px',
+    color: '#9ca3af',
+    marginTop: '4px',
+    fontStyle: 'italic',
   },
 };
 

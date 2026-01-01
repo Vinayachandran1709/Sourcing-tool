@@ -260,7 +260,7 @@ async def search_profiles(
         
         print("\nCALLING search_and_cache_profiles...")
         profiles = await GitHubIntegrationService.search_and_cache_profiles(
-            db, filters, max_github_results=30
+            db, filters, max_github_results=100  # ← INCREASED from 30 to 100
         )
         print(f"SUCCESS: Got {len(profiles)} profiles from hybrid search")
         

@@ -63,6 +63,13 @@ class GitHubIntegrationService:
         
         # Fetch from GitHub
         try:
+            # ✅ VALIDATE: Check if GitHub token exists
+            from github_service import GITHUB_TOKEN
+            if not GITHUB_TOKEN:
+                logger.error("⚠️ GITHUB_TOKEN not found in .env! GitHub API will fail.")
+                print("⚠️ WARNING: GITHUB_TOKEN missing - only using database cache")
+                return cached_profiles
+            
             new_profiles = await GitHubIntegrationService._fetch_from_github(
                 db, primary_language, location, min_repos, max_github_results
             )
@@ -146,7 +153,7 @@ class GitHubIntegrationService:
                 language=language,
                 location=location,
                 min_repos=min_repos,
-                max_pages=2  # 2 pages = 60 users max
+                max_pages=4  # ✅ INCREASED: 4 pages = 120 users (was 2 pages = 60)
             )
             
             if not users:
@@ -161,7 +168,12 @@ class GitHubIntegrationService:
             print(f"   Fetching detailed profiles...")
             new_profiles = []
             
-            for i, username in enumerate(usernames[:20], 1):  # Limit to 20 for speed
+            # ✅ INCREASED LIMIT: Process up to 50 profiles (was 20)
+            process_limit = min(50, len(usernames))
+            print(f"   Processing {process_limit} profiles...")
+            
+            for i, username in enumerate(usernames[:process_limit], 1):
+
                 try:
                     # Check if already in database
                     existing = db.query(Profile).filter(
@@ -242,5 +254,8 @@ class GitHubIntegrationService:
             return new_profiles
             
         except Exception as e:
-            logger.error(f"GitHub fetch failed: {e}", exc_info=True)
+            logger.error(f"❌ GitHub fetch failed: {e}", exc_info=True)
+            print(f"❌ GitHub API Error: {e}")
+            print(f"   Falling back to database cache only")
+            # Don't return empty - let the hybrid search continue with cache
             return []
