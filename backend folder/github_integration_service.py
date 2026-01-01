@@ -208,6 +208,11 @@ class GitHubIntegrationService:
                     # Calculate score
                     profile.developer_score = profile.calculate_developer_score()
                     
+                    # NEW: Detect roles
+                    from role_detection_service import RoleDetectionService
+                    profile.detected_roles = RoleDetectionService.detect_roles(profile)
+                    profile.roles_analyzed_at = datetime.now(timezone.utc)
+                                        
                     # ✅ FIX #6: Wrap database save in try/except with detailed logging
                     try:
                         db.add(profile)

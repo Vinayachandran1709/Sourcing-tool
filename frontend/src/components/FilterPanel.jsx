@@ -1,24 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import { ChevronDown, ChevronUp, X, Search } from 'lucide-react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 // ===== CONSTANT DEFINITIONS (MUST BE OUTSIDE COMPONENT) =====
 const ROLE_OPTIONS = [
   'Frontend Developer',
   'Backend Developer',
-  'Full Stack Developer',
-  'Mobile Developer (iOS)',
-  'Mobile Developer (Android)',
+  'Full-Stack Developer',
+  'Mobile Developer',
   'DevOps Engineer',
   'Data Scientist',
-  'Machine Learning Engineer',
+  'AI/ML Engineer',
+  'Data Engineer',
   'QA Engineer',
-  'Security Engineer',
-  'Cloud Architect',
-  'Database Administrator',
-  'System Administrator',
-  'Technical Lead',
-  'Engineering Manager',
-  'Product Engineer'
+  'Security Engineer'
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -80,6 +75,39 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
   const [roleSearch, setRoleSearch] = useState('');
   const [languageSearch, setLanguageSearch] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
+
+  useEffect(() => {
+    const styleSheet = document.createElement('style');
+    styleSheet.textContent = `
+      div[style*="autocompleteOption"]:hover {
+        background: #f9fafb !important;
+      }
+      
+      button[style*="roleChip"]:hover {
+        background: #FF6B35 !important;
+        color: #ffffff !important;
+        border-color: #FF6B35 !important;
+      }
+      
+      label[style*="checkboxLabel"]:hover {
+        background-color: #f3f4f6 !important;
+      }
+      
+      button[style*="resetButton"]:hover {
+        background: #f9fafb !important;
+      }
+      
+      button[style*="applyButton"]:hover {
+        background: #e85a26 !important;
+      }
+    `;
+    document.head.appendChild(styleSheet);
+
+    // Cleanup function to remove the style when component unmounts
+    return () => {
+      document.head.removeChild(styleSheet);
+    };
+  }, []);
 
   // Filtered options based on search
   const filteredRoles = useMemo(() => {
@@ -168,40 +196,76 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
       {/* Filters */}
       {isExpanded && (
         <div style={styles.content}>
-          {/* Role Filter with Search */}
+          {/* Role Filter - Single Input with Autocomplete */}
           <div style={styles.filterGroup}>
-            <label style={styles.label}>Role</label>
+            <label style={styles.label}>
+              Role {filters.role && <span style={styles.selectedBadge}>Selected: {filters.role}</span>}
+            </label>
             <div style={styles.searchableDropdown}>
               <div style={styles.searchInputWrapper}>
                 <Search size={16} color="#9ca3af" style={styles.searchIcon} />
                 <input
                   type="text"
-                  placeholder="Search roles..."
-                  value={roleSearch}
-                  onChange={(e) => setRoleSearch(e.target.value)}
-                  style={styles.searchInput}
+                  placeholder="Type or select a role..."
+                  value={roleSearch || filters.role}
+                  onChange={(e) => {
+                    setRoleSearch(e.target.value);
+                    // Clear selection when typing
+                    if (e.target.value !== filters.role) {
+                      setFilters({ ...filters, role: '' });
+                    }
+                  }}
+                  style={styles.input}
+                  autoComplete="off"
                 />
-                {roleSearch && (
+                {(roleSearch || filters.role) && (
                   <X 
                     size={16} 
                     color="#9ca3af" 
                     style={styles.clearIcon}
-                    onClick={() => setRoleSearch('')}
+                    onClick={() => {
+                      setRoleSearch('');
+                      setFilters({ ...filters, role: '' });
+                    }}
                   />
                 )}
               </div>
-              <select
-                value={filters.role}
-                onChange={handleRoleChange}
-                style={styles.select}
-              >
-                <option value="">All Roles</option>
-                {filteredRoles.map(role => (
-                  <option key={role} value={role}>{role}</option>
-                ))}
-              </select>
+              
+              {/* Autocomplete Suggestions */}
+              {roleSearch && roleSearch !== filters.role && filteredRoles.length > 0 && (
+                <div style={styles.autocompleteDropdown}>
+                  {filteredRoles.map(role => (
+                    <div
+                      key={role}
+                      style={styles.autocompleteOption}
+                      onClick={() => {
+                        setFilters({ ...filters, role });
+                        setRoleSearch('');
+                      }}
+                    >
+                      {role}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {/* Role Chips */}
+              {!roleSearch && !filters.role && (
+                <div style={styles.roleChips}>
+                  {ROLE_OPTIONS.map(role => (
+                    <button
+                      key={role}
+                      onClick={() => setFilters({ ...filters, role })}
+                      style={styles.roleChip}
+                    >
+                      {role}
+                    </button>
+                  ))}
+                </div>
+              )}
+              
               {roleSearch && filteredRoles.length === 0 && (
-                <div style={styles.noResults}>No roles found</div>
+                <div style={styles.noResults}>No roles found - try selecting from chips below</div>
               )}
             </div>
           </div>
@@ -559,6 +623,59 @@ const styles = {
     fontWeight: 600,
     color: '#ffffff',
     backgroundColor: '#FF6B35',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontFamily: 'Outfit, sans-serif',
+  },
+  selectedBadge: {
+    marginLeft: '8px',
+    padding: '4px 10px',
+    backgroundColor: '#FF6B35',
+    color: '#ffffff',
+    borderRadius: '12px',
+    fontSize: '11px',
+    fontWeight: 600,
+  },
+
+  autocompleteDropdown: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    marginTop: '4px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    zIndex: 10,
+    maxHeight: '200px',
+    overflowY: 'auto',
+  },
+
+  autocompleteOption: {
+    padding: '10px 12px',
+    cursor: 'pointer',
+    fontSize: '14px',
+    color: '#374151',
+    transition: 'background 0.2s',
+    borderBottom: '1px solid #f3f4f6',
+  },
+
+  roleChips: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+    marginTop: '12px',
+  },
+
+  roleChip: {
+    padding: '8px 14px',
+    backgroundColor: '#f9fafb',
+    border: '1px solid #e5e7eb',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: 500,
+    color: '#374151',
     cursor: 'pointer',
     transition: 'all 0.2s',
     fontFamily: 'Outfit, sans-serif',

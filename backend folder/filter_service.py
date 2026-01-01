@@ -59,25 +59,15 @@ class FilterService:
         # HARD FILTERS (must match)
         
         # 1. Role-based filtering
+        # 1. Role-based filtering (SOFT - uses detected roles from AI analysis)
         role = filters.get("role")
-        if role and role in FilterService.ROLE_LANGUAGE_MAP:
-            expected_languages = FilterService.ROLE_LANGUAGE_MAP[role]
-            # Match if primary_language matches OR any language in languages_data
-            lang_conditions = []
-            
-            # Check primary_language
-            for lang in expected_languages:
-                lang_conditions.append(Profile.primary_language.ilike(f"%{lang}%"))
-            
-            # Check languages_data JSON field (convert to text for searching)
-            for lang in expected_languages:
-                # Use CAST to text and search within JSON
-                lang_conditions.append(
-                    cast(Profile.languages_data, String).ilike(f"%{lang}%")
-                )
-            
-            query = query.filter(or_(*lang_conditions))
-        
+        if role:
+            from role_detection_service import RoleDetectionService
+            # Soft filter: show profiles with 40%+ confidence in this role
+            # This is done in Python after query, not in SQL (more flexible)
+            pass  # We'll filter in-memory after getting results
+
+
         # 2. Programming Language (if provided)
         languages = filters.get("languages", [])
         if languages:
@@ -164,6 +154,17 @@ class FilterService:
         
         # Sort by adjusted score
         scored_profiles.sort(key=lambda p: p.adjusted_score, reverse=True)
+        
+        # NEW: Apply soft role filter if specified
+        role = filters.get("role")
+        if role:
+            from role_detection_service import RoleDetectionService
+            # Keep profiles with 40%+ confidence in the role
+            scored_profiles = [
+                p for p in scored_profiles 
+                if RoleDetectionService.matches_role_filter(p, role, min_confidence=0.40)
+            ]
+            logger.info(f"After role filter '{role}': {len(scored_profiles)} profiles")
 
         # ✅ FIX #5: Add debug logging at end
         logger.info(f"FilterService returning {len(scored_profiles)} profiles")

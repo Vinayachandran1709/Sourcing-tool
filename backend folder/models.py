@@ -86,6 +86,10 @@ class Profile(Base):
     cached_at = Column(DateTime(timezone=True), server_default=func.now())
     source = Column(String, default="github")
     
+    # NEW: Role detection
+    detected_roles = Column(JSON, nullable=True)  # [{"role": "Backend Developer", "confidence": 0.85}, ...]
+    roles_analyzed_at = Column(DateTime(timezone=True), nullable=True)
+    
     # NEW: Additional fields
     phone_number = Column(String, nullable=True)  # Fetch but NEVER show to users
     linkedin_url = Column(String, nullable=True)

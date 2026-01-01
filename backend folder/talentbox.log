@@ -6017,3 +6017,91 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate
 2025-12-28 19:09:33,363 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
 2025-12-28 19:09:33,363 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
 2025-12-28 19:09:33,364 - __main__ - INFO - Search found 31 profiles
+2025-12-29 20:26:40,231 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2025-12-29 20:26:40,236 - main - INFO - Environment: development
+2025-12-29 20:26:40,237 - main - INFO - CORS origins: ['http://localhost:3000']
+2025-12-29 20:27:35,108 - main - INFO - Search request from user 12: role=, languages=['Python']
+2025-12-29 20:27:35,603 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2025-12-29 20:27:35,604 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2025-12-29 20:27:35,605 - github_integration_service - INFO - 📦 Searching database cache...
+2025-12-29 20:27:36,727 - github_integration_service - INFO -    ✅ Found 31 cached profiles
+2025-12-29 20:27:36,728 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2025-12-29 20:27:36,729 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2025-12-29 20:27:36,730 - main - INFO - Search found 31 profiles
+2025-12-29 20:27:59,066 - main - INFO - Search request from user 12: role=, languages=[]
+2025-12-29 20:27:59,070 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2025-12-29 20:27:59,074 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2025-12-29 20:27:59,076 - github_integration_service - INFO - 📦 Searching database cache...
+2025-12-29 20:28:00,279 - github_integration_service - INFO -    ✅ Found 31 cached profiles
+2025-12-29 20:28:00,280 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2025-12-29 20:28:00,281 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2025-12-29 20:28:00,282 - main - INFO - Search found 31 profiles
+2025-12-29 20:28:22,668 - main - INFO - Search request from user 12: role=, languages=[]
+2025-12-29 20:28:22,678 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2025-12-29 20:28:22,678 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2025-12-29 20:28:22,679 - github_integration_service - INFO - 📦 Searching database cache...
+2025-12-29 20:28:23,913 - github_integration_service - INFO -    ✅ Found 31 cached profiles
+2025-12-29 20:28:23,913 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2025-12-29 20:28:23,914 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2025-12-29 20:28:23,915 - main - INFO - Search found 31 profiles
+2026-01-01 20:26:50,260 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 20:26:50,263 - main - INFO - Environment: development
+2026-01-01 20:26:50,264 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 20:27:41,577 - main - INFO - Search request from user 12: role=, languages=['Python']
+2026-01-01 20:27:42,142 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-01 20:27:42,145 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-01 20:27:42,146 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-01 20:27:42,936 - github_integration_service - INFO -    ✅ Found 31 cached profiles
+2026-01-01 20:27:42,937 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-01 20:27:42,938 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-01 20:27:42,939 - main - INFO - Search found 31 profiles
+2026-01-01 20:27:57,838 - main - INFO - Search request from user 12: role=, languages=['Python']
+2026-01-01 20:27:57,840 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-01 20:27:57,841 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-01 20:27:57,842 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-01 20:27:58,619 - github_integration_service - INFO -    ✅ Found 31 cached profiles
+2026-01-01 20:27:58,620 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-01 20:27:58,621 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-01 20:27:58,623 - main - INFO - Search found 31 profiles
+2026-01-01 21:04:51,814 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:04:51,816 - main - INFO - Environment: development
+2026-01-01 21:04:51,817 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 21:05:08,314 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:05:08,315 - main - INFO - Environment: development
+2026-01-01 21:05:08,316 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 21:05:11,374 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:05:11,374 - main - INFO - Environment: development
+2026-01-01 21:05:11,375 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 21:05:42,692 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:05:42,693 - main - INFO - Environment: development
+2026-01-01 21:05:42,695 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 21:05:54,090 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:05:54,091 - main - INFO - Environment: development
+2026-01-01 21:05:54,092 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 21:06:22,442 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:06:22,445 - main - INFO - Environment: development
+2026-01-01 21:06:22,446 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 21:06:25,589 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:06:25,590 - main - INFO - Environment: development
+2026-01-01 21:06:25,590 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 21:07:07,095 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 21:07:07,096 - main - INFO - Environment: development
+2026-01-01 21:07:07,097 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:30:50,616 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 22:30:50,621 - main - INFO - Environment: development
+2026-01-01 22:30:50,623 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:30:53,487 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 22:30:53,488 - main - INFO - Environment: development
+2026-01-01 22:30:53,489 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:30:56,406 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 22:30:56,407 - main - INFO - Environment: development
+2026-01-01 22:30:56,408 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:31:56,554 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 22:31:56,556 - main - INFO - Environment: development
+2026-01-01 22:31:56,557 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:32:00,066 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 22:32:00,068 - main - INFO - Environment: development
+2026-01-01 22:32:00,069 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:32:04,609 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 22:32:04,611 - main - INFO - Environment: development
+2026-01-01 22:32:04,612 - main - INFO - CORS origins: ['http://localhost:3000']
