@@ -25,6 +25,7 @@ const SearchDashboard = () => {
   const [savedLists, setSavedLists] = useState([]);
   const [stats, setStats] = useState(null);
   const [currentFilters, setCurrentFilters] = useState({});
+  const [scoreRange, setScoreRange] = useState({ min: 0, max: 100 });
   const [currentPage, setCurrentPage] = useState(1);
   const PROFILES_PER_PAGE = 20;
 
@@ -106,6 +107,11 @@ useEffect(() => {
     }
   }
 }, []);
+
+// Reset to page 1 when score range changes
+useEffect(() => {
+  setCurrentPage(1);
+}, [scoreRange]);
 
 // Profile selection handlers
 const handleProfileSelect = async (profileId) => {
@@ -189,14 +195,17 @@ const handleExportCSV = () => {
   window.URL.revokeObjectURL(url);
 };
 
-// Pagination
-const paginatedProfiles = profiles.slice(
+// Filter by score range before pagination
+const scoreFilteredProfiles = profiles.filter(p => 
+  p.developer_score >= scoreRange.min && p.developer_score <= scoreRange.max
+);
+
+const paginatedProfiles = scoreFilteredProfiles.slice(
   (currentPage - 1) * PROFILES_PER_PAGE,
   currentPage * PROFILES_PER_PAGE
 );
 
-const totalPages = Math.ceil(profiles.length / PROFILES_PER_PAGE);
-
+const totalPages = Math.ceil(scoreFilteredProfiles.length / PROFILES_PER_PAGE);
 const handleRetry = () => {
   if (currentFilters && Object.keys(currentFilters).length > 0) {
     handleSearch(currentFilters);
@@ -277,6 +286,64 @@ const handleRetry = () => {
             <button onClick={handleExportCSV} style={styles.exportButton}>
               <Download size={16} />
               Export CSV
+            </button>
+          </div>
+        </div>
+      )}
+
+
+      {/* Post-Results Score Filter (Only shows after results) */}
+      {profiles.length > 0 && !loading && (
+        <div style={styles.scoreFilterBar}>
+          <div style={styles.scoreFilterLeft}>
+            <span style={styles.scoreFilterIcon}>🎯</span>
+            <span style={styles.scoreFilterLabel}>Refine by Developer Score</span>
+          </div>
+          <div style={styles.scoreFilterRight}>
+            <button
+              onClick={() => setScoreRange({ min: 0, max: 100 })}
+              style={{
+                ...styles.scoreRangeButton,
+                ...(scoreRange.min === 0 && scoreRange.max === 100 ? styles.scoreRangeButtonActive : {})
+              }}
+            >
+              All Scores
+            </button>
+            <button
+              onClick={() => setScoreRange({ min: 85, max: 100 })}
+              style={{
+                ...styles.scoreRangeButton,
+                ...(scoreRange.min === 85 ? styles.scoreRangeButtonActive : {})
+              }}
+            >
+              Expert (85-100)
+            </button>
+            <button
+              onClick={() => setScoreRange({ min: 70, max: 84 })}
+              style={{
+                ...styles.scoreRangeButton,
+                ...(scoreRange.min === 70 && scoreRange.max === 84 ? styles.scoreRangeButtonActive : {})
+              }}
+            >
+              Senior (70-84)
+            </button>
+            <button
+              onClick={() => setScoreRange({ min: 50, max: 69 })}
+              style={{
+                ...styles.scoreRangeButton,
+                ...(scoreRange.min === 50 && scoreRange.max === 69 ? styles.scoreRangeButtonActive : {})
+              }}
+            >
+              Mid-Level (50-69)
+            </button>
+            <button
+              onClick={() => setScoreRange({ min: 0, max: 49 })}
+              style={{
+                ...styles.scoreRangeButton,
+                ...(scoreRange.max === 49 ? styles.scoreRangeButtonActive : {})
+              }}
+            >
+              Junior (0-49)
             </button>
           </div>
         </div>
@@ -862,6 +929,56 @@ const styles = {
     color: '#6b7280',
     marginTop: '0.5rem',
     maxWidth: '400px',
+  },
+  scoreFilterBar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '16px 24px',
+    backgroundColor: '#f0fdf4',
+    border: '2px solid #10b981',
+    borderRadius: '12px',
+    marginBottom: '24px',
+  },
+
+  scoreFilterLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+
+  scoreFilterIcon: {
+    fontSize: '24px',
+  },
+
+  scoreFilterLabel: {
+    fontSize: '15px',
+    fontWeight: 600,
+    color: '#1a1a1a',
+  },
+
+  scoreFilterRight: {
+    display: 'flex',
+    gap: '8px',
+  },
+
+  scoreRangeButton: {
+    padding: '8px 16px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    color: '#374151',
+    fontSize: '13px',
+    fontWeight: 600,
+    cursor: 'pointer',
+    fontFamily: 'Outfit, sans-serif',
+    transition: 'all 0.2s',
+  },
+
+  scoreRangeButtonActive: {
+    backgroundColor: '#10b981',
+    borderColor: '#10b981',
+    color: '#ffffff',
   },
 };
 

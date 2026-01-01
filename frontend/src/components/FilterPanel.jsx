@@ -63,7 +63,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
     role: initialFilters.role || '',
     languages: initialFilters.languages || [],
     skills: initialFilters.skills || [],
-    minScore: initialFilters.minScore || 0,
     minRepos: initialFilters.minRepos || 0,
     minContributions: initialFilters.minContributions || 0,
     location: initialFilters.location || '',
@@ -152,7 +151,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
       role: '',
       languages: [],
       skills: [],
-      minScore: 0,
       minRepos: 0,
       minContributions: 0,
       location: '',
@@ -170,7 +168,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
     filters.role,
     filters.languages.length > 0,
     filters.skills.length > 0,
-    filters.minScore > 0,
     filters.minRepos > 0,
     filters.minContributions > 0,
     filters.location,
@@ -364,26 +361,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
             />
           </div>
 
-          {/* Developer Score */}
-          <div style={styles.filterGroup}>
-            <label style={styles.label}>
-              Minimum Developer Score: {filters.minScore}
-            </label>
-            <input
-              type="range"
-              min="0"
-              max="100"
-              value={filters.minScore}
-              onChange={(e) => setFilters({ ...filters, minScore: parseInt(e.target.value) })}
-              style={styles.slider}
-            />
-            <div style={styles.sliderLabels}>
-              <span>0</span>
-              <span>50</span>
-              <span>100</span>
-            </div>
-          </div>
-
         {/* Min Repos (Soft Filter) */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
@@ -401,16 +378,28 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
             </span>
           </div>
 
-          {/* Min Contributions */}
+          {/* Min Contributions - Dropdown with Presets */}
           <div style={styles.filterGroup}>
-            <label style={styles.label}>Minimum Contributions</label>
-            <input
-              type="number"
-              placeholder="0"
-              value={filters.minContributions}
-              onChange={(e) => setFilters({ ...filters, minContributions: parseInt(e.target.value) || 0 })}
-              style={styles.input}
-            />
+            <label style={styles.label}>
+              Minimum Contributions (optional boost)
+            </label>
+            <div style={styles.dropdownWrapper}>
+              <select
+                value={filters.minContributions}
+                onChange={(e) => setFilters({ ...filters, minContributions: parseInt(e.target.value) })}
+                style={styles.select}
+              >
+                <option value="0">Any (No minimum)</option>
+                <option value="10">10+ contributions (Active hobbyist)</option>
+                <option value="50">50+ contributions (Regular contributor)</option>
+                <option value="100">100+ contributions (Very active)</option>
+                <option value="250">250+ contributions (Highly active)</option>
+                <option value="500">500+ contributions (Elite contributor)</option>
+              </select>
+              <span style={styles.filterHint}>
+                Profiles with fewer contributions will still appear, ranked lower
+              </span>
+            </div>
           </div>
 
           {/* Actions */}
@@ -674,6 +663,11 @@ const styles = {
     color: '#9ca3af',
     marginTop: '4px',
     fontStyle: 'italic',
+  },
+  dropdownWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '6px',
   },
 };
 

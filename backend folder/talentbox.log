@@ -6536,3 +6536,20 @@ server closed the connection unexpectedly
 2026-01-01 23:31:38,416 - github_integration_service - INFO - ✅ Total unique profiles: 10
 2026-01-01 23:31:38,417 - github_integration_service - INFO -    - From cache: 10
 2026-01-01 23:31:38,418 - github_integration_service - INFO -    - From GitHub: 0
+2026-01-01 23:31:38,424 - main - INFO - Search found 10 profiles
+2026-01-01 23:58:45,486 - main - INFO - Search request from user 12: role=Frontend Developer, languages=['JavaScript']
+2026-01-01 23:58:45,490 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-01 23:58:45,492 - github_integration_service - INFO -    Filters: {'role': 'Frontend Developer', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-01 23:58:45,494 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-01 23:58:46,381 - github_integration_service - INFO -    ✅ Found 28 cached profiles
+2026-01-01 23:58:46,388 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-01 23:58:46,389 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-01 23:58:46,392 - main - INFO - Search found 28 profiles
+2026-01-02 00:06:27,415 - main - INFO - Search request from user 12: role=Frontend Developer, languages=['JavaScript']
+2026-01-02 00:06:27,432 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-02 00:06:27,438 - github_integration_service - INFO -    Filters: {'role': 'Frontend Developer', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-02 00:06:27,439 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-02 00:06:28,447 - github_integration_service - INFO -    ✅ Found 28 cached profiles
+2026-01-02 00:06:28,448 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-02 00:06:28,449 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-02 00:06:28,450 - main - INFO - Search found 28 profiles
