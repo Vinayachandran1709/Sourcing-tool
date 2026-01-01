@@ -57,7 +57,7 @@ const SKILL_OPTIONS = [
 ];
 
 // ===== COMPONENT STARTS HERE =====
-const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
+const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState({
     role: initialFilters.role || '',
@@ -158,8 +158,12 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {} }) => {
     setRoleSearch('');
     setLanguageSearch('');
     setSkillSearch('');
+    
+    // Call parent's reset handler
+    if (onReset) {
+      onReset();
+    }
   };
-
   const handleApply = () => {
     onApplyFilters(filters);
   };

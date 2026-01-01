@@ -78,6 +78,39 @@ logger.info(f"CORS origins: {CORS_ORIGINS}")
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+@app.on_event("startup")
+async def startup_event():
+    """Validate critical configurations on startup"""
+    logger.info("🚀 TalentBox API Starting Up...")
+    
+    # Validate GitHub Token
+    from github_service import GITHUB_TOKEN
+    if not GITHUB_TOKEN:
+        logger.error("⚠️ CRITICAL: GITHUB_TOKEN not found in .env!")
+        logger.error("   → GitHub API searches will fail")
+        logger.error("   → Only database cache will work")
+    else:
+        logger.info(f"✅ GitHub Token found (length: {len(GITHUB_TOKEN)})")
+    
+    # Validate Database
+    try:
+        from sqlalchemy import text
+        from database import engine
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        logger.info("✅ Database connection successful")
+    except Exception as e:
+        logger.error(f"❌ Database connection failed: {e}")
+    
+    # Validate JWT Secret
+    from auth_middleware import SECRET_KEY
+    if not SECRET_KEY:
+        logger.error("⚠️ CRITICAL: JWT_SECRET_KEY not found!")
+    else:
+        logger.info("✅ JWT Secret configured")
+    
+    logger.info("🎯 Startup validation complete\n")
+
 
 # ⭐ GLOBAL ERROR HANDLERS
 

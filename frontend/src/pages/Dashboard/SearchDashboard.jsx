@@ -73,41 +73,41 @@ const SearchDashboard = () => {
   }
 };
 
-// Load saved lists on mount
-useEffect(() => {
+  // Load saved lists on mount
+  useEffect(() => {
 
-  const styleSheet = document.createElement('style');
-    styleSheet.textContent = `
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
+    const styleSheet = document.createElement('style');
+      styleSheet.textContent = `
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `;
+      document.head.appendChild(styleSheet);
+
+
+    const loadLists = async () => {
+      try {
+        const data = await getSavedLists();
+        setSavedLists(data.lists || []);
+      } catch (error) {
+        console.error('Failed to load saved lists:', error);
       }
-    `;
-    document.head.appendChild(styleSheet);
-
-
-  const loadLists = async () => {
-    try {
-      const data = await getSavedLists();
-      setSavedLists(data.lists || []);
-    } catch (error) {
-      console.error('Failed to load saved lists:', error);
+    };
+    loadLists();
+    
+    // ✅ CHANGED: Load last search into filters but DON'T trigger search
+    const lastSearch = localStorage.getItem('lastSearch');
+    if (lastSearch) {
+      try {
+        const filters = JSON.parse(lastSearch);
+        setCurrentFilters(filters); // Just load into UI
+        // Do NOT call handleSearch() here!
+      } catch (error) {
+        console.error('Failed to load last search:', error);
+      }
     }
-  };
-  loadLists();
-  
-  // Load last search from localStorage
-  const lastSearch = localStorage.getItem('lastSearch');
-  if (lastSearch) {
-    try {
-      const filters = JSON.parse(lastSearch);
-      handleSearch(filters);
-    } catch (error) {
-      console.error('Failed to load last search:', error);
-    }
-  }
-}, []);
-
+  }, []);
 // Reset to page 1 when score range changes
 useEffect(() => {
   setCurrentPage(1);
@@ -211,6 +211,16 @@ const handleRetry = () => {
     handleSearch(currentFilters);
   }
 };
+const handleResetAll = () => {
+  setProfiles([]);
+  setStats(null);
+  setCurrentFilters({});
+  setCurrentPage(1);
+  setScoreRange({ min: 0, max: 100 });
+  setError(null);
+  localStorage.removeItem('lastSearch');
+};
+
 
   const handleToggleSelect = async (profileId) => {
     try {
@@ -231,8 +241,9 @@ const handleRetry = () => {
       <FilterPanel 
         onApplyFilters={handleSearch} 
         initialFilters={currentFilters}
+        onReset={handleResetAll}
       />
-
+      
       {/* Error Display */}
       {error && (
         <div style={styles.errorBox}>

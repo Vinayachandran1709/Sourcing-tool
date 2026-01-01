@@ -6553,3 +6553,62 @@ server closed the connection unexpectedly
 2026-01-02 00:06:28,448 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
 2026-01-02 00:06:28,449 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
 2026-01-02 00:06:28,450 - main - INFO - Search found 28 profiles
+2026-01-02 00:25:57,484 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-02 00:25:57,485 - main - INFO - Environment: development
+2026-01-02 00:25:57,485 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-02 00:25:57,565 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-02 00:25:57,977 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-02 00:26:03,753 - main - INFO - ✅ Database connection successful
+2026-01-02 00:26:03,754 - main - INFO - ✅ JWT Secret configured
+2026-01-02 00:26:03,754 - main - INFO - 🎯 Startup validation complete
+
+2026-01-02 00:26:16,090 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-02 00:26:16,094 - main - INFO - Environment: development
+2026-01-02 00:26:16,095 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-02 00:26:16,283 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-02 00:26:16,383 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-02 00:26:21,622 - main - INFO - ✅ Database connection successful
+2026-01-02 00:26:21,623 - main - INFO - ✅ JWT Secret configured
+2026-01-02 00:26:21,628 - main - INFO - 🎯 Startup validation complete
+
+2026-01-02 00:26:24,558 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-02 00:26:24,560 - main - INFO - Environment: development
+2026-01-02 00:26:24,561 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-02 00:26:24,624 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-02 00:26:24,670 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-02 00:26:30,035 - main - INFO - ✅ Database connection successful
+2026-01-02 00:26:30,036 - main - INFO - ✅ JWT Secret configured
+2026-01-02 00:26:30,037 - main - INFO - 🎯 Startup validation complete
+
+2026-01-02 00:26:57,997 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-02 00:26:57,999 - main - INFO - Environment: development
+2026-01-02 00:26:58,000 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-02 00:26:58,060 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-02 00:26:58,106 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-02 00:27:03,407 - main - INFO - ✅ Database connection successful
+2026-01-02 00:27:03,409 - main - INFO - ✅ JWT Secret configured
+2026-01-02 00:27:03,410 - main - INFO - 🎯 Startup validation complete
+
+2026-01-02 00:30:03,720 - main - INFO - Search request from user 12: role=Frontend Developer, languages=[]
+2026-01-02 00:30:03,746 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-02 00:30:03,747 - github_integration_service - INFO -    Filters: {'role': 'Frontend Developer', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-02 00:30:03,747 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-02 00:30:04,560 - github_integration_service - INFO -    ✅ Found 28 cached profiles
+2026-01-02 00:30:04,562 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-02 00:30:04,563 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-02 00:30:04,564 - main - INFO - Search found 28 profiles
+2026-01-02 00:42:03,702 - main - INFO - Search request from user 12: role=, languages=['Python']
+2026-01-02 00:42:03,704 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-02 00:42:03,706 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-02 00:42:03,707 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-02 00:42:04,631 - github_integration_service - INFO -    ✅ Found 28 cached profiles
+2026-01-02 00:42:04,631 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-02 00:42:04,633 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-02 00:42:04,634 - main - INFO - Search found 28 profiles
+2026-01-02 00:57:48,348 - main - INFO - Search request from user 12: role=Backend Developer, languages=[]
+2026-01-02 00:57:48,351 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-02 00:57:48,352 - github_integration_service - INFO -    Filters: {'role': 'Backend Developer', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-02 00:57:48,353 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-02 00:57:49,308 - github_integration_service - INFO -    ✅ Found 28 cached profiles
+2026-01-02 00:57:49,309 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-02 00:57:49,310 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
