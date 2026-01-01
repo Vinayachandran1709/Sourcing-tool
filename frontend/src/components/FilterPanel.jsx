@@ -1,6 +1,5 @@
-import React, { useState, useMemo } from 'react';
-import { ChevronDown, ChevronUp, X, Search } from 'lucide-react';
 import React, { useState, useMemo, useEffect } from 'react';
+import { ChevronDown, ChevronUp, X, Search } from 'lucide-react';
 
 // ===== CONSTANT DEFINITIONS (MUST BE OUTSIDE COMPONENT) =====
 const ROLE_OPTIONS = [

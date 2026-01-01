@@ -6105,3 +6105,22 @@ sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate
 2026-01-01 22:32:04,609 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
 2026-01-01 22:32:04,611 - main - INFO - Environment: development
 2026-01-01 22:32:04,612 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:49:58,877 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-01 22:49:58,878 - main - INFO - Environment: development
+2026-01-01 22:49:58,879 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-01 22:53:03,907 - main - INFO - Search request from user 12: role=, languages=['Python']
+2026-01-01 22:53:04,551 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-01 22:53:04,553 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-01 22:53:04,556 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-01 22:53:05,634 - github_integration_service - INFO -    ✅ Found 25 cached profiles
+2026-01-01 22:53:05,635 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-01 22:53:05,636 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-01 22:53:05,637 - main - INFO - Search found 25 profiles
+2026-01-01 22:53:23,321 - main - INFO - Search request from user 12: role=, languages=['Python']
+2026-01-01 22:53:23,323 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-01 22:53:23,324 - github_integration_service - INFO -    Filters: {'role': '', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-01 22:53:23,326 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-01 22:53:24,183 - github_integration_service - INFO -    ✅ Found 25 cached profiles
+2026-01-01 22:53:24,184 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-01 22:53:24,185 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-01 22:53:24,186 - main - INFO - Search found 25 profiles
