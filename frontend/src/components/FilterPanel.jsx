@@ -368,7 +368,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 </div>
               )}
             </div>
-            <span style={styles.hintText}>Profiles matching 40%+ of selected languages will be shown</span>
           </div>
 
           {/* ✅ NEW: Frameworks - Dropdown Toggle */}
@@ -419,7 +418,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 </div>
               )}
             </div>
-            <span style={styles.hintText}>Profiles matching 40%+ of selected frameworks will be shown</span>
           </div>
 
           {/* ✅ NEW: Tools - Dropdown Toggle */}
@@ -470,7 +468,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 </div>
               )}
             </div>
-            <span style={styles.hintText}>Profiles matching 40%+ of selected tools will be shown</span>
           </div>
 
           {/* ✅ NEW: Location - Dropdown + Manual Entry */}

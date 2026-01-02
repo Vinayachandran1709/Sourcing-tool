@@ -26,7 +26,7 @@ class GitHubIntegrationService:
     async def search_and_cache_profiles(
         db: Session,
         filters: Dict,
-        max_github_results: int = 50
+        max_github_results: int = 150
     ) -> List[Profile]:
         """
         Main search function that combines database cache + GitHub API
@@ -153,7 +153,7 @@ class GitHubIntegrationService:
                 language=language,
                 location=location,
                 min_repos=min_repos,
-                max_pages=4  # ✅ INCREASED: 4 pages = 120 users (was 2 pages = 60)
+                max_pages=10  # ✅ INCREASED: 10 pages = 300 users
             )
             
             if not users:
@@ -169,7 +169,7 @@ class GitHubIntegrationService:
             new_profiles = []
             
             # ✅ INCREASED LIMIT: Process up to 50 profiles (was 20)
-            process_limit = min(50, len(usernames))
+            process_limit = min(150, len(usernames))  # ✅ Process up to 150
             print(f"   Processing {process_limit} profiles...")
             
             for i, username in enumerate(usernames[:process_limit], 1):

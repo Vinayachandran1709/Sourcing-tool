@@ -302,18 +302,8 @@ const SearchDashboard = () => {
         {stats && !loading && (
           <div style={styles.statsBar}>
             <div style={styles.statItem}>
-              <span style={styles.statValue}>{stats.total}</span>
-              <span style={styles.statLabel}>Total Found</span>
-            </div>
-            <div style={styles.statDivider}></div>
-            <div style={styles.statItem}>
-              <span style={styles.statValue}>{stats.fromCache}</span>
-              <span style={styles.statLabel}>From Cache</span>
-            </div>
-            <div style={styles.statDivider}></div>
-            <div style={styles.statItem}>
-              <span style={styles.statValue}>{stats.fromGithub}</span>
-              <span style={styles.statLabel}>From GitHub</span>
+              <span style={styles.statValue}>{profiles.length}</span>
+              <span style={styles.statLabel}>Total Profiles</span>
             </div>
             <div style={styles.statDivider}></div>
             <div style={styles.statItem}>
