@@ -6622,3 +6622,40 @@ server closed the connection unexpectedly
 2026-01-02 20:17:28,751 - main - INFO - ✅ JWT Secret configured
 2026-01-02 20:17:28,752 - main - INFO - 🎯 Startup validation complete
 
+2026-01-02 20:20:12,507 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2026-01-02 20:20:12,528 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-02 20:20:12,528 - github_integration_service - INFO -    Filters: {'role': 'Backend Developer', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-02 20:20:12,528 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-02 20:20:13,326 - github_integration_service - INFO -    ✅ Found 28 cached profiles
+2026-01-02 20:20:13,326 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-02 20:20:13,326 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-02 20:20:13,328 - main - INFO - Search found 28 profiles
+2026-01-02 20:25:02,075 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2026-01-02 20:25:02,078 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-02 20:25:02,080 - github_integration_service - INFO -    Filters: {'role': 'Backend Developer', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': '', 'min_repos': 0}
+2026-01-02 20:25:02,080 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-02 20:25:02,904 - github_integration_service - INFO -    ✅ Found 28 cached profiles
+2026-01-02 20:25:02,904 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-02 20:25:02,905 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-02 20:25:02,905 - main - INFO - Search found 28 profiles
+2026-01-02 22:04:58,734 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-02 22:04:58,737 - main - INFO - Environment: development
+2026-01-02 22:04:58,739 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-02 22:04:58,810 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-02 22:04:59,249 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-02 22:05:05,238 - main - INFO - ✅ Database connection successful
+2026-01-02 22:05:05,239 - main - INFO - ✅ JWT Secret configured
+2026-01-02 22:05:05,240 - main - INFO - 🎯 Startup validation complete
+
+2026-01-02 22:06:24,816 - main - INFO - Search request from user 12: role=Backend Developer, languages=[]
+2026-01-02 22:06:24,846 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED
+2026-01-02 22:06:24,846 - github_integration_service - INFO -    Filters: {'role': 'Backend Developer', 'languages': [], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': 'USA', 'min_repos': 0}
+2026-01-02 22:06:24,848 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-02 22:06:25,216 - github_integration_service - INFO -    ✅ Found 0 cached profiles
+2026-01-02 22:06:25,217 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
+2026-01-02 22:06:27,568 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-02 22:06:28,751 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=location:USA&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-02 22:06:31,028 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=location:USA&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-02 22:06:33,210 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=location:USA&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-02 22:06:35,610 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=location:USA&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-02 22:06:38,118 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Star, GitBranch, MapPin, Mail, ExternalLink, Code } from 'lucide-react';
+import { Star, GitBranch, MapPin, Mail, ExternalLink, Code, Eye } from 'lucide-react';
 
-const ProfileCard = ({ profile, onToggleSelect }) => {
+const ProfileCard = ({ profile, onSelect, onViewDetails, onAddToList }) => {
   const getScoreColor = (score) => {
     if (score >= 85) return '#10b981';
     if (score >= 70) return '#3b82f6';
@@ -19,6 +19,7 @@ const ProfileCard = ({ profile, onToggleSelect }) => {
 
   return (
     <div style={styles.card}>
+      {/* Header with Avatar & Score */}
       <div style={styles.header}>
         <img
           src={profile.avatar_url || 'https://via.placeholder.com/80'}
@@ -27,7 +28,13 @@ const ProfileCard = ({ profile, onToggleSelect }) => {
         />
         <div style={styles.info}>
           <h3 style={styles.name}>{profile.name || profile.github_username}</h3>
-          <a href={`https://github.com/${profile.github_username}`} target="_blank" rel="noopener noreferrer" style={styles.username}>
+          <a 
+            href={`https://github.com/${profile.github_username}`} 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            style={styles.username}
+            onClick={(e) => e.stopPropagation()}
+          >
             @{profile.github_username} <ExternalLink size={14} />
           </a>
           {profile.location && (
@@ -37,41 +44,89 @@ const ProfileCard = ({ profile, onToggleSelect }) => {
             </div>
           )}
         </div>
-        <div style={{...styles.scoreBadge, backgroundColor: getScoreColor(profile.developer_score)}}>
+        <div style={{
+          ...styles.scoreBadge, 
+          backgroundColor: getScoreColor(profile.developer_score)
+        }}>
           <div style={styles.scoreValue}>{profile.developer_score}</div>
           <div style={styles.scoreLabel}>{getScoreLabel(profile.developer_score)}</div>
         </div>
       </div>
-      {profile.bio && <p style={styles.bio}>{profile.bio}</p>}
+
+      {/* Bio */}
+      {profile.bio && (
+        <p style={styles.bio}>
+          {profile.bio.length > 120 ? profile.bio.substring(0, 120) + '...' : profile.bio}
+        </p>
+      )}
+
+      {/* Stats */}
       <div style={styles.stats}>
         <div style={styles.stat}>
           <Star size={16} color="#f59e0b" />
-          <span>{profile.total_stars.toLocaleString()} stars</span>
+          <span>{profile.total_stars?.toLocaleString() || 0} stars</span>
         </div>
         <div style={styles.stat}>
           <GitBranch size={16} color="#3b82f6" />
-          <span>{profile.public_repos} repos</span>
+          <span>{profile.public_repos || 0} repos</span>
         </div>
         <div style={styles.stat}>
           <Code size={16} color="#8b5cf6" />
-          <span>{profile.contributions_last_year} contributions</span>
+          <span>{profile.contributions_last_year || 0} contributions</span>
         </div>
       </div>
-      {profile.languages_data && (
+
+      {/* Languages */}
+      {profile.languages_data && Object.keys(profile.languages_data).length > 0 && (
         <div style={styles.languages}>
-          {Object.entries(profile.languages_data).slice(0, 3).map(([lang, percent]) => (
-            <span key={lang} style={styles.languageTag}>{lang} ({percent}%)</span>
-          ))}
+          {(() => {
+            const languagesObj = typeof profile.languages_data === 'string' 
+              ? JSON.parse(profile.languages_data) 
+              : profile.languages_data;
+            
+            const total = Object.values(languagesObj).reduce((a, b) => a + b, 0);
+            
+            return Object.entries(languagesObj)
+              .map(([lang, bytes]) => [lang, ((bytes / total) * 100).toFixed(1)])
+              .sort((a, b) => b[1] - a[1])
+              .slice(0, 3)
+              .map(([lang, percent]) => (
+                <span key={lang} style={styles.languageTag}>
+                  {lang} ({percent}%)
+                </span>
+              ));
+          })()}
         </div>
       )}
+
+      {/* Actions */}
       <div style={styles.actions}>
-        <button onClick={() => onToggleSelect(profile.id)} style={{...styles.selectButton, backgroundColor: profile.selected ? '#10b981' : '#6b7280'}}>
-          {profile.selected ? '✓ Selected' : 'Select for Email'}
+        {/* ✅ NEW: View Profile Button */}
+        <button 
+          onClick={() => onViewDetails && onViewDetails(profile)} 
+          style={styles.viewButton}
+        >
+          <Eye size={16} />
+          <span>View Profile</span>
         </button>
+        
+        <button 
+          onClick={() => onSelect && onSelect(profile.id)} 
+          style={{
+            ...styles.selectButton, 
+            backgroundColor: profile.selected ? '#10b981' : '#6b7280'
+          }}
+        >
+          {profile.selected ? '✓ Selected' : 'Select'}
+        </button>
+        
         {profile.email && (
-          <a href={`mailto:${profile.email}`} style={styles.emailLink}>
+          <a 
+            href={`mailto:${profile.email}`} 
+            style={styles.emailLink}
+            onClick={(e) => e.stopPropagation()}
+          >
             <Mail size={16} />
-            <span>Email</span>
           </a>
         )}
       </div>
@@ -80,24 +135,207 @@ const ProfileCard = ({ profile, onToggleSelect }) => {
 };
 
 const styles = {
-  card: { backgroundColor: '#fff', padding: '1.5rem', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.1)', transition: 'transform 0.2s, box-shadow 0.2s' },
-  header: { display: 'flex', gap: '1rem', marginBottom: '1rem', position: 'relative' },
-  avatar: { width: '80px', height: '80px', borderRadius: '50%', objectFit: 'cover' },
-  info: { flex: 1, display: 'flex', flexDirection: 'column', gap: '0.25rem' },
-  name: { fontSize: '1.25rem', fontWeight: 'bold', color: '#1a1a2e', margin: 0 },
-  username: { display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#4f46e5', textDecoration: 'none', fontSize: '0.875rem' },
-  location: { display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#6b7280', fontSize: '0.875rem' },
-  scoreBadge: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '0.5rem', borderRadius: '8px', minWidth: '80px', color: '#fff' },
-  scoreValue: { fontSize: '1.5rem', fontWeight: 'bold' },
-  scoreLabel: { fontSize: '0.75rem', opacity: 0.9 },
-  bio: { color: '#4b5563', fontSize: '0.875rem', lineHeight: '1.5', marginBottom: '1rem' },
-  stats: { display: 'flex', gap: '1.5rem', marginBottom: '1rem' },
-  stat: { display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', color: '#4b5563' },
-  languages: { display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1rem' },
-  languageTag: { padding: '0.25rem 0.75rem', backgroundColor: '#e0e7ff', color: '#4f46e5', borderRadius: '12px', fontSize: '0.75rem', fontWeight: '500' },
-  actions: { display: 'flex', gap: '0.5rem' },
-  selectButton: { flex: 1, padding: '0.5rem 1rem', border: 'none', borderRadius: '4px', color: '#fff', fontSize: '0.875rem', fontWeight: '500', cursor: 'pointer' },
-  emailLink: { display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.5rem 1rem', backgroundColor: '#f3f4f6', color: '#1f2937', textDecoration: 'none', borderRadius: '4px', fontSize: '0.875rem', fontWeight: '500' },
+  card: {
+    backgroundColor: '#fff',
+    padding: '1.5rem',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
+    transition: 'all 0.2s',
+    cursor: 'pointer',
+    position: 'relative',
+  },
+
+  header: {
+    display: 'flex',
+    gap: '1rem',
+    marginBottom: '1rem',
+    position: 'relative',
+  },
+
+  avatar: {
+    width: '80px',
+    height: '80px',
+    borderRadius: '50%',
+    objectFit: 'cover',
+    border: '3px solid #f3f4f6',
+  },
+
+  info: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.25rem',
+  },
+
+  name: {
+    fontSize: '1.125rem',
+    fontWeight: 'bold',
+    color: '#1a1a1a',
+    margin: 0,
+    lineHeight: 1.3,
+  },
+
+  username: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+    color: '#4f46e5',
+    textDecoration: 'none',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    transition: 'color 0.2s',
+  },
+
+  location: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.25rem',
+    color: '#6b7280',
+    fontSize: '0.875rem',
+  },
+
+  scoreBadge: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0.5rem',
+    borderRadius: '8px',
+    minWidth: '70px',
+    height: '70px',
+    color: '#fff',
+  },
+
+  scoreValue: {
+    fontSize: '1.5rem',
+    fontWeight: 'bold',
+    lineHeight: 1,
+  },
+
+  scoreLabel: {
+    fontSize: '0.6875rem',
+    opacity: 0.9,
+    marginTop: '0.25rem',
+  },
+
+  bio: {
+    color: '#4b5563',
+    fontSize: '0.875rem',
+    lineHeight: '1.5',
+    marginBottom: '1rem',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
+    overflow: 'hidden',
+  },
+
+  stats: {
+    display: 'flex',
+    gap: '1.25rem',
+    marginBottom: '1rem',
+    flexWrap: 'wrap',
+  },
+
+  stat: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    fontSize: '0.875rem',
+    color: '#4b5563',
+  },
+
+  languages: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    marginBottom: '1rem',
+  },
+
+  languageTag: {
+    padding: '0.25rem 0.75rem',
+    backgroundColor: '#e0e7ff',
+    color: '#4f46e5',
+    borderRadius: '12px',
+    fontSize: '0.75rem',
+    fontWeight: '500',
+  },
+
+  actions: {
+    display: 'flex',
+    gap: '0.5rem',
+    alignItems: 'center',
+  },
+
+  // ✅ NEW: View Profile Button
+  viewButton: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    padding: '0.625rem 1rem',
+    backgroundColor: '#FF6B35',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#fff',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontFamily: 'Outfit, sans-serif',
+  },
+
+  selectButton: {
+    flex: 1,
+    padding: '0.625rem 1rem',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#fff',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontFamily: 'Outfit, sans-serif',
+  },
+
+  emailLink: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '0.625rem',
+    backgroundColor: '#f3f4f6',
+    color: '#374151',
+    textDecoration: 'none',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: '500',
+    transition: 'all 0.2s',
+    minWidth: '40px',
+  },
 };
+
+// Hover effects
+const styleSheet = document.createElement('style');
+styleSheet.textContent = `
+  button[style*="viewButton"]:hover {
+    background: #e85a26 !important;
+    transform: translateY(-1px);
+  }
+  
+  button[style*="selectButton"]:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+  }
+  
+  a[style*="emailLink"]:hover {
+    background: #e5e7eb !important;
+  }
+  
+  div[style*="card"]:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-2px);
+  }
+`;
+document.head.appendChild(styleSheet);
 
 export default ProfileCard;
