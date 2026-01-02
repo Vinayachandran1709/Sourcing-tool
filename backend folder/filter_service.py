@@ -52,11 +52,7 @@ class FilterService:
     def apply_filters(db: Session, filters: Dict) -> List[Profile]:
         """
         Apply SOFT filters and return RANKED profiles.
-        
-        NEW APPROACH:
-        - Don't exclude profiles (except extreme cases)
-        - Calculate match score for each profile
-        - Return all profiles sorted by relevance
+        NOW SUPPORTS: Multi-select score ranges, contribution ranges, repo ranges
         """
         logger.info(f"FilterService.apply_filters called with filters: {filters}")
         
@@ -99,7 +95,6 @@ class FilterService:
                         break
                 
                 if role_match:
-                    # Boost score based on confidence
                     if role_confidence >= 0.80:
                         match_score += 20
                         match_signals.append(f"✅ Strong {role} match ({int(role_confidence*100)}%)")
@@ -110,7 +105,6 @@ class FilterService:
                         match_score += 5
                         match_signals.append(f"~ Possible {role} match ({int(role_confidence*100)}%)")
                 else:
-                    # Penalty for not matching role (but don't exclude!)
                     match_score -= 30
                     match_signals.append(f"⚠ Role mismatch")
             
@@ -120,15 +114,12 @@ class FilterService:
                 language_matches = 0
                 profile_langs = []
                 
-                # Check primary language
                 if profile.primary_language:
                     profile_langs.append(profile.primary_language.lower())
                 
-                # Check languages_data
                 if profile.languages_data:
                     profile_langs.extend([lang.lower() for lang in profile.languages_data.keys()])
                 
-                # Count matches
                 for lang in languages:
                     if any(lang.lower() in pl for pl in profile_langs):
                         language_matches += 1
@@ -143,19 +134,19 @@ class FilterService:
                     match_score -= 20
                     match_signals.append(f"⚠ Language mismatch")
             
-            # 3. LOCATION FILTER (Very Soft - just boost if matches)
+            # 3. LOCATION FILTER (Very Soft)
             location = filters.get("location")
             if location and profile.location:
                 if location.lower() in profile.location.lower():
                     match_score += 15
                     match_signals.append(f"✅ Location match: {profile.location}")
                 else:
-                    match_score -= 5  # Small penalty, not exclusion
+                    match_score -= 5
                     match_signals.append(f"○ Location: {profile.location}")
             elif location and not profile.location:
-                match_score -= 3  # Tiny penalty for missing location
+                match_score -= 3
             
-            # 4. FRAMEWORKS (Soft - bonus if matches)
+            # 4. FRAMEWORKS (Soft)
             frameworks = filters.get("frameworks", [])
             if frameworks:
                 framework_matches = 0
@@ -169,50 +160,60 @@ class FilterService:
                     match_score += framework_matches * 5
                     match_signals.append(f"✅ {framework_matches} frameworks match")
             
-            # 5. ACTIVITY FILTERS (Soft)
-            min_stars = filters.get("min_stars", 0)
-            if min_stars > 0:
-                if profile.total_stars >= min_stars:
-                    match_score += 10
-                    match_signals.append(f"✅ Stars: {profile.total_stars}")
-                else:
-                    match_score -= 10
-                    match_signals.append(f"⚠ Stars: {profile.total_stars} (wanted {min_stars}+)")
-            
-            min_contributions = filters.get("min_contributions", 0)
-            if min_contributions > 0:
-                if profile.contributions_last_year >= min_contributions:
-                    match_score += 10
-                    match_signals.append(f"✅ Contributions: {profile.contributions_last_year}")
-                else:
-                    match_score -= 10
-            
-            # 6. RECENT ACTIVITY (Soft)
-            recent_activity = filters.get("recent_activity")
-            if recent_activity and profile.last_active_date:
-                days_map = {
-                    "Last 30 days": 30,
-                    "Last 90 days": 90,
-                    "Last 6 months": 180
-                }
+            # ===== NEW: 5. DEVELOPER SCORE RANGES (Multi-Select) =====
+            score_ranges = filters.get("scoreRanges", [])
+            if score_ranges:
+                # Check if profile's score falls in ANY selected range
+                score_match = False
+                for score_range in score_ranges:
+                    if score_range["min"] <= profile.developer_score <= score_range["max"]:
+                        score_match = True
+                        match_score += 20  # Big boost for score match
+                        match_signals.append(f"✅ Score {profile.developer_score} in range {score_range['min']}-{score_range['max']}")
+                        break
                 
-                if recent_activity in days_map:
-                    cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_map[recent_activity])
-                    if profile.last_active_date >= cutoff_date:
-                        match_score += 15
-                        match_signals.append(f"✅ Recently active")
-                    else:
-                        match_score -= 15
-                        match_signals.append(f"⚠ Inactive for {(datetime.now(timezone.utc) - profile.last_active_date).days} days")
+                if not score_match:
+                    match_score -= 25  # Penalty for not matching any score range
+                    match_signals.append(f"⚠ Score {profile.developer_score} outside selected ranges")
             
-            # Calculate final score (base developer_score + match adjustments)
+            # ===== NEW: 6. CONTRIBUTION RANGES (Multi-Select) =====
+            contribution_ranges = filters.get("contributionRanges", [])
+            if contribution_ranges:
+                contrib_match = False
+                for contrib_range in contribution_ranges:
+                    if contrib_range["min"] <= profile.contributions_last_year <= contrib_range["max"]:
+                        contrib_match = True
+                        match_score += 15  # Good boost
+                        match_signals.append(f"✅ Contributions {profile.contributions_last_year} in range {contrib_range['min']}-{contrib_range['max']}")
+                        break
+                
+                if not contrib_match:
+                    match_score -= 15  # Smaller penalty - still show but rank lower
+                    match_signals.append(f"○ Contributions {profile.contributions_last_year} outside selected ranges")
+            
+            # ===== NEW: 7. REPO RANGES (Multi-Select) =====
+            repo_ranges = filters.get("repoRanges", [])
+            if repo_ranges:
+                repo_match = False
+                for repo_range in repo_ranges:
+                    if repo_range["min"] <= profile.public_repos <= repo_range["max"]:
+                        repo_match = True
+                        match_score += 10  # Smaller boost
+                        match_signals.append(f"✅ Repos {profile.public_repos} in range {repo_range['min']}-{repo_range['max']}")
+                        break
+                
+                if not repo_match:
+                    match_score -= 10  # Small penalty
+                    match_signals.append(f"○ Repos {profile.public_repos} outside selected ranges")
+            
+            # Calculate final score
             final_score = profile.developer_score + match_score
-            final_score = max(0, min(200, final_score))  # Cap between 0-200
+            final_score = max(0, min(200, final_score))
             
             # Store results
             profile.match_score = final_score
             profile.match_signals = match_signals
-            profile.adjusted_score = final_score  # For backward compatibility
+            profile.adjusted_score = final_score
             
             # ONLY EXCLUDE if match_score is extremely negative (less than -50)
             if match_score > -50:

@@ -6612,3 +6612,13 @@ server closed the connection unexpectedly
 2026-01-02 00:57:49,308 - github_integration_service - INFO -    ✅ Found 28 cached profiles
 2026-01-02 00:57:49,309 - github_integration_service - INFO - 🌐 Fetching new profiles from GitHub API...
 2026-01-02 00:57:49,310 - github_integration_service - WARNING -    ⚠️ No language or location specified, skipping GitHub search
+2026-01-02 00:57:49,311 - main - INFO - Search found 28 profiles
+2026-01-02 20:17:22,594 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-02 20:17:22,597 - main - INFO - Environment: development
+2026-01-02 20:17:22,598 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-02 20:17:22,697 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-02 20:17:23,214 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-02 20:17:28,746 - main - INFO - ✅ Database connection successful
+2026-01-02 20:17:28,751 - main - INFO - ✅ JWT Secret configured
+2026-01-02 20:17:28,752 - main - INFO - 🎯 Startup validation complete
+

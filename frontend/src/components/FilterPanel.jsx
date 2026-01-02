@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { ChevronDown, ChevronUp, X, Search } from 'lucide-react';
 
-// ===== CONSTANT DEFINITIONS (MUST BE OUTSIDE COMPONENT) =====
+// ===== CONSTANT DEFINITIONS =====
 const ROLE_OPTIONS = [
   'Frontend Developer',
   'Backend Developer',
@@ -56,19 +56,46 @@ const SKILL_OPTIONS = [
   'TensorFlow'
 ];
 
-// ===== COMPONENT STARTS HERE =====
+// ===== NEW: Score, Contribution, and Repo Ranges =====
+const SCORE_RANGES = [
+  { label: 'Expert (85-100)', min: 85, max: 100, color: '#10b981' },
+  { label: 'Senior (70-84)', min: 70, max: 84, color: '#3b82f6' },
+  { label: 'Mid-Level (50-69)', min: 50, max: 69, color: '#f59e0b' },
+  { label: 'Junior (30-49)', min: 30, max: 49, color: '#8b5cf6' },
+  { label: 'Beginner (0-29)', min: 0, max: 29, color: '#6b7280' }
+];
+
+const CONTRIBUTION_RANGES = [
+  { label: '0-10 (Beginners)', min: 0, max: 10 },
+  { label: '10-50 (Hobbyists)', min: 10, max: 50 },
+  { label: '50-100 (Regular)', min: 50, max: 100 },
+  { label: '100-250 (Active)', min: 100, max: 250 },
+  { label: '250-500 (Very Active)', min: 250, max: 500 },
+  { label: '500+ (Elite)', min: 500, max: 999999 }
+];
+
+const REPO_RANGES = [
+  { label: '0-5 (New Developers)', min: 0, max: 5 },
+  { label: '5-10 (Some Activity)', min: 5, max: 10 },
+  { label: '10-20 (Regular)', min: 10, max: 20 },
+  { label: '20-50 (Active)', min: 20, max: 50 },
+  { label: '50+ (Very Active)', min: 50, max: 999999 }
+];
+
+// ===== COMPONENT =====
 const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState({
     role: initialFilters.role || '',
     languages: initialFilters.languages || [],
     skills: initialFilters.skills || [],
-    minRepos: initialFilters.minRepos || 0,
-    minContributions: initialFilters.minContributions || 0,
+    scoreRanges: initialFilters.scoreRanges || [], // NEW: Array of {min, max} objects
+    contributionRanges: initialFilters.contributionRanges || [], // NEW
+    repoRanges: initialFilters.repoRanges || [], // NEW
     location: initialFilters.location || '',
   });
 
-  // Search states for each dropdown
+  // Search states
   const [roleSearch, setRoleSearch] = useState('');
   const [languageSearch, setLanguageSearch] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
@@ -90,6 +117,10 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
         background-color: #f3f4f6 !important;
       }
       
+      label[style*="rangeCheckboxLabel"]:hover {
+        background-color: #f9fafb !important;
+      }
+      
       button[style*="resetButton"]:hover {
         background: #f9fafb !important;
       }
@@ -100,13 +131,12 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     `;
     document.head.appendChild(styleSheet);
 
-    // Cleanup function to remove the style when component unmounts
     return () => {
       document.head.removeChild(styleSheet);
     };
   }, []);
 
-  // Filtered options based on search
+  // Filtered options
   const filteredRoles = useMemo(() => {
     if (!roleSearch) return ROLE_OPTIONS;
     return ROLE_OPTIONS.filter(role => 
@@ -128,10 +158,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     );
   }, [skillSearch]);
 
-  const handleRoleChange = (e) => {
-    setFilters({ ...filters, role: e.target.value });
-  };
-
+  // Handlers
   const handleLanguageToggle = (language) => {
     const newLanguages = filters.languages.includes(language)
       ? filters.languages.filter(l => l !== language)
@@ -146,24 +173,52 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     setFilters({ ...filters, skills: newSkills });
   };
 
+  // ===== NEW: Score Range Toggle =====
+  const handleScoreRangeToggle = (range) => {
+    const isSelected = filters.scoreRanges.some(r => r.min === range.min && r.max === range.max);
+    const newRanges = isSelected
+      ? filters.scoreRanges.filter(r => !(r.min === range.min && r.max === range.max))
+      : [...filters.scoreRanges, { min: range.min, max: range.max }];
+    setFilters({ ...filters, scoreRanges: newRanges });
+  };
+
+  // ===== NEW: Contribution Range Toggle =====
+  const handleContributionRangeToggle = (range) => {
+    const isSelected = filters.contributionRanges.some(r => r.min === range.min && r.max === range.max);
+    const newRanges = isSelected
+      ? filters.contributionRanges.filter(r => !(r.min === range.min && r.max === range.max))
+      : [...filters.contributionRanges, { min: range.min, max: range.max }];
+    setFilters({ ...filters, contributionRanges: newRanges });
+  };
+
+  // ===== NEW: Repo Range Toggle =====
+  const handleRepoRangeToggle = (range) => {
+    const isSelected = filters.repoRanges.some(r => r.min === range.min && r.max === range.max);
+    const newRanges = isSelected
+      ? filters.repoRanges.filter(r => !(r.min === range.min && r.max === range.max))
+      : [...filters.repoRanges, { min: range.min, max: range.max }];
+    setFilters({ ...filters, repoRanges: newRanges });
+  };
+
   const handleReset = () => {
     setFilters({
       role: '',
       languages: [],
       skills: [],
-      minRepos: 0,
-      minContributions: 0,
+      scoreRanges: [],
+      contributionRanges: [],
+      repoRanges: [],
       location: '',
     });
     setRoleSearch('');
     setLanguageSearch('');
     setSkillSearch('');
     
-    // Call parent's reset handler
     if (onReset) {
       onReset();
     }
   };
+
   const handleApply = () => {
     onApplyFilters(filters);
   };
@@ -172,8 +227,9 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     filters.role,
     filters.languages.length > 0,
     filters.skills.length > 0,
-    filters.minRepos > 0,
-    filters.minContributions > 0,
+    filters.scoreRanges.length > 0,
+    filters.contributionRanges.length > 0,
+    filters.repoRanges.length > 0,
     filters.location,
   ].filter(Boolean).length;
 
@@ -193,7 +249,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
       {/* Filters */}
       {isExpanded && (
         <div style={styles.content}>
-          {/* Role Filter - Single Input with Autocomplete */}
+          {/* Role Filter */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
               Role {filters.role && <span style={styles.selectedBadge}>Selected: {filters.role}</span>}
@@ -207,7 +263,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                   value={roleSearch || filters.role}
                   onChange={(e) => {
                     setRoleSearch(e.target.value);
-                    // Clear selection when typing
                     if (e.target.value !== filters.role) {
                       setFilters({ ...filters, role: '' });
                     }
@@ -228,7 +283,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 )}
               </div>
               
-              {/* Autocomplete Suggestions */}
               {roleSearch && roleSearch !== filters.role && filteredRoles.length > 0 && (
                 <div style={styles.autocompleteDropdown}>
                   {filteredRoles.map(role => (
@@ -246,7 +300,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 </div>
               )}
               
-              {/* Role Chips */}
               {!roleSearch && !filters.role && (
                 <div style={styles.roleChips}>
                   {ROLE_OPTIONS.map(role => (
@@ -262,12 +315,12 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
               )}
               
               {roleSearch && filteredRoles.length === 0 && (
-                <div style={styles.noResults}>No roles found - try selecting from chips below</div>
+                <div style={styles.noResults}>No roles found</div>
               )}
             </div>
           </div>
 
-          {/* Languages Filter with Search */}
+          {/* Languages Filter */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
               Programming Languages ({filters.languages.length} selected)
@@ -310,7 +363,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </div>
           </div>
 
-          {/* Skills & Frameworks Filter with Search */}
+          {/* Skills & Frameworks Filter */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
               Skills & Frameworks ({filters.skills.length} selected)
@@ -365,44 +418,96 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             />
           </div>
 
-        {/* Min Repos (Soft Filter) */}
+          {/* ===== NEW: Developer Score Ranges (Multi-Select) ===== */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
-              Minimum Repositories (optional boost)
+              Developer Score ({filters.scoreRanges.length} range{filters.scoreRanges.length !== 1 ? 's' : ''} selected)
             </label>
-            <input
-              type="number"
-              placeholder="0"
-              value={filters.minRepos}
-              onChange={(e) => setFilters({ ...filters, minRepos: parseInt(e.target.value) || 0 })}
-              style={styles.input}
-            />
-            <span style={styles.filterHint}>
-              Profiles with fewer repos will still appear, just ranked lower
-            </span>
+            <div style={styles.rangeCheckboxContainer}>
+              {SCORE_RANGES.map(range => {
+                const isSelected = filters.scoreRanges.some(r => r.min === range.min && r.max === range.max);
+                return (
+                  <label 
+                    key={range.label} 
+                    style={{
+                      ...styles.rangeCheckboxLabel,
+                      ...(isSelected ? styles.rangeCheckboxLabelSelected : {})
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleScoreRangeToggle(range)}
+                      style={styles.rangeCheckbox}
+                    />
+                    <div style={styles.rangeCheckboxContent}>
+                      <span style={{
+                        ...styles.rangeColorDot,
+                        backgroundColor: range.color
+                      }}></span>
+                      <span style={styles.rangeCheckboxText}>{range.label}</span>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
           </div>
 
-          {/* Min Contributions - Dropdown with Presets */}
+          {/* ===== NEW: Contribution Ranges (Multi-Select) ===== */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
-              Minimum Contributions (optional boost)
+              Minimum Contributions ({filters.contributionRanges.length} range{filters.contributionRanges.length !== 1 ? 's' : ''} selected)
             </label>
-            <div style={styles.dropdownWrapper}>
-              <select
-                value={filters.minContributions}
-                onChange={(e) => setFilters({ ...filters, minContributions: parseInt(e.target.value) })}
-                style={styles.select}
-              >
-                <option value="0">Any (No minimum)</option>
-                <option value="10">10+ contributions (Active hobbyist)</option>
-                <option value="50">50+ contributions (Regular contributor)</option>
-                <option value="100">100+ contributions (Very active)</option>
-                <option value="250">250+ contributions (Highly active)</option>
-                <option value="500">500+ contributions (Elite contributor)</option>
-              </select>
-              <span style={styles.filterHint}>
-                Profiles with fewer contributions will still appear, ranked lower
-              </span>
+            <div style={styles.rangeCheckboxContainer}>
+              {CONTRIBUTION_RANGES.map(range => {
+                const isSelected = filters.contributionRanges.some(r => r.min === range.min && r.max === range.max);
+                return (
+                  <label 
+                    key={range.label} 
+                    style={{
+                      ...styles.rangeCheckboxLabel,
+                      ...(isSelected ? styles.rangeCheckboxLabelSelected : {})
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleContributionRangeToggle(range)}
+                      style={styles.rangeCheckbox}
+                    />
+                    <span style={styles.rangeCheckboxText}>{range.label}</span>
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* ===== NEW: Repo Ranges (Multi-Select) - LAST ===== */}
+          <div style={styles.filterGroup}>
+            <label style={styles.label}>
+              Minimum Repositories ({filters.repoRanges.length} range{filters.repoRanges.length !== 1 ? 's' : ''} selected)
+            </label>
+            <div style={styles.rangeCheckboxContainer}>
+              {REPO_RANGES.map(range => {
+                const isSelected = filters.repoRanges.some(r => r.min === range.min && r.max === range.max);
+                return (
+                  <label 
+                    key={range.label} 
+                    style={{
+                      ...styles.rangeCheckboxLabel,
+                      ...(isSelected ? styles.rangeCheckboxLabelSelected : {})
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleRepoRangeToggle(range)}
+                      style={styles.rangeCheckbox}
+                    />
+                    <span style={styles.rangeCheckboxText}>{range.label}</span>
+                  </label>
+                );
+              })}
             </div>
           </div>
 
@@ -421,7 +526,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   );
 };
 
-// ===== STYLES (OUTSIDE COMPONENT) =====
+// ===== STYLES =====
 const styles = {
   container: {
     backgroundColor: '#ffffff',
@@ -502,18 +607,6 @@ const styles = {
     transform: 'translateY(-50%)',
     cursor: 'pointer',
   },
-  select: {
-    width: '100%',
-    padding: '10px 12px',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    fontSize: '14px',
-    fontFamily: 'Outfit, sans-serif',
-    backgroundColor: '#ffffff',
-    cursor: 'pointer',
-    outline: 'none',
-    transition: 'border-color 0.2s',
-  },
   input: {
     width: '100%',
     padding: '10px 12px',
@@ -553,21 +646,6 @@ const styles = {
   checkboxText: {
     fontSize: '14px',
     color: '#374151',
-  },
-  slider: {
-    width: '100%',
-    height: '6px',
-    borderRadius: '3px',
-    outline: 'none',
-    WebkitAppearance: 'none',
-    background: '#e5e7eb',
-  },
-  sliderLabels: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    marginTop: '8px',
-    fontSize: '12px',
-    color: '#6b7280',
   },
   noResults: {
     padding: '12px',
@@ -618,7 +696,6 @@ const styles = {
     fontSize: '11px',
     fontWeight: 600,
   },
-
   autocompleteDropdown: {
     position: 'absolute',
     top: '100%',
@@ -633,7 +710,6 @@ const styles = {
     maxHeight: '200px',
     overflowY: 'auto',
   },
-
   autocompleteOption: {
     padding: '10px 12px',
     cursor: 'pointer',
@@ -642,14 +718,12 @@ const styles = {
     transition: 'background 0.2s',
     borderBottom: '1px solid #f3f4f6',
   },
-
   roleChips: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '8px',
     marginTop: '12px',
   },
-
   roleChip: {
     padding: '8px 14px',
     backgroundColor: '#f9fafb',
@@ -662,16 +736,61 @@ const styles = {
     transition: 'all 0.2s',
     fontFamily: 'Outfit, sans-serif',
   },
-  filterHint: {
-    fontSize: '11px',
-    color: '#9ca3af',
-    marginTop: '4px',
-    fontStyle: 'italic',
-  },
-  dropdownWrapper: {
+
+  // ===== NEW: Range Checkbox Styles =====
+  rangeCheckboxContainer: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '6px',
+    gap: '10px',
+    padding: '12px',
+    backgroundColor: '#f9fafb',
+    borderRadius: '8px',
+    border: '1px solid #e5e7eb',
+  },
+
+  rangeCheckboxLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    padding: '10px 12px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+
+  rangeCheckboxLabelSelected: {
+    backgroundColor: '#fff5f2',
+    borderColor: '#FF6B35',
+    boxShadow: '0 0 0 3px rgba(255, 107, 53, 0.1)',
+  },
+
+  rangeCheckbox: {
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
+
+  rangeCheckboxContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    flex: 1,
+  },
+
+  rangeColorDot: {
+    width: '12px',
+    height: '12px',
+    borderRadius: '50%',
+    flexShrink: 0,
+  },
+
+  rangeCheckboxText: {
+    fontSize: '14px',
+    fontWeight: 500,
+    color: '#374151',
   },
 };
 
