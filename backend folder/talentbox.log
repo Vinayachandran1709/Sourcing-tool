@@ -12581,3 +12581,1031 @@ DETAIL:  Key (github_username)=(jetsonhacks) already exists.
 2026-01-03 16:41:08,127 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=5 "HTTP/1.1 200 OK"
 2026-01-03 16:41:10,566 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=6 "HTTP/1.1 200 OK"
 2026-01-03 16:41:12,967 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=7 "HTTP/1.1 200 OK"
+2026-01-03 16:41:15,533 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=8 "HTTP/1.1 200 OK"
+2026-01-03 16:41:17,946 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=9 "HTTP/1.1 200 OK"
+2026-01-03 16:41:20,609 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=10 "HTTP/1.1 200 OK"
+2026-01-03 16:41:23,373 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:41:24,603 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tiangolo "HTTP/1.1 200 OK"
+2026-01-03 16:41:26,447 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tiangolo/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:41:28,497 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tiangolo/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:41:29,191 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tiangolo/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:41:33,373 - github_integration_service - INFO - ✅ Saved tiangolo: Score 72
+2026-01-03 16:41:34,846 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:41:36,284 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sebastianruder "HTTP/1.1 200 OK"
+2026-01-03 16:41:38,133 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sebastianruder/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:41:39,557 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sebastianruder/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:41:39,962 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sebastianruder/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:41:43,241 - github_integration_service - INFO - ✅ Saved sebastianruder: Score 51
+2026-01-03 16:41:45,083 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:41:46,311 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vakila "HTTP/1.1 200 OK"
+2026-01-03 16:41:48,363 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vakila/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:41:49,909 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vakila/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:41:50,305 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vakila/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:41:53,890 - github_integration_service - INFO - ✅ Saved vakila: Score 57
+2026-01-03 16:41:55,834 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:41:57,170 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vietnh1009 "HTTP/1.1 200 OK"
+2026-01-03 16:41:58,662 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vietnh1009/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:42:00,033 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vietnh1009/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:00,443 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vietnh1009/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:03,769 - github_integration_service - INFO - ✅ Saved vietnh1009: Score 57
+2026-01-03 16:42:05,314 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:42:06,584 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nlohmann "HTTP/1.1 200 OK"
+2026-01-03 16:42:08,329 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nlohmann/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:42:10,087 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nlohmann/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:10,890 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nlohmann/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:14,376 - github_integration_service - INFO - ✅ Saved nlohmann: Score 73
+2026-01-03 16:42:17,851 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:42:19,183 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nschloe "HTTP/1.1 200 OK"
+2026-01-03 16:42:21,846 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nschloe/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:42:23,894 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nschloe/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:24,489 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nschloe/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:27,684 - github_integration_service - INFO - ✅ Saved nschloe: Score 77
+2026-01-03 16:42:29,322 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:42:30,508 - httpx - INFO - HTTP Request: GET https://api.github.com/users/honnibal "HTTP/1.1 200 OK"
+2026-01-03 16:42:32,713 - httpx - INFO - HTTP Request: GET https://api.github.com/users/honnibal/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:42:34,056 - httpx - INFO - HTTP Request: GET https://api.github.com/users/honnibal/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:34,445 - httpx - INFO - HTTP Request: GET https://api.github.com/users/honnibal/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:37,924 - github_integration_service - INFO - ✅ Saved honnibal: Score 35
+2026-01-03 16:42:39,377 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:42:40,994 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vas3k "HTTP/1.1 200 OK"
+2026-01-03 16:42:42,522 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vas3k/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:42:44,171 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vas3k/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:44,537 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vas3k/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:47,860 - github_integration_service - INFO - ✅ Saved vas3k: Score 67
+2026-01-03 16:42:49,290 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:42:50,396 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alireza0 "HTTP/1.1 200 OK"
+2026-01-03 16:42:51,849 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alireza0/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:42:53,795 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alireza0/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:54,204 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alireza0/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:42:57,271 - github_integration_service - INFO - ✅ Saved alireza0: Score 58
+2026-01-03 16:42:58,913 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:43:00,348 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hynek "HTTP/1.1 200 OK"
+2026-01-03 16:43:01,886 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hynek/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:43:03,626 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hynek/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:04,274 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hynek/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:07,557 - github_integration_service - INFO - ✅ Saved hynek: Score 68
+2026-01-03 16:43:11,006 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:43:12,269 - httpx - INFO - HTTP Request: GET https://api.github.com/users/explosion "HTTP/1.1 200 OK"
+2026-01-03 16:43:14,067 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:43:15,204 - httpx - INFO - HTTP Request: GET https://api.github.com/users/datitran "HTTP/1.1 200 OK"
+2026-01-03 16:43:17,657 - httpx - INFO - HTTP Request: GET https://api.github.com/users/datitran/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:43:19,293 - httpx - INFO - HTTP Request: GET https://api.github.com/users/datitran/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:19,602 - httpx - INFO - HTTP Request: GET https://api.github.com/users/datitran/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:23,184 - github_integration_service - INFO - ✅ Saved datitran: Score 56
+2026-01-03 16:43:24,723 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:43:26,026 - httpx - INFO - HTTP Request: GET https://api.github.com/users/deliveryhero "HTTP/1.1 200 OK"
+2026-01-03 16:43:27,792 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:43:29,023 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kashif "HTTP/1.1 200 OK"
+2026-01-03 16:43:31,697 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kashif/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:43:33,527 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kashif/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:34,449 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kashif/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:37,930 - github_integration_service - INFO - ✅ Saved kashif: Score 69
+2026-01-03 16:43:39,572 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:43:40,900 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tgalal "HTTP/1.1 200 OK"
+2026-01-03 16:43:42,745 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tgalal/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:43:43,972 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tgalal/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:44,382 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tgalal/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:47,456 - github_integration_service - INFO - ✅ Saved tgalal: Score 65
+2026-01-03 16:43:50,935 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:43:52,472 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LilithWittmann "HTTP/1.1 200 OK"
+2026-01-03 16:43:54,368 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LilithWittmann/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:43:55,847 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LilithWittmann/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:56,262 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LilithWittmann/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:43:59,473 - github_integration_service - INFO - ✅ Saved LilithWittmann: Score 47
+2026-01-03 16:44:01,175 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:44:02,301 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pudo "HTTP/1.1 200 OK"
+2026-01-03 16:44:04,159 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pudo/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:44:05,889 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pudo/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:06,706 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pudo/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:09,666 - github_integration_service - INFO - ✅ Saved pudo: Score 71
+2026-01-03 16:44:11,171 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:44:12,539 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jdhao "HTTP/1.1 200 OK"
+2026-01-03 16:44:14,589 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jdhao/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:44:16,025 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jdhao/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:16,434 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jdhao/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:19,143 - github_integration_service - INFO - ✅ Saved jdhao: Score 67
+2026-01-03 16:44:21,144 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:44:22,376 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rahmonov "HTTP/1.1 200 OK"
+2026-01-03 16:44:24,320 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rahmonov/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:44:25,752 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rahmonov/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:26,162 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rahmonov/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:29,349 - github_integration_service - INFO - ✅ Saved rahmonov: Score 50
+2026-01-03 16:44:30,873 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:44:32,108 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ndrplz "HTTP/1.1 200 OK"
+2026-01-03 16:44:33,536 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ndrplz/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:44:35,070 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ndrplz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:35,477 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ndrplz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:38,825 - github_integration_service - INFO - ✅ Saved ndrplz: Score 52
+2026-01-03 16:44:42,546 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:44:43,673 - httpx - INFO - HTTP Request: GET https://api.github.com/users/maateen "HTTP/1.1 200 OK"
+2026-01-03 16:44:45,428 - httpx - INFO - HTTP Request: GET https://api.github.com/users/maateen/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:44:46,844 - httpx - INFO - HTTP Request: GET https://api.github.com/users/maateen/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:47,675 - httpx - INFO - HTTP Request: GET https://api.github.com/users/maateen/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:50,850 - github_integration_service - INFO - ✅ Saved maateen: Score 49
+2026-01-03 16:44:52,377 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:44:53,611 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kjam "HTTP/1.1 200 OK"
+2026-01-03 16:44:55,465 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kjam/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:44:56,781 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kjam/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:44:57,195 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kjam/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:00,294 - github_integration_service - INFO - ✅ Saved kjam: Score 42
+2026-01-03 16:45:01,801 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:45:02,933 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anapaulagomes "HTTP/1.1 200 OK"
+2026-01-03 16:45:05,494 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anapaulagomes/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:45:07,328 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anapaulagomes/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:08,045 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anapaulagomes/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:11,149 - github_integration_service - INFO - ✅ Saved anapaulagomes: Score 59
+2026-01-03 16:45:12,828 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:45:14,292 - httpx - INFO - HTTP Request: GET https://api.github.com/users/philippjfr "HTTP/1.1 200 OK"
+2026-01-03 16:45:17,258 - httpx - INFO - HTTP Request: GET https://api.github.com/users/philippjfr/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:45:19,686 - httpx - INFO - HTTP Request: GET https://api.github.com/users/philippjfr/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:21,058 - httpx - INFO - HTTP Request: GET https://api.github.com/users/philippjfr/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:24,226 - github_integration_service - INFO - ✅ Saved philippjfr: Score 55
+2026-01-03 16:45:25,946 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:45:27,281 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LefterisJP "HTTP/1.1 200 OK"
+2026-01-03 16:45:30,573 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LefterisJP/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:45:32,564 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LefterisJP/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:33,645 - httpx - INFO - HTTP Request: GET https://api.github.com/users/LefterisJP/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:36,921 - github_integration_service - INFO - ✅ Saved LefterisJP: Score 56
+2026-01-03 16:45:40,608 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:45:41,836 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NikolaiT "HTTP/1.1 200 OK"
+2026-01-03 16:45:43,887 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NikolaiT/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:45:45,227 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NikolaiT/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:45,538 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NikolaiT/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:48,698 - github_integration_service - INFO - ✅ Saved NikolaiT: Score 67
+2026-01-03 16:45:50,440 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:45:51,976 - httpx - INFO - HTTP Request: GET https://api.github.com/users/wolfv "HTTP/1.1 200 OK"
+2026-01-03 16:45:54,946 - httpx - INFO - HTTP Request: GET https://api.github.com/users/wolfv/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:45:57,094 - httpx - INFO - HTTP Request: GET https://api.github.com/users/wolfv/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:45:58,280 - httpx - INFO - HTTP Request: GET https://api.github.com/users/wolfv/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:01,397 - github_integration_service - INFO - ✅ Saved wolfv: Score 60
+2026-01-03 16:46:03,116 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:46:04,367 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DonnchaC "HTTP/1.1 200 OK"
+2026-01-03 16:46:07,002 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DonnchaC/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:46:09,162 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DonnchaC/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:10,019 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DonnchaC/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:13,172 - github_integration_service - INFO - ✅ Saved DonnchaC: Score 50
+2026-01-03 16:46:14,913 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:46:16,142 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aabouzaid "HTTP/1.1 200 OK"
+2026-01-03 16:46:19,011 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aabouzaid/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:46:20,970 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aabouzaid/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:21,365 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aabouzaid/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:24,340 - github_integration_service - INFO - ✅ Saved aabouzaid: Score 54
+2026-01-03 16:46:25,869 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:46:27,100 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AnirudhDagar "HTTP/1.1 200 OK"
+2026-01-03 16:46:29,780 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AnirudhDagar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:46:31,324 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AnirudhDagar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:31,605 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AnirudhDagar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:34,566 - github_integration_service - INFO - ✅ Saved AnirudhDagar: Score 32
+2026-01-03 16:46:38,267 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:46:39,489 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mhagger "HTTP/1.1 200 OK"
+2026-01-03 16:46:40,823 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mhagger/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:46:42,153 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mhagger/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:42,768 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mhagger/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:45,569 - github_integration_service - INFO - ✅ Saved mhagger: Score 62
+2026-01-03 16:46:47,013 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:46:48,605 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tasdikrahman "HTTP/1.1 200 OK"
+2026-01-03 16:46:51,366 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tasdikrahman/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:46:53,109 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tasdikrahman/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:53,416 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tasdikrahman/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:46:56,558 - github_integration_service - INFO - ✅ Saved tasdikrahman: Score 54
+2026-01-03 16:46:57,980 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:46:59,101 - httpx - INFO - HTTP Request: GET https://api.github.com/users/davidsbatista "HTTP/1.1 200 OK"
+2026-01-03 16:47:01,261 - httpx - INFO - HTTP Request: GET https://api.github.com/users/davidsbatista/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:47:03,196 - httpx - INFO - HTTP Request: GET https://api.github.com/users/davidsbatista/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:04,074 - httpx - INFO - HTTP Request: GET https://api.github.com/users/davidsbatista/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:07,649 - github_integration_service - INFO - ✅ Saved davidsbatista: Score 67
+2026-01-03 16:47:09,495 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:47:10,637 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fritzing "HTTP/1.1 200 OK"
+2026-01-03 16:47:12,157 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:47:13,385 - httpx - INFO - HTTP Request: GET https://api.github.com/users/stefanw "HTTP/1.1 200 OK"
+2026-01-03 16:47:16,150 - httpx - INFO - HTTP Request: GET https://api.github.com/users/stefanw/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:47:17,790 - httpx - INFO - HTTP Request: GET https://api.github.com/users/stefanw/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:18,413 - httpx - INFO - HTTP Request: GET https://api.github.com/users/stefanw/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:23,522 - github_integration_service - INFO - ✅ Saved stefanw: Score 63
+2026-01-03 16:47:27,209 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:47:28,541 - httpx - INFO - HTTP Request: GET https://api.github.com/users/matthiasplappert "HTTP/1.1 200 OK"
+2026-01-03 16:47:30,700 - httpx - INFO - HTTP Request: GET https://api.github.com/users/matthiasplappert/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:47:32,137 - httpx - INFO - HTTP Request: GET https://api.github.com/users/matthiasplappert/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:32,653 - httpx - INFO - HTTP Request: GET https://api.github.com/users/matthiasplappert/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:35,927 - github_integration_service - INFO - ✅ Saved matthiasplappert: Score 41
+2026-01-03 16:47:37,965 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:47:39,302 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DominicBreuker "HTTP/1.1 200 OK"
+2026-01-03 16:47:41,859 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DominicBreuker/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:47:43,300 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DominicBreuker/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:43,696 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DominicBreuker/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:46,753 - github_integration_service - INFO - ✅ Saved DominicBreuker: Score 70
+2026-01-03 16:47:48,406 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:47:49,551 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abhishek-ch "HTTP/1.1 200 OK"
+2026-01-03 16:47:51,677 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abhishek-ch/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:47:53,218 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abhishek-ch/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:53,525 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abhishek-ch/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:47:56,436 - github_integration_service - INFO - ✅ Saved abhishek-ch: Score 48
+2026-01-03 16:47:57,834 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:47:58,954 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laurmaedje "HTTP/1.1 200 OK"
+2026-01-03 16:48:00,784 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laurmaedje/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:48:02,767 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laurmaedje/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:03,545 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laurmaedje/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:06,941 - github_integration_service - INFO - ✅ Saved laurmaedje: Score 48
+2026-01-03 16:48:08,464 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:48:09,815 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fractaledmind "HTTP/1.1 200 OK"
+2026-01-03 16:48:12,331 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fractaledmind/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:48:14,008 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fractaledmind/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:14,472 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fractaledmind/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:17,051 - github_integration_service - INFO - ✅ Saved fractaledmind: Score 72
+2026-01-03 16:48:20,560 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:48:21,773 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adbar "HTTP/1.1 200 OK"
+2026-01-03 16:48:23,543 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adbar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:48:25,201 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adbar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:25,590 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adbar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:28,970 - github_integration_service - INFO - ✅ Saved adbar: Score 64
+2026-01-03 16:48:30,520 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:48:31,825 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ManiMozaffar "HTTP/1.1 200 OK"
+2026-01-03 16:48:34,398 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ManiMozaffar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:48:35,728 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ManiMozaffar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:36,023 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ManiMozaffar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:38,960 - github_integration_service - INFO - ✅ Saved ManiMozaffar: Score 44
+2026-01-03 16:48:40,528 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:48:41,675 - httpx - INFO - HTTP Request: GET https://api.github.com/users/berinhard "HTTP/1.1 200 OK"
+2026-01-03 16:48:44,216 - httpx - INFO - HTTP Request: GET https://api.github.com/users/berinhard/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:48:45,752 - httpx - INFO - HTTP Request: GET https://api.github.com/users/berinhard/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:46,170 - httpx - INFO - HTTP Request: GET https://api.github.com/users/berinhard/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:49,073 - github_integration_service - INFO - ✅ Saved berinhard: Score 59
+2026-01-03 16:48:50,463 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:48:51,896 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hackebrot "HTTP/1.1 200 OK"
+2026-01-03 16:48:54,969 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hackebrot/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:48:57,119 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hackebrot/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:48:57,938 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hackebrot/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:00,559 - github_integration_service - INFO - ✅ Saved hackebrot: Score 60
+2026-01-03 16:49:02,238 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:49:03,367 - httpx - INFO - HTTP Request: GET https://api.github.com/users/krother "HTTP/1.1 200 OK"
+2026-01-03 16:49:05,373 - httpx - INFO - HTTP Request: GET https://api.github.com/users/krother/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:49:06,741 - httpx - INFO - HTTP Request: GET https://api.github.com/users/krother/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:07,270 - httpx - INFO - HTTP Request: GET https://api.github.com/users/krother/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:10,642 - github_integration_service - INFO - ✅ Saved krother: Score 52
+2026-01-03 16:49:14,194 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:49:15,552 - httpx - INFO - HTTP Request: GET https://api.github.com/users/guitmz "HTTP/1.1 200 OK"
+2026-01-03 16:49:18,219 - httpx - INFO - HTTP Request: GET https://api.github.com/users/guitmz/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:49:20,159 - httpx - INFO - HTTP Request: GET https://api.github.com/users/guitmz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:20,673 - httpx - INFO - HTTP Request: GET https://api.github.com/users/guitmz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:23,849 - github_integration_service - INFO - ✅ Saved guitmz: Score 70
+2026-01-03 16:49:25,381 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:49:27,225 - httpx - INFO - HTTP Request: GET https://api.github.com/users/whoenig "HTTP/1.1 200 OK"
+2026-01-03 16:49:29,186 - httpx - INFO - HTTP Request: GET https://api.github.com/users/whoenig/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:49:30,708 - httpx - INFO - HTTP Request: GET https://api.github.com/users/whoenig/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:31,219 - httpx - INFO - HTTP Request: GET https://api.github.com/users/whoenig/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:34,393 - github_integration_service - INFO - ✅ Saved whoenig: Score 60
+2026-01-03 16:49:35,826 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:49:37,157 - httpx - INFO - HTTP Request: GET https://api.github.com/users/esc "HTTP/1.1 200 OK"
+2026-01-03 16:49:39,413 - httpx - INFO - HTTP Request: GET https://api.github.com/users/esc/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:49:41,259 - httpx - INFO - HTTP Request: GET https://api.github.com/users/esc/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:42,386 - httpx - INFO - HTTP Request: GET https://api.github.com/users/esc/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:45,554 - github_integration_service - INFO - ✅ Saved esc: Score 53
+2026-01-03 16:49:47,398 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:49:48,628 - httpx - INFO - HTTP Request: GET https://api.github.com/users/turian "HTTP/1.1 200 OK"
+2026-01-03 16:49:51,394 - httpx - INFO - HTTP Request: GET https://api.github.com/users/turian/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:49:53,209 - httpx - INFO - HTTP Request: GET https://api.github.com/users/turian/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:53,953 - httpx - INFO - HTTP Request: GET https://api.github.com/users/turian/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:49:57,416 - github_integration_service - INFO - ✅ Saved turian: Score 60
+2026-01-03 16:49:59,007 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:50:00,506 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laf0rge "HTTP/1.1 200 OK"
+2026-01-03 16:50:02,555 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laf0rge/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:50:04,192 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laf0rge/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:04,807 - httpx - INFO - HTTP Request: GET https://api.github.com/users/laf0rge/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:07,685 - github_integration_service - INFO - ✅ Saved laf0rge: Score 44
+2026-01-03 16:50:11,156 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:50:12,455 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cjolowicz "HTTP/1.1 200 OK"
+2026-01-03 16:50:14,877 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cjolowicz/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:50:16,481 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cjolowicz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:16,896 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cjolowicz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:20,063 - github_integration_service - INFO - ✅ Saved cjolowicz: Score 70
+2026-01-03 16:50:21,704 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:50:22,934 - httpx - INFO - HTTP Request: GET https://api.github.com/users/schriftgestalt "HTTP/1.1 200 OK"
+2026-01-03 16:50:26,211 - httpx - INFO - HTTP Request: GET https://api.github.com/users/schriftgestalt/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:50:28,096 - httpx - INFO - HTTP Request: GET https://api.github.com/users/schriftgestalt/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:28,795 - httpx - INFO - HTTP Request: GET https://api.github.com/users/schriftgestalt/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:32,357 - github_integration_service - INFO - ✅ Saved schriftgestalt: Score 56
+2026-01-03 16:50:33,888 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:50:35,015 - httpx - INFO - HTTP Request: GET https://api.github.com/users/burnash "HTTP/1.1 200 OK"
+2026-01-03 16:50:36,976 - httpx - INFO - HTTP Request: GET https://api.github.com/users/burnash/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:50:38,602 - httpx - INFO - HTTP Request: GET https://api.github.com/users/burnash/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:39,726 - httpx - INFO - HTTP Request: GET https://api.github.com/users/burnash/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:42,840 - github_integration_service - INFO - ✅ Saved burnash: Score 70
+2026-01-03 16:50:44,915 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:50:46,179 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Goldziher "HTTP/1.1 200 OK"
+2026-01-03 16:50:48,227 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Goldziher/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:50:50,381 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Goldziher/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:51,523 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Goldziher/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:50:54,631 - github_integration_service - INFO - ✅ Saved Goldziher: Score 61
+2026-01-03 16:50:56,269 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:50:57,468 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cmaureir "HTTP/1.1 200 OK"
+2026-01-03 16:51:00,373 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cmaureir/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:51:02,118 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cmaureir/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:02,979 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cmaureir/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:06,658 - github_integration_service - INFO - ✅ Saved cmaureir: Score 56
+2026-01-03 16:51:10,457 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:51:11,696 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anna-geller "HTTP/1.1 200 OK"
+2026-01-03 16:51:13,797 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anna-geller/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:51:15,361 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anna-geller/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:15,674 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anna-geller/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:18,641 - github_integration_service - INFO - ✅ Saved anna-geller: Score 37
+2026-01-03 16:51:20,197 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:51:21,507 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hartwork "HTTP/1.1 200 OK"
+2026-01-03 16:51:24,373 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hartwork/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:51:26,074 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hartwork/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:27,010 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hartwork/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:30,417 - github_integration_service - INFO - ✅ Saved hartwork: Score 74
+2026-01-03 16:51:32,155 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:51:33,385 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jamwithai "HTTP/1.1 200 OK"
+2026-01-03 16:51:34,717 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jamwithai/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:51:35,831 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jamwithai/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:36,151 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jamwithai/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:39,312 - github_integration_service - INFO - ✅ Saved jamwithai: Score 39
+2026-01-03 16:51:40,821 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:51:42,090 - httpx - INFO - HTTP Request: GET https://api.github.com/users/zalandoresearch "HTTP/1.1 200 OK"
+2026-01-03 16:51:43,797 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:51:45,058 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abdulfatir "HTTP/1.1 200 OK"
+2026-01-03 16:51:47,172 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abdulfatir/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:51:49,159 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abdulfatir/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:49,985 - httpx - INFO - HTTP Request: GET https://api.github.com/users/abdulfatir/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:51:53,660 - github_integration_service - INFO - ✅ Saved abdulfatir: Score 74
+2026-01-03 16:51:57,169 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:51:58,367 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MarkusH "HTTP/1.1 200 OK"
+2026-01-03 16:52:01,445 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MarkusH/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:52:03,168 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MarkusH/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:03,467 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MarkusH/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:06,566 - github_integration_service - INFO - ✅ Saved MarkusH: Score 43
+2026-01-03 16:52:08,099 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:52:09,261 - httpx - INFO - HTTP Request: GET https://api.github.com/users/andela-sjames "HTTP/1.1 200 OK"
+2026-01-03 16:52:12,094 - httpx - INFO - HTTP Request: GET https://api.github.com/users/andela-sjames/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:52:13,893 - httpx - INFO - HTTP Request: GET https://api.github.com/users/andela-sjames/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:14,259 - httpx - INFO - HTTP Request: GET https://api.github.com/users/andela-sjames/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:17,214 - github_integration_service - INFO - ✅ Saved andela-sjames: Score 40
+2026-01-03 16:52:18,880 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:52:20,593 - httpx - INFO - HTTP Request: GET https://api.github.com/users/syllog1sm "HTTP/1.1 200 OK"
+2026-01-03 16:52:22,129 - httpx - INFO - HTTP Request: GET https://api.github.com/users/syllog1sm/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:52:23,357 - httpx - INFO - HTTP Request: GET https://api.github.com/users/syllog1sm/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:23,869 - httpx - INFO - HTTP Request: GET https://api.github.com/users/syllog1sm/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:26,958 - github_integration_service - INFO - ✅ Saved syllog1sm: Score 33
+2026-01-03 16:52:28,532 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:52:29,810 - httpx - INFO - HTTP Request: GET https://api.github.com/users/manojpandey "HTTP/1.1 200 OK"
+2026-01-03 16:52:32,692 - httpx - INFO - HTTP Request: GET https://api.github.com/users/manojpandey/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:52:34,737 - httpx - INFO - HTTP Request: GET https://api.github.com/users/manojpandey/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:35,235 - httpx - INFO - HTTP Request: GET https://api.github.com/users/manojpandey/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:38,310 - github_integration_service - INFO - ✅ Saved manojpandey: Score 40
+2026-01-03 16:52:40,048 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:52:41,278 - httpx - INFO - HTTP Request: GET https://api.github.com/users/gkmngrgn "HTTP/1.1 200 OK"
+2026-01-03 16:52:42,918 - httpx - INFO - HTTP Request: GET https://api.github.com/users/gkmngrgn/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:52:44,249 - httpx - INFO - HTTP Request: GET https://api.github.com/users/gkmngrgn/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:44,625 - httpx - INFO - HTTP Request: GET https://api.github.com/users/gkmngrgn/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:47,487 - github_integration_service - INFO - ✅ Saved gkmngrgn: Score 43
+2026-01-03 16:52:51,003 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:52:52,337 - httpx - INFO - HTTP Request: GET https://api.github.com/users/md-mq "HTTP/1.1 200 OK"
+2026-01-03 16:52:55,309 - httpx - INFO - HTTP Request: GET https://api.github.com/users/md-mq/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:52:56,949 - httpx - INFO - HTTP Request: GET https://api.github.com/users/md-mq/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:52:57,355 - httpx - INFO - HTTP Request: GET https://api.github.com/users/md-mq/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:00,234 - github_integration_service - INFO - ✅ Saved md-mq: Score 55
+2026-01-03 16:53:01,757 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:53:02,780 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nickstenning "HTTP/1.1 200 OK"
+2026-01-03 16:53:05,554 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nickstenning/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:53:07,289 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nickstenning/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:07,730 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nickstenning/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:10,859 - github_integration_service - INFO - ✅ Saved nickstenning: Score 71
+2026-01-03 16:53:16,671 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:53:19,064 - httpx - INFO - HTTP Request: GET https://api.github.com/users/felipecruz "HTTP/1.1 200 OK"
+2026-01-03 16:53:20,805 - httpx - INFO - HTTP Request: GET https://api.github.com/users/felipecruz/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:53:22,245 - httpx - INFO - HTTP Request: GET https://api.github.com/users/felipecruz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:22,545 - httpx - INFO - HTTP Request: GET https://api.github.com/users/felipecruz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:27,450 - github_integration_service - INFO - ✅ Saved felipecruz: Score 35
+2026-01-03 16:53:28,997 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:53:30,229 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RosaWagner "HTTP/1.1 200 OK"
+2026-01-03 16:53:31,477 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RosaWagner/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:53:32,860 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RosaWagner/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:33,160 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RosaWagner/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:36,279 - github_integration_service - INFO - ✅ Saved RosaWagner: Score 31
+2026-01-03 16:53:37,862 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:53:39,161 - httpx - INFO - HTTP Request: GET https://api.github.com/users/OpenBankProject "HTTP/1.1 200 OK"
+2026-01-03 16:53:40,697 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:53:41,900 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lorey "HTTP/1.1 200 OK"
+2026-01-03 16:53:43,436 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lorey/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:53:44,964 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lorey/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:45,588 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lorey/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:48,712 - github_integration_service - INFO - ✅ Saved lorey: Score 67
+2026-01-03 16:53:50,309 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:53:51,637 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kshitij10496 "HTTP/1.1 200 OK"
+2026-01-03 16:53:53,586 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kshitij10496/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:53:54,908 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kshitij10496/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:55,417 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kshitij10496/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:53:58,387 - github_integration_service - INFO - ✅ Saved kshitij10496: Score 47
+2026-01-03 16:53:59,718 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:54:00,834 - httpx - INFO - HTTP Request: GET https://api.github.com/users/BenjaminBossan "HTTP/1.1 200 OK"
+2026-01-03 16:54:02,962 - httpx - INFO - HTTP Request: GET https://api.github.com/users/BenjaminBossan/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:54:04,839 - httpx - INFO - HTTP Request: GET https://api.github.com/users/BenjaminBossan/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:05,965 - httpx - INFO - HTTP Request: GET https://api.github.com/users/BenjaminBossan/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:09,253 - github_integration_service - INFO - ✅ Saved BenjaminBossan: Score 53
+2026-01-03 16:54:10,785 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:54:12,006 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mr-c "HTTP/1.1 200 OK"
+2026-01-03 16:54:14,629 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mr-c/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:54:16,820 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mr-c/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:17,519 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mr-c/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:20,918 - github_integration_service - INFO - ✅ Saved mr-c: Score 53
+2026-01-03 16:54:22,870 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:54:24,093 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rixx "HTTP/1.1 200 OK"
+2026-01-03 16:54:26,753 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rixx/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:54:28,565 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rixx/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:29,379 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rixx/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:33,116 - github_integration_service - INFO - ✅ Saved rixx: Score 65
+2026-01-03 16:54:36,684 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:54:38,015 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jfilter "HTTP/1.1 200 OK"
+2026-01-03 16:54:40,783 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jfilter/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:54:42,529 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jfilter/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:43,239 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jfilter/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:46,414 - github_integration_service - INFO - ✅ Saved jfilter: Score 73
+2026-01-03 16:54:48,052 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:54:49,281 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nomicode "HTTP/1.1 200 OK"
+2026-01-03 16:54:51,442 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nomicode/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:54:52,661 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nomicode/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:53,005 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nomicode/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:54:56,289 - github_integration_service - INFO - ✅ Saved nomicode: Score 28
+2026-01-03 16:54:57,677 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:54:58,906 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fabsx00 "HTTP/1.1 200 OK"
+2026-01-03 16:55:00,649 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fabsx00/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:55:01,876 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fabsx00/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:02,193 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fabsx00/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:05,665 - github_integration_service - INFO - ✅ Saved fabsx00: Score 29
+2026-01-03 16:55:07,406 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:55:08,800 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tsterbak "HTTP/1.1 200 OK"
+2026-01-03 16:55:11,806 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tsterbak/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:55:13,134 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tsterbak/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:13,558 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tsterbak/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:16,519 - github_integration_service - INFO - ✅ Saved tsterbak: Score 45
+2026-01-03 16:55:18,060 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:55:19,388 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sotte "HTTP/1.1 200 OK"
+2026-01-03 16:55:21,437 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sotte/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:55:23,998 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sotte/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:25,128 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sotte/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:28,468 - github_integration_service - INFO - ✅ Saved sotte: Score 66
+2026-01-03 16:55:32,084 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:55:33,211 - httpx - INFO - HTTP Request: GET https://api.github.com/users/illume "HTTP/1.1 200 OK"
+2026-01-03 16:55:36,385 - httpx - INFO - HTTP Request: GET https://api.github.com/users/illume/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:55:38,545 - httpx - INFO - HTTP Request: GET https://api.github.com/users/illume/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:40,035 - httpx - INFO - HTTP Request: GET https://api.github.com/users/illume/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:43,248 - github_integration_service - INFO - ✅ Saved illume: Score 58
+2026-01-03 16:55:44,783 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:55:46,115 - httpx - INFO - HTTP Request: GET https://api.github.com/users/omergulen "HTTP/1.1 200 OK"
+2026-01-03 16:55:48,983 - httpx - INFO - HTTP Request: GET https://api.github.com/users/omergulen/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:55:50,724 - httpx - INFO - HTTP Request: GET https://api.github.com/users/omergulen/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:51,246 - httpx - INFO - HTTP Request: GET https://api.github.com/users/omergulen/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:53,843 - github_integration_service - INFO - ✅ Saved omergulen: Score 53
+2026-01-03 16:55:55,432 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:55:56,585 - httpx - INFO - HTTP Request: GET https://api.github.com/users/niderhoff "HTTP/1.1 200 OK"
+2026-01-03 16:55:58,105 - httpx - INFO - HTTP Request: GET https://api.github.com/users/niderhoff/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:55:59,462 - httpx - INFO - HTTP Request: GET https://api.github.com/users/niderhoff/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:55:59,943 - httpx - INFO - HTTP Request: GET https://api.github.com/users/niderhoff/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:03,522 - github_integration_service - INFO - ✅ Saved niderhoff: Score 65
+2026-01-03 16:56:05,159 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:56:06,390 - httpx - INFO - HTTP Request: GET https://api.github.com/users/marinho "HTTP/1.1 200 OK"
+2026-01-03 16:56:09,360 - httpx - INFO - HTTP Request: GET https://api.github.com/users/marinho/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:56:10,998 - httpx - INFO - HTTP Request: GET https://api.github.com/users/marinho/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:11,305 - httpx - INFO - HTTP Request: GET https://api.github.com/users/marinho/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:14,683 - github_integration_service - INFO - ✅ Saved marinho: Score 46
+2026-01-03 16:56:16,220 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:56:17,450 - httpx - INFO - HTTP Request: GET https://api.github.com/users/moiseshorta "HTTP/1.1 200 OK"
+2026-01-03 16:56:19,454 - httpx - INFO - HTTP Request: GET https://api.github.com/users/moiseshorta/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:56:21,034 - httpx - INFO - HTTP Request: GET https://api.github.com/users/moiseshorta/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:21,342 - httpx - INFO - HTTP Request: GET https://api.github.com/users/moiseshorta/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:24,617 - github_integration_service - INFO - ✅ Saved moiseshorta: Score 47
+2026-01-03 16:56:28,303 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:56:29,430 - httpx - INFO - HTTP Request: GET https://api.github.com/users/s-soroosh "HTTP/1.1 200 OK"
+2026-01-03 16:56:31,350 - httpx - INFO - HTTP Request: GET https://api.github.com/users/s-soroosh/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:56:32,778 - httpx - INFO - HTTP Request: GET https://api.github.com/users/s-soroosh/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:33,091 - httpx - INFO - HTTP Request: GET https://api.github.com/users/s-soroosh/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:36,393 - github_integration_service - INFO - ✅ Saved s-soroosh: Score 53
+2026-01-03 16:56:38,135 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:56:39,569 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jenskutilek "HTTP/1.1 200 OK"
+2026-01-03 16:56:41,925 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jenskutilek/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:56:43,486 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jenskutilek/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:44,384 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jenskutilek/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:47,555 - github_integration_service - INFO - ✅ Saved jenskutilek: Score 69
+2026-01-03 16:56:49,193 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:56:50,627 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CarlosZiegler "HTTP/1.1 200 OK"
+2026-01-03 16:56:53,485 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CarlosZiegler/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:56:55,347 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CarlosZiegler/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:55,975 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CarlosZiegler/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:56:59,000 - github_integration_service - INFO - ✅ Saved CarlosZiegler: Score 55
+2026-01-03 16:57:00,510 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:57:01,798 - httpx - INFO - HTTP Request: GET https://api.github.com/users/oleiade "HTTP/1.1 200 OK"
+2026-01-03 16:57:04,447 - httpx - INFO - HTTP Request: GET https://api.github.com/users/oleiade/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:57:06,400 - httpx - INFO - HTTP Request: GET https://api.github.com/users/oleiade/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:07,431 - httpx - INFO - HTTP Request: GET https://api.github.com/users/oleiade/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:11,107 - github_integration_service - INFO - ✅ Saved oleiade: Score 76
+2026-01-03 16:57:12,686 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:57:14,077 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sunsided "HTTP/1.1 200 OK"
+2026-01-03 16:57:16,639 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sunsided/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:57:18,276 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sunsided/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:18,788 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sunsided/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:22,474 - github_integration_service - INFO - ✅ Saved sunsided: Score 64
+2026-01-03 16:57:26,365 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:57:27,595 - httpx - INFO - HTTP Request: GET https://api.github.com/users/chrippa "HTTP/1.1 200 OK"
+2026-01-03 16:57:29,245 - httpx - INFO - HTTP Request: GET https://api.github.com/users/chrippa/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:57:30,620 - httpx - INFO - HTTP Request: GET https://api.github.com/users/chrippa/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:30,986 - httpx - INFO - HTTP Request: GET https://api.github.com/users/chrippa/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:34,455 - github_integration_service - INFO - ✅ Saved chrippa: Score 49
+2026-01-03 16:57:36,197 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:57:37,323 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Mark2Mark "HTTP/1.1 200 OK"
+2026-01-03 16:57:39,381 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Mark2Mark/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:57:40,820 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Mark2Mark/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:41,319 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Mark2Mark/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:44,239 - github_integration_service - INFO - ✅ Saved Mark2Mark: Score 45
+2026-01-03 16:57:45,618 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:57:47,052 - httpx - INFO - HTTP Request: GET https://api.github.com/users/katiayn "HTTP/1.1 200 OK"
+2026-01-03 16:57:49,305 - httpx - INFO - HTTP Request: GET https://api.github.com/users/katiayn/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:57:50,638 - httpx - INFO - HTTP Request: GET https://api.github.com/users/katiayn/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:51,046 - httpx - INFO - HTTP Request: GET https://api.github.com/users/katiayn/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:57:54,628 - github_integration_service - INFO - ✅ Saved katiayn: Score 32
+2026-01-03 16:57:56,268 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:57:57,599 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fneum "HTTP/1.1 200 OK"
+2026-01-03 16:57:59,313 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fneum/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:58:01,707 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fneum/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:03,233 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fneum/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:06,921 - github_integration_service - INFO - ✅ Saved fneum: Score 54
+2026-01-03 16:58:08,555 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:58:09,682 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tmylk "HTTP/1.1 200 OK"
+2026-01-03 16:58:11,732 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tmylk/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:58:12,935 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tmylk/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:13,279 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tmylk/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:16,652 - github_integration_service - INFO - ✅ Saved tmylk: Score 40
+2026-01-03 16:58:20,537 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:58:21,972 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alfredfrancis "HTTP/1.1 200 OK"
+2026-01-03 16:58:25,147 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alfredfrancis/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:58:26,783 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alfredfrancis/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:27,104 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alfredfrancis/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:30,675 - github_integration_service - INFO - ✅ Saved alfredfrancis: Score 67
+2026-01-03 16:58:32,138 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:58:33,338 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Lassulus "HTTP/1.1 200 OK"
+2026-01-03 16:58:35,693 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Lassulus/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:58:37,126 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Lassulus/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:37,638 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Lassulus/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:41,017 - github_integration_service - INFO - ✅ Saved Lassulus: Score 56
+2026-01-03 16:58:42,638 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:58:43,989 - httpx - INFO - HTTP Request: GET https://api.github.com/users/flaport "HTTP/1.1 200 OK"
+2026-01-03 16:58:46,445 - httpx - INFO - HTTP Request: GET https://api.github.com/users/flaport/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:58:48,186 - httpx - INFO - HTTP Request: GET https://api.github.com/users/flaport/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:48,659 - httpx - INFO - HTTP Request: GET https://api.github.com/users/flaport/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:51,872 - github_integration_service - INFO - ✅ Saved flaport: Score 62
+2026-01-03 16:58:53,306 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:58:54,638 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mrs83 "HTTP/1.1 200 OK"
+2026-01-03 16:58:56,789 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mrs83/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:58:58,630 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mrs83/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:58:59,041 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mrs83/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:01,739 - github_integration_service - INFO - ✅ Saved mrs83: Score 39
+2026-01-03 16:59:03,088 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:59:04,366 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hoechenberger "HTTP/1.1 200 OK"
+2026-01-03 16:59:07,548 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hoechenberger/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:59:09,458 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hoechenberger/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:10,099 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hoechenberger/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:13,273 - github_integration_service - INFO - ✅ Saved hoechenberger: Score 50
+2026-01-03 16:59:17,061 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:59:18,305 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tunavargi "HTTP/1.1 200 OK"
+2026-01-03 16:59:20,241 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tunavargi/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:59:21,633 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tunavargi/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:21,977 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tunavargi/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:25,152 - github_integration_service - INFO - ✅ Saved tunavargi: Score 27
+2026-01-03 16:59:26,767 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:59:28,225 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Dineshkarthik "HTTP/1.1 200 OK"
+2026-01-03 16:59:30,287 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Dineshkarthik/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:59:31,706 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Dineshkarthik/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:32,218 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Dineshkarthik/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:35,188 - github_integration_service - INFO - ✅ Saved Dineshkarthik: Score 52
+2026-01-03 16:59:37,030 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:59:38,284 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DuyguA "HTTP/1.1 200 OK"
+2026-01-03 16:59:42,059 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DuyguA/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:59:43,450 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DuyguA/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:44,029 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DuyguA/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:47,374 - github_integration_service - INFO - ✅ Saved DuyguA: Score 44
+2026-01-03 16:59:49,113 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 16:59:50,241 - httpx - INFO - HTTP Request: GET https://api.github.com/users/trentmc "HTTP/1.1 200 OK"
+2026-01-03 16:59:51,575 - httpx - INFO - HTTP Request: GET https://api.github.com/users/trentmc/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 16:59:53,316 - httpx - INFO - HTTP Request: GET https://api.github.com/users/trentmc/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:53,826 - httpx - INFO - HTTP Request: GET https://api.github.com/users/trentmc/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 16:59:57,409 - github_integration_service - INFO - ✅ Saved trentmc: Score 34
+2026-01-03 16:59:58,944 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:00:00,071 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adewes "HTTP/1.1 200 OK"
+2026-01-03 17:00:02,018 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adewes/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:00:03,356 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adewes/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:03,752 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adewes/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:07,240 - github_integration_service - INFO - ✅ Saved adewes: Score 43
+2026-01-03 17:00:10,660 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:00:12,052 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nicbou "HTTP/1.1 200 OK"
+2026-01-03 17:00:14,103 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nicbou/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:00:15,535 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nicbou/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:16,348 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nicbou/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:19,842 - github_integration_service - INFO - ✅ Saved nicbou: Score 48
+2026-01-03 17:00:21,269 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:00:22,591 - httpx - INFO - HTTP Request: GET https://api.github.com/users/holgerd77 "HTTP/1.1 200 OK"
+2026-01-03 17:00:24,957 - httpx - INFO - HTTP Request: GET https://api.github.com/users/holgerd77/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:00:26,495 - httpx - INFO - HTTP Request: GET https://api.github.com/users/holgerd77/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:27,004 - httpx - INFO - HTTP Request: GET https://api.github.com/users/holgerd77/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:29,871 - github_integration_service - INFO - ✅ Saved holgerd77: Score 63
+2026-01-03 17:00:31,305 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:00:32,509 - httpx - INFO - HTTP Request: GET https://api.github.com/users/amn41 "HTTP/1.1 200 OK"
+2026-01-03 17:00:34,274 - httpx - INFO - HTTP Request: GET https://api.github.com/users/amn41/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:00:35,593 - httpx - INFO - HTTP Request: GET https://api.github.com/users/amn41/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:35,912 - httpx - INFO - HTTP Request: GET https://api.github.com/users/amn41/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:38,984 - github_integration_service - INFO - ✅ Saved amn41: Score 27
+2026-01-03 17:00:40,520 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:00:41,749 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karlitschek "HTTP/1.1 200 OK"
+2026-01-03 17:00:43,098 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karlitschek/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:00:44,328 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karlitschek/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:44,966 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karlitschek/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:47,751 - github_integration_service - INFO - ✅ Saved karlitschek: Score 19
+2026-01-03 17:00:49,328 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:00:50,681 - httpx - INFO - HTTP Request: GET https://api.github.com/users/yaph "HTTP/1.1 200 OK"
+2026-01-03 17:00:53,428 - httpx - INFO - HTTP Request: GET https://api.github.com/users/yaph/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:00:55,112 - httpx - INFO - HTTP Request: GET https://api.github.com/users/yaph/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:55,680 - httpx - INFO - HTTP Request: GET https://api.github.com/users/yaph/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:00:59,056 - github_integration_service - INFO - ✅ Saved yaph: Score 66
+2026-01-03 17:01:02,743 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:01:04,178 - httpx - INFO - HTTP Request: GET https://api.github.com/users/EnTeQuAk "HTTP/1.1 200 OK"
+2026-01-03 17:01:06,746 - httpx - INFO - HTTP Request: GET https://api.github.com/users/EnTeQuAk/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:01:08,681 - httpx - INFO - HTTP Request: GET https://api.github.com/users/EnTeQuAk/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:09,147 - httpx - INFO - HTTP Request: GET https://api.github.com/users/EnTeQuAk/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:11,957 - github_integration_service - INFO - ✅ Saved EnTeQuAk: Score 35
+2026-01-03 17:01:13,478 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:01:14,620 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pajowu "HTTP/1.1 200 OK"
+2026-01-03 17:01:17,404 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pajowu/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:01:19,239 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pajowu/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:19,851 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pajowu/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:22,984 - github_integration_service - INFO - ✅ Saved pajowu: Score 60
+2026-01-03 17:01:24,655 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:01:25,790 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mmabrouk "HTTP/1.1 200 OK"
+2026-01-03 17:01:27,524 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mmabrouk/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:01:29,280 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mmabrouk/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:30,150 - httpx - INFO - HTTP Request: GET https://api.github.com/users/mmabrouk/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:33,770 - github_integration_service - INFO - ✅ Saved mmabrouk: Score 50
+2026-01-03 17:01:35,306 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:01:36,637 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hadyelsahar "HTTP/1.1 200 OK"
+2026-01-03 17:01:39,514 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hadyelsahar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:01:41,042 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hadyelsahar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:41,669 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hadyelsahar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:44,830 - github_integration_service - INFO - ✅ Saved hadyelsahar: Score 59
+2026-01-03 17:01:46,365 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:01:47,647 - httpx - INFO - HTTP Request: GET https://api.github.com/users/iwpnd "HTTP/1.1 200 OK"
+2026-01-03 17:01:50,156 - httpx - INFO - HTTP Request: GET https://api.github.com/users/iwpnd/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:01:51,898 - httpx - INFO - HTTP Request: GET https://api.github.com/users/iwpnd/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:52,512 - httpx - INFO - HTTP Request: GET https://api.github.com/users/iwpnd/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:01:55,071 - github_integration_service - INFO - ✅ Saved iwpnd: Score 58
+2026-01-03 17:01:58,640 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:01:59,984 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CyberDem0n "HTTP/1.1 200 OK"
+2026-01-03 17:02:02,345 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CyberDem0n/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:02:03,984 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CyberDem0n/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:04,888 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CyberDem0n/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:08,694 - github_integration_service - INFO - ✅ Saved CyberDem0n: Score 47
+2026-01-03 17:02:10,225 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:02:11,557 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vrde "HTTP/1.1 200 OK"
+2026-01-03 17:02:14,935 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vrde/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:02:16,372 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vrde/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:16,676 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vrde/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:19,615 - github_integration_service - INFO - ✅ Saved vrde: Score 43
+2026-01-03 17:02:21,035 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:02:22,208 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DasIch "HTTP/1.1 200 OK"
+2026-01-03 17:02:24,346 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DasIch/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:02:25,705 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DasIch/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:25,995 - httpx - INFO - HTTP Request: GET https://api.github.com/users/DasIch/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:28,868 - github_integration_service - INFO - ✅ Saved DasIch: Score 36
+2026-01-03 17:02:30,295 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:02:31,524 - httpx - INFO - HTTP Request: GET https://api.github.com/users/papermerge "HTTP/1.1 200 OK"
+2026-01-03 17:02:32,958 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:02:34,290 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tuxxy "HTTP/1.1 200 OK"
+2026-01-03 17:02:36,900 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tuxxy/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:02:38,373 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tuxxy/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:38,797 - httpx - INFO - HTTP Request: GET https://api.github.com/users/tuxxy/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:41,765 - github_integration_service - INFO - ✅ Saved tuxxy: Score 39
+2026-01-03 17:02:45,963 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:02:47,397 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bsao "HTTP/1.1 200 OK"
+2026-01-03 17:02:49,138 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bsao/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:02:50,570 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bsao/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:51,083 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bsao/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:02:54,362 - github_integration_service - INFO - ✅ Saved bsao: Score 37
+2026-01-03 17:02:55,860 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:02:57,034 - httpx - INFO - HTTP Request: GET https://api.github.com/users/0xIslamTaha "HTTP/1.1 200 OK"
+2026-01-03 17:02:59,515 - httpx - INFO - HTTP Request: GET https://api.github.com/users/0xIslamTaha/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:03:01,017 - httpx - INFO - HTTP Request: GET https://api.github.com/users/0xIslamTaha/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:01,423 - httpx - INFO - HTTP Request: GET https://api.github.com/users/0xIslamTaha/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:05,112 - github_integration_service - INFO - ✅ Saved 0xIslamTaha: Score 44
+2026-01-03 17:03:06,753 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:03:08,082 - httpx - INFO - HTTP Request: GET https://api.github.com/users/joschabach "HTTP/1.1 200 OK"
+2026-01-03 17:03:09,528 - httpx - INFO - HTTP Request: GET https://api.github.com/users/joschabach/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:03:10,643 - httpx - INFO - HTTP Request: GET https://api.github.com/users/joschabach/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:11,018 - httpx - INFO - HTTP Request: GET https://api.github.com/users/joschabach/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:14,226 - github_integration_service - INFO - ✅ Saved joschabach: Score 24
+2026-01-03 17:03:15,763 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:03:17,707 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lubieowoce "HTTP/1.1 200 OK"
+2026-01-03 17:03:19,348 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lubieowoce/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:03:20,782 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lubieowoce/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:21,293 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lubieowoce/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:24,886 - github_integration_service - INFO - ✅ Saved lubieowoce: Score 50
+2026-01-03 17:03:26,634 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:03:27,698 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ciur "HTTP/1.1 200 OK"
+2026-01-03 17:03:31,747 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ciur/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:03:33,273 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ciur/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:33,870 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ciur/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:36,456 - github_integration_service - INFO - ✅ Saved ciur: Score 77
+2026-01-03 17:03:39,829 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:03:41,027 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Davies-K "HTTP/1.1 200 OK"
+2026-01-03 17:03:43,924 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Davies-K/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:03:45,270 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Davies-K/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:45,665 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Davies-K/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:48,379 - github_integration_service - INFO - ✅ Saved Davies-K: Score 47
+2026-01-03 17:03:49,923 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:03:51,292 - httpx - INFO - HTTP Request: GET https://api.github.com/users/asmitbm "HTTP/1.1 200 OK"
+2026-01-03 17:03:54,778 - httpx - INFO - HTTP Request: GET https://api.github.com/users/asmitbm/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:03:56,451 - httpx - INFO - HTTP Request: GET https://api.github.com/users/asmitbm/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:03:57,034 - httpx - INFO - HTTP Request: GET https://api.github.com/users/asmitbm/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:01,638 - github_integration_service - INFO - ✅ Saved asmitbm: Score 49
+2026-01-03 17:04:03,816 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:04:04,993 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bh2smith "HTTP/1.1 200 OK"
+2026-01-03 17:04:07,888 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bh2smith/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:04:09,627 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bh2smith/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:10,552 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bh2smith/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:16,080 - github_integration_service - INFO - ✅ Saved bh2smith: Score 56
+2026-01-03 17:04:17,599 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:04:18,746 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rotki "HTTP/1.1 200 OK"
+2026-01-03 17:04:20,293 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:04:21,399 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dorneanu "HTTP/1.1 200 OK"
+2026-01-03 17:04:23,866 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dorneanu/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:04:25,295 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dorneanu/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:25,806 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dorneanu/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:28,924 - github_integration_service - INFO - ✅ Saved dorneanu: Score 64
+2026-01-03 17:04:32,682 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:04:33,912 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dunky11 "HTTP/1.1 200 OK"
+2026-01-03 17:04:35,889 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dunky11/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:04:37,250 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dunky11/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:37,890 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dunky11/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:41,167 - github_integration_service - INFO - ✅ Saved dunky11: Score 46
+2026-01-03 17:04:42,703 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:04:43,900 - httpx - INFO - HTTP Request: GET https://api.github.com/users/artfwo "HTTP/1.1 200 OK"
+2026-01-03 17:04:45,690 - httpx - INFO - HTTP Request: GET https://api.github.com/users/artfwo/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:04:47,414 - httpx - INFO - HTTP Request: GET https://api.github.com/users/artfwo/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:48,035 - httpx - INFO - HTTP Request: GET https://api.github.com/users/artfwo/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:51,508 - github_integration_service - INFO - ✅ Saved artfwo: Score 50
+2026-01-03 17:04:53,043 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:04:54,478 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sixohsix "HTTP/1.1 200 OK"
+2026-01-03 17:04:56,732 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sixohsix/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:04:58,060 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sixohsix/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:04:58,574 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sixohsix/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:01,646 - github_integration_service - INFO - ✅ Saved sixohsix: Score 43
+2026-01-03 17:05:03,182 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:05:04,513 - httpx - INFO - HTTP Request: GET https://api.github.com/users/martinrusev "HTTP/1.1 200 OK"
+2026-01-03 17:05:06,128 - httpx - INFO - HTTP Request: GET https://api.github.com/users/martinrusev/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:05:07,586 - httpx - INFO - HTTP Request: GET https://api.github.com/users/martinrusev/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:08,251 - httpx - INFO - HTTP Request: GET https://api.github.com/users/martinrusev/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:10,862 - github_integration_service - INFO - ✅ Saved martinrusev: Score 47
+2026-01-03 17:05:12,301 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:05:13,841 - httpx - INFO - HTTP Request: GET https://api.github.com/users/doda-zz "HTTP/1.1 200 OK"
+2026-01-03 17:05:15,471 - httpx - INFO - HTTP Request: GET https://api.github.com/users/doda-zz/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:05:16,652 - httpx - INFO - HTTP Request: GET https://api.github.com/users/doda-zz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:17,025 - httpx - INFO - HTTP Request: GET https://api.github.com/users/doda-zz/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:20,601 - github_integration_service - INFO - ✅ Saved doda-zz: Score 34
+2026-01-03 17:05:24,265 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:05:25,507 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Korak-997 "HTTP/1.1 200 OK"
+2026-01-03 17:05:26,733 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Korak-997/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:05:28,171 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Korak-997/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:28,681 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Korak-997/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:31,551 - github_integration_service - INFO - ✅ Saved Korak-997: Score 32
+2026-01-03 17:05:33,034 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:05:34,393 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Omid-Mohajerani "HTTP/1.1 200 OK"
+2026-01-03 17:05:36,055 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Omid-Mohajerani/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:05:37,399 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Omid-Mohajerani/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:37,793 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Omid-Mohajerani/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:41,063 - github_integration_service - INFO - ✅ Saved Omid-Mohajerani: Score 27
+2026-01-03 17:05:42,788 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:05:44,038 - httpx - INFO - HTTP Request: GET https://api.github.com/users/elezar "HTTP/1.1 200 OK"
+2026-01-03 17:05:46,704 - httpx - INFO - HTTP Request: GET https://api.github.com/users/elezar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:05:48,855 - httpx - INFO - HTTP Request: GET https://api.github.com/users/elezar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:50,253 - httpx - INFO - HTTP Request: GET https://api.github.com/users/elezar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:05:53,564 - github_integration_service - INFO - ✅ Saved elezar: Score 53
+2026-01-03 17:05:55,101 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:05:56,224 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aditya-konarde "HTTP/1.1 200 OK"
+2026-01-03 17:05:59,246 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aditya-konarde/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:06:01,041 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aditya-konarde/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:01,352 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aditya-konarde/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:04,207 - github_integration_service - INFO - ✅ Saved aditya-konarde: Score 46
+2026-01-03 17:06:05,752 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:06:06,912 - httpx - INFO - HTTP Request: GET https://api.github.com/users/benmaier "HTTP/1.1 200 OK"
+2026-01-03 17:06:09,951 - httpx - INFO - HTTP Request: GET https://api.github.com/users/benmaier/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:06:11,497 - httpx - INFO - HTTP Request: GET https://api.github.com/users/benmaier/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:11,900 - httpx - INFO - HTTP Request: GET https://api.github.com/users/benmaier/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:15,387 - github_integration_service - INFO - ✅ Saved benmaier: Score 58
+2026-01-03 17:06:19,178 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:06:20,565 - httpx - INFO - HTTP Request: GET https://api.github.com/users/satta "HTTP/1.1 200 OK"
+2026-01-03 17:06:24,174 - httpx - INFO - HTTP Request: GET https://api.github.com/users/satta/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:06:26,446 - httpx - INFO - HTTP Request: GET https://api.github.com/users/satta/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:27,177 - httpx - INFO - HTTP Request: GET https://api.github.com/users/satta/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:31,662 - github_integration_service - INFO - ✅ Saved satta: Score 53
+2026-01-03 17:06:33,434 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:06:34,847 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kadirpekel "HTTP/1.1 200 OK"
+2026-01-03 17:06:37,011 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kadirpekel/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:06:38,923 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kadirpekel/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:39,806 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kadirpekel/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:44,624 - github_integration_service - INFO - ✅ Saved kadirpekel: Score 59
+2026-01-03 17:06:47,497 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:06:48,862 - httpx - INFO - HTTP Request: GET https://api.github.com/users/christoph2 "HTTP/1.1 200 OK"
+2026-01-03 17:06:50,398 - httpx - INFO - HTTP Request: GET https://api.github.com/users/christoph2/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:06:52,546 - httpx - INFO - HTTP Request: GET https://api.github.com/users/christoph2/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:53,172 - httpx - INFO - HTTP Request: GET https://api.github.com/users/christoph2/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:06:57,998 - github_integration_service - INFO - ✅ Saved christoph2: Score 51
+2026-01-03 17:07:00,124 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:07:01,458 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Ladsgroup "HTTP/1.1 200 OK"
+2026-01-03 17:07:03,635 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Ladsgroup/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:07:07,204 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Ladsgroup/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:07:08,524 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Ladsgroup/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:07:13,027 - github_integration_service - INFO - ✅ Saved Ladsgroup: Score 43
+2026-01-03 17:07:15,459 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:07:17,024 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pupil-labs "HTTP/1.1 200 OK"
+2026-01-03 17:07:20,608 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:07:23,075 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fclesio "HTTP/1.1 200 OK"
+2026-01-03 17:07:25,325 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fclesio/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:07:28,898 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fclesio/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:07:29,427 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fclesio/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:07:35,864 - github_integration_service - INFO - ✅ Saved fclesio: Score 47
+2026-01-03 17:07:38,834 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:07:41,494 - httpx - INFO - HTTP Request: GET https://api.github.com/users/venthur "HTTP/1.1 200 OK"
+2026-01-03 17:07:44,365 - httpx - INFO - HTTP Request: GET https://api.github.com/users/venthur/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:07:46,412 - httpx - INFO - HTTP Request: GET https://api.github.com/users/venthur/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:07:47,126 - httpx - INFO - HTTP Request: GET https://api.github.com/users/venthur/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:07:51,840 - github_integration_service - INFO - ✅ Saved venthur: Score 54
+2026-01-03 17:07:54,708 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:07:56,960 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nolar "HTTP/1.1 200 OK"
+2026-01-03 17:07:59,669 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nolar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:08:02,488 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nolar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:08:03,926 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nolar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:08:08,617 - github_integration_service - INFO - ✅ Saved nolar: Score 71
+2026-01-03 17:08:11,330 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:08:12,784 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dizballanze "HTTP/1.1 200 OK"
+2026-01-03 17:08:15,190 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dizballanze/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:08:18,261 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dizballanze/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:08:19,386 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dizballanze/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:08:23,686 - github_integration_service - INFO - ✅ Saved dizballanze: Score 57
+2026-01-03 17:08:25,326 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 17:08:27,679 - httpx - INFO - HTTP Request: GET https://api.github.com/users/erikw "HTTP/1.1 200 OK"
+2026-01-03 17:08:32,188 - httpx - INFO - HTTP Request: GET https://api.github.com/users/erikw/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 17:08:34,858 - httpx - INFO - HTTP Request: GET https://api.github.com/users/erikw/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:08:36,186 - httpx - INFO - HTTP Request: GET https://api.github.com/users/erikw/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 17:08:42,120 - github_integration_service - INFO - ✅ Saved erikw: Score 73
+2026-01-03 17:08:44,127 - github_integration_service - INFO -    ✅ Fetched and cached 142 new profiles
+2026-01-03 17:10:14,589 - github_integration_service - INFO - ✅ Total unique profiles: 142
+2026-01-03 17:10:14,589 - github_integration_service - INFO -    - From cache: 0
+2026-01-03 17:10:14,590 - github_integration_service - INFO -    - From GitHub: 142
+2026-01-03 17:10:14,593 - main - INFO - Search found 142 profiles
+2026-01-03 19:59:20,028 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 19:59:20,029 - main - INFO - Environment: development
+2026-01-03 19:59:20,030 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 19:59:20,109 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 19:59:20,178 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:01:24,528 - main - INFO - ✅ Database connection successful
+2026-01-03 20:01:24,530 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:01:24,531 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:01:28,355 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:01:28,356 - main - INFO - Environment: development
+2026-01-03 20:01:28,357 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:01:28,562 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:01:28,737 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:01:37,024 - main - INFO - ✅ Database connection successful
+2026-01-03 20:01:37,028 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:01:37,030 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:01:40,395 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:01:40,396 - main - INFO - Environment: development
+2026-01-03 20:01:40,396 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:01:40,481 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:01:40,600 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:01:45,934 - main - INFO - ✅ Database connection successful
+2026-01-03 20:01:45,937 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:01:45,940 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:01:49,540 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:01:49,541 - main - INFO - Environment: development
+2026-01-03 20:01:49,541 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:01:49,608 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:01:49,706 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:01:55,069 - main - INFO - ✅ Database connection successful
+2026-01-03 20:01:55,070 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:01:55,070 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:01:59,397 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:01:59,398 - main - INFO - Environment: development
+2026-01-03 20:01:59,399 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:01:59,483 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:01:59,601 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:02:04,683 - main - INFO - ✅ Database connection successful
+2026-01-03 20:02:04,691 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:02:04,692 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:02:23,658 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:02:23,659 - main - INFO - Environment: development
+2026-01-03 20:02:23,659 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:02:23,722 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:02:23,777 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:02:29,556 - main - INFO - ✅ Database connection successful
+2026-01-03 20:02:29,557 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:02:29,557 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:02:32,548 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:02:32,549 - main - INFO - Environment: development
+2026-01-03 20:02:32,550 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:02:32,640 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:02:32,682 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:02:38,150 - main - INFO - ✅ Database connection successful
+2026-01-03 20:02:38,175 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:02:38,177 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:02:48,023 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:02:48,024 - main - INFO - Environment: development
+2026-01-03 20:02:48,024 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:02:51,908 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:02:51,908 - main - INFO - Environment: development
+2026-01-03 20:02:51,909 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:02:59,189 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:02:59,190 - main - INFO - Environment: development
+2026-01-03 20:02:59,191 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:02:59,332 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:02:59,424 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:03:04,578 - main - INFO - ✅ Database connection successful
+2026-01-03 20:03:04,579 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:03:04,582 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:03:28,037 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:03:28,038 - main - INFO - Environment: development
+2026-01-03 20:03:28,038 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:03:28,097 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:03:28,138 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:03:33,252 - main - INFO - ✅ Database connection successful
+2026-01-03 20:03:33,253 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:03:33,254 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:03:35,961 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:03:35,962 - main - INFO - Environment: development
+2026-01-03 20:03:35,962 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:03:36,024 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:03:36,071 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:03:42,140 - main - INFO - ✅ Database connection successful
+2026-01-03 20:03:42,140 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:03:42,140 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:04:17,694 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:04:17,695 - main - INFO - Environment: development
+2026-01-03 20:04:17,696 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:04:17,747 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:04:17,788 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:04:23,609 - main - INFO - ✅ Database connection successful
+2026-01-03 20:04:23,610 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:04:23,611 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:04:26,737 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-03 20:04:26,739 - main - INFO - Environment: development
+2026-01-03 20:04:26,741 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-03 20:04:26,803 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-03 20:04:26,848 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-03 20:04:31,765 - main - INFO - ✅ Database connection successful
+2026-01-03 20:04:31,766 - main - INFO - ✅ JWT Secret configured
+2026-01-03 20:04:31,767 - main - INFO - 🎯 Startup validation complete
+
+2026-01-03 20:04:55,626 - main - INFO - Search request from user 12: role=Backend Developer, languages=['Python']
+2026-01-03 20:04:55,687 - github_integration_service - INFO - 🔍 HYBRID SEARCH STARTED (TARGET: 200 profiles)
+2026-01-03 20:04:55,688 - github_integration_service - INFO -    Filters: {'role': 'Backend Developer', 'languages': ['Python'], 'frameworks': [], 'tools': [], 'min_stars': 0, 'min_contributions': 0, 'recent_activity': None, 'location': 'New York', 'min_repos': 0}
+2026-01-03 20:04:55,689 - github_integration_service - INFO - 📦 Searching database cache...
+2026-01-03 20:04:56,404 - github_integration_service - INFO -    ✅ Found 4 cached profiles
+2026-01-03 20:04:56,405 - github_integration_service - INFO - 🌐 Cache insufficient. Fetching 196 more from GitHub...
+2026-01-03 20:04:58,047 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:04:59,337 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-03 20:05:01,394 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-03 20:05:03,567 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-03 20:05:05,823 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-03 20:05:07,975 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-03 20:05:16,487 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:05:17,397 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:05:17,399 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:05:17,401 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:05:17,403 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:05:17,404 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:05:17,406 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-03 20:05:22,744 - httpx - INFO - HTTP Request: GET https://api.github.com/users/VIDA-NYU "HTTP/1.1 200 OK"
+2026-01-03 20:05:22,747 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anhad13 "HTTP/1.1 200 OK"
+2026-01-03 20:05:22,749 - httpx - INFO - HTTP Request: GET https://api.github.com/users/frankligy "HTTP/1.1 200 OK"
+2026-01-03 20:05:22,752 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CityOfNewYork "HTTP/1.1 200 OK"
+2026-01-03 20:05:24,397 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RabbitWhite1 "HTTP/1.1 200 OK"
+2026-01-03 20:05:24,400 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rteammco "HTTP/1.1 200 OK"
+2026-01-03 20:05:26,411 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sleibrock "HTTP/1.1 200 OK"
+2026-01-03 20:05:28,101 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anhad13/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 20:05:28,955 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rteammco/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 20:05:28,962 - httpx - INFO - HTTP Request: GET https://api.github.com/users/frankligy/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 20:05:28,967 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RabbitWhite1/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 20:05:28,973 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sleibrock/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-03 20:05:32,244 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anhad13/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 20:05:35,003 - github_integration_service - INFO - ✅ Saved anhad13: Score 35
+2026-01-03 20:05:35,005 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sleibrock/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 20:05:35,007 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rteammco/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 20:05:35,012 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RabbitWhite1/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 20:05:35,014 - httpx - INFO - HTTP Request: GET https://api.github.com/users/frankligy/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-03 20:05:38,095 - github_integration_service - INFO - ✅ Saved sleibrock: Score 55

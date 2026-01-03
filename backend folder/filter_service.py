@@ -20,11 +20,18 @@ class FilterService:
         """
         logger.info(f"🔍 FilterService with filters: {filters}")
         
+        # ✅ OPTIMIZED: Don't load ALL profiles, filter in SQL
         query = db.query(Profile)
+        
+        # Apply filters at SQL level (much faster)
+        location = filters.get("location")
+        
+        if location:
+            query = query.filter(Profile.location.ilike(f"%{location}%"))
+        
         all_profiles = query.all()
         
-        logger.info(f"📊 Total profiles in DB: {len(all_profiles)}")
-        
+        logger.info(f"📊 Total profiles in DB: {len(all_profiles)}")        
         # ===== STEP 1: STRICT LANGUAGE FILTER =====
         languages = filters.get("languages", [])
         if languages:

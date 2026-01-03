@@ -39,8 +39,6 @@ from waitlist_routes import router as waitlist_router
 from lists_routes import router as lists_router
 from email_routes import router as email_router
 from razorpay_routes import router as razorpay_router
-from analytics_routes import router as analytics_router
-from search_history_routes import router as search_history_router
 
 # Import services
 from filter_service import FilterService
@@ -175,9 +173,6 @@ app.include_router(auth_router)
 app.include_router(lists_router)
 app.include_router(email_router)
 app.include_router(razorpay_router)
-app.include_router(analytics_router)
-app.include_router(search_history_router)
-
 
 # ===== REQUEST/RESPONSE MODELS =====
 
@@ -332,23 +327,7 @@ async def search_profiles(
     
     # Log usage
     UsageService.log_usage(db, user_id, "search", filters)
-    
-    # Save search history
-    search_params = {
-        "search_type": "role-based" if search.role else "general",
-        "keywords": None,
-        "role": search.role,
-        "location": search.location,
-        "min_followers": None,
-        "min_repos": search.min_repos if search.min_repos else 0,
-        "languages": search.languages if search.languages else [],
-        "frameworks": search.frameworks if search.frameworks else [],
-        "min_score": None
-    }
-    
-    top_profile_id = profiles[0].id if profiles and len(profiles) > 0 else None
-    SearchHistoryService.save_search(db, user_id, search_params, len(profiles), top_profile_id)
-    
+       
     # ✅ FIX #3: Convert Profile objects to dicts properly
     profile_dicts = []
     for profile in profiles[:200]:  # Limit to 200 profiles

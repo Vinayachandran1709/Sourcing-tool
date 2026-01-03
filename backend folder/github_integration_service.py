@@ -178,8 +178,9 @@ class GitHubIntegrationService:
                 language=language,
                 location=location,
                 min_repos=min_repos,
-                max_pages=10  # ✅ INCREASED: 10 pages = 300 users
-            )
+                max_pages=6,  # ✅ OPTIMIZED: 6 pages = 180 users
+                target_users=min(180, max_results)  # ✅ EARLY STOPPING
+            )            
             
             if not users:
                 print("   ⚠️ No users found from GitHub")
@@ -197,8 +198,11 @@ class GitHubIntegrationService:
             process_limit = min(150, len(usernames))  # ✅ Process up to 150
             print(f"   Processing {process_limit} profiles...")
             
-            for i, username in enumerate(usernames[:process_limit], 1):
-
+            # ✅ FIX: PARALLEL PROCESSING - Process 8 profiles simultaneously
+            BATCH_SIZE = 8  # Process 8 profiles at once
+            
+            # Helper function to process single profile
+            async def process_single_profile(username: str, index: int):
                 try:
                     # Check if already in database
                     existing = db.query(Profile).filter(
@@ -206,21 +210,21 @@ class GitHubIntegrationService:
                     ).first()
                     
                     if existing:
-                        print(f"   [{i}/{len(usernames[:20])}] {username} - already cached")
-                        continue
+                        print(f"   [{index}/{process_limit}] {username} - cached")
+                        return None
                     
-                    print(f"   [{i}/{len(usernames[:20])}] {username}...", end=" ")
+                    print(f"   [{index}/{process_limit}] {username}...", end=" ")
                     
                     # Fetch full details
                     details = await get_user_details(username)
                     
                     if not details:
-                        print("❌ Failed")
-                        continue
+                        print("❌")
+                        return None
                     
                     if not is_valid_user_data(details):
-                        print("⏭️ Invalid")
-                        continue
+                        print("⏭️")
+                        return None
                     
                     # Create Profile object
                     profile = Profile(
@@ -245,39 +249,64 @@ class GitHubIntegrationService:
                     # Calculate score
                     profile.developer_score = profile.calculate_developer_score()
                     
-                    # NEW: Detect roles
-                    from role_detection_service import RoleDetectionService
-                    profile.detected_roles = RoleDetectionService.detect_roles(profile)
-                    profile.roles_analyzed_at = datetime.now(timezone.utc)
-                                        
-                    # ✅ FIX #6: Wrap database save in try/except with detailed logging
+                    # Detect roles
+                    try:
+                        from role_detection_service import RoleDetectionService
+                        profile.detected_roles = RoleDetectionService.detect_roles(profile)
+                        profile.roles_analyzed_at = datetime.now(timezone.utc)
+                    except:
+                        profile.detected_roles = []
+                    
+                    # Save to database
                     try:
                         db.add(profile)
                         db.commit()
                         db.refresh(profile)
                         
-                        new_profiles.append(profile)
                         logger.info(f"✅ Saved {username}: Score {profile.developer_score}")
-                        print(f"✅ Score: {profile.developer_score}")
+                        print(f"✅ {profile.developer_score}")
+                        return profile
                     except Exception as save_error:
                         logger.error(f"❌ Failed to save {username}: {save_error}")
-                        print(f"❌ Save failed: {save_error}")
+                        print(f"❌")
                         db.rollback()
-                        continue
-                    
-                    # Rate limit protection
-                    if i % 5 == 0:
-                        print(f"   💤 Cooling down...")
-                        await asyncio.sleep(2)
-                    
+                        return None
+                        
                 except Exception as e:
-                    print(f"❌ Error: {e}")
-                    logger.error(f"Error processing {username}: {e}", exc_info=True)
+                    print(f"❌")
+                    logger.error(f"Error processing {username}: {e}")
                     db.rollback()
-                    continue
+                    return None
             
-            return new_profiles
+            # Process profiles in parallel batches
+            for batch_start in range(0, process_limit, BATCH_SIZE):
+                batch_end = min(batch_start + BATCH_SIZE, process_limit)
+                batch_usernames = usernames[batch_start:batch_end]
+                
+                print(f"\n   🔄 Processing batch {batch_start//BATCH_SIZE + 1} ({len(batch_usernames)} profiles)...")
+                
+                # Process batch in parallel
+                tasks = [
+                    process_single_profile(username, batch_start + i + 1)
+                    for i, username in enumerate(batch_usernames)
+                ]
+                
+                batch_results = await asyncio.gather(*tasks, return_exceptions=True)
+                
+                # Collect successful profiles
+                for result in batch_results:
+                    if result and not isinstance(result, Exception):
+                        new_profiles.append(result)
+                
+                # Early stopping if we have enough
+                if len(new_profiles) >= profiles_needed:
+                    print(f"\n   ✅ Target reached! Stopping early.")
+                    break
+                
+                # Short cooldown between batches (not between individual profiles)
+                await asyncio.sleep(0.5)
             
+            return new_profiles            
         except Exception as e:
             logger.error(f"❌ GitHub fetch failed: {e}", exc_info=True)
             print(f"❌ GitHub API Error: {e}")
