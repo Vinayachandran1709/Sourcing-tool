@@ -15,6 +15,7 @@ from pydantic import BaseModel, ConfigDict
 from datetime import datetime, timezone, timedelta
 import logging
 import sys
+import asyncio
 
 # ⭐ CONFIGURE LOGGING (Windows-compatible, no emojis in console)
 logging.basicConfig(
@@ -697,6 +698,239 @@ def version_check():
         "status": "All fixes applied ✅"
     }
 
+
+# ===== STREAMING SEARCH ENDPOINT (SSE) =====
+
+from fastapi.responses import StreamingResponse
+import json
+
+@app.get("/api/search-profiles-stream")
+async def search_profiles_stream(
+    role: Optional[str] = None,
+    languages: Optional[str] = None,  # comma-separated
+    location: Optional[str] = None,
+    min_repos: Optional[int] = 0,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    ✅ STREAMING SEARCH with Server-Sent Events (SSE)
+    
+    Returns results progressively:
+    1. Cached profiles immediately (5-10 seconds)
+    2. Progress updates as new profiles fetch
+    3. New profiles as they're saved
+    4. Completion message
+    """
+    
+    async def event_stream():
+        """Generator that yields SSE events"""
+        
+        try:
+            # ===== PHASE 1: Instant Feedback =====
+            yield f"data: {json.dumps({'type': 'status', 'message': 'Searching GitHub...', 'phase': 1})}\n\n"
+            
+            # Build filters
+            languages_list = languages.split(',') if languages else []
+            filters = {
+                "role": role,
+                "languages": languages_list,
+                "location": location,
+                "min_repos": min_repos or 0
+            }
+            
+            # ===== PHASE 2: Return Cached Profiles Immediately =====
+            from github_integration_service import GitHubIntegrationService
+            
+            logger.info("Fetching cached profiles...")
+            cached_profiles = GitHubIntegrationService._search_database(db, filters)
+            
+            # Convert to dicts
+            cached_dicts = []
+            for profile in cached_profiles[:200]:
+                profile_dict = {
+                    "id": profile.id,
+                    "github_username": profile.github_username,
+                    "name": profile.name,
+                    "email": profile.email,
+                    "location": profile.location,
+                    "bio": profile.bio,
+                    "public_repos": profile.public_repos,
+                    "primary_language": profile.primary_language,
+                    "total_stars": getattr(profile, 'total_stars', 0),
+                    "developer_score": getattr(profile, 'developer_score', 0),
+                    "avatar_url": getattr(profile, 'avatar_url', None),
+                    "contributions_last_year": getattr(profile, 'contributions_last_year', 0),
+                    "followers": getattr(profile, 'followers', 0),
+                    "languages_data": getattr(profile, 'languages_data', None),
+                    "top_repos": getattr(profile, 'top_repos', None),
+                    "selected": False
+                }
+                cached_dicts.append(profile_dict)
+            
+            # Send cached profiles
+            yield f"data: {json.dumps({'type': 'cached_profiles', 'profiles': cached_dicts, 'count': len(cached_dicts), 'phase': 2})}\n\n"
+            
+            # Check if we need more
+            target_profiles = 200
+            if len(cached_profiles) >= target_profiles:
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'from_cache': len(cached_profiles), 'from_github': 0, 'phase': 4})}\n\n"
+                return
+            
+            # ===== PHASE 3: Fetch New Profiles with Progress =====
+            profiles_needed = target_profiles - len(cached_profiles)
+            yield f"data: {json.dumps({'type': 'status', 'message': f'Fetching {profiles_needed} more profiles from GitHub...', 'phase': 3})}\n\n"
+            
+            # Fetch from GitHub with progress
+            language = languages_list[0] if languages_list else None
+            
+            if not language and not location:
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'from_cache': len(cached_profiles), 'from_github': 0, 'phase': 4})}\n\n"
+                return
+            
+            # Import and search
+            from github_service import search_github_users_paginated, get_user_details, is_valid_user_data
+            from models import Profile
+            from role_detection_service import RoleDetectionService
+            
+            # Search GitHub
+            users = await search_github_users_paginated(
+                language=language,
+                location=location,
+                min_repos=min_repos or 0,
+                max_pages=6,
+                target_users=180
+            )
+            
+            if not users:
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'from_cache': len(cached_profiles), 'from_github': 0, 'phase': 4})}\n\n"
+                return
+            
+            usernames = [user["login"] for user in users[:150]]
+            total_to_process = min(150, len(usernames))
+            
+            new_profiles_count = 0
+            processed_count = 0
+            
+            # Process in parallel batches
+            BATCH_SIZE = 8
+            
+            for batch_start in range(0, total_to_process, BATCH_SIZE):
+                batch_end = min(batch_start + BATCH_SIZE, total_to_process)
+                batch_usernames = usernames[batch_start:batch_end]
+                
+                # Process batch
+                tasks = []
+                for username in batch_usernames:
+                    # Check cache first
+                    existing = db.query(Profile).filter(Profile.github_username == username).first()
+                    if existing:
+                        processed_count += 1
+                        continue
+                    
+                    tasks.append(get_user_details(username))
+                
+                # Fetch details in parallel
+                results = await asyncio.gather(*tasks, return_exceptions=True)
+                
+                # Save profiles
+                batch_new_profiles = []
+                for details in results:
+                    if isinstance(details, Exception) or not details:
+                        continue
+                    
+                    if not is_valid_user_data(details):
+                        continue
+                    
+                    try:
+                        profile = Profile(
+                            github_username=details["username"],
+                            name=details.get("name"),
+                            email=details.get("email"),
+                            location=details.get("location"),
+                            bio=details.get("bio"),
+                            public_repos=details.get("public_repos", 0),
+                            primary_language=list(details.get("languages", {}).keys())[0] if details.get("languages") else None,
+                            contributions_last_year=details.get("contributions", 0),
+                            portfolio_url=details.get("portfolio_url"),
+                            avatar_url=details.get("avatar_url"),
+                            total_stars=details.get("total_stars", 0),
+                            languages_data=details.get("languages"),
+                            top_repos=details.get("top_repos"),
+                            last_active_date=details.get("last_active_date"),
+                            cached_at=datetime.now(timezone.utc),
+                            source="github"
+                        )
+                        
+                        profile.developer_score = profile.calculate_developer_score()
+                        profile.detected_roles = RoleDetectionService.detect_roles(profile)
+                        profile.roles_analyzed_at = datetime.now(timezone.utc)
+                        
+                        db.add(profile)
+                        db.commit()
+                        db.refresh(profile)
+                        
+                        # Convert to dict
+                        profile_dict = {
+                            "id": profile.id,
+                            "github_username": profile.github_username,
+                            "name": profile.name,
+                            "email": profile.email,
+                            "location": profile.location,
+                            "bio": profile.bio,
+                            "public_repos": profile.public_repos,
+                            "primary_language": profile.primary_language,
+                            "total_stars": profile.total_stars,
+                            "developer_score": profile.developer_score,
+                            "avatar_url": profile.avatar_url,
+                            "contributions_last_year": profile.contributions_last_year,
+                            "followers": getattr(profile, 'followers', 0),
+                            "languages_data": profile.languages_data,
+                            "top_repos": profile.top_repos,
+                            "selected": False
+                        }
+                        
+                        batch_new_profiles.append(profile_dict)
+                        new_profiles_count += 1
+                        
+                    except Exception as e:
+                        logger.error(f"Failed to save profile: {e}")
+                        db.rollback()
+                
+                processed_count += len(batch_usernames)
+                
+                # Send progress update
+                progress_percent = int((processed_count / total_to_process) * 100)
+                total_profiles = len(cached_profiles) + new_profiles_count
+                
+                yield f"data: {json.dumps({'type': 'progress', 'percent': progress_percent, 'processed': processed_count, 'total': total_to_process, 'profiles_found': total_profiles, 'phase': 3})}\n\n"
+                
+                # Send new profiles
+                if batch_new_profiles:
+                    yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': batch_new_profiles, 'phase': 3})}\n\n"
+                
+                # Early stop if target reached
+                if new_profiles_count >= profiles_needed:
+                    break
+                
+                await asyncio.sleep(0.5)
+            
+            # ===== PHASE 4: Complete =====
+            total_profiles = len(cached_profiles) + new_profiles_count
+            yield f"data: {json.dumps({'type': 'complete', 'total': total_profiles, 'from_cache': len(cached_profiles), 'from_github': new_profiles_count, 'phase': 4})}\n\n"
+            
+        except Exception as e:
+            logger.error(f"Streaming search error: {e}", exc_info=True)
+            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
+    
+    return StreamingResponse(
+        event_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no"
+        }
+    )
 
 # ===== RUN WITH UVICORN =====
 
