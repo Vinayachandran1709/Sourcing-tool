@@ -269,13 +269,20 @@ async def search_profiles(
     print("="*60)
     
     # Build filters
+    # ✅ FIX #1: Properly handle languages array
+    languages_list = []
+    if search.languages and len(search.languages) > 0:
+        languages_list = search.languages
+    elif search.language:
+        languages_list = [search.language]
+    
     filters = {
         "role": search.role,
-        "languages": search.languages or [search.language] if search.language else [],
-        "frameworks": search.frameworks,
-        "tools": search.tools,
-        "min_stars": search.min_stars,
-        "min_contributions": search.min_contributions,
+        "languages": languages_list,
+        "frameworks": search.frameworks or [],
+        "tools": search.tools or [],
+        "min_stars": search.min_stars or 0,
+        "min_contributions": search.min_contributions or 0,
         "recent_activity": search.recent_activity,
         "location": search.location,
         "min_repos": search.min_repos or 0
@@ -292,11 +299,14 @@ async def search_profiles(
         print("SUCCESS: GitHubIntegrationService imported")
         
         print("\nCALLING search_and_cache_profiles...")
+        # ✅ FIX #3: Pass target_profiles parameter
         profiles = await GitHubIntegrationService.search_and_cache_profiles(
-            db, filters, max_github_results=100  # ← INCREASED from 30 to 100
+            db, 
+            filters, 
+            max_github_results=150,  # Max to fetch from GitHub if needed
+            target_profiles=200  # Target total profiles to return
         )
-        print(f"SUCCESS: Got {len(profiles)} profiles from hybrid search")
-        
+        print(f"SUCCESS: Got {len(profiles)} profiles from hybrid search")        
         # Count profiles from cache vs GitHub (all are now cached)
         from_cache = len(profiles)
         from_github = 0  # All new profiles are now in cache

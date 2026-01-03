@@ -26,18 +26,21 @@ class GitHubIntegrationService:
     async def search_and_cache_profiles(
         db: Session,
         filters: Dict,
-        max_github_results: int = 150
+        max_github_results: int = 150,
+        target_profiles: int = 200  # ✅ FIX #3: Target minimum
     ) -> List[Profile]:
         """
-        Main search function that combines database cache + GitHub API
+        ✅ FIX #3: CACHE-FIRST ARCHITECTURE
         
-        ✅ FIX #4: Enhanced logging throughout the search process
+        1. Query database first
+        2. Only fetch from GitHub if cache < target
+        3. Return cached results immediately
         """
         
-        logger.info(f"🔍 HYBRID SEARCH STARTED")
+        logger.info(f"🔍 HYBRID SEARCH STARTED (TARGET: {target_profiles} profiles)")
         logger.info(f"   Filters: {filters}")
         
-        # ===== STEP 1: Search database cache =====
+        # ===== STEP 1: Search database cache FIRST =====
         logger.info("📦 Searching database cache...")
         try:
             cached_profiles = GitHubIntegrationService._search_database(db, filters)
@@ -48,8 +51,16 @@ class GitHubIntegrationService:
             print(f"   ❌ Database search failed: {e}")
             cached_profiles = []
         
-        # ===== STEP 2: Fetch new profiles from GitHub =====
-        logger.info("🌐 Fetching new profiles from GitHub API...")
+        # ✅ FIX #3: Check if we have enough cached profiles
+        if len(cached_profiles) >= target_profiles:
+            logger.info(f"   ✅ Cache sufficient! Returning {len(cached_profiles)} profiles")
+            print(f"   ✅ Cache sufficient! Returning {len(cached_profiles)} profiles (no GitHub fetch needed)")
+            return cached_profiles[:target_profiles]  # Return target amount
+        
+        # ===== STEP 2: Fetch ONLY if cache insufficient =====
+        profiles_needed = target_profiles - len(cached_profiles)
+        logger.info(f"🌐 Cache insufficient. Fetching {profiles_needed} more from GitHub...")
+        print(f"🌐 Need {profiles_needed} more profiles from GitHub API...")
         
         language = filters.get("languages", [])
         primary_language = language[0] if language and len(language) > 0 else None
@@ -57,10 +68,9 @@ class GitHubIntegrationService:
         min_repos = filters.get("min_repos", 0)
         
         if not primary_language and not location:
-            logger.warning("   ⚠️ No language or location specified, skipping GitHub search")
-            print("   ⚠️ No language or location specified, skipping GitHub search")
-            return cached_profiles
-        
+            logger.warning("   ⚠️ No language or location specified, cannot fetch from GitHub")
+            print("   ⚠️ No language or location specified, returning cached results only")
+            return cached_profiles        
         # Fetch from GitHub
         try:
             # ✅ VALIDATE: Check if GitHub token exists
@@ -100,23 +110,38 @@ class GitHubIntegrationService:
         print(f"   - From cache: {len(cached_profiles)}")
         print(f"   - From GitHub: {len(new_profiles)}")
         
-        return unique_profiles    
-    
+        # ✅ FIX #3: Return target amount
+        return unique_profiles[:target_profiles]
+
+
     @staticmethod
     def _search_database(db: Session, filters: Dict) -> List[Profile]:
-        """Search existing cached profiles"""
+        """
+        ✅ FIX #3: Enhanced database search
+        Search more aggressively to reduce GitHub API dependency
+        """
         query = db.query(Profile)
         
-        # Language filter
+        # Language filter - check BOTH primary_language AND languages_data
         languages = filters.get("languages", [])
         if languages:
-            from sqlalchemy import or_
-            language_conditions = [
-                Profile.primary_language.ilike(f"%{lang}%") for lang in languages
-            ]
-            query = query.filter(or_(*language_conditions))
+            from sqlalchemy import or_, cast, String
+            
+            # Build conditions for both fields
+            conditions = []
+            
+            # Check primary_language
+            for lang in languages:
+                conditions.append(Profile.primary_language.ilike(f"%{lang}%"))
+            
+            # Check languages_data JSON field
+            for lang in languages:
+                # SQLite/PostgreSQL JSON search
+                conditions.append(cast(Profile.languages_data, String).ilike(f"%{lang}%"))
+            
+            query = query.filter(or_(*conditions))
         
-        # Location filter
+        # Location filter - more flexible matching
         location = filters.get("location")
         if location:
             query = query.filter(Profile.location.ilike(f"%{location}%"))
@@ -129,8 +154,8 @@ class GitHubIntegrationService:
         # Sort by score
         query = query.order_by(Profile.developer_score.desc())
         
-        return query.limit(100).all()
-    
+        # ✅ FIX #3: Increase limit to fetch more from cache
+        return query.limit(300).all()  # Was 100, now 300    
     
     @staticmethod
     async def _fetch_from_github(

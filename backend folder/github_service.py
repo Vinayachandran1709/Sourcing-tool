@@ -191,41 +191,36 @@ async def get_repo_languages(owner: str, repo_name: str):
 
 async def calculate_language_distribution(username: str, repos, max_repos_to_check: int = 30):
     """
-    ✅ STRICT: Calculate language distribution
-    Only return languages that actually exist in repos
+    ✅ FIX #2: FAST language distribution - NO extra API calls!
+    Uses repo.language from repo list instead of fetching language breakdown
     """
-    total_bytes = {}
+    language_counts = {}
     
     repos_to_check = repos[:max_repos_to_check]
     
+    # Count language occurrences across repos
     for repo in repos_to_check:
-        repo_name = repo.get("name")
-        
-        # Get languages for this repo
-        languages = await get_repo_languages(username, repo_name)
-        
-        # Aggregate bytes
-        for language, bytes_count in languages.items():
-            total_bytes[language] = total_bytes.get(language, 0) + bytes_count
+        lang = repo.get("language")
+        if lang and lang != "null":
+            language_counts[lang] = language_counts.get(lang, 0) + 1
     
-    # Calculate percentages
-    if not total_bytes:
+    # Calculate percentages based on repo count
+    if not language_counts:
         return {}
     
-    total = sum(total_bytes.values())
+    total_repos = len(repos_to_check)
     percentages = {}
     
-    for language, bytes_count in total_bytes.items():
-        percentage = round((bytes_count / total) * 100, 1)
+    for language, count in language_counts.items():
+        percentage = round((count / total_repos) * 100, 1)
         percentages[language] = percentage
     
-    # Sort by percentage
+    # Sort by percentage (most used first)
     sorted_percentages = dict(
         sorted(percentages.items(), key=lambda x: x[1], reverse=True)
     )
     
     return sorted_percentages
-
 
 async def get_last_activity_date(username: str):
     """Get last activity date"""
