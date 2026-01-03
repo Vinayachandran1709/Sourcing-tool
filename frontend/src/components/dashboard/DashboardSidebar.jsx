@@ -29,18 +29,6 @@ const DashboardSidebar = () => {
       description: 'Email campaigns'
     },
     {
-      name: 'Search History',
-      path: '/dashboard/search-history',
-      icon: Clock,
-      description: 'Past searches'
-    },
-    {
-      name: 'Analytics',
-      path: '/dashboard/analytics',
-      icon: BarChart3,
-      description: 'Insights & stats'
-    },
-    {
       name: 'Subscription',
       path: '/dashboard/subscription',
       icon: CreditCard,

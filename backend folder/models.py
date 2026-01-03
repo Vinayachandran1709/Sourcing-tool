@@ -51,8 +51,6 @@ class User(Base):
 
     # Relationships
     saved_lists = relationship("SavedList", back_populates="user")
-    search_history = relationship("SearchHistory", back_populates="user")
-    profile_views = relationship("ProfileView", back_populates="user")
 
 # ===== PROFILE MODEL =====
 
@@ -161,59 +159,6 @@ class OutreachLog(Base):
     email_sent_at = Column(DateTime(timezone=True), server_default=func.now())
     email_status = Column(String)
     error_message = Column(String, nullable=True)
-
-
-class SearchHistory(Base):
-    """Track user search history with full parameters"""
-    __tablename__ = "search_history"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    
-    # Search parameters (store everything for recreation)
-    search_type = Column(String, default="general")  # general, role-based, location-based
-    keywords = Column(String)  # Search keywords/query
-    role = Column(String)  # For role-based searches
-    location = Column(String)  # Location filter
-    min_followers = Column(Integer)  # Follower count filter
-    min_repos = Column(Integer)  # Repository count filter
-    languages = Column(ARRAY(String))  # Programming languages
-    frameworks = Column(ARRAY(String))  # Frameworks/tools
-    min_score = Column(Integer)  # Minimum developer score
-    
-    # Results metadata
-    results_count = Column(Integer, default=0)  # Number of results returned
-    top_profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=True)  # Top result
-    
-    # Timestamps
-    search_date = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    last_recreated = Column(DateTime(timezone=True), nullable=True)  # When user recreated this search
-    
-    # Relationships
-    user = relationship("User", back_populates="search_history")
-    top_profile = relationship("Profile", foreign_keys=[top_profile_id])
-
-class ProfileView(Base):
-    """Track when users view profiles"""
-    __tablename__ = "profile_views"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    profile_id = Column(Integer, ForeignKey("profiles.id"), nullable=False)
-    
-    # View metadata
-    viewed_from = Column(String)  # "search", "saved_list", "email_campaign", "direct"
-    search_history_id = Column(Integer, ForeignKey("search_history.id"), nullable=True)
-    
-    # Timestamps
-    first_viewed = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    last_viewed = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
-    view_count = Column(Integer, default=1)
-    
-    # Relationships
-    user = relationship("User", back_populates="profile_views")
-    profile = relationship("Profile")
-    search_history = relationship("SearchHistory", foreign_keys=[search_history_id])
 
 class EmailOutreach(Base):
     """Track bulk email campaigns"""

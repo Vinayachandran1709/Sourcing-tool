@@ -81,7 +81,8 @@ class GitHubIntegrationService:
                 return cached_profiles
             
             new_profiles = await GitHubIntegrationService._fetch_from_github(
-                db, primary_language, location, min_repos, max_github_results
+                db, primary_language, location, min_repos, max_github_results,
+                profiles_needed  # ✅ PASS profiles_needed
             )
             logger.info(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
             print(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
@@ -163,7 +164,8 @@ class GitHubIntegrationService:
         language: str,
         location: str,
         min_repos: int,
-        max_results: int
+        max_results: int,
+        profiles_needed: int = 200
     ) -> List[Profile]:
         """
         Fetch new profiles from GitHub and cache them

@@ -135,35 +135,6 @@ export const markCampaignReplied = async (campaignId, replyContent = null) => {
   return response.data;
 };
 
-// ===== SEARCH HISTORY APIs =====
-
-export const getSearchHistory = async (limit = 50, days = null) => {
-  const params = { limit };
-  if (days) params.days = days;
-  const response = await api.get('/api/search-history', { params });
-  return response.data;
-};
-
-export const getSearchDetails = async (searchId) => {
-  const response = await api.get(`/api/search-history/${searchId}`);
-  return response.data;
-};
-
-export const recreateSearch = async (searchId) => {
-  const response = await api.post(`/api/search-history/${searchId}/recreate`);
-  return response.data;
-};
-
-export const deleteSearch = async (searchId) => {
-  const response = await api.delete(`/api/search-history/${searchId}`);
-  return response.data;
-};
-
-export const getSearchStatistics = async () => {
-  const response = await api.get('/api/search-history/statistics/overview');
-  return response.data;
-};
-
 // ===== SAVED LISTS APIs (FIXED ENDPOINTS) =====
 
 export const getSavedLists = async () => {
@@ -211,33 +182,6 @@ export const updateProfileNotes = async (listId, profileId, notes) => {
 
 export const getListLimits = async () => {
   const response = await api.get('/api/lists/limits');
-  return response.data;
-};
-
-// ===== ANALYTICS APIs (FIXED ENDPOINTS) =====
-
-export const getAnalyticsOverview = async (timeRange = '7d') => {
-  const response = await api.get('/api/analytics/overview', { params: { time_range: timeRange } });
-  return response.data;
-};
-
-export const getSearchesTrend = async (timeRange = '7d') => {
-  const response = await api.get('/api/analytics/searches-trend', { params: { time_range: timeRange } });
-  return response.data;
-};
-
-export const getEmailPerformance = async (timeRange = '7d') => {
-  const response = await api.get('/api/analytics/email-performance', { params: { time_range: timeRange } });
-  return response.data;
-};
-
-export const getTopRoles = async (timeRange = '7d') => {
-  const response = await api.get('/api/analytics/top-roles', { params: { time_range: timeRange } });
-  return response.data;
-};
-
-export const getDashboardMetrics = async () => {
-  const response = await api.get('/api/analytics/dashboard');
   return response.data;
 };
 

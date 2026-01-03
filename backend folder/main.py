@@ -48,8 +48,6 @@ from models import User, Profile, EmailOutreach, SearchHistory
 from auth_middleware import get_current_user
 from profile_cache_service import ProfileCacheService
 from email_service import EmailService
-from search_history_service import SearchHistoryService
-
 
 # ===== INITIALIZE FASTAPI APP =====
 

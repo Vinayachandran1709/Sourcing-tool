@@ -55,9 +55,7 @@ function App() {
               <Route path="saved-lists" element={<SavedListsPage />} />
               <Route path="email-templates" element={<EmailTemplatesPage />} />
               <Route path="outreach-history" element={<OutreachHistoryPage />} />
-              <Route path="search-history" element={<SearchHistoryPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />
-              <Route path="analytics" element={<AnalyticsPage />} />
             </Route>
 
             {/* Catch all - redirect to home */}
