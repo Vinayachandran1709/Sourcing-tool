@@ -44,7 +44,7 @@ from razorpay_routes import router as razorpay_router
 from filter_service import FilterService
 from usage_service import UsageService
 from database import get_db
-from models import User, Profile, EmailOutreach, SearchHistory
+from models import User, Profile, EmailOutreach
 from auth_middleware import get_current_user
 from profile_cache_service import ProfileCacheService
 from email_service import EmailService

@@ -18,9 +18,7 @@ import SearchDashboard from './pages/Dashboard/SearchDashboard';
 import SavedListsPage from './pages/Dashboard/SavedListsPage.jsx';
 import EmailTemplatesPage from './pages/Dashboard/EmailTemplatesPage.jsx';
 import OutreachHistoryPage from './pages/Dashboard/OutreachHistoryPage';
-import SearchHistoryPage from './pages/Dashboard/SearchHistoryPage';
 import SubscriptionPage from './pages/Dashboard/SubscriptionPage';
-import AnalyticsPage from './pages/Dashboard/AnalyticsPage.jsx';
 import CheckoutPage from './pages/CheckoutPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
 
