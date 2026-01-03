@@ -27,18 +27,12 @@ const SearchDashboard = () => {
   const [progressPercent, setProgressPercent] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
   const [stats, setStats] = useState({ fromCache: 0, fromGithub: 0, total: 0 });
-  const eventSourceRef = useRef(null);
   
   const [currentPage, setCurrentPage] = useState(1);
   const PROFILES_PER_PAGE = 12;
 
-  // ✅ STREAMING SEARCH with SSE
+  // ✅ STREAMING SEARCH with Fetch (supports Authorization headers)
   const handleSearch = async (filters) => {
-    // Close any existing connection
-    if (eventSourceRef.current) {
-      eventSourceRef.current.close();
-    }
-
     setLoading(true);
     setError(null);
     setProfiles([]);
@@ -51,107 +45,114 @@ const SearchDashboard = () => {
     try {
       const token = localStorage.getItem('token');
       
-      // Build query params
-      const params = new URLSearchParams();
-      if (filters.role) params.append('role', filters.role);
-      if (filters.languages && filters.languages.length > 0) {
-        params.append('languages', filters.languages.join(','));
-      }
-      if (filters.location) params.append('location', filters.location);
-      if (filters.min_repos) params.append('min_repos', filters.min_repos);
+      // Build request body
+      const requestBody = {
+        role: filters.role || null,
+        languages: filters.languages || [],
+        location: filters.location || null,
+        min_repos: filters.min_repos || 0
+      };
       
-      // Create SSE connection
-      const url = `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/search-profiles-stream?${params}`;
-      const eventSource = new EventSource(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`
+      // Use fetch with streaming
+      const response = await fetch(
+        `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/search-profiles-stream`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(requestBody)
         }
-      });
-      
-      eventSourceRef.current = eventSource;
+      );
 
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
       let cachedCount = 0;
       let newCount = 0;
-      
-      eventSource.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) break;
+        
+        // Decode chunk
+        buffer += decoder.decode(value, { stream: true });
+        
+        // Process complete messages (ending with \n\n)
+        const messages = buffer.split('\n\n');
+        buffer = messages.pop() || ''; // Keep incomplete message in buffer
+        
+        for (const message of messages) {
+          if (!message.trim() || !message.startsWith('data: ')) continue;
           
-          switch (data.type) {
-            case 'status':
-              setSearchPhase(data.phase);
-              setStatusMessage(data.message);
-              break;
-              
-            case 'cached_profiles':
-              // ✅ PHASE 2: Show cached profiles immediately
-              setProfiles(data.profiles);
-              cachedCount = data.count;
-              setStats({ fromCache: cachedCount, fromGithub: 0, total: cachedCount });
-              setSearchPhase(2);
-              setStatusMessage(`✅ Found ${cachedCount} profiles in database`);
-              break;
-              
-            case 'progress':
-              // ✅ PHASE 3: Update progress
-              setProgressPercent(data.percent);
-              newCount = data.profiles_found - cachedCount;
-              setStats({ fromCache: cachedCount, fromGithub: newCount, total: data.profiles_found });
-              setSearchPhase(3);
-              setStatusMessage(`🌐 Fetching new profiles: ${data.processed}/${data.total}`);
-              break;
-              
-            case 'new_profiles':
-              // ✅ PHASE 3: Add new profiles as they arrive
-              setProfiles(prev => [...prev, ...data.profiles]);
-              break;
-              
-            case 'complete':
-              // ✅ PHASE 4: Complete
-              setStats({ 
-                fromCache: data.from_cache, 
-                fromGithub: data.from_github, 
-                total: data.total 
-              });
-              setSearchPhase(4);
-              setStatusMessage(`✅ Search complete! Found ${data.total} developers`);
-              setLoading(false);
-              eventSource.close();
-              break;
-              
-            case 'error':
-              setError({ message: data.message });
-              setLoading(false);
-              eventSource.close();
-              break;
+          try {
+            const jsonStr = message.replace(/^data: /, '');
+            const data = JSON.parse(jsonStr);
+            
+            switch (data.type) {
+              case 'status':
+                setSearchPhase(data.phase);
+                setStatusMessage(data.message);
+                break;
+                
+              case 'cached_profiles':
+                // ✅ PHASE 2: Show cached profiles immediately
+                setProfiles(data.profiles);
+                cachedCount = data.count;
+                setStats({ fromCache: cachedCount, fromGithub: 0, total: cachedCount });
+                setSearchPhase(2);
+                setStatusMessage(`✅ Found ${cachedCount} profiles in database`);
+                break;
+                
+              case 'progress':
+                // ✅ PHASE 3: Update progress
+                setProgressPercent(data.percent);
+                newCount = data.profiles_found - cachedCount;
+                setStats({ fromCache: cachedCount, fromGithub: newCount, total: data.profiles_found });
+                setSearchPhase(3);
+                setStatusMessage(`🌐 Fetching new profiles: ${data.processed}/${data.total}`);
+                break;
+                
+              case 'new_profiles':
+                // ✅ PHASE 3: Add new profiles as they arrive
+                setProfiles(prev => [...prev, ...data.profiles]);
+                break;
+                
+              case 'complete':
+                // ✅ PHASE 4: Complete
+                setStats({ 
+                  fromCache: data.from_cache, 
+                  fromGithub: data.from_github, 
+                  total: data.total 
+                });
+                setSearchPhase(4);
+                setStatusMessage(`✅ Search complete! Found ${data.total} developers`);
+                setLoading(false);
+                break;
+                
+              case 'error':
+                setError({ message: data.message });
+                setLoading(false);
+                break;
+            }
+          } catch (e) {
+            console.error('Failed to parse SSE data:', e);
           }
-        } catch (e) {
-          console.error('Failed to parse SSE data:', e);
         }
-      };
-      
-      eventSource.onerror = (err) => {
-        console.error('SSE error:', err);
-        setError({ message: 'Connection lost. Please try again.' });
-        setLoading(false);
-        eventSource.close();
-      };
+      }
       
     } catch (error) {
       console.error('Search failed:', error);
-      setError({ message: 'Failed to start search. Please try again.' });
+      setError({ message: error.message || 'Failed to start search. Please try again.' });
       setLoading(false);
     }
   };
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (eventSourceRef.current) {
-        eventSourceRef.current.close();
-      }
-    };
-  }, []);
 
   useEffect(() => {
     const loadLists = async () => {
