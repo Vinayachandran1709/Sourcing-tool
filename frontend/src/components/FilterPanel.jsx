@@ -320,7 +320,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </div>
           </div>
 
-          {/* ✅ NEW: Programming Languages - Dropdown Toggle */}
+          {/* ✅ Programming Languages - Dropdown with Dynamic Arrow */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
               Programming Languages ({filters.languages.length} selected)
@@ -328,13 +328,13 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             <div style={styles.dropdownContainer}>
               <div style={styles.dropdownToggle} onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}>
                 <span style={styles.dropdownToggleText}>
-                  {filters.languages.length === 0 
-                    ? 'Select languages...' 
+                  {filters.languages.length === 0
+                    ? 'Select languages...'
                     : filters.languages.slice(0, 3).join(', ') + (filters.languages.length > 3 ? ` +${filters.languages.length - 3} more` : '')}
                 </span>
-                <ChevronDown size={16} color="#6b7280" />
+                {showLanguageDropdown ? <ChevronUp size={16} color="#6b7280" /> : <ChevronDown size={16} color="#6b7280" />}
               </div>
-              
+
               {showLanguageDropdown && (
                 <div style={styles.dropdownMenu}>
                   <div style={styles.searchInputWrapper}>
@@ -370,7 +370,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </div>
           </div>
 
-          {/* ✅ NEW: Frameworks - Dropdown Toggle */}
+          {/* ✅ Frameworks - Dropdown with Dynamic Arrow */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
               Frameworks ({filters.frameworks.length} selected)
@@ -378,13 +378,13 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             <div style={styles.dropdownContainer}>
               <div style={styles.dropdownToggle} onClick={() => setShowFrameworkDropdown(!showFrameworkDropdown)}>
                 <span style={styles.dropdownToggleText}>
-                  {filters.frameworks.length === 0 
-                    ? 'Select frameworks...' 
+                  {filters.frameworks.length === 0
+                    ? 'Select frameworks...'
                     : filters.frameworks.slice(0, 3).join(', ') + (filters.frameworks.length > 3 ? ` +${filters.frameworks.length - 3} more` : '')}
                 </span>
-                <ChevronDown size={16} color="#6b7280" />
+                {showFrameworkDropdown ? <ChevronUp size={16} color="#6b7280" /> : <ChevronDown size={16} color="#6b7280" />}
               </div>
-              
+
               {showFrameworkDropdown && (
                 <div style={styles.dropdownMenu}>
                   <div style={styles.searchInputWrapper}>
@@ -420,7 +420,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </div>
           </div>
 
-          {/* ✅ NEW: Tools - Dropdown Toggle */}
+          {/* ✅ Tools - Dropdown with Dynamic Arrow */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>
               Tools ({filters.tools.length} selected)
@@ -428,13 +428,13 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             <div style={styles.dropdownContainer}>
               <div style={styles.dropdownToggle} onClick={() => setShowToolDropdown(!showToolDropdown)}>
                 <span style={styles.dropdownToggleText}>
-                  {filters.tools.length === 0 
-                    ? 'Select tools...' 
+                  {filters.tools.length === 0
+                    ? 'Select tools...'
                     : filters.tools.slice(0, 3).join(', ') + (filters.tools.length > 3 ? ` +${filters.tools.length - 3} more` : '')}
                 </span>
-                <ChevronDown size={16} color="#6b7280" />
+                {showToolDropdown ? <ChevronUp size={16} color="#6b7280" /> : <ChevronDown size={16} color="#6b7280" />}
               </div>
-              
+
               {showToolDropdown && (
                 <div style={styles.dropdownMenu}>
                   <div style={styles.searchInputWrapper}>
@@ -470,7 +470,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </div>
           </div>
 
-          {/* ✅ NEW: Location - Dropdown + Manual Entry */}
+          {/* ✅ Location - Dropdown with Dynamic Arrow */}
           <div style={styles.filterGroup}>
             <label style={styles.label}>Location</label>
             <div style={styles.dropdownContainer}>
@@ -487,9 +487,9 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                   style={styles.locationInput}
                   autoComplete="off"
                 />
-                <ChevronDown size={16} color="#6b7280" />
+                {showLocationDropdown ? <ChevronUp size={16} color="#6b7280" /> : <ChevronDown size={16} color="#6b7280" />}
               </div>
-              
+
               {showLocationDropdown && (
                 <div style={styles.dropdownMenu}>
                   <div style={styles.dropdownOptions}>

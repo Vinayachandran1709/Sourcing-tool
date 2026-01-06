@@ -15,7 +15,7 @@ import LandingPage from './pages/LandingPage';
 // Dashboard Layout & Pages
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import SearchDashboard from './pages/Dashboard/SearchDashboard';
-import SavedListsPage from './pages/Dashboard/SavedListsPage.jsx';
+import SavedProfilesPage from './pages/Dashboard/SavedProfilesPage';
 import EmailTemplatesPage from './pages/Dashboard/EmailTemplatesPage.jsx';
 import OutreachHistoryPage from './pages/Dashboard/OutreachHistoryPage';
 import SubscriptionPage from './pages/Dashboard/SubscriptionPage';

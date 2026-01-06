@@ -17,11 +17,14 @@ const SearchDashboard = () => {
   const [error, setError] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
-  const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
-  const [savedLists, setSavedLists] = useState([]);
+  const [savedProfileIds, setSavedProfileIds] = useState(() => {
+    // Load saved profile IDs from localStorage
+    const saved = localStorage.getItem('savedProfileIds');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [currentFilters, setCurrentFilters] = useState({});
-  
+
   // ✅ NEW: Streaming state
   const [searchPhase, setSearchPhase] = useState(0); // 0=idle, 1-4=phases
   const [progressPercent, setProgressPercent] = useState(0);
@@ -154,22 +157,10 @@ const SearchDashboard = () => {
     }
   };
 
-  useEffect(() => {
-    const loadLists = async () => {
-      try {
-        const data = await getSavedLists();
-        setSavedLists(data.lists || []);
-      } catch (error) {
-        console.error('Failed to load saved lists:', error);
-      }
-    };
-    loadLists();
-  }, []);
-
   const handleProfileSelect = async (profileId) => {
     try {
       await toggleProfileSelection(profileId);
-      setProfiles(profiles.map(p => 
+      setProfiles(profiles.map(p =>
         p.id === profileId ? { ...p, selected: !p.selected } : p
       ));
     } catch (error) {
@@ -191,19 +182,33 @@ const SearchDashboard = () => {
     setShowDetailModal(true);
   };
 
-  const handleAddToList = (profile) => {
-    setSelectedProfile(profile);
-    setShowAddToListModal(true);
-  };
+  const handleToggleSave = (profile) => {
+    const isSaved = savedProfileIds.includes(profile.id);
+    let updatedSavedIds;
 
-  const handleAddToListConfirm = async (listId) => {
-    try {
-      await addProfileToList(listId, selectedProfile.id);
-      alert('Profile added to list successfully!');
-      setShowAddToListModal(false);
-    } catch (error) {
-      console.error('Failed to add to list:', error);
-      alert('Failed to add profile to list. Please try again.');
+    if (isSaved) {
+      // Remove from saved
+      updatedSavedIds = savedProfileIds.filter(id => id !== profile.id);
+    } else {
+      // Add to saved
+      updatedSavedIds = [...savedProfileIds, profile.id];
+      // Also save full profile data to localStorage
+      const savedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
+      const profileExists = savedProfiles.some(p => p.id === profile.id);
+      if (!profileExists) {
+        savedProfiles.push(profile);
+        localStorage.setItem('savedProfiles', JSON.stringify(savedProfiles));
+      }
+    }
+
+    setSavedProfileIds(updatedSavedIds);
+    localStorage.setItem('savedProfileIds', JSON.stringify(updatedSavedIds));
+
+    // Remove from saved profiles if unsaving
+    if (isSaved) {
+      const savedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
+      const filtered = savedProfiles.filter(p => p.id !== profile.id);
+      localStorage.setItem('savedProfiles', JSON.stringify(filtered));
     }
   };
 
@@ -347,17 +352,7 @@ const SearchDashboard = () => {
           <div style={styles.statsBar}>
             <div style={styles.statItem}>
               <span style={styles.statValue}>{profiles.length}</span>
-              <span style={styles.statLabel}>Total Profiles</span>
-            </div>
-            <div style={styles.statDivider}></div>
-            <div style={styles.statItem}>
-              <span style={styles.statValue}>{stats.fromCache}</span>
-              <span style={styles.statLabel}>Cached</span>
-            </div>
-            <div style={styles.statDivider}></div>
-            <div style={styles.statItem}>
-              <span style={styles.statValue}>{stats.fromGithub}</span>
-              <span style={styles.statLabel}>New</span>
+              <span style={styles.statLabel}>Profiles Found</span>
             </div>
             <div style={styles.statDivider}></div>
             <div style={styles.statItem}>
@@ -403,7 +398,8 @@ const SearchDashboard = () => {
                   profile={profile}
                   onSelect={() => handleProfileSelect(profile.id)}
                   onViewDetails={() => handleViewProfile(profile)}
-                  onAddToList={() => handleAddToList(profile)}
+                  onToggleSave={handleToggleSave}
+                  isSaved={savedProfileIds.includes(profile.id)}
                 />
               ))}
             </div>
@@ -490,36 +486,6 @@ const SearchDashboard = () => {
               setSelectedProfile(null);
             }}
           />
-        )}
-
-        {showAddToListModal && (
-          <div style={styles.modalOverlay} onClick={() => setShowAddToListModal(false)}>
-            <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
-              <h3 style={styles.modalTitle}>Add to Saved List</h3>
-              <div style={styles.listOptions}>
-                {savedLists.length === 0 ? (
-                  <p style={styles.noLists}>No saved lists yet. Create one first!</p>
-                ) : (
-                  savedLists.map(list => (
-                    <button
-                      key={list.id}
-                      onClick={() => handleAddToListConfirm(list.id)}
-                      style={styles.listOption}
-                    >
-                      <List size={16} />
-                      {list.name}
-                    </button>
-                  ))
-                )}
-              </div>
-              <button 
-                onClick={() => setShowAddToListModal(false)} 
-                style={styles.modalCloseButton}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
         )}
       </div>
     </>

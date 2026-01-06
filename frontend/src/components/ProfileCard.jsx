@@ -1,7 +1,7 @@
 import React from 'react';
 import { Star, GitBranch, MapPin, Mail, ExternalLink, Code, Eye } from 'lucide-react';
 
-const ProfileCard = ({ profile, onSelect, onViewDetails, onAddToList }) => {
+const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }) => {
   const getScoreColor = (score) => {
     if (score >= 85) return '#10b981';
     if (score >= 70) return '#3b82f6';
@@ -19,6 +19,23 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onAddToList }) => {
 
   return (
     <div style={styles.card}>
+      {/* Star Button (Top-Right) */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleSave && onToggleSave(profile);
+        }}
+        style={styles.starButton}
+        title={isSaved ? 'Remove from saved' : 'Save profile'}
+      >
+        <Star
+          size={22}
+          color={isSaved ? '#FFB800' : '#d1d5db'}
+          fill={isSaved ? '#FFB800' : 'none'}
+          strokeWidth={isSaved ? 0 : 2}
+        />
+      </button>
+
       {/* Header with Avatar & Score */}
       <div style={styles.header}>
         <img
@@ -28,10 +45,10 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onAddToList }) => {
         />
         <div style={styles.info}>
           <h3 style={styles.name}>{profile.name || profile.github_username}</h3>
-          <a 
-            href={`https://github.com/${profile.github_username}`} 
-            target="_blank" 
-            rel="noopener noreferrer" 
+          <a
+            href={`https://github.com/${profile.github_username}`}
+            target="_blank"
+            rel="noopener noreferrer"
             style={styles.username}
             onClick={(e) => e.stopPropagation()}
           >
@@ -45,7 +62,7 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onAddToList }) => {
           )}
         </div>
         <div style={{
-          ...styles.scoreBadge, 
+          ...styles.scoreBadge,
           backgroundColor: getScoreColor(profile.developer_score)
         }}>
           <div style={styles.scoreValue}>{profile.developer_score}</div>
@@ -143,6 +160,24 @@ const styles = {
     transition: 'all 0.2s',
     cursor: 'pointer',
     position: 'relative',
+  },
+
+  starButton: {
+    position: 'absolute',
+    top: '12px',
+    right: '12px',
+    background: '#fff',
+    border: 'none',
+    borderRadius: '50%',
+    width: '40px',
+    height: '40px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    zIndex: 10,
   },
 
   header: {
@@ -317,20 +352,25 @@ const styles = {
 // Hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
+  button[style*="starButton"]:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+  }
+
   button[style*="viewButton"]:hover {
     background: #e85a26 !important;
     transform: translateY(-1px);
   }
-  
+
   button[style*="selectButton"]:hover {
     opacity: 0.9;
     transform: translateY(-1px);
   }
-  
+
   a[style*="emailLink"]:hover {
     background: #e5e7eb !important;
   }
-  
+
   div[style*="card"]:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
     transform: translateY(-2px);
