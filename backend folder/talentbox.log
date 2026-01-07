@@ -16883,3 +16883,62 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-07 20:38:13,306 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
 2026-01-07 20:38:14,047 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
 2026-01-07 20:38:15,429 - httpx - INFO - HTTP Request: GET https://api.github.com/users/deliveryhero "HTTP/1.1 200 OK"
+2026-01-07 20:38:15,433 - httpx - INFO - HTTP Request: GET https://api.github.com/users/explosion "HTTP/1.1 200 OK"
+2026-01-07 20:38:15,436 - main - INFO - 📊 Progress: 16/150 (10%) - Found: 130
+2026-01-07 20:38:18,426 - main - INFO - 📊 Progress: 24/150 (16%) - Found: 130
+2026-01-07 20:38:22,840 - main - INFO - 📊 Progress: 32/150 (21%) - Found: 130
+2026-01-07 20:38:27,233 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:38:28,486 - httpx - INFO - HTTP Request: GET https://api.github.com/users/fritzing "HTTP/1.1 200 OK"
+2026-01-07 20:38:28,488 - main - INFO - 📊 Progress: 40/150 (26%) - Found: 130
+2026-01-07 20:38:31,511 - main - INFO - 📊 Progress: 48/150 (32%) - Found: 130
+2026-01-07 20:38:35,220 - main - INFO - 📊 Progress: 56/150 (37%) - Found: 130
+2026-01-07 20:38:39,580 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:38:40,824 - httpx - INFO - HTTP Request: GET https://api.github.com/users/zalandoresearch "HTTP/1.1 200 OK"
+2026-01-07 20:38:40,839 - main - INFO - 📊 Progress: 64/150 (42%) - Found: 130
+2026-01-07 20:38:46,792 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:38:48,123 - httpx - INFO - HTTP Request: GET https://api.github.com/users/OpenBankProject "HTTP/1.1 200 OK"
+2026-01-07 20:38:48,126 - main - INFO - 📊 Progress: 72/150 (48%) - Found: 130
+2026-01-07 20:38:51,093 - main - INFO - 📊 Progress: 80/150 (53%) - Found: 130
+2026-01-07 20:38:55,598 - main - INFO - 📊 Progress: 88/150 (58%) - Found: 130
+2026-01-07 20:38:59,094 - main - INFO - 📊 Progress: 96/150 (64%) - Found: 130
+2026-01-07 20:39:02,255 - main - INFO - 📊 Progress: 104/150 (69%) - Found: 130
+2026-01-07 20:39:05,311 - main - INFO - 📊 Progress: 112/150 (74%) - Found: 130
+2026-01-07 20:39:09,628 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:39:10,960 - httpx - INFO - HTTP Request: GET https://api.github.com/users/papermerge "HTTP/1.1 200 OK"
+2026-01-07 20:39:10,962 - main - INFO - 📊 Progress: 120/150 (80%) - Found: 130
+2026-01-07 20:39:15,463 - main - INFO - 📊 Progress: 128/150 (85%) - Found: 130
+2026-01-07 20:39:20,084 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:39:21,303 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rotki "HTTP/1.1 200 OK"
+2026-01-07 20:39:21,306 - main - INFO - 📊 Progress: 136/150 (90%) - Found: 130
+2026-01-07 20:39:27,085 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:39:28,368 - httpx - INFO - HTTP Request: GET https://api.github.com/users/pupil-labs "HTTP/1.1 200 OK"
+2026-01-07 20:39:28,369 - main - INFO - 📊 Progress: 144/150 (96%) - Found: 130
+2026-01-07 20:39:31,196 - main - INFO - 📊 Progress: 150/150 (100%) - Found: 130
+2026-01-07 20:39:31,706 - main - INFO - ✅ Search complete! Total: 130 (Cache: 130, GitHub: 0)
+2026-01-08 00:31:47,408 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-08 00:31:47,409 - main - INFO - Environment: development
+2026-01-08 00:31:47,412 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-08 00:31:47,471 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-08 00:31:47,998 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-08 00:31:55,693 - main - INFO - ✅ Database connection successful
+2026-01-08 00:31:55,694 - main - INFO - ✅ JWT Secret configured
+2026-01-08 00:31:55,695 - main - INFO - 🎯 Startup validation complete
+
+2026-01-08 00:32:02,947 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-08 00:32:02,948 - main - INFO - Environment: development
+2026-01-08 00:32:02,950 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-08 00:32:03,024 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-08 00:32:03,076 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-08 00:32:07,614 - main - INFO - ✅ Database connection successful
+2026-01-08 00:32:07,615 - main - INFO - ✅ JWT Secret configured
+2026-01-08 00:32:07,616 - main - INFO - 🎯 Startup validation complete
+
+2026-01-08 00:32:10,494 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-08 00:32:10,495 - main - INFO - Environment: development
+2026-01-08 00:32:10,496 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-08 00:32:10,595 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-08 00:32:10,645 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-08 00:32:16,493 - main - INFO - ✅ Database connection successful
+2026-01-08 00:32:16,493 - main - INFO - ✅ JWT Secret configured
+2026-01-08 00:32:16,494 - main - INFO - 🎯 Startup validation complete
+
