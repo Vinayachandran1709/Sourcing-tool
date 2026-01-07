@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, Mail, Clock, CreditCard, Package, Folder, Send, BarChart3 } from 'lucide-react';
+import { Search, Mail, Clock, CreditCard, Package, Folder, Send, BarChart3, Star } from 'lucide-react';
 
 const DashboardSidebar = () => {
   const navItems = [
@@ -11,10 +11,10 @@ const DashboardSidebar = () => {
       description: 'Find developers'
     },
     {
-      name: 'Saved Lists',
-      path: '/dashboard/saved-lists',
-      icon: Folder,
-      description: 'Your shortlists'
+      name: 'Saved Profiles',
+      path: '/dashboard/saved-profiles',
+      icon: Star,
+      description: 'Your saved devs'
     },
     {
       name: 'Email Templates',

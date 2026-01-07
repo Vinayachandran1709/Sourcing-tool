@@ -40,8 +40,8 @@ function App() {
             <Route path="/payment-success" element={<PaymentSuccessPage />} />
 
             {/* Protected Dashboard Routes */}
-            <Route 
-              path="/dashboard" 
+            <Route
+              path="/dashboard"
               element={
                 <PrivateRoute>
                   <DashboardLayout />
@@ -50,7 +50,7 @@ function App() {
             >
               <Route index element={<Navigate to="/dashboard/search" replace />} />
               <Route path="search" element={<SearchDashboard />} />
-              <Route path="saved-lists" element={<SavedListsPage />} />
+              <Route path="saved-profiles" element={<SavedProfilesPage />} />
               <Route path="email-templates" element={<EmailTemplatesPage />} />
               <Route path="outreach-history" element={<OutreachHistoryPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />

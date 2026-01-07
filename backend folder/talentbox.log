@@ -16858,3 +16858,28 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-06 23:48:25,345 - main - INFO - 📊 Progress: 144/150 (96%) - Found: 169
 2026-01-06 23:48:28,422 - main - INFO - 📊 Progress: 150/150 (100%) - Found: 169
 2026-01-06 23:48:28,928 - main - INFO - ✅ Search complete! Total: 169 (Cache: 169, GitHub: 0)
+2026-01-07 20:26:54,831 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-07 20:26:54,834 - main - INFO - Environment: development
+2026-01-07 20:26:54,835 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-07 20:26:54,884 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-07 20:26:55,288 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-07 20:27:23,351 - main - INFO - ✅ Database connection successful
+2026-01-07 20:27:23,353 - main - INFO - ✅ JWT Secret configured
+2026-01-07 20:27:23,355 - main - INFO - 🎯 Startup validation complete
+
+2026-01-07 20:37:47,258 - main - INFO - 📦 Fetching cached profiles...
+2026-01-07 20:37:48,754 - main - INFO - ✅ Sending 130 cached profiles
+2026-01-07 20:37:48,768 - main - INFO - 🌐 Need 70 more profiles from GitHub
+2026-01-07 20:37:48,793 - main - INFO - 🔍 Searching GitHub: language=Python, location=Berlin
+2026-01-07 20:37:52,589 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:37:53,851 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-07 20:37:56,103 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-07 20:37:58,151 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-07 20:38:00,097 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-07 20:38:02,359 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-07 20:38:04,458 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Berlin&per_page=30&page=6 "HTTP/1.1 200 OK"
+2026-01-07 20:38:04,462 - main - INFO - 📥 Processing 150 profiles
+2026-01-07 20:38:06,957 - main - INFO - 📊 Progress: 8/150 (5%) - Found: 130
+2026-01-07 20:38:13,306 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:38:14,047 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-07 20:38:15,429 - httpx - INFO - HTTP Request: GET https://api.github.com/users/deliveryhero "HTTP/1.1 200 OK"
