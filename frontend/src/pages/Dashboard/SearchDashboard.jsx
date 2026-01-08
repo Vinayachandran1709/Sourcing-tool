@@ -18,6 +18,10 @@ const SearchDashboard = () => {
     return saved ? JSON.parse(saved) : [];
   });
   const [loading, setLoading] = useState(false);
+  const [currentFilters, setCurrentFilters] = useState(() => {
+    const saved = localStorage.getItem('currentFilters');
+    return saved ? JSON.parse(saved) : {};
+  });
   const [error, setError] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -39,7 +43,30 @@ const SearchDashboard = () => {
   const [stats, setStats] = useState({ fromCache: 0, fromGithub: 0, total: 0 });
   
   const [currentPage, setCurrentPage] = useState(1);
+  const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
+    const saved = localStorage.getItem('scoreFilterRanges');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [showScoreFilter, setShowScoreFilter] = useState(false);
+
+  useEffect(() => {
+    localStorage.setItem('scoreFilterRanges', JSON.stringify(scoreFilterRanges));
+  }, [scoreFilterRanges]);
   const PROFILES_PER_PAGE = 12;
+
+  // ✅ PERSIST: Save profiles to localStorage whenever they change
+  useEffect(() => {
+    if (profiles.length > 0) {
+      localStorage.setItem('searchResults', JSON.stringify(profiles));
+    }
+  }, [profiles]);
+
+  // ✅ PERSIST: Save filters to localStorage whenever they change
+  useEffect(() => {
+    if (Object.keys(currentFilters).length > 0) {
+      localStorage.setItem('currentFilters', JSON.stringify(currentFilters));
+    }
+  }, [currentFilters]);
 
   // ✅ STREAMING SEARCH with Fetch (supports Authorization headers)
   const handleSearch = async (filters) => {
@@ -255,7 +282,27 @@ const SearchDashboard = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const handleScoreRangeToggle = (range) => {
+    const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
+    if (isSelected) {
+      setScoreFilterRanges(scoreFilterRanges.filter(r => !(r.min === range.min && r.max === range.max)));
+    } else {
+      setScoreFilterRanges([...scoreFilterRanges, range]);
+    }
+    setCurrentPage(1); // Reset to first page when filter changes
+  };
+
   // ✅ NEW: Page number pagination
+  // ✅ SCORE FILTER: Apply score filtering
+  const filteredProfiles = profiles.filter(profile => {
+    if (scoreFilterRanges.length === 0) return true;
+    
+    const score = profile.developer_score || 0;
+    return scoreFilterRanges.some(range => 
+      score >= range.min && score <= range.max
+    );
+  });
+
   // ✅ SCORE FILTER: Apply score filtering
   const filteredProfiles = profiles.filter(profile => {
     if (scoreFilterRanges.length === 0) return true;

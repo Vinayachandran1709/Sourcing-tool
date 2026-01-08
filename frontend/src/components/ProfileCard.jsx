@@ -402,8 +402,14 @@ const styles = {
 };
 
 // Hover effects
+// Hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
+  div[style*="checkboxContainer"]:hover {
+    border-color: #FF6B35 !important;
+    box-shadow: 0 4px 8px rgba(255, 107, 53, 0.2) !important;
+  }
+
   button[style*="starButton"]:hover {
     transform: scale(1.1);
     box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
@@ -414,9 +420,9 @@ styleSheet.textContent = `
     transform: translateY(-1px);
   }
 
-  button[style*="selectButton"]:hover {
-    opacity: 0.9;
-    transform: translateY(-1px);
+  button[style*="starActionButton"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
   }
 
   a[style*="emailLink"]:hover {
