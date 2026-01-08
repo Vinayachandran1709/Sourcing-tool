@@ -8,18 +8,21 @@ logger = logging.getLogger(__name__)
 
 class FilterService:
     """
-    ✅ SMART ROLE-BASED FILTERING
+    ✅ SMART ROLE-BASED FILTERING WITH ENHANCED LOCATION HIERARCHY
     
     Features:
     1. Technology-based role matching (Python → shows all Python roles)
     2. Flexible role matching (ANY: language OR framework OR tool)
-    3. Location ranking (city → country → rest)
+    3. Location hierarchy (city → country → region → global)
+       - Predefined cities: Returns city profiles + country profiles
+       - Unknown cities: Resolves to country or region
+       - Always returns results (graceful fallback)
     """
     
     @staticmethod
     def apply_filters(db: Session, filters: Dict) -> List[Profile]:
         """
-        Apply smart filters with role-based matching.
+        Apply smart filters with role-based matching and location hierarchy.
         """
         logger.info(f"🔍 FilterService with filters: {filters}")
         
@@ -73,55 +76,191 @@ class FilterService:
             all_profiles = role_filtered
             logger.info(f"✅ After role filter: {len(all_profiles)} profiles")
         
-        # ===== STEP 4: LOCATION RANKING (not filtering) =====
+        # ===== STEP 4: LOCATION RANKING WITH FALLBACK HIERARCHY =====
+        # Hierarchy: city → country → region → global
         if location and all_profiles:
             logger.info(f"📍 Location ranking: {location}")
             
             city_matches = []
             country_matches = []
-            other_profiles = []
+            region_matches = []
+            global_matches = []
             
-            location_lower = location.lower()
+            location_lower = location.lower().strip()
             
-            # City to country mapping
+            # ===== COMPREHENSIVE CITY-TO-COUNTRY MAPPING =====
+            # Maps predefined cities to their countries
             CITY_TO_COUNTRY = {
+                # United States cities
                 "san francisco": "united states",
                 "new york": "united states",
                 "seattle": "united states",
                 "austin": "united states",
+                "sf": "united states",
+                "nyc": "united states",
+                "usa": "united states",
+                "us": "united states",
+                
+                # European cities
+                "london": "united kingdom",
+                "berlin": "germany",
+                "amsterdam": "netherlands",
+                "uk": "united kingdom",
+                
+                # Indian cities
                 "bangalore": "india",
                 "mumbai": "india",
                 "delhi": "india",
-                "hyderabad": "india",
-                "london": "united kingdom",
-                "manchester": "united kingdom",
-                "berlin": "germany",
-                "munich": "germany",
-                "tokyo": "japan",
+                "bengaluru": "india",
+                
+                # Asian cities
                 "singapore": "singapore",
+                "tokyo": "japan",
             }
             
-            country = CITY_TO_COUNTRY.get(location_lower)
+            # ===== COUNTRY-TO-REGION MAPPING =====
+            # Maps countries to broader regions for fallback
+            COUNTRY_TO_REGION = {
+                "united states": "americas",
+                "canada": "americas",
+                "mexico": "americas",
+                "brazil": "americas",
+                "argentina": "americas",
+                
+                "united kingdom": "europe",
+                "germany": "europe",
+                "netherlands": "europe",
+                "france": "europe",
+                "spain": "europe",
+                "italy": "europe",
+                "poland": "europe",
+                "sweden": "europe",
+                "norway": "europe",
+                
+                "india": "asia",
+                "singapore": "asia",
+                "japan": "asia",
+                "china": "asia",
+                "south korea": "asia",
+                "indonesia": "asia",
+                "thailand": "asia",
+                "vietnam": "asia",
+                "philippines": "asia",
+                
+                "australia": "apac",
+                "new zealand": "apac",
+            }
+            
+            # ===== REGION KEYWORDS =====
+            # Detects if user typed a region name directly
+            REGION_KEYWORDS = {
+                "europe": "europe",
+                "asia": "asia",
+                "americas": "americas",
+                "apac": "apac",
+                "remote": "global",  # "Remote" means global
+                "anywhere": "global",
+                "worldwide": "global",
+            }
+            
+            # ===== STEP 4A: DETERMINE LOCATION TYPE & HIERARCHY =====
+            
+            is_predefined_city = location_lower in CITY_TO_COUNTRY
+            target_country = CITY_TO_COUNTRY.get(location_lower)
+            target_region = REGION_KEYWORDS.get(location_lower)
+            
+            # If not a predefined city, check if it's a country name
+            if not is_predefined_city and not target_region:
+                # Check if location matches any country in our mapping
+                for country in COUNTRY_TO_REGION.keys():
+                    if location_lower in country or country in location_lower:
+                        target_country = country
+                        break
+            
+            # If still no match, try to infer region from typed location
+            if not target_country and not target_region:
+                # Try to resolve unknown city to a region by checking profile locations
+                # This handles cases like "Melbourne" (Australia → APAC)
+                location_sample = [p.location.lower() for p in all_profiles[:50] if p.location]
+                
+                # Check if any profiles mention this location alongside a known country
+                for profile_loc in location_sample:
+                    if location_lower in profile_loc:
+                        # Try to extract country from profile location
+                        for country, region in COUNTRY_TO_REGION.items():
+                            if country in profile_loc:
+                                target_country = country
+                                break
+                        if target_country:
+                            break
+            
+            logger.info(f"   📍 Location type: predefined_city={is_predefined_city}, country={target_country}, region={target_region}")
+            
+            # ===== STEP 4B: CLASSIFY PROFILES BY LOCATION SPECIFICITY =====
             
             for profile in all_profiles:
                 if not profile.location:
-                    other_profiles.append(profile)
+                    # Profiles without location go to global matches
+                    global_matches.append(profile)
                     continue
                 
                 profile_location_lower = profile.location.lower()
                 
-                # City match
+                # PRIORITY 1: City match (highest priority)
                 if location_lower in profile_location_lower or profile_location_lower in location_lower:
                     city_matches.append(profile)
-                # Country match
-                elif country and country in profile_location_lower:
+                    continue
+                
+                # PRIORITY 2: Country match (if we identified a country)
+                if target_country and target_country in profile_location_lower:
                     country_matches.append(profile)
+                    continue
+                
+                # PRIORITY 3: Region match (if we identified a region or inferred one)
+                if target_region:
+                    # User typed a region directly (e.g., "Europe", "Asia")
+                    if target_region == "global":
+                        # "Remote" or "Anywhere" → all profiles are valid
+                        region_matches.append(profile)
+                    else:
+                        # Check if profile location matches the region
+                        for country, region in COUNTRY_TO_REGION.items():
+                            if region == target_region and country in profile_location_lower:
+                                region_matches.append(profile)
+                                break
+                        else:
+                            global_matches.append(profile)
+                    continue
+                
+                # PRIORITY 4: Fallback - try to match profiles to the inferred region
+                if target_country:
+                    # We have a country, check if profile is in same region
+                    target_region_fallback = COUNTRY_TO_REGION.get(target_country)
+                    if target_region_fallback:
+                        for country, region in COUNTRY_TO_REGION.items():
+                            if region == target_region_fallback and country in profile_location_lower:
+                                region_matches.append(profile)
+                                break
+                        else:
+                            global_matches.append(profile)
+                    else:
+                        global_matches.append(profile)
                 else:
-                    other_profiles.append(profile)
+                    # No match at all → global
+                    global_matches.append(profile)
             
-            # Combine: City → Country → Rest
-            all_profiles = city_matches + country_matches + other_profiles
-            logger.info(f"✅ Location ranking: {len(city_matches)} city, {len(country_matches)} country, {len(other_profiles)} other")
+            # ===== STEP 4C: COMBINE WITH HIERARCHY =====
+            # City → Country → Region → Global
+            all_profiles = city_matches + country_matches + region_matches + global_matches
+            
+            logger.info(f"✅ Location ranking: {len(city_matches)} city, {len(country_matches)} country, {len(region_matches)} region, {len(global_matches)} global")
+            
+            # ===== STEP 4D: ENSURE NON-EMPTY RESULTS =====
+            # If we have zero matches in city/country/region, the global fallback ensures results
+            if len(city_matches) == 0 and len(country_matches) == 0 and len(region_matches) == 0:
+                logger.info(f"   ⚠️ No specific location matches, returning all profiles (global fallback)")
+            elif len(city_matches) == 0 and len(country_matches) == 0:
+                logger.info(f"   ⚠️ No city/country matches, falling back to region/global profiles")
         
         # ===== STEP 5: CONTRIBUTION/REPO RANGE FILTERS =====
         contribution_ranges = filters.get("contributionRanges", [])

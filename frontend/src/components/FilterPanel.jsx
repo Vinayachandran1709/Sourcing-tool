@@ -34,25 +34,39 @@ const TOOL_OPTIONS = [
   'Redis', 'Elasticsearch', 'GraphQL', 'REST API', 'Git', 'Jira', 'Figma'
 ];
 
-// ✅ LOCATION: Dropdown options
+// ✅ UPDATED: Cleaner location options with consistent structure
+// Grouped by: Countries → Cities → Regions → Remote
 const LOCATION_OPTIONS = [
-  { value: 'USA', label: 'United States' },
-  { value: 'San Francisco', label: 'San Francisco, CA' },
-  { value: 'New York', label: 'New York, NY' },
-  { value: 'Seattle', label: 'Seattle, WA' },
-  { value: 'Austin', label: 'Austin, TX' },
-  { value: 'Europe', label: 'Europe' },
-  { value: 'London', label: 'London, UK' },
-  { value: 'Berlin', label: 'Berlin, Germany' },
-  { value: 'Amsterdam', label: 'Amsterdam, Netherlands' },
-  { value: 'India', label: 'India' },
-  { value: 'Bangalore', label: 'Bangalore, India' },
-  { value: 'Mumbai', label: 'Mumbai, India' },
-  { value: 'Delhi', label: 'Delhi, India' },
-  { value: 'Asia', label: 'Asia' },
-  { value: 'Singapore', label: 'Singapore' },
-  { value: 'Tokyo', label: 'Tokyo, Japan' },
-  { value: 'Remote', label: 'Remote' }
+  // North America - United States
+  { value: 'United States', label: '🇺🇸 United States', category: 'country' },
+  { value: 'San Francisco', label: '  📍 San Francisco, CA', category: 'city' },
+  { value: 'New York', label: '  📍 New York, NY', category: 'city' },
+  { value: 'Seattle', label: '  📍 Seattle, WA', category: 'city' },
+  { value: 'Austin', label: '  📍 Austin, TX', category: 'city' },
+  
+  // Europe
+  { value: 'Europe', label: '🌍 Europe', category: 'region' },
+  { value: 'United Kingdom', label: '  🇬🇧 United Kingdom', category: 'country' },
+  { value: 'London', label: '    📍 London', category: 'city' },
+  { value: 'Germany', label: '  🇩🇪 Germany', category: 'country' },
+  { value: 'Berlin', label: '    📍 Berlin', category: 'city' },
+  { value: 'Netherlands', label: '  🇳🇱 Netherlands', category: 'country' },
+  { value: 'Amsterdam', label: '    📍 Amsterdam', category: 'city' },
+  
+  // Asia - India
+  { value: 'Asia', label: '🌏 Asia', category: 'region' },
+  { value: 'India', label: '  🇮🇳 India', category: 'country' },
+  { value: 'Bangalore', label: '    📍 Bangalore', category: 'city' },
+  { value: 'Mumbai', label: '    📍 Mumbai', category: 'city' },
+  { value: 'Delhi', label: '    📍 Delhi', category: 'city' },
+  
+  // Asia - Other
+  { value: 'Singapore', label: '  🇸🇬 Singapore', category: 'city' },
+  { value: 'Japan', label: '  🇯🇵 Japan', category: 'country' },
+  { value: 'Tokyo', label: '    📍 Tokyo', category: 'city' },
+  
+  // Remote
+  { value: 'Remote', label: '🌐 Remote / Anywhere', category: 'remote' }
 ];
 
 const CONTRIBUTION_RANGES = [
@@ -160,7 +174,8 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   const filteredLocations = useMemo(() => {
     if (!locationSearch) return LOCATION_OPTIONS;
     return LOCATION_OPTIONS.filter(loc => 
-      loc.label.toLowerCase().includes(locationSearch.toLowerCase())
+      loc.label.toLowerCase().includes(locationSearch.toLowerCase()) ||
+      loc.value.toLowerCase().includes(locationSearch.toLowerCase())
     );
   }, [locationSearch]);
 
@@ -470,16 +485,21 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </div>
           </div>
 
-          {/* ✅ Location - Dropdown with Dynamic Arrow */}
+          {/* ✅ Location - Dropdown with free-text input + predefined options */}
           <div style={styles.filterGroup}>
-            <label style={styles.label}>Location</label>
+            <label style={styles.label}>
+              Location
+            </label>
             <div style={styles.dropdownContainer}>
               <div style={styles.dropdownToggle} onClick={() => setShowLocationDropdown(!showLocationDropdown)}>
                 <input
                   type="text"
                   placeholder="Type or select location..."
                   value={filters.location}
-                  onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                  onChange={(e) => {
+                    setFilters({ ...filters, location: e.target.value });
+                    setLocationSearch(e.target.value);
+                  }}
                   onClick={(e) => {
                     e.stopPropagation();
                     setShowLocationDropdown(true);
@@ -499,6 +519,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                         style={styles.dropdownOption}
                         onClick={() => {
                           setFilters({ ...filters, location: loc.value });
+                          setLocationSearch('');
                           setShowLocationDropdown(false);
                         }}
                       >
