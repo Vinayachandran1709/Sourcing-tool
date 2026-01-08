@@ -725,7 +725,7 @@ async def search_profiles_stream(
         
         try:
             # ===== PHASE 1: Instant Feedback =====
-            yield f"data: {json.dumps({'type': 'status', 'message': '🔍 Searching GitHub...', 'phase': 1})}\n\n"
+            yield f"data: {json.dumps({'type': 'status', 'message': '🔍 Initializing search...', 'phase': 1})}\n\n"
             
             # Build filters
             languages_list = []
@@ -770,28 +770,28 @@ async def search_profiles_stream(
                 }
                 cached_dicts.append(profile_dict)
             
-            # Send cached profiles
-            logger.info(f"✅ Sending {len(cached_dicts)} cached profiles")
-            yield f"data: {json.dumps({'type': 'cached_profiles', 'profiles': cached_dicts, 'count': len(cached_dicts), 'phase': 2})}\n\n"
+            # Send initial results (don't mention cache)
+            logger.info(f"✅ Sending {len(cached_dicts)} initial results")
+            yield f"data: {json.dumps({'type': 'profiles', 'profiles': cached_dicts, 'count': len(cached_dicts), 'phase': 2})}\n\n"
             
             # Check if we need more
-            target_profiles = 200
+            target_profiles = 350
             if len(cached_profiles) >= target_profiles:
-                logger.info(f"✅ Cache sufficient, completing")
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'from_cache': len(cached_profiles), 'from_github': 0, 'phase': 4})}\n\n"
+                logger.info(f"✅ Search complete")
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'phase': 3})}\n\n"
                 return
             
             # ===== PHASE 3: Fetch New Profiles with Progress =====
             profiles_needed = target_profiles - len(cached_profiles)
-            logger.info(f"🌐 Need {profiles_needed} more profiles from GitHub")
-            yield f"data: {json.dumps({'type': 'status', 'message': f'🌐 Fetching {profiles_needed} more profiles from GitHub...', 'phase': 3})}\n\n"
+            logger.info(f"🔍 Searching for {profiles_needed} more profiles")
+            yield f"data: {json.dumps({'type': 'status', 'message': '🔍 Searching for more developers...', 'phase': 3})}\n\n"
             
             # Check if we have language or location
             language = languages_list[0] if languages_list else None
             
             if not language and not search.location:
                 logger.warning("⚠️ No language or location, stopping")
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'from_cache': len(cached_profiles), 'from_github': 0, 'phase': 4})}\n\n"
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'phase': 3})}\n\n"
                 return
             
             # Import and search
@@ -805,17 +805,17 @@ async def search_profiles_stream(
                 language=language,
                 location=search.location,
                 min_repos=search.min_repos or 0,
-                max_pages=6,
-                target_users=180
+                max_pages=10,
+                target_users=300
             )
             
             if not users:
                 logger.warning("⚠️ No users found from GitHub")
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'from_cache': len(cached_profiles), 'from_github': 0, 'phase': 4})}\n\n"
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'phase': 3})}\n\n"
                 return
             
-            usernames = [user["login"] for user in users[:150]]
-            total_to_process = min(150, len(usernames))
+            usernames = [user["login"] for user in users[:300]]
+            total_to_process = min(250, len(usernames))
             
             logger.info(f"📥 Processing {total_to_process} profiles")
             
@@ -823,11 +823,31 @@ async def search_profiles_stream(
             processed_count = 0
             
             # Process in parallel batches
-            BATCH_SIZE = 8
+            # ✅ FILTER OUT EXISTING USERNAMES to prevent duplicate API calls
+            existing_usernames = set(
+                username[0] for username in db.query(Profile.github_username)
+                .filter(Profile.github_username.in_(usernames[:total_to_process]))
+                .all()
+            )
             
-            for batch_start in range(0, total_to_process, BATCH_SIZE):
-                batch_end = min(batch_start + BATCH_SIZE, total_to_process)
-                batch_usernames = usernames[batch_start:batch_end]
+            usernames_to_fetch = [u for u in usernames[:total_to_process] if u not in existing_usernames]
+            
+            if existing_usernames:
+                logger.info(f"⏭️  Skipping {len(existing_usernames)} already cached profiles")
+            
+            if not usernames_to_fetch:
+                logger.info(f"✅ All profiles already cached")
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles), 'phase': 3})}\n\n"
+                return
+            
+            logger.info(f"📥 Fetching {len(usernames_to_fetch)} new profiles")
+            
+            # Process in parallel batches
+            BATCH_SIZE = 12
+            
+            for batch_start in range(0, len(usernames_to_fetch), BATCH_SIZE):
+                batch_end = min(batch_start + BATCH_SIZE, len(usernames_to_fetch))
+                batch_usernames = usernames_to_fetch[batch_start:batch_end]
                 
                 # Process batch
                 tasks = []
@@ -924,23 +944,23 @@ async def search_profiles_stream(
                         yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': batch_new_profiles, 'phase': 3})}\n\n"
                 
                 # Send progress update
-                progress_percent = int((processed_count / total_to_process) * 100)
+                progress_percent = int((processed_count / len(usernames_to_fetch)) * 100)
                 total_profiles = len(cached_profiles) + new_profiles_count
                 
-                logger.info(f"📊 Progress: {processed_count}/{total_to_process} ({progress_percent}%) - Found: {total_profiles}")
-                yield f"data: {json.dumps({'type': 'progress', 'percent': progress_percent, 'processed': processed_count, 'total': total_to_process, 'profiles_found': total_profiles, 'phase': 3})}\n\n"
+                logger.info(f"📊 Progress: {progress_percent}% - Total found: {total_profiles}")
+                yield f"data: {json.dumps({'type': 'progress', 'percent': progress_percent, 'total_found': total_profiles, 'phase': 3})}\n\n"
                 
                 # Early stop if target reached
                 if new_profiles_count >= profiles_needed:
                     logger.info(f"✅ Target reached! Stopping early.")
                     break
                 
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.3)
             
             # ===== PHASE 4: Complete =====
             total_profiles = len(cached_profiles) + new_profiles_count
-            logger.info(f"✅ Search complete! Total: {total_profiles} (Cache: {len(cached_profiles)}, GitHub: {new_profiles_count})")
-            yield f"data: {json.dumps({'type': 'complete', 'total': total_profiles, 'from_cache': len(cached_profiles), 'from_github': new_profiles_count, 'phase': 4})}\n\n"
+            logger.info(f"✅ Search complete! Total: {total_profiles}")
+            yield f"data: {json.dumps({'type': 'complete', 'total': total_profiles, 'phase': 3})}\n\n"
             
         except Exception as e:
             logger.error(f"❌ Streaming search error: {e}", exc_info=True)

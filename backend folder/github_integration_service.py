@@ -27,7 +27,7 @@ class GitHubIntegrationService:
         db: Session,
         filters: Dict,
         max_github_results: int = 150,
-        target_profiles: int = 200  # ✅ FIX #3: Target minimum
+        target_profiles: int = 400  # ✅ FIX #3: Target minimum
     ) -> List[Profile]:
         """
         ✅ FIX #3: CACHE-FIRST ARCHITECTURE
@@ -156,7 +156,7 @@ class GitHubIntegrationService:
         query = query.order_by(Profile.developer_score.desc())
         
         # ✅ FIX #3: Increase limit to fetch more from cache
-        return query.limit(300).all()  # Was 100, now 300    
+        return query.limit(600).all()  # Was 100, now 300    
     
     @staticmethod
     async def _fetch_from_github(
@@ -180,9 +180,9 @@ class GitHubIntegrationService:
                 language=language,
                 location=location,
                 min_repos=min_repos,
-                max_pages=6,  # ✅ OPTIMIZED: 6 pages = 180 users
-                target_users=min(180, max_results)  # ✅ EARLY STOPPING
-            )            
+                max_pages=12,
+                target_users=min(300, max_results)
+            )           
             
             if not users:
                 print("   ⚠️ No users found from GitHub")
@@ -196,13 +196,32 @@ class GitHubIntegrationService:
             print(f"   Fetching detailed profiles...")
             new_profiles = []
             
-            # ✅ INCREASED LIMIT: Process up to 50 profiles (was 20)
-            process_limit = min(150, len(usernames))  # ✅ Process up to 150
+            # Process up to 250 profiles to reach target of 350
+            process_limit = min(300, len(usernames))
             print(f"   Processing {process_limit} profiles...")
             
-            # ✅ FIX: PARALLEL PROCESSING - Process 8 profiles simultaneously
-            BATCH_SIZE = 8  # Process 8 profiles at once
+            # Parallel processing - 12 profiles simultaneously
+            BATCH_SIZE = 12
             
+
+            # ✅ FILTER OUT EXISTING USERNAMES to prevent duplicate API calls
+            existing_usernames = set(
+                db.query(Profile.github_username)
+                .filter(Profile.github_username.in_(usernames[:process_limit]))
+                .all()
+            )
+            existing_usernames = {username[0] for username in existing_usernames}
+            usernames_to_fetch = [u for u in usernames[:process_limit] if u not in existing_usernames]
+            
+            if existing_usernames:
+                print(f"   ⏭️  Skipping {len(existing_usernames)} already cached profiles")
+            
+            if not usernames_to_fetch:
+                print(f"   ✅ All profiles already in cache!")
+                return []
+            
+            print(f"   📥 Fetching {len(usernames_to_fetch)} new profiles...")
+
             # Helper function to process single profile
             async def process_single_profile(username: str, index: int):
                 try:
@@ -281,9 +300,9 @@ class GitHubIntegrationService:
                     return None
             
             # Process profiles in parallel batches
-            for batch_start in range(0, process_limit, BATCH_SIZE):
-                batch_end = min(batch_start + BATCH_SIZE, process_limit)
-                batch_usernames = usernames[batch_start:batch_end]
+            for batch_start in range(0, len(usernames_to_fetch), BATCH_SIZE):
+                batch_end = min(batch_start + BATCH_SIZE, len(usernames_to_fetch))
+                batch_usernames = usernames_to_fetch[batch_start:batch_end]
                 
                 print(f"\n   🔄 Processing batch {batch_start//BATCH_SIZE + 1} ({len(batch_usernames)} profiles)...")
                 
@@ -306,7 +325,7 @@ class GitHubIntegrationService:
                     break
                 
                 # Short cooldown between batches (not between individual profiles)
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.3)
             
             return new_profiles            
         except Exception as e:

@@ -55,8 +55,8 @@ async def search_github_users_paginated(
     language: str, 
     location: str = None, 
     min_repos: int = 0, 
-    max_pages: int = 6,  # ✅ REDUCED: 6 pages = 180 users (enough for target)
-    target_users: int = 180  # ✅ NEW: Stop early if target reached
+    max_pages: int = 10,  # ✅ REDUCED: 6 pages = 180 users (enough for target)
+    target_users: int = 300  # ✅ NEW: Stop early if target reached
 ):
     """
     ✅ OPTIMIZED SEARCH: Fetch pages until target reached
@@ -114,7 +114,7 @@ async def search_github_users_paginated(
                     print(f"✅ Target reached! Stopping early.")
                     break
                 
-                await asyncio.sleep(0.8)  # ✅ REDUCED: 0.8s instead of 1.2s        
+                await asyncio.sleep(0.6)  # ✅ REDUCED: 0.8s instead of 1.2s        
                         
             except Exception as e:
                 print(f"❌ Error: {e}")

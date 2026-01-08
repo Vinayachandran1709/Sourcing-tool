@@ -31,16 +31,12 @@ const SearchDashboard = () => {
     const saved = localStorage.getItem('savedProfileIds');
     return saved ? JSON.parse(saved) : [];
   });
-  const [currentFilters, setCurrentFilters] = useState(() => {
-    const saved = localStorage.getItem('currentFilters');
-    return saved ? JSON.parse(saved) : {};
-  });
 
   // ✅ NEW: Streaming state
   const [searchPhase, setSearchPhase] = useState(0); // 0=idle, 1-4=phases
   const [progressPercent, setProgressPercent] = useState(0);
   const [statusMessage, setStatusMessage] = useState('');
-  const [stats, setStats] = useState({ fromCache: 0, fromGithub: 0, total: 0 });
+  const [stats, setStats] = useState({ total: 0 });
   
   const [currentPage, setCurrentPage] = useState(1);
   const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
@@ -110,8 +106,6 @@ const SearchDashboard = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
-      let cachedCount = 0;
-      let newCount = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -138,37 +132,31 @@ const SearchDashboard = () => {
                 setStatusMessage(data.message);
                 break;
                 
-              case 'cached_profiles':
-                // ✅ PHASE 2: Show cached profiles immediately
+              case 'profiles':
+                // Initial results loaded
                 setProfiles(data.profiles);
-                cachedCount = data.count;
-                setStats({ fromCache: cachedCount, fromGithub: 0, total: cachedCount });
-                setSearchPhase(2);
-                setStatusMessage(`✅ Found ${cachedCount} profiles in database`);
+                setStats({ total: data.count });
+                setSearchPhase(data.phase);
+                setStatusMessage(`✅ Found ${data.count} developers`);
                 break;
                 
               case 'progress':
-                // ✅ PHASE 3: Update progress
+                // Update progress
                 setProgressPercent(data.percent);
-                newCount = data.profiles_found - cachedCount;
-                setStats({ fromCache: cachedCount, fromGithub: newCount, total: data.profiles_found });
+                setStats({ total: data.total_found });
                 setSearchPhase(3);
-                setStatusMessage(`🌐 Fetching new profiles: ${data.processed}/${data.total}`);
+                setStatusMessage(`🔍 Processing developers...`);
                 break;
                 
               case 'new_profiles':
-                // ✅ PHASE 3: Add new profiles as they arrive
+                // Add new profiles as they arrive
                 setProfiles(prev => [...prev, ...data.profiles]);
                 break;
                 
               case 'complete':
-                // ✅ PHASE 4: Complete
-                setStats({ 
-                  fromCache: data.from_cache, 
-                  fromGithub: data.from_github, 
-                  total: data.total 
-                });
-                setSearchPhase(4);
+                // Complete
+                setStats({ total: data.total });
+                setSearchPhase(3);
                 setStatusMessage(`✅ Search complete! Found ${data.total} developers`);
                 setLoading(false);
                 break;
@@ -292,17 +280,6 @@ const SearchDashboard = () => {
     setCurrentPage(1); // Reset to first page when filter changes
   };
 
-  // ✅ NEW: Page number pagination
-  // ✅ SCORE FILTER: Apply score filtering
-  const filteredProfiles = profiles.filter(profile => {
-    if (scoreFilterRanges.length === 0) return true;
-    
-    const score = profile.developer_score || 0;
-    return scoreFilterRanges.some(range => 
-      score >= range.min && score <= range.max
-    );
-  });
-
   // ✅ SCORE FILTER: Apply score filtering
   const filteredProfiles = profiles.filter(profile => {
     if (scoreFilterRanges.length === 0) return true;
@@ -364,10 +341,9 @@ const SearchDashboard = () => {
           initialFilters={currentFilters}
           onReset={() => {
             setProfiles([]);
-            setStats({ fromCache: 0, fromGithub: 0, total: 0 });
+            setStats({ total: 0 });
             setCurrentFilters({});
             setSearchPhase(0);
-            // ✅ PERSIST: Clear localStorage when reset
             localStorage.removeItem('searchResults');
             localStorage.removeItem('currentFilters');
             localStorage.removeItem('scoreFilterRanges');
@@ -378,7 +354,7 @@ const SearchDashboard = () => {
         {loading && searchPhase > 0 && (
           <div style={styles.progressContainer}>
             <div style={styles.progressHeader}>
-              <span style={styles.progressPhase}>Phase {searchPhase}/4</span>
+              <span style={styles.progressPhase}>Phase {searchPhase}/3</span>
               <span style={styles.progressStatus}>{statusMessage}</span>
             </div>
             
@@ -388,19 +364,11 @@ const SearchDashboard = () => {
               </div>
             )}
             
-            {searchPhase >= 2 && (
+            {stats.total > 0 && (
               <div style={styles.progressStats}>
                 <div style={styles.progressStat}>
-                  <span style={styles.progressStatValue}>{stats.fromCache}</span>
-                  <span style={styles.progressStatLabel}>from cache</span>
-                </div>
-                <div style={styles.progressStat}>
-                  <span style={styles.progressStatValue}>{stats.fromGithub}</span>
-                  <span style={styles.progressStatLabel}>from GitHub</span>
-                </div>
-                <div style={styles.progressStat}>
                   <span style={styles.progressStatValue}>{stats.total}</span>
-                  <span style={styles.progressStatLabel}>total</span>
+                  <span style={styles.progressStatLabel}>developers found</span>
                 </div>
               </div>
             )}
@@ -420,7 +388,7 @@ const SearchDashboard = () => {
           <div style={styles.statsBar}>
             <div style={styles.statItem}>
               <span style={styles.statValue}>{profiles.length}</span>
-              <span style={styles.statLabel}>Profiles Found</span>
+              <span style={styles.statLabel}>Developers Found</span>
             </div>
             <div style={styles.statDivider}></div>
             <div style={styles.statItem}>
