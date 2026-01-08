@@ -72,7 +72,15 @@ const REPO_RANGES = [
   { label: '50+ (Very Active)', min: 50, max: 999999 }
 ];
 
-const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
+const SCORE_RANGES = [
+  { label: '0-29 (Beginner)', min: 0, max: 29 },
+  { label: '30-49 (Junior)', min: 30, max: 49 },
+  { label: '50-69 (Mid-Level)', min: 50, max: 69 },
+  { label: '70-84 (Senior)', min: 70, max: 84 },
+  { label: '85-100 (Expert)', min: 85, max: 100 }
+];
+
+const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset, hasProfiles = false }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState({
     role: initialFilters.role || '',
@@ -81,6 +89,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     tools: initialFilters.tools || [],
     contributionRanges: initialFilters.contributionRanges || [],
     repoRanges: initialFilters.repoRanges || [],
+    scoreRanges: initialFilters.scoreRanges || [],
     location: initialFilters.location || '',
   });
 
@@ -202,6 +211,14 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     setFilters({ ...filters, repoRanges: newRanges });
   };
 
+  const handleScoreRangeToggle = (range) => {
+    const isSelected = filters.scoreRanges.some(r => r.min === range.min && r.max === range.max);
+    const newRanges = isSelected
+      ? filters.scoreRanges.filter(r => !(r.min === range.min && r.max === range.max))
+      : [...filters.scoreRanges, { min: range.min, max: range.max }];
+    setFilters({ ...filters, scoreRanges: newRanges });
+  };
+
   const handleReset = () => {
     setFilters({
       role: '',
@@ -210,6 +227,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
       tools: [],
       contributionRanges: [],
       repoRanges: [],
+      scoreRanges: [],
       location: '',
     });
     setRoleSearch('');
@@ -217,7 +235,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     setFrameworkSearch('');
     setToolSearch('');
     setLocationSearch('');
-    
+
     if (onReset) {
       onReset();
     }
@@ -234,6 +252,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     filters.tools.length > 0,
     filters.contributionRanges.length > 0,
     filters.repoRanges.length > 0,
+    filters.scoreRanges.length > 0,
     filters.location,
   ].filter(Boolean).length;
 
@@ -549,8 +568,8 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
               {REPO_RANGES.map(range => {
                 const isSelected = filters.repoRanges.some(r => r.min === range.min && r.max === range.max);
                 return (
-                  <label 
-                    key={range.label} 
+                  <label
+                    key={range.label}
                     style={{
                       ...styles.rangeCheckboxLabel,
                       ...(isSelected ? styles.rangeCheckboxLabelSelected : {})
@@ -568,6 +587,37 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
               })}
             </div>
           </div>
+
+          {/* Developer Score Ranges - Only shown after profiles are fetched */}
+          {hasProfiles && (
+            <div style={styles.filterGroup}>
+              <label style={styles.label}>
+                Developer Score ({filters.scoreRanges.length} range{filters.scoreRanges.length !== 1 ? 's' : ''} selected)
+              </label>
+              <div style={styles.rangeCheckboxContainer}>
+                {SCORE_RANGES.map(range => {
+                  const isSelected = filters.scoreRanges.some(r => r.min === range.min && r.max === range.max);
+                  return (
+                    <label
+                      key={range.label}
+                      style={{
+                        ...styles.rangeCheckboxLabel,
+                        ...(isSelected ? styles.rangeCheckboxLabelSelected : {})
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleScoreRangeToggle(range)}
+                        style={styles.rangeCheckbox}
+                      />
+                      <span style={styles.rangeCheckboxText}>{range.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+          )}
 
           {/* Actions */}
           <div style={styles.actions}>

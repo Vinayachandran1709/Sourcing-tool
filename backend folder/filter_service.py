@@ -145,7 +145,20 @@ class FilterService:
                         break
             all_profiles = range_filtered
             logger.info(f"✅ After repo filter: {len(all_profiles)} profiles")
-        
+
+        score_ranges = filters.get("scoreRanges", [])
+        if score_ranges and all_profiles:
+            range_filtered = []
+            for profile in all_profiles:
+                # Ensure developer_score exists, default to 0 if not
+                dev_score = getattr(profile, 'developer_score', 0) or 0
+                for score_range in score_ranges:
+                    if score_range["min"] <= dev_score <= score_range["max"]:
+                        range_filtered.append(profile)
+                        break
+            all_profiles = range_filtered
+            logger.info(f"✅ After score filter: {len(all_profiles)} profiles")
+
         # ===== STEP 6: SCORE AND RANK =====
         scored_profiles = []
         
