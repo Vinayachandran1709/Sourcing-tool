@@ -509,7 +509,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 </div>
               )}
             </div>
-            <span style={styles.hintText}>Select from list or type custom location</span>
           </div>
 
           {/* Contribution Ranges */}

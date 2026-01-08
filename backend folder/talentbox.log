@@ -16942,3 +16942,97 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-08 00:32:16,493 - main - INFO - ✅ JWT Secret configured
 2026-01-08 00:32:16,494 - main - INFO - 🎯 Startup validation complete
 
+2026-01-08 20:40:00,241 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-08 20:40:00,243 - main - INFO - Environment: development
+2026-01-08 20:40:00,244 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-08 20:40:00,297 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-08 20:40:00,697 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-08 20:40:08,151 - main - INFO - ✅ Database connection successful
+2026-01-08 20:40:08,152 - main - INFO - ✅ JWT Secret configured
+2026-01-08 20:40:08,153 - main - INFO - 🎯 Startup validation complete
+
+2026-01-08 22:12:32,070 - main - INFO - 📦 Fetching cached profiles...
+2026-01-08 22:12:32,953 - main - INFO - ✅ Sending 5 cached profiles
+2026-01-08 22:12:32,955 - main - INFO - 🌐 Need 195 more profiles from GitHub
+2026-01-08 22:12:32,992 - main - INFO - 🔍 Searching GitHub: language=Python, location=Delhi
+2026-01-08 22:12:35,459 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:12:37,135 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Delhi&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-08 22:12:39,592 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Delhi&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-08 22:12:42,049 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Delhi&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-08 22:12:44,408 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Delhi&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-08 22:12:46,869 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Delhi&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-08 22:12:49,422 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:Delhi&per_page=30&page=6 "HTTP/1.1 200 OK"
+2026-01-08 22:12:49,427 - main - INFO - 📥 Processing 150 profiles
+2026-01-08 22:12:59,767 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:12:59,771 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:12:59,773 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:00,593 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:00,595 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:03,866 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:03,869 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:03,871 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:06,849 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ayooshkathuria "HTTP/1.1 200 OK"
+2026-01-08 22:13:07,659 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Vikranth3140 "HTTP/1.1 200 OK"
+2026-01-08 22:13:07,662 - httpx - INFO - HTTP Request: GET https://api.github.com/users/developerrahulofficial "HTTP/1.1 200 OK"
+2026-01-08 22:13:07,665 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PrathamKumar14 "HTTP/1.1 200 OK"
+2026-01-08 22:13:07,667 - httpx - INFO - HTTP Request: GET https://api.github.com/users/thismlguy "HTTP/1.1 200 OK"
+2026-01-08 22:13:07,669 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Ignitetechnologies "HTTP/1.1 200 OK"
+2026-01-08 22:13:07,670 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aviaryan "HTTP/1.1 200 OK"
+2026-01-08 22:13:13,468 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Ignitetechnologies/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:13:14,510 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ayooshkathuria/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:13:14,514 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PrathamKumar14/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:13:14,519 - httpx - INFO - HTTP Request: GET https://api.github.com/users/thismlguy/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:13:16,928 - httpx - INFO - HTTP Request: GET https://api.github.com/users/developerrahulofficial/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:13:16,934 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Vikranth3140/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:13:16,943 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aviaryan/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:13:19,988 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ayooshkathuria/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:13:19,990 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aviaryan/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:13:19,992 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PrathamKumar14/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:13:19,993 - httpx - INFO - HTTP Request: GET https://api.github.com/users/thismlguy/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:13:19,999 - httpx - INFO - HTTP Request: GET https://api.github.com/users/developerrahulofficial/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:13:20,126 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Vikranth3140/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:13:44,547 - main - INFO - 📤 Sending 7 new profiles
+2026-01-08 22:13:44,548 - main - INFO - 📊 Progress: 8/150 (5%) - Found: 12
+2026-01-08 22:13:53,756 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:54,739 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:54,763 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:54,764 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:54,766 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:54,768 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:54,770 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:13:54,772 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:01,697 - httpx - INFO - HTTP Request: GET https://api.github.com/users/IncredibleHacker "HTTP/1.1 200 OK"
+2026-01-08 22:14:02,698 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jaidevd "HTTP/1.1 200 OK"
+2026-01-08 22:14:02,700 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aparna2071 "HTTP/1.1 200 OK"
+2026-01-08 22:14:02,702 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PriyankaJhaTheDeveloper "HTTP/1.1 200 OK"
+2026-01-08 22:14:02,704 - httpx - INFO - HTTP Request: GET https://api.github.com/users/theskumar "HTTP/1.1 200 OK"
+2026-01-08 22:14:02,706 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cybergeekgyan "HTTP/1.1 200 OK"
+2026-01-08 22:14:02,708 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dufferzafar "HTTP/1.1 200 OK"
+2026-01-08 22:14:08,728 - httpx - INFO - HTTP Request: GET https://api.github.com/users/IncredibleHacker/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:14:09,663 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PriyankaJhaTheDeveloper/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:14:10,561 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cybergeekgyan/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:14:10,571 - httpx - INFO - HTTP Request: GET https://api.github.com/users/theskumar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:14:10,600 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dufferzafar/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:14:13,447 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jaidevd/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:14:13,454 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aparna2071/repos?sort=updated&per_page=100&type=owner "HTTP/1.1 200 OK"
+2026-01-08 22:14:15,952 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PriyankaJhaTheDeveloper/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:14:16,055 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aparna2071/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:14:16,112 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cybergeekgyan/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:14:16,118 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jaidevd/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:14:16,177 - httpx - INFO - HTTP Request: GET https://api.github.com/users/theskumar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:14:16,355 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dufferzafar/events/public?per_page=100 "HTTP/1.1 200 OK"
+2026-01-08 22:14:40,558 - main - INFO - 📤 Sending 7 new profiles
+2026-01-08 22:14:40,560 - main - INFO - 📊 Progress: 16/150 (10%) - Found: 19
+2026-01-08 22:14:51,181 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:52,007 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:52,009 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:52,012 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:52,014 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:52,016 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:52,018 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:52,020 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-08 22:14:58,112 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sara-02 "HTTP/1.1 200 OK"
+2026-01-08 22:14:58,965 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jainaman224 "HTTP/1.1 200 OK"
+2026-01-08 22:14:58,968 - httpx - INFO - HTTP Request: GET https://api.github.com/users/upsidedownlabs "HTTP/1.1 200 OK"
+2026-01-08 22:14:58,970 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Merciful123 "HTTP/1.1 200 OK"
+2026-01-08 22:14:58,973 - httpx - INFO - HTTP Request: GET https://api.github.com/users/adityajha2005 "HTTP/1.1 200 OK"
