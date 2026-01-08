@@ -25,14 +25,18 @@ class FilterService:
         
         # ===== STEP 1: LOAD PROFILES FROM DATABASE =====
         query = db.query(Profile)
-        
-        # Apply location filter at SQL level (optimization)
-        location = filters.get("location")
-        if location:
-            query = query.filter(Profile.location.ilike(f"%{location}%"))
-        
+
+        # Note: We intentionally do NOT filter by location at SQL level here
+        # to ensure we can implement proper hierarchical filtering in Python.
+        # For example, if user types "San Francisco", we need to return both:
+        # - Profiles from San Francisco (city)
+        # - Profiles from United States (country)
+        # SQL-level filtering would prevent us from getting country-level matches.
+
         all_profiles = query.all()
         logger.info(f"📊 Loaded {len(all_profiles)} profiles from database")
+
+        location = filters.get("location")
         
         # ===== STEP 2: TECHNOLOGY-BASED FILTERING (Languages/Frameworks/Tools) =====
         languages = filters.get("languages", [])
@@ -73,55 +77,233 @@ class FilterService:
             all_profiles = role_filtered
             logger.info(f"✅ After role filter: {len(all_profiles)} profiles")
         
-        # ===== STEP 4: LOCATION RANKING (not filtering) =====
+        # ===== STEP 4: HIERARCHICAL LOCATION FILTERING =====
+        # MVP logic with clear hierarchy: city → country → region → global
         if location and all_profiles:
-            logger.info(f"📍 Location ranking: {location}")
-            
-            city_matches = []
-            country_matches = []
-            other_profiles = []
-            
-            location_lower = location.lower()
-            
-            # City to country mapping
+            logger.info(f"📍 Location filter: {location}")
+
+            location_lower = location.lower().strip()
+
+            # ===== LOCATION MAPPINGS =====
+
+            # Predefined cities from frontend (these get city + country results)
+            PREDEFINED_CITIES = {
+                "san francisco", "new york", "seattle", "austin",
+                "london", "berlin", "amsterdam",
+                "bangalore", "mumbai", "delhi",
+                "singapore", "tokyo"
+            }
+
+            # Comprehensive city-to-country mapping
             CITY_TO_COUNTRY = {
+                # Americas - USA
                 "san francisco": "united states",
                 "new york": "united states",
                 "seattle": "united states",
                 "austin": "united states",
+                "boston": "united states",
+                "chicago": "united states",
+                "los angeles": "united states",
+                "portland": "united states",
+                "denver": "united states",
+                "atlanta": "united states",
+
+                # Europe - UK
+                "london": "united kingdom",
+                "manchester": "united kingdom",
+                "edinburgh": "united kingdom",
+                "cambridge": "united kingdom",
+
+                # Europe - Germany
+                "berlin": "germany",
+                "munich": "germany",
+                "hamburg": "germany",
+                "frankfurt": "germany",
+
+                # Europe - Netherlands
+                "amsterdam": "netherlands",
+                "rotterdam": "netherlands",
+
+                # Europe - Other
+                "paris": "france",
+                "madrid": "spain",
+                "barcelona": "spain",
+                "stockholm": "sweden",
+                "copenhagen": "denmark",
+                "oslo": "norway",
+                "helsinki": "finland",
+                "dublin": "ireland",
+                "zurich": "switzerland",
+
+                # Asia - India
                 "bangalore": "india",
                 "mumbai": "india",
                 "delhi": "india",
                 "hyderabad": "india",
-                "london": "united kingdom",
-                "manchester": "united kingdom",
-                "berlin": "germany",
-                "munich": "germany",
-                "tokyo": "japan",
+                "pune": "india",
+                "chennai": "india",
+                "kolkata": "india",
+
+                # Asia - Other
                 "singapore": "singapore",
+                "tokyo": "japan",
+                "osaka": "japan",
+                "kyoto": "japan",
+                "hong kong": "china",
+                "shanghai": "china",
+                "beijing": "china",
+                "shenzhen": "china",
+                "seoul": "south korea",
+                "taipei": "taiwan",
+                "bangkok": "thailand",
+
+                # Oceania
+                "sydney": "australia",
+                "melbourne": "australia",
+                "brisbane": "australia",
+                "auckland": "new zealand",
+
+                # Canada
+                "toronto": "canada",
+                "vancouver": "canada",
+                "montreal": "canada",
             }
-            
+
+            # Country-to-region mapping
+            COUNTRY_TO_REGION = {
+                # Americas
+                "united states": "americas",
+                "canada": "americas",
+                "mexico": "americas",
+                "brazil": "americas",
+                "argentina": "americas",
+
+                # Europe
+                "united kingdom": "europe",
+                "germany": "europe",
+                "france": "europe",
+                "netherlands": "europe",
+                "spain": "europe",
+                "italy": "europe",
+                "sweden": "europe",
+                "norway": "europe",
+                "denmark": "europe",
+                "finland": "europe",
+                "ireland": "europe",
+                "switzerland": "europe",
+                "poland": "europe",
+                "belgium": "europe",
+                "austria": "europe",
+
+                # Asia
+                "india": "asia",
+                "china": "asia",
+                "japan": "asia",
+                "singapore": "asia",
+                "south korea": "asia",
+                "taiwan": "asia",
+                "thailand": "asia",
+                "vietnam": "asia",
+                "indonesia": "asia",
+                "malaysia": "asia",
+                "philippines": "asia",
+
+                # Oceania (treated as part of Asia-Pacific in this context)
+                "australia": "asia",
+                "new zealand": "asia",
+            }
+
+            # ===== DETERMINE FILTER STRATEGY =====
+
+            is_predefined_city = location_lower in PREDEFINED_CITIES
+            is_city = location_lower in CITY_TO_COUNTRY
+            is_remote = location_lower == "remote"
+
+            # Get country and region for the location
             country = CITY_TO_COUNTRY.get(location_lower)
-            
+            region = None
+            if country:
+                region = COUNTRY_TO_REGION.get(country)
+
+            # Initialize result buckets
+            city_matches = []
+            country_matches = []
+            region_matches = []
+            global_matches = []
+
+            logger.info(f"🔍 Filter strategy - Predefined: {is_predefined_city}, IsCity: {is_city}, Country: {country}, Region: {region}")
+
+            # ===== APPLY HIERARCHICAL FILTERING =====
+
             for profile in all_profiles:
                 if not profile.location:
-                    other_profiles.append(profile)
+                    # Profiles without location go to global bucket
+                    global_matches.append(profile)
                     continue
-                
+
                 profile_location_lower = profile.location.lower()
-                
-                # City match
-                if location_lower in profile_location_lower or profile_location_lower in location_lower:
-                    city_matches.append(profile)
-                # Country match
-                elif country and country in profile_location_lower:
-                    country_matches.append(profile)
+
+                # Special case: Remote
+                if is_remote:
+                    if "remote" in profile_location_lower:
+                        city_matches.append(profile)
+                    else:
+                        global_matches.append(profile)
+                    continue
+
+                # ===== CASE 1: Predefined City (SF, NYC, London, etc.) =====
+                # Return city profiles first, then country profiles
+                if is_predefined_city:
+                    # Check for city match (exact or substring)
+                    if location_lower in profile_location_lower:
+                        city_matches.append(profile)
+                    # Check for country match (if city has a country)
+                    elif country and country in profile_location_lower:
+                        country_matches.append(profile)
+                    else:
+                        global_matches.append(profile)
+
+                # ===== CASE 2: Typed City in Mapping (but not predefined) =====
+                # Example: User types "Melbourne" → resolve to Australia only
+                elif is_city and not is_predefined_city:
+                    # Only return country-level profiles (not the city itself)
+                    if country in profile_location_lower:
+                        country_matches.append(profile)
+                    else:
+                        global_matches.append(profile)
+
+                # ===== CASE 3: Country or Region Search =====
+                # Example: "Germany", "Europe", "Asia"
                 else:
-                    other_profiles.append(profile)
-            
-            # Combine: City → Country → Rest
-            all_profiles = city_matches + country_matches + other_profiles
-            logger.info(f"✅ Location ranking: {len(city_matches)} city, {len(country_matches)} country, {len(other_profiles)} other")
+                    # Try exact location match first
+                    if location_lower in profile_location_lower:
+                        city_matches.append(profile)
+                    # Try as country match
+                    elif any(country_name in profile_location_lower for country_name in COUNTRY_TO_REGION.keys() if location_lower in country_name):
+                        country_matches.append(profile)
+                    # Try as region match
+                    elif region and COUNTRY_TO_REGION.get(profile_location_lower.split(',')[0].strip()) == region:
+                        region_matches.append(profile)
+                    else:
+                        global_matches.append(profile)
+
+            # ===== COMBINE RESULTS WITH CLEAR HIERARCHY =====
+            # Priority: City > Country > Region > Global
+            all_profiles = city_matches + country_matches + region_matches + global_matches
+
+            logger.info(
+                f"✅ Location hierarchy - "
+                f"City: {len(city_matches)}, "
+                f"Country: {len(country_matches)}, "
+                f"Region: {len(region_matches)}, "
+                f"Global: {len(global_matches)}"
+            )
+
+            # ===== FALLBACK: Never return empty results =====
+            # If we have no matches at all, widen scope automatically
+            if not all_profiles:
+                logger.warning(f"⚠️  No matches for '{location}' - returning all profiles as fallback")
+                all_profiles = db.query(Profile).all()
         
         # ===== STEP 5: CONTRIBUTION/REPO RANGE FILTERS =====
         contribution_ranges = filters.get("contributionRanges", [])

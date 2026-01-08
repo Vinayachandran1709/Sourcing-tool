@@ -35,23 +35,35 @@ const TOOL_OPTIONS = [
 ];
 
 // ✅ LOCATION: Dropdown options
+// Organized by region → country → cities for better UX
 const LOCATION_OPTIONS = [
-  { value: 'USA', label: 'United States' },
+  // Americas
+  { value: 'United States', label: 'United States' },
   { value: 'San Francisco', label: 'San Francisco, CA' },
   { value: 'New York', label: 'New York, NY' },
   { value: 'Seattle', label: 'Seattle, WA' },
   { value: 'Austin', label: 'Austin, TX' },
+
+  // Europe
   { value: 'Europe', label: 'Europe' },
+  { value: 'United Kingdom', label: 'United Kingdom' },
   { value: 'London', label: 'London, UK' },
+  { value: 'Germany', label: 'Germany' },
   { value: 'Berlin', label: 'Berlin, Germany' },
+  { value: 'Netherlands', label: 'Netherlands' },
   { value: 'Amsterdam', label: 'Amsterdam, Netherlands' },
+
+  // Asia
+  { value: 'Asia', label: 'Asia' },
   { value: 'India', label: 'India' },
   { value: 'Bangalore', label: 'Bangalore, India' },
   { value: 'Mumbai', label: 'Mumbai, India' },
   { value: 'Delhi', label: 'Delhi, India' },
-  { value: 'Asia', label: 'Asia' },
   { value: 'Singapore', label: 'Singapore' },
+  { value: 'Japan', label: 'Japan' },
   { value: 'Tokyo', label: 'Tokyo, Japan' },
+
+  // Other
   { value: 'Remote', label: 'Remote' }
 ];
 
@@ -509,7 +521,6 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 </div>
               )}
             </div>
-            <span style={styles.hintText}>Select from list or type custom location</span>
           </div>
 
           {/* Contribution Ranges */}
