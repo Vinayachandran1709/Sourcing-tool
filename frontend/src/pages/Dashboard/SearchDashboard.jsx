@@ -12,7 +12,11 @@ import {
 } from '../../services/api';
 
 const SearchDashboard = () => {
-  const [profiles, setProfiles] = useState([]);
+  // ✅ PERSIST: Load profiles and filters from localStorage on mount
+  const [profiles, setProfiles] = useState(() => {
+    const saved = localStorage.getItem('searchResults');
+    return saved ? JSON.parse(saved) : [];
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
@@ -23,7 +27,10 @@ const SearchDashboard = () => {
     const saved = localStorage.getItem('savedProfileIds');
     return saved ? JSON.parse(saved) : [];
   });
-  const [currentFilters, setCurrentFilters] = useState({});
+  const [currentFilters, setCurrentFilters] = useState(() => {
+    const saved = localStorage.getItem('currentFilters');
+    return saved ? JSON.parse(saved) : {};
+  });
 
   // ✅ NEW: Streaming state
   const [searchPhase, setSearchPhase] = useState(0); // 0=idle, 1-4=phases
@@ -249,8 +256,18 @@ const SearchDashboard = () => {
   };
 
   // ✅ NEW: Page number pagination
-  const totalPages = Math.ceil(profiles.length / PROFILES_PER_PAGE);
-  const paginatedProfiles = profiles.slice(
+  // ✅ SCORE FILTER: Apply score filtering
+  const filteredProfiles = profiles.filter(profile => {
+    if (scoreFilterRanges.length === 0) return true;
+    
+    const score = profile.developer_score || 0;
+    return scoreFilterRanges.some(range => 
+      score >= range.min && score <= range.max
+    );
+  });
+
+  const totalPages = Math.ceil(filteredProfiles.length / PROFILES_PER_PAGE);
+  const paginatedProfiles = filteredProfiles.slice(
     (currentPage - 1) * PROFILES_PER_PAGE,
     currentPage * PROFILES_PER_PAGE
   );
@@ -303,6 +320,10 @@ const SearchDashboard = () => {
             setStats({ fromCache: 0, fromGithub: 0, total: 0 });
             setCurrentFilters({});
             setSearchPhase(0);
+            // ✅ PERSIST: Clear localStorage when reset
+            localStorage.removeItem('searchResults');
+            localStorage.removeItem('currentFilters');
+            localStorage.removeItem('scoreFilterRanges');
           }}
         />
         
@@ -361,6 +382,81 @@ const SearchDashboard = () => {
                 Export CSV
               </button>
             </div>
+          </div>
+        )}
+
+
+        {/* ✅ SCORE FILTER: Secondary filter (appears after profiles loaded) */}
+        {profiles.length > 0 && !loading && (
+          <div style={styles.scoreFilterContainer}>
+            <div style={styles.scoreFilterHeader}>
+              <div style={styles.scoreFilterLeft}>
+                <span style={styles.scoreFilterTitle}>Filter by Developer Score</span>
+                {scoreFilterRanges.length > 0 && (
+                  <span style={styles.scoreFilterBadge}>
+                    {scoreFilterRanges.length} range{scoreFilterRanges.length !== 1 ? 's' : ''} selected
+                  </span>
+                )}
+              </div>
+              <button 
+                onClick={() => setShowScoreFilter(!showScoreFilter)}
+                style={styles.scoreFilterToggle}
+              >
+                {showScoreFilter ? 'Hide' : 'Show'} Score Ranges
+              </button>
+            </div>
+
+            {showScoreFilter && (
+              <div style={styles.scoreRanges}>
+                {[
+                  { label: '0-30 (Beginner)', min: 0, max: 30, color: '#6b7280' },
+                  { label: '30-50 (Junior)', min: 30, max: 50, color: '#f59e0b' },
+                  { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#3b82f6' },
+                  { label: '70-85 (Senior)', min: 70, max: 85, color: '#10b981' },
+                  { label: '85-100 (Expert)', min: 85, max: 100, color: '#8b5cf6' }
+                ].map(range => {
+                  const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
+                  return (
+                    <label 
+                      key={range.label}
+                      style={{
+                        ...styles.scoreRangeLabel,
+                        ...(isSelected ? styles.scoreRangeLabelSelected : {}),
+                        borderColor: isSelected ? range.color : '#e5e7eb'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleScoreRangeToggle(range)}
+                        style={styles.scoreRangeCheckbox}
+                      />
+                      <div style={styles.scoreRangeContent}>
+                        <span style={styles.scoreRangeText}>{range.label}</span>
+                        <div 
+                          style={{
+                            ...styles.scoreRangeIndicator, 
+                            backgroundColor: range.color
+                          }}
+                        ></div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+            )}
+
+            {scoreFilterRanges.length > 0 && (
+              <div style={styles.scoreFilterInfo}>
+                Showing {filteredProfiles.length} of {profiles.length} profiles
+                <button 
+                  onClick={() => setScoreFilterRanges([])}
+                  style={styles.clearScoreFilter}
+                >
+                  Clear Score Filter
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -846,6 +942,129 @@ const styles = {
     fontSize: '14px',
     fontWeight: '600',
     color: '#374151',
+  },
+
+  scoreFilterContainer: {
+    backgroundColor: '#ffffff',
+    border: '1px solid #e5e7eb',
+    borderRadius: '12px',
+    padding: '20px',
+    marginBottom: '24px',
+  },
+
+  scoreFilterHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '16px',
+  },
+
+  scoreFilterLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+
+  scoreFilterTitle: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+
+  scoreFilterBadge: {
+    padding: '4px 12px',
+    backgroundColor: '#FF6B35',
+    color: '#ffffff',
+    borderRadius: '12px',
+    fontSize: '12px',
+    fontWeight: '600',
+  },
+
+  scoreFilterToggle: {
+    padding: '8px 16px',
+    backgroundColor: '#f9fafb',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    color: '#374151',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'Outfit, sans-serif',
+  },
+
+  scoreRanges: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+    gap: '12px',
+    marginBottom: '16px',
+  },
+
+  scoreRangeLabel: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '12px 16px',
+    backgroundColor: '#f9fafb',
+    border: '2px solid #e5e7eb',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+
+  scoreRangeLabelSelected: {
+    backgroundColor: '#ffffff',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  },
+
+  scoreRangeCheckbox: {
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
+    flexShrink: 0,
+  },
+
+  scoreRangeContent: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+
+  scoreRangeText: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+
+  scoreRangeIndicator: {
+    width: '24px',
+    height: '24px',
+    borderRadius: '6px',
+    flexShrink: 0,
+  },
+
+  scoreFilterInfo: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 16px',
+    backgroundColor: '#f0fdf4',
+    borderRadius: '8px',
+    fontSize: '14px',
+    color: '#15803d',
+    fontWeight: '600',
+  },
+
+  clearScoreFilter: {
+    padding: '6px 12px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #10b981',
+    borderRadius: '6px',
+    color: '#10b981',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'Outfit, sans-serif',
   },
 };
 

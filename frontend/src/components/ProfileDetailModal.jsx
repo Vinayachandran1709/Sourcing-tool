@@ -40,7 +40,7 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
 
   // Calculate activity recency
   const getActivityStatus = (lastActiveDate) => {
-    if (!lastActiveDate) return { text: 'Unknown', color: '#9ca3af' };
+    if (!lastActiveDate) return null;  // ✅ CHANGED: Return null instead of "Unknown"
     
     const now = new Date();
     const lastActive = new Date(lastActiveDate);
@@ -102,12 +102,15 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
             <div style={styles.scoreValue}>Developer Score: {profile.developer_score || 0}/100</div>
             <div style={styles.scoreLabel}>{getScoreLabel(profile.developer_score || 0)}</div>
           </div>
-          <div style={styles.activityBadge}>
-            <Clock size={16} />
-            <span style={{color: activityStatus.color, fontWeight: 600}}>
-              {activityStatus.text}
-            </span>
-          </div>
+          {/* ✅ CHANGED: Only show activity badge if status exists */}
+          {activityStatus && (
+            <div style={styles.activityBadge}>
+              <Clock size={16} />
+              <span style={{color: activityStatus.color, fontWeight: 600}}>
+                {activityStatus.text}
+              </span>
+            </div>
+          )}
         </div>
 
         <div style={styles.content}>

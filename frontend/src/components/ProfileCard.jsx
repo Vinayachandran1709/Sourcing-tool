@@ -19,7 +19,20 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
 
   return (
     <div style={styles.card}>
-      {/* Star Button (Top-Right) */}
+      {/* ✅ NEW: Checkbox (Top-Left) */}
+      <div style={styles.checkboxContainer}>
+        <input
+          type="checkbox"
+          checked={profile.selected || false}
+          onChange={(e) => {
+            e.stopPropagation();
+            onSelect && onSelect(profile.id);
+          }}
+          style={styles.checkbox}
+        />
+      </div>
+
+      {/* Star Button (Repositioned) */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -117,6 +130,7 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
       )}
 
       {/* Actions */}
+      {/* Actions */}
       <div style={styles.actions}>
         {/* ✅ NEW: View Profile Button */}
         <button 
@@ -127,14 +141,26 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
           <span>View Profile</span>
         </button>
         
+        {/* ✅ REDESIGNED: Star Button replaces Select */}
         <button 
-          onClick={() => onSelect && onSelect(profile.id)} 
+          onClick={(e) => {
+            e.stopPropagation();
+            onToggleSave && onToggleSave(profile);
+          }}
           style={{
-            ...styles.selectButton, 
-            backgroundColor: profile.selected ? '#10b981' : '#6b7280'
+            ...styles.starActionButton,
+            backgroundColor: isSaved ? '#FFB800' : '#f3f4f6'
           }}
         >
-          {profile.selected ? '✓ Selected' : 'Select'}
+          <Star
+            size={18}
+            color={isSaved ? '#ffffff' : '#6b7280'}
+            fill={isSaved ? '#ffffff' : 'none'}
+            strokeWidth={2}
+          />
+          <span style={{ color: isSaved ? '#ffffff' : '#6b7280' }}>
+            {isSaved ? 'Saved' : 'Save'}
+          </span>
         </button>
         
         {profile.email && (
@@ -153,13 +179,36 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
 
 const styles = {
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: '#fafbfc',
     padding: '1.5rem',
     borderRadius: '12px',
     border: '1px solid #e5e7eb',
     transition: 'all 0.2s',
     cursor: 'pointer',
     position: 'relative',
+  },
+
+  checkboxContainer: {
+    position: 'absolute',
+    top: '12px',
+    left: '12px',
+    background: '#fff',
+    border: '2px solid #d1d5db',
+    borderRadius: '6px',
+    width: '28px',
+    height: '28px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    zIndex: 10,
+  },
+
+  checkbox: {
+    width: '18px',
+    height: '18px',
+    cursor: 'pointer',
+    accentColor: '#FF6B35',
   },
 
   starButton: {
@@ -320,13 +369,16 @@ const styles = {
     fontFamily: 'Outfit, sans-serif',
   },
 
-  selectButton: {
+  starActionButton: {
     flex: 1,
-    padding: '0.625rem 1rem',
-    border: 'none',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+    padding: '10px 16px',
+    border: '2px solid #e5e7eb',
     borderRadius: '8px',
-    color: '#fff',
-    fontSize: '0.875rem',
+    fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
