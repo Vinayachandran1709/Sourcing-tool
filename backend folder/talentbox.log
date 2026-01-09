@@ -19066,3 +19066,5 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-09 21:36:47,603 - main - INFO - ✅ GitHub Token found (length: 40)
 2026-01-09 21:36:53,161 - main - INFO - ✅ Database connection successful
 2026-01-09 21:36:53,162 - main - INFO - ✅ JWT Secret configured
+2026-01-09 21:36:53,163 - main - INFO - 🎯 Startup validation complete
+

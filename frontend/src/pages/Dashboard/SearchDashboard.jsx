@@ -1,1086 +1,851 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Mail, Download, AlertCircle, CheckSquare, List } from 'lucide-react';
-import DashboardHeader from '../../components/dashboard/DashboardHeader';
-import ProfileCard from '../../components/ProfileCard';
-import ProfileDetailModal from '../../components/ProfileDetailModal';
-import EmailModal from '../../components/EmailModal';
-import FilterPanel from '../../components/FilterPanel';
-import { 
-  toggleProfileSelection, 
-  getSavedLists,
-  addProfileToList 
-} from '../../services/api';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { api } from '../../services/api';
 
-const SearchDashboard = () => {
-  // ✅ PERSIST: Load profiles and filters from localStorage on mount
-  const [profiles, setProfiles] = useState(() => {
-    const saved = localStorage.getItem('searchResults');
-    return saved ? JSON.parse(saved) : [];
-  });
+function SearchDashboard() {
+  const navigate = useNavigate();
+  const [profiles, setProfiles] = useState([]);
+  const [filteredProfiles, setFilteredProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentFilters, setCurrentFilters] = useState(() => {
-    const saved = localStorage.getItem('currentFilters');
-    return saved ? JSON.parse(saved) : {};
-  });
   const [error, setError] = useState(null);
-  const [showEmailModal, setShowEmailModal] = useState(false);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [selectedProfile, setSelectedProfile] = useState(null);
-  const [savedProfileIds, setSavedProfileIds] = useState(() => {
-    // Load saved profile IDs from localStorage
-    const saved = localStorage.getItem('savedProfileIds');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  // ✅ NEW: Streaming state
-  const [searchPhase, setSearchPhase] = useState(0); // 0=idle, 1-4=phases
-  const [progressPercent, setProgressPercent] = useState(0);
-  const [statusMessage, setStatusMessage] = useState('');
+  const [currentFilters, setCurrentFilters] = useState(null);
+  
+  // ✅ Simple stats - just total count
   const [stats, setStats] = useState({ total: 0 });
   
-  const [currentPage, setCurrentPage] = useState(1);
-  const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
-    const saved = localStorage.getItem('scoreFilterRanges');
-    return saved ? JSON.parse(saved) : [];
+  // ✅ Smooth progress tracking (no phases)
+  const [searchProgress, setSearchProgress] = useState({
+    isSearching: false,
+    message: '',
+    percent: 0
   });
-  const [showScoreFilter, setShowScoreFilter] = useState(false);
+  
+  // ✅ Search completion state - controls score filter
+  const [searchComplete, setSearchComplete] = useState(false);
+  
+  // ✅ Score filter (disabled during search)
+  const [scoreFilter, setScoreFilter] = useState(0);
 
-  useEffect(() => {
-    localStorage.setItem('scoreFilterRanges', JSON.stringify(scoreFilterRanges));
-  }, [scoreFilterRanges]);
-  const PROFILES_PER_PAGE = 12;
+  // Search form state
+  const [searchFilters, setSearchFilters] = useState({
+    role: '',
+    languages: [],
+    location: '',
+    min_repos: 0
+  });
 
-  // ✅ PERSIST: Save profiles to localStorage whenever they change
-  useEffect(() => {
-    if (profiles.length > 0) {
-      localStorage.setItem('searchResults', JSON.stringify(profiles));
-    }
-  }, [profiles]);
-
-  // ✅ PERSIST: Save filters to localStorage whenever they change
-  useEffect(() => {
-    if (Object.keys(currentFilters).length > 0) {
-      localStorage.setItem('currentFilters', JSON.stringify(currentFilters));
-    }
-  }, [currentFilters]);
-
-  // ✅ STREAMING SEARCH with Fetch (supports Authorization headers)
   const handleSearch = async (filters) => {
-    setLoading(true);
     setError(null);
+    setLoading(true);
     setProfiles([]);
+    setFilteredProfiles([]);
+    setStats({ total: 0 });
     setCurrentFilters(filters);
-    setCurrentPage(1);
-    setSearchPhase(1);
-    setProgressPercent(0);
-    setStatusMessage('🔍 Initializing search...');
+    setScoreFilter(0); // Reset score filter
     
+    // ✅ Search started - disable score filter
+    setSearchComplete(false);
+    setSearchProgress({
+      isSearching: true,
+      message: 'Searching for developers...',
+      percent: 0
+    });
+
     try {
       const token = localStorage.getItem('token');
-      
-      // Build request body
-      const requestBody = {
-        role: filters.role || null,
-        languages: filters.languages || [],
-        location: filters.location || null,
-        min_repos: filters.min_repos || 0
-      };
-      
-      // Use fetch with streaming
-      const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/search-profiles-stream`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(requestBody)
-        }
-      );
+      const response = await fetch(`${api.API_URL}/api/search-profiles-stream`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(filters)
+      });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        throw new Error('Search failed');
       }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = '';
+      let allProfiles = [];
 
       while (true) {
         const { done, value } = await reader.read();
-        
         if (done) break;
-        
-        // Decode chunk
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Process complete messages (ending with \n\n)
-        const messages = buffer.split('\n\n');
-        buffer = messages.pop() || ''; // Keep incomplete message in buffer
-        
-        for (const message of messages) {
-          if (!message.trim() || !message.startsWith('data: ')) continue;
-          
-          try {
-            const jsonStr = message.replace(/^data: /, '');
-            const data = JSON.parse(jsonStr);
-            
-            switch (data.type) {
-              case 'status':
-                setSearchPhase(data.phase);
-                setStatusMessage(data.message);
-                break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+
+              if (data.type === 'status') {
+                // ✅ Smooth status updates
+                setSearchProgress(prev => ({
+                  ...prev,
+                  message: data.message
+                }));
+              }
+              else if (data.type === 'profiles') {
+                // Initial cached profiles
+                const profilesWithSelection = data.profiles.map(p => ({
+                  ...p,
+                  selected: false
+                }));
+                allProfiles = [...allProfiles, ...profilesWithSelection];
+                setProfiles(allProfiles);
+                setFilteredProfiles(allProfiles);
+                setStats({ total: allProfiles.length });
                 
-              case 'profiles':
-                // Initial results loaded
-                setProfiles(data.profiles);
-                setStats({ total: data.count });
-                setSearchPhase(data.phase);
-                setStatusMessage(`✅ Found ${data.count} developers`);
-                break;
+                // ✅ Update progress
+                setSearchProgress(prev => ({
+                  ...prev,
+                  message: `Found ${allProfiles.length} developers...`
+                }));
+              }
+              else if (data.type === 'new_profiles') {
+                // New profiles streamed in
+                const newProfiles = data.profiles.map(p => ({
+                  ...p,
+                  selected: false
+                }));
+                allProfiles = [...allProfiles, ...newProfiles];
+                setProfiles(allProfiles);
+                setFilteredProfiles(allProfiles);
+                setStats({ total: allProfiles.length });
                 
-              case 'progress':
-                // Update progress
-                setProgressPercent(data.percent);
-                setStats({ total: data.total_found });
-                setSearchPhase(3);
-                setStatusMessage(`🔍 Processing developers...`);
-                break;
-                
-              case 'new_profiles':
-                // Add new profiles as they arrive
-                setProfiles(prev => [...prev, ...data.profiles]);
-                break;
-                
-              case 'complete':
-                // Complete
-                setStats({ total: data.total });
-                setSearchPhase(3);
-                setStatusMessage(`✅ Search complete! Found ${data.total} developers`);
+                // ✅ Update progress message
+                setSearchProgress(prev => ({
+                  ...prev,
+                  message: `Found ${allProfiles.length} developers...`
+                }));
+              }
+              else if (data.type === 'progress') {
+                // ✅ Smooth progress updates
+                setSearchProgress(prev => ({
+                  ...prev,
+                  percent: data.percent,
+                  message: `Found ${data.total_found} developers...`
+                }));
+              }
+              else if (data.type === 'complete') {
+                // ✅ Search complete - enable score filter
+                setSearchProgress({
+                  isSearching: false,
+                  message: `Search complete! Found ${data.total} developers`,
+                  percent: 100
+                });
+                setSearchComplete(true);
                 setLoading(false);
-                break;
-                
-              case 'error':
-                setError({ message: data.message });
+              }
+              else if (data.type === 'error') {
+                setError(data.message);
                 setLoading(false);
-                break;
+                setSearchProgress({
+                  isSearching: false,
+                  message: '',
+                  percent: 0
+                });
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE data:', e);
             }
-          } catch (e) {
-            console.error('Failed to parse SSE data:', e);
           }
         }
       }
-      
-    } catch (error) {
-      console.error('Search failed:', error);
-      setError({ message: error.message || 'Failed to start search. Please try again.' });
+    } catch (err) {
+      setError(err.message || 'Search failed');
       setLoading(false);
+      setSearchProgress({
+        isSearching: false,
+        message: '',
+        percent: 0
+      });
     }
   };
 
-  const handleProfileSelect = async (profileId) => {
-    try {
-      await toggleProfileSelection(profileId);
-      setProfiles(profiles.map(p =>
+  // ✅ OPTIMIZATION: Optimistic select toggle (instant UI update)
+  const handleSelectToggle = async (profileId) => {
+    // ✅ Update UI immediately (optimistic)
+    setProfiles(prevProfiles =>
+      prevProfiles.map(p =>
         p.id === profileId ? { ...p, selected: !p.selected } : p
-      ));
-    } catch (error) {
-      console.error('Failed to toggle selection:', error);
-    }
-  };
-
-  const handleSelectAll = () => {
-    const allSelected = profiles.every(p => p.selected);
-    setProfiles(profiles.map(p => ({ ...p, selected: !allSelected })));
-  };
-
-  const handleDeselectAll = () => {
-    setProfiles(profiles.map(p => ({ ...p, selected: false })));
-  };
-
-  const handleViewProfile = (profile) => {
-    setSelectedProfile(profile);
-    setShowDetailModal(true);
-  };
-
-  const handleToggleSave = (profile) => {
-    const isSaved = savedProfileIds.includes(profile.id);
-    let updatedSavedIds;
-
-    if (isSaved) {
-      // Remove from saved
-      updatedSavedIds = savedProfileIds.filter(id => id !== profile.id);
-    } else {
-      // Add to saved
-      updatedSavedIds = [...savedProfileIds, profile.id];
-      // Also save full profile data to localStorage
-      const savedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
-      const profileExists = savedProfiles.some(p => p.id === profile.id);
-      if (!profileExists) {
-        savedProfiles.push(profile);
-        localStorage.setItem('savedProfiles', JSON.stringify(savedProfiles));
-      }
-    }
-
-    setSavedProfileIds(updatedSavedIds);
-    localStorage.setItem('savedProfileIds', JSON.stringify(updatedSavedIds));
-
-    // Remove from saved profiles if unsaving
-    if (isSaved) {
-      const savedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
-      const filtered = savedProfiles.filter(p => p.id !== profile.id);
-      localStorage.setItem('savedProfiles', JSON.stringify(filtered));
-    }
-  };
-
-  const handleBulkEmail = () => {
-    const selectedProfiles = profiles.filter(p => p.selected);
-    if (selectedProfiles.length === 0) {
-      alert('Please select at least one profile to send emails.');
-      return;
-    }
-    setShowEmailModal(true);
-  };
-
-  const handleExportCSV = () => {
-    const csv = [
-      ['Name', 'Username', 'Score', 'Location', 'Email', 'Stars', 'Repos', 'Contributions', 'Primary Language'],
-      ...profiles.map(p => [
-        p.name || p.github_username,
-        p.github_username,
-        p.developer_score,
-        p.location || '',
-        p.email || '',
-        p.total_stars,
-        p.public_repos,
-        p.contributions_last_year,
-        p.primary_language || ''
-      ])
-    ].map(row => row.join(',')).join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `developers_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
-  const handleScoreRangeToggle = (range) => {
-    const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
-    if (isSelected) {
-      setScoreFilterRanges(scoreFilterRanges.filter(r => !(r.min === range.min && r.max === range.max)));
-    } else {
-      setScoreFilterRanges([...scoreFilterRanges, range]);
-    }
-    setCurrentPage(1); // Reset to first page when filter changes
-  };
-
-  // ✅ SCORE FILTER: Apply score filtering
-  const filteredProfiles = profiles.filter(profile => {
-    if (scoreFilterRanges.length === 0) return true;
-    
-    const score = profile.developer_score || 0;
-    return scoreFilterRanges.some(range => 
-      score >= range.min && score <= range.max
+      )
     );
-  });
+    setFilteredProfiles(prevProfiles =>
+      prevProfiles.map(p =>
+        p.id === profileId ? { ...p, selected: !p.selected } : p
+      )
+    );
 
-  const totalPages = Math.ceil(filteredProfiles.length / PROFILES_PER_PAGE);
-  const paginatedProfiles = filteredProfiles.slice(
-    (currentPage - 1) * PROFILES_PER_PAGE,
-    currentPage * PROFILES_PER_PAGE
-  );
-
-  // Generate page numbers to display
-  const getPageNumbers = () => {
-    const pages = [];
-    const maxVisible = 7;
-    
-    if (totalPages <= maxVisible) {
-      // Show all pages
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
-    } else {
-      // Smart pagination
-      if (currentPage <= 4) {
-        // Near start: [1] [2] [3] [4] [5] ... [15]
-        for (let i = 1; i <= 5; i++) pages.push(i);
-        pages.push('...');
-        pages.push(totalPages);
-      } else if (currentPage >= totalPages - 3) {
-        // Near end: [1] ... [11] [12] [13] [14] [15]
-        pages.push(1);
-        pages.push('...');
-        for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
-      } else {
-        // Middle: [1] ... [5] [6] [7] ... [15]
-        pages.push(1);
-        pages.push('...');
-        for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
-        pages.push('...');
-        pages.push(totalPages);
-      }
+    // ✅ Then sync with backend (fire and forget)
+    try {
+      await api.toggleProfileSelection(profileId);
+    } catch (err) {
+      console.error('Failed to sync selection:', err);
+      // ✅ Revert on error
+      setProfiles(prevProfiles =>
+        prevProfiles.map(p =>
+          p.id === profileId ? { ...p, selected: !p.selected } : p
+        )
+      );
+      setFilteredProfiles(prevProfiles =>
+        prevProfiles.map(p =>
+          p.id === profileId ? { ...p, selected: !p.selected } : p
+        )
+      );
     }
+  };
+
+  // ✅ Score filter handler (disabled during search)
+  const handleScoreFilterChange = (e) => {
+    const newScore = parseInt(e.target.value);
+    setScoreFilter(newScore);
     
-    return pages;
+    if (newScore === 0) {
+      setFilteredProfiles(profiles);
+    } else {
+      const filtered = profiles.filter(p => p.developer_score >= newScore);
+      setFilteredProfiles(filtered);
+    }
+  };
+
+  const handleResetSearch = () => {
+    setProfiles([]);
+    setFilteredProfiles([]);
+    setCurrentFilters(null);
+    setStats({ total: 0 });
+    setScoreFilter(0);
+    setSearchComplete(false);
+    setSearchProgress({
+      isSearching: false,
+      message: '',
+      percent: 0
+    });
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    handleSearch(searchFilters);
   };
 
   return (
-    <>
-      <DashboardHeader />
-      <div style={styles.content}>
-        {/* Filters */}
-        <FilterPanel 
-          onApplyFilters={handleSearch} 
-          initialFilters={currentFilters}
-          onReset={() => {
-            setProfiles([]);
-            setStats({ total: 0 });
-            setCurrentFilters({});
-            setSearchPhase(0);
-            localStorage.removeItem('searchResults');
-            localStorage.removeItem('currentFilters');
-            localStorage.removeItem('scoreFilterRanges');
-          }}
-        />
-        
-        {/* ✅ NEW: Progress Indicator */}
-        {loading && searchPhase > 0 && (
-          <div style={styles.progressContainer}>
-            <div style={styles.progressHeader}>
-              <span style={styles.progressPhase}>Phase {searchPhase}/3</span>
-              <span style={styles.progressStatus}>{statusMessage}</span>
-            </div>
-            
-            {searchPhase === 3 && (
-              <div style={styles.progressBarContainer}>
-                <div style={{...styles.progressBar, width: `${progressPercent}%`}}></div>
-              </div>
-            )}
-            
-            {stats.total > 0 && (
-              <div style={styles.progressStats}>
-                <div style={styles.progressStat}>
-                  <span style={styles.progressStatValue}>{stats.total}</span>
-                  <span style={styles.progressStatLabel}>developers found</span>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Error */}
-        {error && (
-          <div style={styles.errorBox}>
-            <AlertCircle size={20} color="#dc2626" />
-            <span>{error.message}</span>
-          </div>
-        )}
-
-        {/* Stats Bar */}
-        {profiles.length > 0 && !loading && (
-          <div style={styles.statsBar}>
-            <div style={styles.statItem}>
-              <span style={styles.statValue}>{profiles.length}</span>
-              <span style={styles.statLabel}>Developers Found</span>
-            </div>
-            <div style={styles.statDivider}></div>
-            <div style={styles.statItem}>
-              <button onClick={handleExportCSV} style={styles.exportButton}>
-                <Download size={16} />
-                Export CSV
-              </button>
-            </div>
-          </div>
-        )}
-
-
-        {/* ✅ SCORE FILTER: Secondary filter (appears after profiles loaded) */}
-        {profiles.length > 0 && !loading && (
-          <div style={styles.scoreFilterContainer}>
-            <div style={styles.scoreFilterHeader}>
-              <div style={styles.scoreFilterLeft}>
-                <span style={styles.scoreFilterTitle}>Filter by Developer Score</span>
-                {scoreFilterRanges.length > 0 && (
-                  <span style={styles.scoreFilterBadge}>
-                    {scoreFilterRanges.length} range{scoreFilterRanges.length !== 1 ? 's' : ''} selected
-                  </span>
-                )}
-              </div>
-              <button 
-                onClick={() => setShowScoreFilter(!showScoreFilter)}
-                style={styles.scoreFilterToggle}
-              >
-                {showScoreFilter ? 'Hide' : 'Show'} Score Ranges
-              </button>
-            </div>
-
-            {showScoreFilter && (
-              <div style={styles.scoreRanges}>
-                {[
-                  { label: '0-30 (Beginner)', min: 0, max: 30, color: '#6b7280' },
-                  { label: '30-50 (Junior)', min: 30, max: 50, color: '#f59e0b' },
-                  { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#3b82f6' },
-                  { label: '70-85 (Senior)', min: 70, max: 85, color: '#10b981' },
-                  { label: '85-100 (Expert)', min: 85, max: 100, color: '#8b5cf6' }
-                ].map(range => {
-                  const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
-                  return (
-                    <label 
-                      key={range.label}
-                      style={{
-                        ...styles.scoreRangeLabel,
-                        ...(isSelected ? styles.scoreRangeLabelSelected : {}),
-                        borderColor: isSelected ? range.color : '#e5e7eb'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleScoreRangeToggle(range)}
-                        style={styles.scoreRangeCheckbox}
-                      />
-                      <div style={styles.scoreRangeContent}>
-                        <span style={styles.scoreRangeText}>{range.label}</span>
-                        <div 
-                          style={{
-                            ...styles.scoreRangeIndicator, 
-                            backgroundColor: range.color
-                          }}
-                        ></div>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-            )}
-
-            {scoreFilterRanges.length > 0 && (
-              <div style={styles.scoreFilterInfo}>
-                Showing {filteredProfiles.length} of {profiles.length} profiles
-                <button 
-                  onClick={() => setScoreFilterRanges([])}
-                  style={styles.clearScoreFilter}
-                >
-                  Clear Score Filter
-                </button>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Bulk Actions */}
-        {profiles.filter(p => p.selected).length > 0 && (
-          <div style={styles.bulkActions}>
-            <div style={styles.bulkActionsLeft}>
-              <CheckSquare size={20} color="#FF6B35" />
-              <span style={styles.bulkActionsText}>
-                {profiles.filter(p => p.selected).length} profile(s) selected
-              </span>
-            </div>
-            <div style={styles.bulkActionsRight}>
-              <button onClick={handleSelectAll} style={styles.bulkActionButton}>
-                {profiles.every(p => p.selected) ? 'Deselect All' : 'Select All'}
-              </button>
-              <button onClick={handleBulkEmail} style={styles.bulkActionButtonPrimary}>
-                <Mail size={16} />
-                Send Bulk Email
-              </button>
-              <button onClick={handleDeselectAll} style={styles.bulkActionButton}>
-                Clear Selection
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Profiles Grid */}
-        {paginatedProfiles.length > 0 && (
-          <>
-            <div style={styles.profilesGrid}>
-              {paginatedProfiles.map(profile => (
-                <ProfileCard
-                  key={profile.id}
-                  profile={profile}
-                  onSelect={() => handleProfileSelect(profile.id)}
-                  onViewDetails={() => handleViewProfile(profile)}
-                  onToggleSave={handleToggleSave}
-                  isSaved={savedProfileIds.includes(profile.id)}
-                />
-              ))}
-            </div>
-
-            {/* ✅ NEW: Page Number Pagination */}
-            {totalPages > 1 && (
-              <div style={styles.pagination}>
-                <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  style={{
-                    ...styles.paginationButton,
-                    ...(currentPage === 1 ? styles.paginationButtonDisabled : {})
-                  }}
-                >
-                  ← Previous
-                </button>
-                
-                <div style={styles.pageNumbers}>
-                  {getPageNumbers().map((page, idx) => {
-                    if (page === '...') {
-                      return <span key={`ellipsis-${idx}`} style={styles.pageEllipsis}>...</span>;
-                    }
-                    
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        style={{
-                          ...styles.pageNumber,
-                          ...(currentPage === page ? styles.pageNumberActive : {})
-                        }}
-                      >
-                        {page}
-                      </button>
-                    );
-                  })}
-                </div>
-                
-                <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  style={{
-                    ...styles.paginationButton,
-                    ...(currentPage === totalPages ? styles.paginationButtonDisabled : {})
-                  }}
-                >
-                  Next →
-                </button>
-              </div>
-            )}
-          </>
-        )}
-
-        {/* Empty State */}
-        {!loading && profiles.length === 0 && !error && searchPhase === 0 && (
-          <div style={styles.emptyState}>
-            <Search size={48} color="#9ca3af" />
-            <h3 style={styles.emptyStateTitle}>Start Your Search</h3>
-            <p style={styles.emptyStateText}>
-              Use the filters above to find developers
-            </p>
-          </div>
-        )}
-
-        {/* Modals */}
-        {showEmailModal && (
-          <EmailModal
-            profiles={profiles.filter(p => p.selected)}
-            onClose={() => setShowEmailModal(false)}
-            onSuccess={() => {
-              setShowEmailModal(false);
-              handleDeselectAll();
-            }}
-          />
-        )}
-
-        {showDetailModal && selectedProfile && (
-          <ProfileDetailModal
-            profile={selectedProfile}
-            isOpen={showDetailModal}
-            onClose={() => {
-              setShowDetailModal(false);
-              setSelectedProfile(null);
-            }}
-          />
-        )}
+    <div style={styles.container}>
+      <div style={styles.header}>
+        <h1 style={styles.title}>🔍 Search Developers</h1>
+        <button 
+          style={styles.btnSecondary}
+          onClick={() => navigate('/saved-lists')}
+        >
+          View Saved Lists
+        </button>
       </div>
-    </>
-  );
-};
 
+      {/* Search Form */}
+      <div style={styles.searchForm}>
+        <form onSubmit={handleFormSubmit} style={styles.form}>
+          <div style={styles.formRow}>
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Role</label>
+              <select
+                style={styles.input}
+                value={searchFilters.role}
+                onChange={(e) => setSearchFilters({...searchFilters, role: e.target.value})}
+              >
+                <option value="">Any Role</option>
+                <option value="frontend">Frontend</option>
+                <option value="backend">Backend</option>
+                <option value="fullstack">Full Stack</option>
+                <option value="mobile">Mobile</option>
+                <option value="devops">DevOps</option>
+              </select>
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Location</label>
+              <input
+                type="text"
+                style={styles.input}
+                placeholder="e.g. Seattle, San Francisco"
+                value={searchFilters.location}
+                onChange={(e) => setSearchFilters({...searchFilters, location: e.target.value})}
+              />
+            </div>
+
+            <div style={styles.formGroup}>
+              <label style={styles.label}>Min Repos</label>
+              <input
+                type="number"
+                style={styles.input}
+                min="0"
+                value={searchFilters.min_repos}
+                onChange={(e) => setSearchFilters({...searchFilters, min_repos: parseInt(e.target.value)})}
+              />
+            </div>
+          </div>
+
+          <div style={styles.formRow}>
+            <button type="submit" style={styles.btnPrimary} disabled={loading}>
+              {loading ? 'Searching...' : 'Search Developers'}
+            </button>
+            {currentFilters && (
+              <button type="button" style={styles.btnSecondary} onClick={handleResetSearch}>
+                Reset Search
+              </button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      {error && (
+        <div style={styles.errorBox}>
+          ❌ {error}
+        </div>
+      )}
+
+      {/* ✅ SMOOTH PROGRESS BAR (No phases, side-placed count) */}
+      {searchProgress.isSearching && (
+        <div style={styles.progressContainer}>
+          <div style={styles.progressContent}>
+            <div style={styles.progressLeft}>
+              <span style={styles.progressMessage}>{searchProgress.message}</span>
+              <div style={styles.progressBarContainer}>
+                <div 
+                  style={{...styles.progressBarFill, width: `${searchProgress.percent}%`}}
+                />
+              </div>
+            </div>
+            <div style={styles.progressStats}>
+              <span style={styles.statValue}>{stats.total}</span>
+              <span style={styles.statLabel}>found</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Results section with score filter */}
+      {profiles.length > 0 && (
+        <>
+          {/* ✅ Stats bar - side placement, not prominent */}
+          <div style={styles.resultsHeader}>
+            <div style={styles.resultsInfo}>
+              <span style={styles.resultsCount}>{filteredProfiles.length} developers</span>
+              {scoreFilter > 0 && (
+                <span style={styles.filterBadge}>Score ≥ {scoreFilter}</span>
+              )}
+            </div>
+            
+            {/* ✅ Score filter - disabled during search */}
+            <div style={styles.scoreFilterContainer}>
+              <label htmlFor="score-filter" style={styles.scoreFilterLabel}>
+                Developer Score:
+                {!searchComplete && <span style={styles.filterDisabledHint}> (searching...)</span>}
+              </label>
+              <input
+                id="score-filter"
+                type="range"
+                min="0"
+                max="100"
+                step="10"
+                value={scoreFilter}
+                onChange={handleScoreFilterChange}
+                disabled={!searchComplete}
+                style={{
+                  ...styles.scoreSlider,
+                  ...(searchComplete ? {} : styles.scoreSliderDisabled)
+                }}
+              />
+              <span style={styles.scoreValue}>{scoreFilter}</span>
+            </div>
+
+            {currentFilters && (
+              <button style={styles.btnSmall} onClick={handleResetSearch}>
+                New Search
+              </button>
+            )}
+          </div>
+
+          {/* Profile Grid */}
+          <div style={styles.profilesGrid}>
+            {filteredProfiles.map(profile => (
+              <div key={profile.id} style={styles.profileCard}>
+                <div style={styles.profileHeader}>
+                  <img 
+                    src={profile.avatar_url || 'https://via.placeholder.com/50'} 
+                    alt={profile.github_username}
+                    style={styles.avatar}
+                  />
+                  <div style={styles.profileInfo}>
+                    <h3 style={styles.profileName}>{profile.name || profile.github_username}</h3>
+                    <p style={styles.profileUsername}>@{profile.github_username}</p>
+                  </div>
+                </div>
+
+                <div style={styles.profileStats}>
+                  <div style={styles.stat}>
+                    <span style={styles.statNumber}>{profile.developer_score}</span>
+                    <span style={styles.statText}>Score</span>
+                  </div>
+                  <div style={styles.stat}>
+                    <span style={styles.statNumber}>{profile.total_stars}</span>
+                    <span style={styles.statText}>Stars</span>
+                  </div>
+                  <div style={styles.stat}>
+                    <span style={styles.statNumber}>{profile.public_repos}</span>
+                    <span style={styles.statText}>Repos</span>
+                  </div>
+                </div>
+
+                {profile.location && (
+                  <p style={styles.profileLocation}>📍 {profile.location}</p>
+                )}
+
+                {profile.primary_language && (
+                  <div style={styles.languageBadge}>{profile.primary_language}</div>
+                )}
+
+                <button
+                  onClick={() => handleSelectToggle(profile.id)}
+                  style={{
+                    ...styles.selectButton,
+                    ...(profile.selected ? styles.selectButtonActive : {})
+                  }}
+                >
+                  {profile.selected ? '✓ Selected' : 'Select'}
+                </button>
+              </div>
+            ))}
+          </div>
+
+          {filteredProfiles.length === 0 && scoreFilter > 0 && (
+            <div style={styles.noResults}>
+              No developers found with score ≥ {scoreFilter}. Try lowering the filter.
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Empty state */}
+      {!loading && profiles.length === 0 && !searchProgress.isSearching && (
+        <div style={styles.emptyState}>
+          <div style={styles.emptyIcon}>🔍</div>
+          <h2 style={styles.emptyTitle}>Start Your Search</h2>
+          <p style={styles.emptyText}>
+            Use the filters above to find talented developers
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ===== INLINE STYLES =====
 const styles = {
-  content: {
+  container: {
     maxWidth: '1400px',
     margin: '0 auto',
     padding: '2rem',
+    fontFamily: "'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
   },
 
-  // ✅ NEW: Progress styles
-  progressContainer: {
-    padding: '24px',
-    backgroundColor: '#f0fdf4',
-    border: '2px solid #10b981',
-    borderRadius: '12px',
-    marginBottom: '24px',
-  },
-
-  progressHeader: {
+  header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '16px',
+    marginBottom: '2rem'
   },
 
-  progressPhase: {
-    fontSize: '14px',
-    fontWeight: '700',
-    color: '#10b981',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
+  title: {
+    fontSize: '2rem',
+    color: '#2c3e50',
+    fontWeight: '700'
   },
 
-  progressStatus: {
-    fontSize: '14px',
+  // Search Form
+  searchForm: {
+    background: 'white',
+    borderRadius: '12px',
+    padding: '2rem',
+    marginBottom: '2rem',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+  },
+
+  form: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '1.5rem'
+  },
+
+  formRow: {
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+    gap: '1rem'
+  },
+
+  formGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.5rem'
+  },
+
+  label: {
+    fontSize: '0.9rem',
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#2c3e50'
+  },
+
+  input: {
+    padding: '0.75rem',
+    border: '2px solid #e2e8f0',
+    borderRadius: '8px',
+    fontSize: '0.95rem',
+    fontFamily: "'Outfit', sans-serif",
+    transition: 'border-color 0.2s'
+  },
+
+  btnPrimary: {
+    padding: '0.875rem 1.5rem',
+    background: '#667eea',
+    color: 'white',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontFamily: "'Outfit', sans-serif"
+  },
+
+  btnSecondary: {
+    padding: '0.875rem 1.5rem',
+    background: 'white',
+    color: '#667eea',
+    border: '2px solid #667eea',
+    borderRadius: '8px',
+    fontSize: '1rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    fontFamily: "'Outfit', sans-serif"
+  },
+
+  btnSmall: {
+    padding: '0.5rem 1rem',
+    background: 'white',
+    color: '#667eea',
+    border: '2px solid #667eea',
+    borderRadius: '8px',
+    fontSize: '0.9rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif"
+  },
+
+  // Error
+  errorBox: {
+    background: '#fee',
+    borderLeft: '4px solid #f44',
+    padding: '1rem',
+    marginBottom: '1rem',
+    borderRadius: '4px',
+    color: '#c33'
+  },
+
+  // ✅ SMOOTH PROGRESS BAR (No phases)
+  progressContainer: {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    borderRadius: '12px',
+    padding: '1.5rem',
+    marginBottom: '2rem',
+    boxShadow: '0 4px 12px rgba(102, 126, 234, 0.2)'
+  },
+
+  progressContent: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: '2rem'
+  },
+
+  progressLeft: {
+    flex: 1
+  },
+
+  progressMessage: {
+    color: 'white',
+    fontSize: '1rem',
+    fontWeight: '500',
+    display: 'block',
+    marginBottom: '0.75rem'
   },
 
   progressBarContainer: {
-    height: '12px',
-    backgroundColor: '#d1fae5',
-    borderRadius: '6px',
-    overflow: 'hidden',
-    marginBottom: '16px',
+    background: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: '8px',
+    height: '8px',
+    overflow: 'hidden'
   },
 
-  progressBar: {
+  progressBarFill: {
+    background: 'white',
     height: '100%',
-    backgroundColor: '#10b981',
-    transition: 'width 0.3s ease',
-    borderRadius: '6px',
+    borderRadius: '8px',
+    transition: 'width 0.3s ease'
   },
 
+  // ✅ Side-placed stats (not prominent)
   progressStats: {
     display: 'flex',
-    gap: '24px',
-    justifyContent: 'center',
-  },
-
-  progressStat: {
-    display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '4px',
-  },
-
-  progressStatValue: {
-    fontSize: '24px',
-    fontWeight: '700',
-    color: '#10b981',
-  },
-
-  progressStatLabel: {
-    fontSize: '12px',
-    color: '#6b7280',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-
-  errorBox: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '16px',
-    backgroundColor: '#fef2f2',
-    border: '1px solid #fecaca',
+    background: 'rgba(255, 255, 255, 0.15)',
+    padding: '0.75rem 1.25rem',
     borderRadius: '8px',
-    marginBottom: '24px',
-    color: '#991b1b',
-  },
-
-  statsBar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    padding: '16px 24px',
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    border: '1px solid #e5e7eb',
-    marginBottom: '24px',
-  },
-
-  statItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px',
+    minWidth: '80px'
   },
 
   statValue: {
-    fontSize: '24px',
+    color: 'white',
+    fontSize: '1.75rem',
     fontWeight: '700',
-    color: '#1a1a1a',
+    lineHeight: 1
   },
 
   statLabel: {
-    fontSize: '12px',
-    color: '#6b7280',
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: '0.75rem',
     textTransform: 'uppercase',
     letterSpacing: '0.5px',
+    marginTop: '0.25rem'
   },
 
-  statDivider: {
-    width: '1px',
-    height: '40px',
-    backgroundColor: '#e5e7eb',
-  },
-
-  exportButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    backgroundColor: '#f9fafb',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-  },
-
-  bulkActions: {
+  // ✅ Results header with score filter
+  resultsHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '16px 24px',
-    backgroundColor: '#fffbf5',
-    border: '2px solid #FF6B35',
+    padding: '1rem 1.5rem',
+    background: 'white',
+    borderRadius: '8px',
+    marginBottom: '1.5rem',
+    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+    flexWrap: 'wrap',
+    gap: '1rem'
+  },
+
+  resultsInfo: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem'
+  },
+
+  resultsCount: {
+    fontSize: '1rem',
+    color: '#2c3e50',
+    fontWeight: '600'
+  },
+
+  filterBadge: {
+    background: '#667eea',
+    color: 'white',
+    padding: '0.25rem 0.75rem',
     borderRadius: '12px',
-    marginBottom: '24px',
+    fontSize: '0.85rem',
+    fontWeight: '500'
   },
 
-  bulkActionsLeft: {
+  // ✅ Score filter with disabled state
+  scoreFilterContainer: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '1rem'
   },
 
-  bulkActionsText: {
-    fontSize: '14px',
+  scoreFilterLabel: {
+    fontSize: '0.9rem',
+    color: '#2c3e50',
+    fontWeight: '500'
+  },
+
+  filterDisabledHint: {
+    color: '#94a3b8',
+    fontWeight: '400',
+    fontSize: '0.85rem'
+  },
+
+  scoreSlider: {
+    width: '180px',
+    height: '6px',
+    borderRadius: '3px',
+    background: '#e2e8f0',
+    outline: 'none',
+    WebkitAppearance: 'none',
+    cursor: 'pointer'
+  },
+
+  scoreSliderDisabled: {
+    opacity: 0.4,
+    cursor: 'not-allowed'
+  },
+
+  scoreValue: {
     fontWeight: '600',
-    color: '#1a1a1a',
+    color: '#667eea',
+    minWidth: '30px',
+    textAlign: 'center'
   },
 
-  bulkActionsRight: {
-    display: 'flex',
-    gap: '8px',
-  },
-
-  bulkActionButton: {
-    padding: '8px 16px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-  },
-
-  bulkActionButtonPrimary: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    backgroundColor: '#FF6B35',
-    border: 'none',
-    borderRadius: '8px',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-  },
-
+  // Profile Grid
   profilesGrid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))',
-    gap: '20px',
-    marginBottom: '24px',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+    gap: '1.5rem',
+    marginTop: '1.5rem'
   },
 
-  // ✅ NEW: Page number pagination styles
-  pagination: {
-    display: 'flex',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: '12px',
-    padding: '24px',
-  },
-
-  paginationButton: {
-    padding: '10px 20px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-  },
-
-  paginationButtonDisabled: {
-    opacity: 0.5,
-    cursor: 'not-allowed',
-  },
-
-  pageNumbers: {
-    display: 'flex',
-    gap: '6px',
-    alignItems: 'center',
-  },
-
-  pageNumber: {
-    minWidth: '40px',
-    height: '40px',
-    padding: '0 12px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-    transition: 'all 0.2s',
-  },
-
-  pageNumberActive: {
-    backgroundColor: '#FF6B35',
-    borderColor: '#FF6B35',
-    color: '#ffffff',
-  },
-
-  pageEllipsis: {
-    padding: '0 8px',
-    color: '#9ca3af',
-    fontSize: '14px',
-    fontWeight: '600',
-  },
-
-  emptyState: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '80px 20px',
-    textAlign: 'center',
-  },
-
-  emptyStateTitle: {
-    marginTop: '16px',
-    fontSize: '20px',
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-
-  emptyStateText: {
-    marginTop: '8px',
-    fontSize: '14px',
-    color: '#6b7280',
-  },
-
-  modalOverlay: {
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  },
-
-  modalContent: {
-    backgroundColor: '#ffffff',
+  profileCard: {
+    background: 'white',
     borderRadius: '12px',
-    padding: '24px',
-    maxWidth: '400px',
-    width: '90%',
+    padding: '1.5rem',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+    transition: 'transform 0.2s, box-shadow 0.2s',
+    cursor: 'pointer'
   },
 
-  modalTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
-    color: '#1a1a1a',
-    marginBottom: '16px',
-  },
-
-  listOptions: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
-    marginBottom: '16px',
-  },
-
-  listOption: {
+  profileHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
-    padding: '12px 16px',
-    backgroundColor: '#f9fafb',
-    border: '1px solid #e5e7eb',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-    fontSize: '14px',
-    fontWeight: '500',
-    color: '#374151',
+    gap: '1rem',
+    marginBottom: '1rem'
   },
 
-  noLists: {
-    padding: '20px',
-    textAlign: 'center',
-    color: '#6b7280',
-    fontSize: '14px',
+  avatar: {
+    width: '50px',
+    height: '50px',
+    borderRadius: '50%',
+    objectFit: 'cover'
   },
 
-  modalCloseButton: {
-    width: '100%',
-    padding: '10px',
-    backgroundColor: '#f9fafb',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-    fontSize: '14px',
+  profileInfo: {
+    flex: 1
+  },
+
+  profileName: {
+    fontSize: '1.1rem',
     fontWeight: '600',
-    color: '#374151',
+    color: '#2c3e50',
+    marginBottom: '0.25rem'
   },
 
-  scoreFilterContainer: {
-    backgroundColor: '#ffffff',
-    border: '1px solid #e5e7eb',
-    borderRadius: '12px',
-    padding: '20px',
-    marginBottom: '24px',
+  profileUsername: {
+    fontSize: '0.9rem',
+    color: '#64748b'
   },
 
-  scoreFilterHeader: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: '16px',
-  },
-
-  scoreFilterLeft: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-  },
-
-  scoreFilterTitle: {
-    fontSize: '16px',
-    fontWeight: '600',
-    color: '#1a1a1a',
-  },
-
-  scoreFilterBadge: {
-    padding: '4px 12px',
-    backgroundColor: '#FF6B35',
-    color: '#ffffff',
-    borderRadius: '12px',
-    fontSize: '12px',
-    fontWeight: '600',
-  },
-
-  scoreFilterToggle: {
-    padding: '8px 16px',
-    backgroundColor: '#f9fafb',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-  },
-
-  scoreRanges: {
+  profileStats: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-    gap: '12px',
-    marginBottom: '16px',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '1rem',
+    padding: '1rem 0',
+    borderTop: '1px solid #e2e8f0',
+    borderBottom: '1px solid #e2e8f0',
+    marginBottom: '1rem'
   },
 
-  scoreRangeLabel: {
+  stat: {
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
-    gap: '12px',
-    padding: '12px 16px',
-    backgroundColor: '#f9fafb',
-    border: '2px solid #e5e7eb',
-    borderRadius: '10px',
+    gap: '0.25rem'
+  },
+
+  statNumber: {
+    fontSize: '1.25rem',
+    fontWeight: '700',
+    color: '#667eea'
+  },
+
+  statText: {
+    fontSize: '0.75rem',
+    color: '#64748b',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+
+  profileLocation: {
+    fontSize: '0.9rem',
+    color: '#64748b',
+    marginBottom: '0.75rem'
+  },
+
+  languageBadge: {
+    display: 'inline-block',
+    padding: '0.25rem 0.75rem',
+    background: '#f0f9ff',
+    color: '#0369a1',
+    borderRadius: '6px',
+    fontSize: '0.85rem',
+    fontWeight: '500',
+    marginBottom: '1rem'
+  },
+
+  selectButton: {
+    width: '100%',
+    padding: '0.75rem',
+    background: 'white',
+    border: '2px solid #667eea',
+    borderRadius: '8px',
+    color: '#667eea',
+    fontSize: '0.95rem',
+    fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.2s',
+    fontFamily: "'Outfit', sans-serif"
   },
 
-  scoreRangeLabelSelected: {
-    backgroundColor: '#ffffff',
-    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+  selectButtonActive: {
+    background: '#667eea',
+    color: 'white'
   },
 
-  scoreRangeCheckbox: {
-    width: '18px',
-    height: '18px',
-    cursor: 'pointer',
-    flexShrink: 0,
+  // Empty States
+  emptyState: {
+    textAlign: 'center',
+    padding: '4rem 2rem',
+    background: 'white',
+    borderRadius: '12px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
   },
 
-  scoreRangeContent: {
-    flex: 1,
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  emptyIcon: {
+    fontSize: '4rem',
+    marginBottom: '1rem'
   },
 
-  scoreRangeText: {
-    fontSize: '14px',
-    fontWeight: '600',
-    color: '#1a1a1a',
+  emptyTitle: {
+    color: '#2c3e50',
+    marginBottom: '0.5rem',
+    fontSize: '1.5rem',
+    fontWeight: '600'
   },
 
-  scoreRangeIndicator: {
-    width: '24px',
-    height: '24px',
-    borderRadius: '6px',
-    flexShrink: 0,
+  emptyText: {
+    color: '#64748b',
+    fontSize: '1rem'
   },
 
-  scoreFilterInfo: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '12px 16px',
-    backgroundColor: '#f0fdf4',
+  noResults: {
+    textAlign: 'center',
+    padding: '3rem 2rem',
+    background: '#fef3c7',
+    border: '2px dashed #fbbf24',
     borderRadius: '8px',
-    fontSize: '14px',
-    color: '#15803d',
-    fontWeight: '600',
-  },
-
-  clearScoreFilter: {
-    padding: '6px 12px',
-    backgroundColor: '#ffffff',
-    border: '1px solid #10b981',
-    borderRadius: '6px',
-    color: '#10b981',
-    fontSize: '13px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-  },
+    color: '#92400e',
+    fontWeight: '500'
+  }
 };
 
 export default SearchDashboard;
