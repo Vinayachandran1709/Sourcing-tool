@@ -19339,3 +19339,9 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-09 23:24:45,933 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lmwong3/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
 2026-01-09 23:24:45,936 - main - INFO - 📊 Progress: 100% - Total: 135
 2026-01-09 23:24:45,937 - main - INFO - ✅ Search complete! Total: 135
+2026-01-10 01:09:15,117 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 01:09:15,119 - main - INFO - Environment: development
+2026-01-10 01:09:15,120 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 01:09:44,925 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 01:09:44,926 - main - INFO - Environment: development
+2026-01-10 01:09:44,927 - main - INFO - CORS origins: ['http://localhost:3000']

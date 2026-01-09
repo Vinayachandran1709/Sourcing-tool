@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import { CreditCard, Calendar, TrendingUp, Mail, Search, Eye, CheckCircle, X } from 'lucide-react';
+import EmailSettingsCard from '../../components/EmailSettingsCard';
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
@@ -263,6 +264,8 @@ const SubscriptionPage = () => {
           </div>
           <button style={styles.updateBillingBtn}>Update Billing Info</button>
         </div>
+        {/* Email Settings Section */}
+        <EmailSettingsCard />
       </div>
     </div>
   );
