@@ -13,7 +13,7 @@ RATE_LIMIT_THRESHOLD = 100
 
 
 async def check_github_rate_limit():
-    """Check GitHub API rate limit"""
+    """Check GitHub API rate limit - ONLY CALL ONCE at start of search"""
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
@@ -55,12 +55,13 @@ async def search_github_users_paginated(
     language: str, 
     location: str = None, 
     min_repos: int = 0, 
-    max_pages: int = 10,  # ✅ REDUCED: 6 pages = 180 users (enough for target)
-    target_users: int = 300  # ✅ NEW: Stop early if target reached
+    max_pages: int = 5,  # ✅ REDUCED: 5 pages = 150 users (enough for MVP target of 120)
+    target_users: int = 150  # ✅ REDUCED: Stop at 150 users
 ):
     """
     ✅ OPTIMIZED SEARCH: Fetch pages until target reached
     """
+    # ✅ OPTIMIZATION #1: Check rate limit ONCE at start
     await check_github_rate_limit()
     
     all_users = []
@@ -109,12 +110,12 @@ async def search_github_users_paginated(
                 print(f"✅ Got {len(users)} users (Total: {len(all_users)})")
                 
                 # ✅ EARLY STOPPING: Stop if target reached
-
                 if len(all_users) >= target_users:
                     print(f"✅ Target reached! Stopping early.")
                     break
                 
-                await asyncio.sleep(0.6)  # ✅ REDUCED: 0.8s instead of 1.2s        
+                # ✅ OPTIMIZATION #5: REDUCED cooldown from 0.6s to 0.4s
+                await asyncio.sleep(0.4)
                         
             except Exception as e:
                 print(f"❌ Error: {e}")
@@ -124,8 +125,11 @@ async def search_github_users_paginated(
     return all_users
 
 
-async def get_user_repositories(username: str, max_repos: int = 100):
-    """Fetch user's repositories"""
+async def get_user_repositories(username: str, max_repos: int = 30):
+    """
+    ✅ OPTIMIZATION #6: Fetch only 30 repos (was 100)
+    Faster response, less data transfer
+    """
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
@@ -174,31 +178,9 @@ def extract_top_repos(repos, top_n: int = 5):
     return top_repos
 
 
-async def get_repo_languages(owner: str, repo_name: str):
-    """Get language breakdown for a repo"""
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
-    
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(
-                f"{GITHUB_API_URL}/repos/{owner}/{repo_name}/languages",
-                headers=headers,
-                timeout=10.0
-            )
-            
-            if response.status_code == 200:
-                return response.json()
-            return {}
-        except:
-            return {}
-
-
 async def calculate_language_distribution(username: str, repos, max_repos_to_check: int = 30):
     """
-    ✅ FIX #2: FAST language distribution - NO extra API calls!
+    ✅ FAST language distribution - NO extra API calls!
     Uses repo.language from repo list instead of fetching language breakdown
     """
     language_counts = {}
@@ -229,50 +211,41 @@ async def calculate_language_distribution(username: str, repos, max_repos_to_che
     
     return sorted_percentages
 
-async def get_last_activity_date(username: str):
-    """Get last activity date"""
-    headers = {
-        "Authorization": f"token {GITHUB_TOKEN}",
-        "Accept": "application/vnd.github.v3+json"
-    }
+
+def estimate_last_activity_from_repos(repos):
+    """
+    ✅ OPTIMIZATION #3: Estimate activity from repo data (NO API call needed!)
+    Instead of fetching events (slow), use pushed_at from repos
+    """
+    if not repos:
+        return None
     
-    async with httpx.AsyncClient() as client:
-        try:
-            response = await client.get(
-                f"{GITHUB_API_URL}/users/{username}/events/public",
-                headers=headers,
-                params={"per_page": 100}
-            )
-            
-            if response.status_code != 200:
-                return None
-            
-            events = response.json()
-            
-            if not events:
-                return None
-            
-            most_recent_event = events[0]
-            created_at = most_recent_event.get("created_at")
-            
-            if not created_at:
-                return None
-            
-            date_obj = datetime.fromisoformat(created_at.replace('Z', '+00:00'))
-            return date_obj
-            
-        except:
-            return None
+    # Find most recent push across all repos
+    latest_push = None
+    for repo in repos:
+        pushed_at = repo.get("pushed_at")
+        if pushed_at:
+            try:
+                date_obj = datetime.fromisoformat(pushed_at.replace('Z', '+00:00'))
+                if latest_push is None or date_obj > latest_push:
+                    latest_push = date_obj
+            except:
+                continue
+    
+    return latest_push
 
 
-async def get_user_details(username: str, skip_rate_check: bool = False):
+async def get_user_details(username: str):
     """
-    ✅ OPTIMIZED: Get user details + SKIP ORGANIZATIONS
-    skip_rate_check: Set to True when processing in batches (check once per batch instead)
+    ✅ OPTIMIZED: Get user details WITHOUT per-profile rate limit checks
+    ✅ SKIP get_events API call - estimate from repo data instead
+    
+    Reduced from 4 API calls per profile to 2:
+    - 1 for user basic info
+    - 1 for repos
     """
-    if not skip_rate_check:
-        await check_github_rate_limit()
-
+    # ✅ NO rate limit check here - checked once at start of search
+    
     headers = {
         "Authorization": f"token {GITHUB_TOKEN}",
         "Accept": "application/vnd.github.v3+json"
@@ -296,8 +269,8 @@ async def get_user_details(username: str, skip_rate_check: bool = False):
             print(f"⏭️  Skipped {username} (Organization)")
             return None
         
-        # Get repositories
-        repos = await get_user_repositories(username, max_repos=100)
+        # ✅ OPTIMIZATION #6: Get only 30 repos (was 100)
+        repos = await get_user_repositories(username, max_repos=30)
         
         # Extract top repos
         top_repos_data = extract_top_repos(repos, top_n=5)
@@ -305,16 +278,14 @@ async def get_user_details(username: str, skip_rate_check: bool = False):
         # Calculate total stars
         total_stars = sum(repo.get("stargazers_count", 0) for repo in repos)
         
-        # ✅ STRICT: Calculate language distribution
+        # Calculate language distribution
         languages_data = await calculate_language_distribution(username, repos, max_repos_to_check=30)
         
-        # Get last activity
-        last_active = await get_last_activity_date(username)
+        # ✅ OPTIMIZATION #3: Estimate activity from repos (NO API call!)
+        last_active = estimate_last_activity_from_repos(repos)
         
-        # Get contributions
-        # ✅ OPTIMIZED: Use simpler contribution count (already fetched in events)
-        # Don't make separate call - just estimate from public_repos * activity
-        contributions = user_data.get("public_repos", 0) * 2  # Simple estimate
+        # ✅ Simple contribution estimate (no extra API call)
+        contributions = user_data.get("public_repos", 0) * 2
 
         return {
             "username": user_data.get("login"),
