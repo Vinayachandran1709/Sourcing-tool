@@ -55,8 +55,8 @@ async def search_github_users_paginated(
     language: str, 
     location: str = None, 
     min_repos: int = 0, 
-    max_pages: int = 5,  # ✅ REDUCED: 5 pages = 150 users (enough for MVP target of 120)
-    target_users: int = 150  # ✅ REDUCED: Stop at 150 users
+    max_pages: int = 8,  # ✅ REDUCED: 5 pages = 150 users (enough for MVP target of 120)
+    target_users: int = 250  # ✅ REDUCED: Stop at 150 users
 ):
     """
     ✅ OPTIMIZED SEARCH: Fetch pages until target reached

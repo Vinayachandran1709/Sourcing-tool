@@ -38,8 +38,8 @@ class RoleDetectionService:
         
         "Mobile Engineer": {
             "languages": ["Swift", "Kotlin", "Dart", "Java", "C#"],
-            "frameworks": ["Flutter", "React Native"],
-            "tools": ["Git", "GitHub Actions", "REST API", "GraphQL"],
+            "frameworks": ["Flutter", "React Native", "SwiftUI", "UIKit", "Jetpack Compose", "Xamarin"],
+            "tools": ["Git", "GitHub Actions", "REST API", "GraphQL", "Xcode", "Android Studio", "Firebase", "TestFlight", "App Store", "Google Play"],
             "keywords": ["mobile", "ios", "android", "app development", "react native", "flutter"],
             "repo_keywords": ["mobile", "ios", "android", "app", "flutter", "react-native"]
         },

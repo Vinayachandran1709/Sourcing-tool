@@ -28,8 +28,8 @@ class GitHubIntegrationService:
     async def search_and_cache_profiles(
         db: Session,
         filters: Dict,
-        max_github_results: int = 150,
-        target_profiles: int = 120  # ✅ OPTIMIZATION #2: Target 120 profiles for MVP
+        max_github_results: int = 250,
+        target_profiles: int = 200  # ✅ OPTIMIZATION #2: Target 120 profiles for MVP
     ) -> List[Profile]:
         """
         ✅ OPTIMIZED: Cache-first architecture with aggressive early stopping
@@ -184,7 +184,7 @@ class GitHubIntegrationService:
                 location=location,
                 min_repos=min_repos,
                 max_pages=5,  # ✅ Reduced from 12
-                target_users=min(150, max_results)  # ✅ Reduced from 300
+                target_users=min(250, max_results)  # ✅ Reduced from 300
             )
             
             if not users:
@@ -196,7 +196,7 @@ class GitHubIntegrationService:
             print(f"   Found {len(usernames)} GitHub users")
             
             # ✅ OPTIMIZATION #7: Process up to 150 profiles (was 300)
-            process_limit = min(150, len(usernames))
+            process_limit = min(250, len(usernames))
             print(f"   Processing up to {process_limit} profiles...")
             
             # ✅ OPTIMIZATION #4: Batch size 25 (was 12)

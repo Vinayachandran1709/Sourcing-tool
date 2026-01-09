@@ -19157,3 +19157,180 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-09 22:57:33,423 - main - INFO - 📤 Sending 2 new profiles
 2026-01-09 22:57:33,423 - main - INFO - 📊 Progress: 100% - Total: 2
 2026-01-09 22:57:33,424 - main - INFO - ✅ Search complete! Total: 2
+2026-01-09 23:15:21,990 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:15:21,991 - main - INFO - Environment: development
+2026-01-09 23:15:21,992 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:15:22,066 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:15:22,428 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:15:29,939 - main - INFO - ✅ Database connection successful
+2026-01-09 23:15:29,949 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:15:29,953 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:15:57,643 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:15:57,644 - main - INFO - Environment: development
+2026-01-09 23:15:57,645 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:15:57,725 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:15:57,778 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:16:04,818 - main - INFO - ✅ Database connection successful
+2026-01-09 23:16:04,819 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:16:04,820 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:16:08,556 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:16:08,557 - main - INFO - Environment: development
+2026-01-09 23:16:08,557 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:16:08,616 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:16:08,658 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:16:14,924 - main - INFO - ✅ Database connection successful
+2026-01-09 23:16:14,925 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:16:14,926 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:16:22,023 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:16:22,024 - main - INFO - Environment: development
+2026-01-09 23:16:22,025 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:16:22,084 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:16:22,139 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:16:28,048 - main - INFO - ✅ Database connection successful
+2026-01-09 23:16:28,050 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:16:28,051 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:16:31,976 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:16:31,977 - main - INFO - Environment: development
+2026-01-09 23:16:31,978 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:16:32,040 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:16:32,090 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:16:38,501 - main - INFO - ✅ Database connection successful
+2026-01-09 23:16:38,502 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:16:38,503 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:16:41,646 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:16:41,647 - main - INFO - Environment: development
+2026-01-09 23:16:41,648 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:16:41,701 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:16:41,741 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:16:48,017 - main - INFO - ✅ Database connection successful
+2026-01-09 23:16:48,018 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:16:48,019 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:17:01,809 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:17:01,811 - main - INFO - Environment: development
+2026-01-09 23:17:01,811 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:17:01,929 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:17:02,027 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:17:09,109 - main - INFO - ✅ Database connection successful
+2026-01-09 23:17:09,110 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:17:09,111 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:17:11,842 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:17:11,843 - main - INFO - Environment: development
+2026-01-09 23:17:11,844 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:17:11,918 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:17:11,971 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:17:18,899 - main - INFO - ✅ Database connection successful
+2026-01-09 23:17:18,900 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:17:18,901 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:17:26,301 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:17:26,302 - main - INFO - Environment: development
+2026-01-09 23:17:26,303 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:17:26,373 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:17:26,420 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:17:32,366 - main - INFO - ✅ Database connection successful
+2026-01-09 23:17:32,367 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:17:32,370 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:17:36,006 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:17:36,007 - main - INFO - Environment: development
+2026-01-09 23:17:36,008 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:17:36,069 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:17:36,112 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:17:41,999 - main - INFO - ✅ Database connection successful
+2026-01-09 23:17:42,006 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:17:42,027 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:17:46,042 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:17:46,043 - main - INFO - Environment: development
+2026-01-09 23:17:46,044 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:17:46,094 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:17:46,180 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:17:53,057 - main - INFO - ✅ Database connection successful
+2026-01-09 23:17:53,058 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:17:53,059 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:18:08,308 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:18:08,309 - main - INFO - Environment: development
+2026-01-09 23:18:08,310 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:18:08,475 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:18:08,610 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:18:15,861 - main - INFO - ✅ Database connection successful
+2026-01-09 23:18:15,861 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:18:15,862 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:18:55,630 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-09 23:18:55,631 - main - INFO - Environment: development
+2026-01-09 23:18:55,632 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-09 23:18:55,690 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-09 23:18:55,787 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-09 23:19:02,984 - main - INFO - ✅ Database connection successful
+2026-01-09 23:19:02,985 - main - INFO - ✅ JWT Secret configured
+2026-01-09 23:19:02,988 - main - INFO - 🎯 Startup validation complete
+
+2026-01-09 23:19:57,216 - main - INFO - 📦 Fetching cached profiles...
+2026-01-09 23:19:59,156 - main - INFO - ✅ Sending 120 initial results
+2026-01-09 23:19:59,190 - main - INFO - 🔍 Searching for 66 more profiles
+2026-01-09 23:19:59,250 - main - INFO - 🔍 Searching GitHub: language=Python, location=San Francisco
+2026-01-09 23:20:01,351 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-09 23:20:02,992 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-09 23:20:05,244 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-09 23:20:07,359 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-09 23:20:09,653 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-09 23:20:11,916 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-09 23:20:12,347 - main - INFO - 📥 Processing 129 profiles
+2026-01-09 23:20:13,251 - main - INFO - ⏭️  Skipping 115 already cached profiles
+2026-01-09 23:20:13,257 - main - INFO - 📥 Fetching 14 new profiles
+2026-01-09 23:20:30,641 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karti-ai "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,767 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sfcta "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,779 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MuseSystems "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,793 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AbateLab "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,796 - httpx - INFO - HTTP Request: GET https://api.github.com/users/smaato "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,799 - httpx - INFO - HTTP Request: GET https://api.github.com/users/czbiohub-sf "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,804 - httpx - INFO - HTTP Request: GET https://api.github.com/users/gfpsolutions "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,812 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sfomuseum "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,818 - httpx - INFO - HTTP Request: GET https://api.github.com/users/WritingSolutions2020 "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,829 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lmwong3 "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,833 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dsasf-tech-admin "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,836 - httpx - INFO - HTTP Request: GET https://api.github.com/users/salilab "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,842 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Shahbaz-mahmood123 "HTTP/1.1 200 OK"
+2026-01-09 23:20:31,845 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bvsf "HTTP/1.1 200 OK"
+2026-01-09 23:20:35,783 - httpx - INFO - HTTP Request: GET https://api.github.com/users/WritingSolutions2020/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 23:20:35,862 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lmwong3/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 23:20:36,275 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karti-ai/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 23:20:36,581 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Shahbaz-mahmood123/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 23:20:41,112 - main - INFO - 📤 Sending 1 new profiles
+2026-01-09 23:20:41,125 - main - INFO - 📊 Progress: 100% - Total: 135
+2026-01-09 23:20:41,126 - main - INFO - ✅ Search complete! Total: 135
+2026-01-09 23:24:19,618 - main - INFO - 📦 Fetching cached profiles...
+2026-01-09 23:24:22,215 - main - INFO - ✅ Sending 120 initial results
+2026-01-09 23:24:22,221 - main - INFO - 🔍 Searching for 65 more profiles
+2026-01-09 23:24:22,223 - main - INFO - 🔍 Searching GitHub: language=Python, location=San Francisco
+2026-01-09 23:24:23,611 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-09 23:24:25,057 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-09 23:24:26,984 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-09 23:24:28,630 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-09 23:24:30,363 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-09 23:24:32,034 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-09 23:24:32,450 - main - INFO - 📥 Processing 129 profiles
+2026-01-09 23:24:33,230 - main - INFO - ⏭️  Skipping 116 already cached profiles
+2026-01-09 23:24:33,232 - main - INFO - 📥 Fetching 13 new profiles
+2026-01-09 23:24:42,959 - httpx - INFO - HTTP Request: GET https://api.github.com/users/WritingSolutions2020 "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,755 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lmwong3 "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,758 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dsasf-tech-admin "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,760 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MuseSystems "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,762 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sfcta "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,765 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AbateLab "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,768 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bvsf "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,770 - httpx - INFO - HTTP Request: GET https://api.github.com/users/smaato "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,772 - httpx - INFO - HTTP Request: GET https://api.github.com/users/gfpsolutions "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,774 - httpx - INFO - HTTP Request: GET https://api.github.com/users/czbiohub-sf "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,776 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sfomuseum "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,778 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karti-ai "HTTP/1.1 200 OK"
+2026-01-09 23:24:43,780 - httpx - INFO - HTTP Request: GET https://api.github.com/users/salilab "HTTP/1.1 200 OK"

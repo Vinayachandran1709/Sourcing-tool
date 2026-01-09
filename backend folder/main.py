@@ -778,7 +778,7 @@ async def search_profiles_stream(
             yield f"data: {json.dumps({'type': 'profiles', 'profiles': cached_dicts, 'count': len(cached_dicts)})}\n\n"
             
             # Check if we need more
-            target_profiles = 120  # ✅ OPTIMIZATION #2: Reduced from 350
+            target_profiles = 200  # ✅ OPTIMIZATION #2: Reduced from 350
             if len(cached_profiles) >= target_profiles:
                 logger.info(f"✅ Search complete")
                 yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles)})}\n\n"
