@@ -19068,3 +19068,92 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-09 21:36:53,162 - main - INFO - ✅ JWT Secret configured
 2026-01-09 21:36:53,163 - main - INFO - 🎯 Startup validation complete
 
+2026-01-09 22:33:41,010 - main - INFO - 📦 Fetching cached profiles...
+2026-01-09 22:33:43,437 - main - INFO - ✅ Sending 120 initial results
+2026-01-09 22:33:43,443 - main - INFO - ✅ Search complete
+2026-01-09 22:36:33,952 - main - INFO - 📦 Fetching cached profiles...
+2026-01-09 22:36:34,288 - main - INFO - ✅ Sending 0 initial results
+2026-01-09 22:36:34,289 - main - INFO - 🔍 Searching for 120 more profiles
+2026-01-09 22:36:34,329 - main - INFO - 🔍 Searching GitHub: language=Python, location=United Kingdom
+2026-01-09 22:36:36,858 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-09 22:36:38,179 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:United%20Kingdom&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-09 22:36:39,818 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:United%20Kingdom&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-09 22:36:39,823 - main - INFO - 📥 Processing 30 profiles
+2026-01-09 22:36:40,227 - main - INFO - 📥 Fetching 30 new profiles
+2026-01-09 22:36:57,943 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Chandni1995 "HTTP/1.1 200 OK"
+2026-01-09 22:36:57,946 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Zurly-0 "HTTP/1.1 200 OK"
+2026-01-09 22:36:57,949 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alexjthomson "HTTP/1.1 200 OK"
+2026-01-09 22:36:57,952 - httpx - INFO - HTTP Request: GET https://api.github.com/users/99900999 "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,864 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dr-maruf "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,866 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nethra8902 "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,868 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Manishaminhas "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,869 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Jose-Verdu-Diaz "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,870 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AbdsalamUDT "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,871 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Naosekpam "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,873 - httpx - INFO - HTTP Request: GET https://api.github.com/users/POSCON-United-Kingdom "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,876 - httpx - INFO - HTTP Request: GET https://api.github.com/users/marlenebian "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,877 - httpx - INFO - HTTP Request: GET https://api.github.com/users/munawaralicodes "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,879 - httpx - INFO - HTTP Request: GET https://api.github.com/users/drjbarker "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,881 - httpx - INFO - HTTP Request: GET https://api.github.com/users/IbrahimKesici "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,882 - httpx - INFO - HTTP Request: GET https://api.github.com/users/stan8900 "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,884 - httpx - INFO - HTTP Request: GET https://api.github.com/users/martinriis "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,885 - httpx - INFO - HTTP Request: GET https://api.github.com/users/da-rth "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,886 - httpx - INFO - HTTP Request: GET https://api.github.com/users/SuezTechs "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,888 - httpx - INFO - HTTP Request: GET https://api.github.com/users/huangshk "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,890 - httpx - INFO - HTTP Request: GET https://api.github.com/users/TheCyberDeskLtd "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,893 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ellsandell "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,895 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Pickett-Lab "HTTP/1.1 200 OK"
+2026-01-09 22:37:00,896 - httpx - INFO - HTTP Request: GET https://api.github.com/users/imvela "HTTP/1.1 200 OK"
+2026-01-09 22:37:11,548 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AnmarAl-Adly "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,792 - httpx - INFO - HTTP Request: GET https://api.github.com/users/SuezTechs/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,796 - httpx - INFO - HTTP Request: GET https://api.github.com/users/huangshk/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,896 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Zurly-0/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,900 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Manishaminhas/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,902 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AbdsalamUDT/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,904 - httpx - INFO - HTTP Request: GET https://api.github.com/users/munawaralicodes/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,909 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Chandni1995/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,917 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nethra8902/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:12,994 - httpx - INFO - HTTP Request: GET https://api.github.com/users/dr-maruf/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,000 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AnmarAl-Adly/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,004 - httpx - INFO - HTTP Request: GET https://api.github.com/users/martinriis/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,030 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Naosekpam/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,095 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ellsandell/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,112 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Jose-Verdu-Diaz/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,173 - httpx - INFO - HTTP Request: GET https://api.github.com/users/alexjthomson/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,306 - httpx - INFO - HTTP Request: GET https://api.github.com/users/da-rth/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,314 - httpx - INFO - HTTP Request: GET https://api.github.com/users/IbrahimKesici/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,317 - httpx - INFO - HTTP Request: GET https://api.github.com/users/stan8900/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,326 - httpx - INFO - HTTP Request: GET https://api.github.com/users/drjbarker/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,407 - httpx - INFO - HTTP Request: GET https://api.github.com/users/99900999/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:37:13,509 - httpx - INFO - HTTP Request: GET https://api.github.com/users/marlenebian/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:38:32,184 - main - INFO - 📤 Sending 21 new profiles
+2026-01-09 22:38:32,185 - main - INFO - 📊 Progress: 83% - Total: 21
+2026-01-09 22:38:36,349 - httpx - INFO - HTTP Request: GET https://api.github.com/users/huutiennguyen "HTTP/1.1 200 OK"
+2026-01-09 22:38:37,047 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cs-amy "HTTP/1.1 200 OK"
+2026-01-09 22:38:37,050 - httpx - INFO - HTTP Request: GET https://api.github.com/users/firthhh "HTTP/1.1 200 OK"
+2026-01-09 22:38:38,481 - httpx - INFO - HTTP Request: GET https://api.github.com/users/reshmithds "HTTP/1.1 200 OK"
+2026-01-09 22:38:38,483 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Afaq-Tahir98 "HTTP/1.1 200 OK"
+2026-01-09 22:38:40,448 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Afaq-Tahir98/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:38:40,450 - httpx - INFO - HTTP Request: GET https://api.github.com/users/firthhh/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:38:40,454 - httpx - INFO - HTTP Request: GET https://api.github.com/users/cs-amy/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:38:40,484 - httpx - INFO - HTTP Request: GET https://api.github.com/users/reshmithds/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:38:40,551 - httpx - INFO - HTTP Request: GET https://api.github.com/users/huutiennguyen/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:38:51,426 - main - INFO - 📤 Sending 3 new profiles
+2026-01-09 22:38:51,428 - main - INFO - 📊 Progress: 100% - Total: 24
+2026-01-09 22:38:51,429 - main - INFO - ✅ Search complete! Total: 24
+2026-01-09 22:57:16,323 - main - INFO - 📦 Fetching cached profiles...
+2026-01-09 22:57:16,838 - main - INFO - ✅ Sending 0 initial results
+2026-01-09 22:57:16,839 - main - INFO - 🔍 Searching for 120 more profiles
+2026-01-09 22:57:16,839 - main - INFO - 🔍 Searching GitHub: language=Dart, location=New York
+2026-01-09 22:57:18,279 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-09 22:57:19,605 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Dart+location:New%20York&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-09 22:57:21,447 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Dart+location:New%20York&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-09 22:57:21,449 - main - INFO - 📥 Processing 2 profiles
+2026-01-09 22:57:21,855 - main - INFO - 📥 Fetching 2 new profiles
+2026-01-09 22:57:23,859 - httpx - INFO - HTTP Request: GET https://api.github.com/users/JustinSiu00 "HTTP/1.1 200 OK"
+2026-01-09 22:57:24,674 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PreetRai "HTTP/1.1 200 OK"
+2026-01-09 22:57:26,227 - httpx - INFO - HTTP Request: GET https://api.github.com/users/JustinSiu00/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:57:26,675 - httpx - INFO - HTTP Request: GET https://api.github.com/users/PreetRai/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 22:57:33,423 - main - INFO - 📤 Sending 2 new profiles
+2026-01-09 22:57:33,423 - main - INFO - 📊 Progress: 100% - Total: 2
+2026-01-09 22:57:33,424 - main - INFO - ✅ Search complete! Total: 2
