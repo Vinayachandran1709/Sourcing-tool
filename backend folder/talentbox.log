@@ -19334,3 +19334,8 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-09 23:24:43,776 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sfomuseum "HTTP/1.1 200 OK"
 2026-01-09 23:24:43,778 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karti-ai "HTTP/1.1 200 OK"
 2026-01-09 23:24:43,780 - httpx - INFO - HTTP Request: GET https://api.github.com/users/salilab "HTTP/1.1 200 OK"
+2026-01-09 23:24:45,927 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karti-ai/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 23:24:45,930 - httpx - INFO - HTTP Request: GET https://api.github.com/users/WritingSolutions2020/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 23:24:45,933 - httpx - INFO - HTTP Request: GET https://api.github.com/users/lmwong3/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-09 23:24:45,936 - main - INFO - 📊 Progress: 100% - Total: 135
+2026-01-09 23:24:45,937 - main - INFO - ✅ Search complete! Total: 135

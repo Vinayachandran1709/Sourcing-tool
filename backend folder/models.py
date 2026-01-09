@@ -49,6 +49,11 @@ class User(Base):
     usage_emails_sent = Column(Integer, default=0)
     usage_reset_date = Column(DateTime(timezone=True), server_default=func.now())
 
+    # ===== EMAIL OUTREACH FIELDS (ONE TEMPLATE) =====
+    sender_email = Column(String, nullable=True)  # Email they send FROM
+    email_template = Column(Text, nullable=True)  # Their ONE reusable template
+    sender_email_verified = Column(Boolean, default=False)  # Future: verify ownership
+
     # Relationships
     saved_lists = relationship("SavedList", back_populates="user")
 
@@ -165,6 +170,7 @@ class EmailOutreach(Base):
     __tablename__ = "email_outreach"
     
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))  # ← TRACK WHO SENT
     profile_id = Column(Integer, ForeignKey("profiles.id"))
     subject = Column(Text)
     body = Column(Text)

@@ -280,12 +280,33 @@ const SearchDashboard = () => {
     }
   };
 
-  const handleBulkEmail = () => {
+  const handleBulkEmail = async () => {
     const selectedProfiles = profiles.filter(p => p.selected);
     if (selectedProfiles.length === 0) {
       alert('Please select at least one profile to send emails.');
       return;
     }
+    
+    // Check email limits before opening modal
+    try {
+      const { getEmailUsage } = await import('../services/api');
+      const usageData = await getEmailUsage();
+      
+      if (!usageData.usage.can_send) {
+        alert(`Email limit reached! You've used ${usageData.usage.used}/${usageData.usage.limit} emails this month. Upgrade to send more.`);
+        return;
+      }
+      
+      if (selectedProfiles.length > usageData.usage.remaining) {
+        alert(`Cannot send ${selectedProfiles.length} emails. Only ${usageData.usage.remaining} emails remaining this month.`);
+        return;
+      }
+      
+    } catch (error) {
+      console.error('Failed to check email limits:', error);
+      // Continue anyway - backend will enforce limits
+    }
+    
     setShowEmailModal(true);
   };
 

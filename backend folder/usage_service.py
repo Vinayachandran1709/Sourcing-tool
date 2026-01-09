@@ -105,6 +105,46 @@ class UsageService:
         return True
     
     @staticmethod
+    def check_email_limit(db: Session, user_id: int) -> dict:
+        """
+        Check if user can send more emails this month.
+        Returns usage stats with limit, used, remaining, can_send.
+        """
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return {
+                "limit": 0,
+                "used": 0,
+                "remaining": 0,
+                "can_send": False
+            }
+        
+        # Get plan limit
+        plan = getattr(user, 'plan', 'free')
+        limits = UsageService.PLAN_LIMITS.get(plan, UsageService.PLAN_LIMITS["free"])
+        limit = limits["emails_sent"]
+        
+        # Count emails sent this month
+        from datetime import datetime, timezone
+        from models import EmailOutreach
+        
+        month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        
+        sent_count = db.query(EmailOutreach).filter(
+            EmailOutreach.user_id == user_id,
+            EmailOutreach.sent_at >= month_start
+        ).count()
+        
+        remaining = max(0, limit - sent_count) if limit != -1 else 999999
+        
+        return {
+            "limit": limit,
+            "used": sent_count,
+            "remaining": remaining,
+            "can_send": (limit == -1) or (sent_count < limit)
+        }
+    
+    @staticmethod
     def log_usage(db: Session, user_id: int, action_type: str, details: dict = None):
         """Log usage and increment counter"""
         user = db.query(User).filter(User.id == user_id).first()

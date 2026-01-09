@@ -39,6 +39,7 @@ from auth_routes import router as auth_router
 from waitlist_routes import router as waitlist_router
 from lists_routes import router as lists_router
 from email_routes import router as email_router
+from email_settings_routes import router as email_settings_router
 from razorpay_routes import router as razorpay_router
 
 # Import services
@@ -171,6 +172,7 @@ app.include_router(waitlist_router)
 app.include_router(auth_router)
 app.include_router(lists_router)
 app.include_router(email_router)
+app.include_router(email_settings_router)
 app.include_router(razorpay_router)
 
 # ===== REQUEST/RESPONSE MODELS =====
@@ -509,20 +511,49 @@ def send_bulk_emails(
     
     logger.info(f"Bulk email request from user {user_id} for {len(email_request.profile_ids)} profiles")
     
-    # Check email limits
-    try:
-        UsageService.check_limit(db, user_id, "email_sent")
-    except HTTPException as e:
-        raise e
+    # ===== CHECK EMAIL LIMITS =====
+    usage = UsageService.check_email_limit(db, user_id)
     
-    # Get email credentials
-    company_email = os.getenv("COMPANY_EMAIL")
+    if not usage["can_send"]:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "EMAIL_LIMIT_EXCEEDED",
+                "message": f"Email limit reached. You've used {usage['used']}/{usage['limit']} emails this month.",
+                "usage": usage
+            }
+        )
+    
+    # Check if trying to send more than remaining
+    if len(email_request.profile_ids) > usage["remaining"]:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "EMAIL_LIMIT_EXCEEDED",
+                "message": f"Cannot send {len(email_request.profile_ids)} emails. Only {usage['remaining']} remaining this month.",
+                "usage": usage
+            }
+        )
+    
+    # ===== USE USER'S SENDER EMAIL =====
+    sender_email = current_user.sender_email
+    
+    if not sender_email:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "error": "SENDER_EMAIL_NOT_SET",
+                "message": "Please set your sender email in settings first"
+            }
+        )
+    
+    # Get password from env (or user's password if stored)
     company_password = os.getenv("COMPANY_EMAIL_PASSWORD")
     
-    if not company_email or not company_password:
+    if not company_password:
         raise HTTPException(
             status_code=500,
-            detail="Email credentials not configured. Add COMPANY_EMAIL and COMPANY_EMAIL_PASSWORD to .env"
+            detail="Email credentials not configured. Add COMPANY_EMAIL_PASSWORD to .env"
         )
     
     # Get profiles
@@ -546,28 +577,31 @@ def send_bulk_emails(
     # Send emails
     print(f"\n📧 Sending emails to {len(recipients)} developers...")
     results = EmailService.send_bulk_emails(
-        company_email=company_email,
+        company_email=sender_email,
         company_password=company_password,
         recipients=recipients,
         subject=email_request.subject,
         body_template=email_request.body
     )
     
-    # Log outreach
+    # Log outreach WITH user_id
     for profile in profiles:
         if profile.email and '@' in profile.email:
             status = "sent" if any(r["email"] == profile.email for r in recipients) else "failed"
             outreach_log = EmailOutreach(
+                user_id=user_id,  # ← ADD THIS
                 profile_id=profile.id,
                 subject=email_request.subject,
                 body=email_request.body,
                 status=status,
-                company_email=company_email
+                company_email=sender_email
             )
             db.add(outreach_log)
     
-    UsageService.log_usage(db, user_id, "email_sent", {"count": len(recipients)})
     db.commit()
+    
+    # Get updated usage
+    updated_usage = UsageService.check_email_limit(db, user_id)
     
     logger.info(f"Bulk email complete: {results['sent']} sent, {results['failed']} failed")
     print(f"✅ Sent: {results['sent']}, Failed: {results['failed']}\n")
@@ -576,7 +610,8 @@ def send_bulk_emails(
         "sent": results["sent"],
         "failed": results["failed"],
         "errors": results["errors"],
-        "recipients": [r["email"] for r in recipients]
+        "recipients": [r["email"] for r in recipients],
+        "usage": updated_usage  # ← RETURN UPDATED USAGE
     }
 
 
