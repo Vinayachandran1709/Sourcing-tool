@@ -131,7 +131,7 @@ export const createEmailTemplate = async (templateData) => {
   return response.data;
 };
 
-export const updateEmailTemplate = async (templateId, templateData) => {
+export const updateEmailTemplateById = async (templateId, templateData) => {
   const response = await api.put(`/api/emails/templates/${templateId}`, templateData);
   return response.data;
 };

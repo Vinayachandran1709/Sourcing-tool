@@ -16,8 +16,6 @@ import LandingPage from './pages/LandingPage';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import SearchDashboard from './pages/Dashboard/SearchDashboard';
 import SavedProfilesPage from './pages/Dashboard/SavedProfilesPage';
-import EmailTemplatesPage from './pages/Dashboard/EmailTemplatesPage.jsx';
-import OutreachHistoryPage from './pages/Dashboard/OutreachHistoryPage';
 import SubscriptionPage from './pages/Dashboard/SubscriptionPage';
 import CheckoutPage from './pages/CheckoutPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
@@ -51,8 +49,6 @@ function App() {
               <Route index element={<Navigate to="/dashboard/search" replace />} />
               <Route path="search" element={<SearchDashboard />} />
               <Route path="saved-profiles" element={<SavedProfilesPage />} />
-              <Route path="email-templates" element={<EmailTemplatesPage />} />
-              <Route path="outreach-history" element={<OutreachHistoryPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />
             </Route>
 

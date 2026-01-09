@@ -184,6 +184,8 @@ const SubscriptionPage = () => {
           </div>
         </div>
 
+        <EmailSettingsCard />
+        
         {/* Available Plans */}
         <div style={styles.plansSection}>
           <h3 style={styles.sectionTitle}>Upgrade Your Plan</h3>
@@ -264,8 +266,6 @@ const SubscriptionPage = () => {
           </div>
           <button style={styles.updateBillingBtn}>Update Billing Info</button>
         </div>
-        {/* Email Settings Section */}
-        <EmailSettingsCard />
       </div>
     </div>
   );
