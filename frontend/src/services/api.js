@@ -120,57 +120,12 @@ export const getEmailUsage = async () => {
 };
 
 export const checkCsvLimit = async () => {
-  const response = await apiClient.get('/api/check-csv-limit');
+  const response = await api.get('/api/check-csv-limit');
   return response.data;
 };
 
 export const logCsvExport = async () => {
-  const response = await apiClient.post('/api/log-csv-export');
-  return response.data;
-};
-
-// ===== EMAIL TEMPLATES APIs (FIXED ENDPOINTS) =====
-
-export const getEmailTemplates = async () => {
-  const response = await api.get('/api/emails/templates');
-  return response.data;
-};
-
-export const createEmailTemplate = async (templateData) => {
-  const response = await api.post('/api/emails/templates/create', templateData);
-  return response.data;
-};
-
-export const updateEmailTemplateById = async (templateId, templateData) => {
-  const response = await api.put(`/api/emails/templates/${templateId}`, templateData);
-  return response.data;
-};
-
-export const deleteEmailTemplate = async (templateId) => {
-  const response = await api.delete(`/api/emails/templates/${templateId}`);
-  return response.data;
-};
-
-export const createDefaultTemplates = async () => {
-  const response = await api.post('/api/emails/templates/create-defaults');
-  return response.data;
-};
-
-// ===== EMAIL CAMPAIGNS APIs =====
-
-export const sendCampaign = async (campaignData) => {
-  const response = await api.post('/api/emails/campaigns/send', campaignData);
-  return response.data;
-};
-
-export const getCampaigns = async (status = null) => {
-  const params = status ? { status } : {};
-  const response = await api.get('/api/emails/campaigns', { params });
-  return response.data;
-};
-
-export const markCampaignReplied = async (campaignId, replyContent = null) => {
-  const response = await api.post(`/api/emails/campaigns/${campaignId}/reply`, { reply_content: replyContent });
+  const response = await api.post('/api/log-csv-export');
   return response.data;
 };
 

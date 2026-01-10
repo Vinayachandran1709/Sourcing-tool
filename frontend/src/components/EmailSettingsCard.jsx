@@ -9,7 +9,6 @@ const EmailSettingsCard = () => {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   const [emailUsage, setEmailUsage] = useState(null);
-  const [hasCustomTemplate, setHasCustomTemplate] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -36,7 +35,6 @@ const EmailSettingsCard = () => {
       
       setSenderEmail(settings.sender_email || '');
       setEmailTemplate(settings.email_template || '');
-      setHasCustomTemplate(settings.has_custom_template);
       setEmailUsage(usage.usage);
       // Cache settings for instant load next time
       localStorage.setItem('emailSettings', JSON.stringify(settings));
@@ -66,7 +64,6 @@ const EmailSettingsCard = () => {
     try {
       await updateEmailSettings(senderEmail, emailTemplate);
       setMessage({ type: 'success', text: 'Email settings saved successfully!' });
-      setHasCustomTemplate(true);
       
       // Clear success message after 3 seconds
       setTimeout(() => setMessage(null), 3000);

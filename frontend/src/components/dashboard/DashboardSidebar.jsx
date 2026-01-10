@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, Mail, Clock, CreditCard, Package, Folder, Send, BarChart3, Star } from 'lucide-react';
+import { Search, CreditCard, Package, Star } from 'lucide-react';
 
 const DashboardSidebar = () => {
   const navItems = [

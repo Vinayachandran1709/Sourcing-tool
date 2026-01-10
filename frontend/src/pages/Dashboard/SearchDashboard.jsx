@@ -1,14 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Filter, Mail, Download, AlertCircle, CheckSquare, List } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Search, Mail, Download, AlertCircle, CheckSquare } from 'lucide-react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
 import FilterPanel from '../../components/FilterPanel';
 import { 
-  toggleProfileSelection, 
-  getSavedLists,
-  addProfileToList 
+  toggleProfileSelection
 } from '../../services/api';
 
 const SearchDashboard = () => {
@@ -193,6 +191,9 @@ const SearchDashboard = () => {
                   totalFound: 0
                 });
                 break;
+              default:
+              // Ignore unknown message types
+              break;
             }
           } catch (e) {
             console.error('Failed to parse SSE data:', e);
@@ -312,7 +313,7 @@ const SearchDashboard = () => {
   const handleExportCSV = async () => {
   // Check CSV export limits
   try {
-    const { checkCsvLimit, logCsvExport } = await import('../../services/api');
+    const { checkCsvLimit } = await import('../../services/api');
     const limits = await checkCsvLimit();
     
     if (!limits.can_export) {
