@@ -40,7 +40,6 @@ from waitlist_routes import router as waitlist_router
 from lists_routes import router as lists_router
 from email_settings_routes import router as email_settings_router
 from razorpay_routes import router as razorpay_router
-from email_routes import router as email_router
 
 # Import services
 from filter_service import FilterService
@@ -171,7 +170,6 @@ app.add_middleware(
 app.include_router(waitlist_router)
 app.include_router(auth_router)
 app.include_router(lists_router)
-app.include_router(email_router)
 app.include_router(email_settings_router)
 app.include_router(razorpay_router)
 

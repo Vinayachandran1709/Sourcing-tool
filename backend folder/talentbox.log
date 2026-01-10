@@ -19363,3 +19363,235 @@ DETAIL:  Key (github_username)=(bunizao) already exists.
 2026-01-10 10:32:07,973 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
 2026-01-10 10:32:07,985 - main - INFO - Environment: development
 2026-01-10 10:32:07,986 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 10:51:32,056 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 10:51:32,058 - main - INFO - Environment: development
+2026-01-10 10:51:32,059 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 10:51:32,127 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 10:51:32,700 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 10:51:38,611 - main - INFO - ✅ Database connection successful
+2026-01-10 10:51:38,613 - main - INFO - ✅ JWT Secret configured
+2026-01-10 10:51:38,613 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 10:51:41,411 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 10:51:41,412 - main - INFO - Environment: development
+2026-01-10 10:51:41,413 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 10:51:41,480 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 10:51:41,524 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 10:51:46,326 - main - INFO - ✅ Database connection successful
+2026-01-10 10:51:46,327 - main - INFO - ✅ JWT Secret configured
+2026-01-10 10:51:46,328 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 10:52:07,286 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 10:52:07,288 - main - INFO - Environment: development
+2026-01-10 10:52:07,289 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 10:52:07,332 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 10:52:07,370 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 10:52:12,177 - main - INFO - ✅ Database connection successful
+2026-01-10 10:52:12,178 - main - INFO - ✅ JWT Secret configured
+2026-01-10 10:52:12,179 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 10:52:29,504 - main - ERROR - Unexpected error on /api/auth/login: (psycopg2.errors.UndefinedColumn) column users.sender_email does not exist
+LINE 1: ...users.usage_reset_date AS users_usage_reset_date, users.send...
+                                                             ^
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.company AS users_company, users.password_hash AS users_password_hash, users.created_at AS users_created_at, users.plan AS users_plan, users.billing_cycle AS users_billing_cycle, users.razorpay_customer_id AS users_razorpay_customer_id, users.razorpay_subscription_id AS users_razorpay_subscription_id, users.subscription_status AS users_subscription_status, users.trial_start_date AS users_trial_start_date, users.trial_end_date AS users_trial_end_date, users.subscription_start_date AS users_subscription_start_date, users.next_billing_date AS users_next_billing_date, users.company_website AS users_company_website, users.career_page_link AS users_career_page_link, users.usage_searches AS users_usage_searches, users.usage_profile_views AS users_usage_profile_views, users.usage_emails_sent AS users_usage_emails_sent, users.usage_reset_date AS users_usage_reset_date, users.sender_email AS users_sender_email, users.email_template AS users_email_template, users.sender_email_verified AS users_sender_email_verified 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'email_1': 'test@example10.com', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.UndefinedColumn: column users.sender_email does not exist
+LINE 1: ...users.usage_reset_date AS users_usage_reset_date, users.send...
+                                                             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\middleware\exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\middleware\asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 125, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 111, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 391, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\fastapi\routing.py", line 292, in run_endpoint_function
+    return await run_in_threadpool(dependant.call, **values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\starlette\concurrency.py", line 32, in run_in_threadpool
+    return await anyio.to_thread.run_sync(func)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\to_thread.py", line 56, in run_sync
+    return await get_async_backend().run_sync_in_worker_thread(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        func, args, abandon_on_cancel=abandon_on_cancel, limiter=limiter
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 2485, in run_sync_in_worker_thread
+    return await future
+           ^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\anyio\_backends\_asyncio.py", line 976, in run
+    result = context.run(func, *args)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\slowapi\extension.py", line 766, in sync_wrapper
+    response = func(*args, **kwargs)
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\auth_routes.py", line 162, in login
+    user = db.query(User).filter(User.email == login_data.email.lower()).first()
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\query.py", line 2759, in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\query.py", line 2857, in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+                                                  ~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+        params,
+        ^^^^^^^
+        execution_options={"_sa_orm_load_options": self.load_options},
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\session.py", line 2351, in execute
+    return self._execute_internal(
+           ~~~~~~~~~~~~~~~~~~~~~~^
+        statement,
+        ^^^^^^^^^^
+    ...<4 lines>...
+        _add_event=_add_event,
+        ^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\session.py", line 2249, in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self,
+        ^^^^^
+    ...<4 lines>...
+        conn,
+        ^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\orm\context.py", line 306, in orm_execute_statement
+    result = conn.execute(
+        statement, params or {}, execution_options=execution_options
+    )
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1419, in execute
+    return meth(
+        self,
+        distilled_parameters,
+        execution_options or NO_OPTIONS,
+    )
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\sql\elements.py", line 526, in _execute_on_connection
+    return connection._execute_clauseelement(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        self, distilled_params, execution_options
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1641, in _execute_clauseelement
+    ret = self._execute_context(
+        dialect,
+    ...<8 lines>...
+        cache_hit=cache_hit,
+    )
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1846, in _execute_context
+    return self._exec_single_context(
+           ~~~~~~~~~~~~~~~~~~~~~~~~~^
+        dialect, context, statement, parameters
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1986, in _exec_single_context
+    self._handle_dbapi_exception(
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+        e, str_statement, effective_parameters, cursor, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 2355, in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\base.py", line 1967, in _exec_single_context
+    self.dialect.do_execute(
+    ~~~~~~~~~~~~~~~~~~~~~~~^
+        cursor, str_statement, effective_parameters, context
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\sqlalchemy\engine\default.py", line 951, in do_execute
+    cursor.execute(statement, parameters)
+    ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+sqlalchemy.exc.ProgrammingError: (psycopg2.errors.UndefinedColumn) column users.sender_email does not exist
+LINE 1: ...users.usage_reset_date AS users_usage_reset_date, users.send...
+                                                             ^
+
+[SQL: SELECT users.id AS users_id, users.name AS users_name, users.email AS users_email, users.company AS users_company, users.password_hash AS users_password_hash, users.created_at AS users_created_at, users.plan AS users_plan, users.billing_cycle AS users_billing_cycle, users.razorpay_customer_id AS users_razorpay_customer_id, users.razorpay_subscription_id AS users_razorpay_subscription_id, users.subscription_status AS users_subscription_status, users.trial_start_date AS users_trial_start_date, users.trial_end_date AS users_trial_end_date, users.subscription_start_date AS users_subscription_start_date, users.next_billing_date AS users_next_billing_date, users.company_website AS users_company_website, users.career_page_link AS users_career_page_link, users.usage_searches AS users_usage_searches, users.usage_profile_views AS users_usage_profile_views, users.usage_emails_sent AS users_usage_emails_sent, users.usage_reset_date AS users_usage_reset_date, users.sender_email AS users_sender_email, users.email_template AS users_email_template, users.sender_email_verified AS users_sender_email_verified 
+FROM users 
+WHERE users.email = %(email_1)s 
+ LIMIT %(param_1)s]
+[parameters: {'email_1': 'test@example10.com', 'param_1': 1}]
+(Background on this error at: https://sqlalche.me/e/20/f405)
+2026-01-10 10:59:09,303 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 10:59:09,305 - main - INFO - Environment: development
+2026-01-10 10:59:09,306 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 10:59:09,352 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 10:59:09,419 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 10:59:15,257 - main - INFO - ✅ Database connection successful
+2026-01-10 10:59:15,259 - main - INFO - ✅ JWT Secret configured
+2026-01-10 10:59:15,260 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 11:01:50,589 - main - INFO - 📦 Fetching cached profiles...
+2026-01-10 11:01:52,149 - main - INFO - ✅ Sending 120 initial results
+2026-01-10 11:01:52,161 - main - INFO - 🔍 Searching for 65 more profiles
+2026-01-10 11:01:52,192 - main - INFO - 🔍 Searching GitHub: language=Python, location=San Francisco
+2026-01-10 11:01:54,911 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-10 11:01:56,752 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-10 11:01:58,867 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-10 11:02:01,006 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-10 11:02:03,199 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-10 11:02:05,473 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:San%20Francisco&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-10 11:02:05,878 - main - INFO - 📥 Processing 129 profiles
+2026-01-10 11:02:06,418 - main - INFO - ⏭️  Skipping 116 already cached profiles
+2026-01-10 11:02:06,419 - main - INFO - 📥 Fetching 13 new profiles
+2026-01-10 11:02:16,000 - httpx - INFO - HTTP Request: GET https://api.github.com/users/czbiohub-sf "HTTP/1.1 200 OK"
+2026-01-10 11:02:16,003 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sfcta "HTTP/1.1 200 OK"
+2026-01-10 11:02:16,009 - httpx - INFO - HTTP Request: GET https://api.github.com/users/karti-ai "HTTP/1.1 200 OK"
+2026-01-10 11:02:16,666 - httpx - INFO - HTTP Request: GET https://api.github.com/users/smaato "HTTP/1.1 200 OK"
