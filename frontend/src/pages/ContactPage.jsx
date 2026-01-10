@@ -60,7 +60,7 @@ const ContactPage = () => {
         <div style={styles.container}>
           <h1 style={styles.title}>Get in Touch</h1>
           <p style={styles.subtitle}>
-            Have questions? We'd love to hear from you. Send us a message and we'll respond within 24 hours.
+            Have questions? We'd love to hear from you. Send us a message and we'll respond within 1 hour.
           </p>
         </div>
       </section>
@@ -83,8 +83,8 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h4 style={styles.contactLabel}>Email</h4>
-                    <a href="mailto:vinay@talentbox.co" style={styles.contactValue}>
-                      vinay@talentbox.co
+                    <a href="mailto:contact@talentbox.co" style={styles.contactValue}>
+                      contact@talentbox.co
                     </a>
                   </div>
                 </div>
@@ -166,7 +166,7 @@ const ContactPage = () => {
                   <CheckCircle size={64} color="#10b981" />
                   <h3 style={styles.successTitle}>Message Sent!</h3>
                   <p style={styles.successText}>
-                    Thanks for reaching out. We'll get back to you within 24 hours.
+                    Thanks for reaching out. We'll get back to you within 1 hour.
                   </p>
                 </div>
               )}

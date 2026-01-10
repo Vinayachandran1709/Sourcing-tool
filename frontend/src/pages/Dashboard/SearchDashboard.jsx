@@ -476,10 +476,6 @@ const SearchDashboard = () => {
                     {scoreFilterRanges.length} range{scoreFilterRanges.length !== 1 ? 's' : ''} selected
                   </span>
                 )}
-                {/* ✅ Show disabled hint during search */}
-                {!searchComplete && (
-                  <span style={styles.scoreFilterDisabledHint}>(disabled during search)</span>
-                )}
               </div>
               <button 
                 onClick={() => setShowScoreFilter(!showScoreFilter)}

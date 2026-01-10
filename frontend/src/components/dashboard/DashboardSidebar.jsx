@@ -76,9 +76,6 @@ const DashboardSidebar = () => {
 
       {/* Footer */}
       <div style={styles.footer}>
-        <div style={styles.footerText}>
-          TalentBox MVP v1.0
-        </div>
         <div style={styles.footerLinks}>
           <a href="/contact" style={styles.footerLink}>Support</a>
           <span style={styles.footerDivider}>•</span>
