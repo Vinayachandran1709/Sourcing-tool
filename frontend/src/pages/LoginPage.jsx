@@ -3,6 +3,28 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
+// Add animations
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+`;
+document.head.appendChild(styleSheet);
+
+
 const LoginPage = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated } = useAuth();
@@ -13,6 +35,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,16 +49,20 @@ const LoginPage = () => {
     e.preventDefault();
     setLoading(true);
     setError('');
+    setSuccess(false);
 
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
-      navigate('/dashboard/search');
+      setSuccess(true);
+      // Wait 800ms before redirect for smooth transition
+      setTimeout(() => {
+        navigate('/dashboard/search');
+      }, 800);
     } else {
       setError(result.error || 'Login failed. Please try again.');
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const handleChange = (e) => {
@@ -86,6 +113,17 @@ const LoginPage = () => {
             </div>
           )}
 
+          {/* Success Message */}
+          {success && (
+            <div style={styles.successBox}>
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <circle cx="10" cy="10" r="10" fill="#10b981"/>
+                <path d="M6 10l2.5 2.5L14 7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              <span>Success! Redirecting to dashboard...</span>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.formGroup}>
               <label style={styles.label}>Email address</label>
@@ -133,8 +171,35 @@ const LoginPage = () => {
               <Link to="/forgot-password" style={styles.forgotLink}>Forgot password?</Link>
             </div>
 
-            <button type="submit" disabled={loading} style={styles.submitButton}>
-              {loading ? 'Signing in...' : (<><span>Sign in</span><ArrowRight size={20} /></>)}
+            <button 
+              type="submit" 
+              disabled={loading || success} 
+              style={{
+                ...styles.submitButton,
+                opacity: (loading || success) ? 0.7 : 1,
+                cursor: (loading || success) ? 'not-allowed' : 'pointer'
+              }}
+            >
+              {success ? (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 20 20" style={{ animation: 'spin 1s linear infinite' }}>
+                    <circle cx="10" cy="10" r="8" stroke="white" strokeWidth="2" fill="none" strokeDasharray="50" strokeDashoffset="10"/>
+                  </svg>
+                  <span>Redirecting...</span>
+                </>
+              ) : loading ? (
+                <>
+                  <svg width="20" height="20" viewBox="0 0 20 20" style={{ animation: 'spin 1s linear infinite' }}>
+                    <circle cx="10" cy="10" r="8" stroke="white" strokeWidth="2" fill="none" strokeDasharray="50" strokeDashoffset="10"/>
+                  </svg>
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                <>
+                  <span>Sign in</span>
+                  <ArrowRight size={20} />
+                </>
+              )}
             </button>
           </form>
 
@@ -165,6 +230,19 @@ const styles = {
   formSubtitle: { fontSize: '1rem', color: '#6b7280', margin: 0 },
   signupLink: { color: '#FF6B35', fontWeight: '600', textDecoration: 'none' },
   errorBox: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '10px', marginBottom: '1.5rem', color: '#dc2626', fontSize: '0.9375rem' },
+  successBox: {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '0.75rem',
+  padding: '1rem',
+  background: '#f0fdf4',
+  border: '1px solid #86efac',
+  borderRadius: '10px',
+  marginBottom: '1.5rem',
+  color: '#16a34a',
+  fontSize: '0.9375rem',
+  animation: 'slideIn 0.3s ease-out'
+},
   form: { display: 'flex', flexDirection: 'column', gap: '1.5rem' },
   formGroup: { display: 'flex', flexDirection: 'column', gap: '0.5rem' },
   label: { fontSize: '0.9375rem', fontWeight: '600', color: '#1a1a1a' },

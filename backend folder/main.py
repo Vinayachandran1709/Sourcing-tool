@@ -40,6 +40,7 @@ from waitlist_routes import router as waitlist_router
 from lists_routes import router as lists_router
 from email_settings_routes import router as email_settings_router
 from razorpay_routes import router as razorpay_router
+from email_routes import router as email_router
 
 # Import services
 from filter_service import FilterService
