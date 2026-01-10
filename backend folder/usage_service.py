@@ -30,7 +30,6 @@ class UsageService:
     @staticmethod
     def check_limit(db: Session, user_id: int, action_type: str, count: int = 1) -> bool:
 
-        return
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")

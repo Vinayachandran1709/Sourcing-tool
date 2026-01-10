@@ -20231,3 +20231,41 @@ WHERE users.email = %(email_1)s
 2026-01-10 23:41:43,586 - main - INFO - 📤 Sending 23 new profiles
 2026-01-10 23:41:43,588 - main - INFO - 📊 Progress: 100% - Total: 143
 2026-01-10 23:41:43,589 - main - INFO - ✅ Search complete! Total: 143
+2026-01-11 00:09:31,349 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-11 00:09:31,351 - main - INFO - Environment: development
+2026-01-11 00:09:31,352 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-11 00:09:31,419 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-11 00:09:31,854 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-11 00:09:38,587 - main - INFO - ✅ Database connection successful
+2026-01-11 00:09:38,587 - main - INFO - ✅ JWT Secret configured
+2026-01-11 00:09:38,588 - main - INFO - 🎯 Startup validation complete
+
+2026-01-11 00:10:15,258 - main - INFO - 📦 Fetching cached profiles...
+2026-01-11 00:10:17,109 - main - INFO - ✅ Sending 120 initial results
+2026-01-11 00:10:17,118 - main - INFO - 🔍 Searching for 67 more profiles
+2026-01-11 00:10:17,128 - main - INFO - 🔍 Searching GitHub: language=Python, location=New York
+2026-01-11 00:10:19,040 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-11 00:10:20,569 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-11 00:10:22,298 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-11 00:10:24,054 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-11 00:10:25,850 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-11 00:10:27,637 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-11 00:10:27,641 - main - INFO - 📥 Processing 150 profiles
+2026-01-11 00:10:28,452 - main - INFO - ⏭️  Skipping 137 already cached profiles
+2026-01-11 00:10:28,453 - main - INFO - 📥 Fetching 13 new profiles
+2026-01-11 00:10:38,186 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nyartcc "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,196 - httpx - INFO - HTTP Request: GET https://api.github.com/users/SMLC-NYSBC "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,203 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RomanSima "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,940 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nygenome "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,944 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nypl-openaudio "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,947 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sonyc-project "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,949 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bu-air-lab "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,951 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NYSCF "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,952 - httpx - INFO - HTTP Request: GET https://api.github.com/users/BDNYC "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,953 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CityOfNewYork "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,960 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vital2 "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,963 - httpx - INFO - HTTP Request: GET https://api.github.com/users/VIDA-NYU "HTTP/1.1 200 OK"
+2026-01-11 00:10:38,964 - httpx - INFO - HTTP Request: GET https://api.github.com/users/10xbeta "HTTP/1.1 200 OK"
+2026-01-11 00:10:39,520 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RomanSima/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-11 00:10:39,522 - main - INFO - 📊 Progress: 100% - Total: 133
+2026-01-11 00:10:39,524 - main - INFO - ✅ Search complete! Total: 133

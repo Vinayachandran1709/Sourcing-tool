@@ -156,6 +156,10 @@ const signup = async (name, email, company, password) => {
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    
+    // Clear all search session data
+    sessionStorage.clear();
+    
     navigate('/login');
   };
 

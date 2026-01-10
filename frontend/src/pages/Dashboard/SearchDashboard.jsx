@@ -12,12 +12,12 @@ import {
 const SearchDashboard = () => {
   // ✅ PERSIST: Load profiles and filters from localStorage on mount
   const [profiles, setProfiles] = useState(() => {
-    const saved = localStorage.getItem('searchResults');
+    const saved = sessionStorage.getItem('searchResults');
     return saved ? JSON.parse(saved) : [];
   });
   const [loading, setLoading] = useState(false);
   const [currentFilters, setCurrentFilters] = useState(() => {
-    const saved = localStorage.getItem('currentFilters');
+    const saved = sessionStorage.getItem('currentFilters');
     return saved ? JSON.parse(saved) : {};
   });
   const [error, setError] = useState(null);
@@ -39,29 +39,26 @@ const SearchDashboard = () => {
   
   const [currentPage, setCurrentPage] = useState(1);
   const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
-    const saved = localStorage.getItem('scoreFilterRanges');
+    const saved = sessionStorage.getItem('scoreFilterRanges');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // ✅ OPTIMIZATION #2: Search completion state (controls score filter)
-  const [searchComplete, setSearchComplete] = useState(false);
-
   useEffect(() => {
-    localStorage.setItem('scoreFilterRanges', JSON.stringify(scoreFilterRanges));
+    sessionStorage.setItem('scoreFilterRanges', JSON.stringify(scoreFilterRanges));
   }, [scoreFilterRanges]);
   const PROFILES_PER_PAGE = 12;
 
   // ✅ PERSIST: Save profiles to localStorage whenever they change
   useEffect(() => {
     if (profiles.length > 0) {
-      localStorage.setItem('searchResults', JSON.stringify(profiles));
+      sessionStorage.setItem('searchResults', JSON.stringify(profiles));
     }
   }, [profiles]);
 
   // ✅ PERSIST: Save filters to localStorage whenever they change
   useEffect(() => {
     if (Object.keys(currentFilters).length > 0) {
-      localStorage.setItem('currentFilters', JSON.stringify(currentFilters));
+      sessionStorage.setItem('currentFilters', JSON.stringify(currentFilters));
     }
   }, [currentFilters]);
 
@@ -74,8 +71,6 @@ const SearchDashboard = () => {
     setCurrentPage(1);
     setScoreFilterRanges([]); // Reset score filter ranges
     
-    // ✅ OPTIMIZATION #2: Disable score filter during search
-    setSearchComplete(false);
     
     // ✅ OPTIMIZATION #1: Smooth progress initialization
     setSearchProgress({
@@ -177,8 +172,6 @@ const SearchDashboard = () => {
                   message: `Search complete! Found ${data.total} developers`,
                   totalFound: data.total
                 });
-                // ✅ OPTIMIZATION #2: Enable score filter when search completes
-                setSearchComplete(true);
                 setLoading(false);
                 break;
                 
@@ -435,10 +428,9 @@ const SearchDashboard = () => {
               totalFound: 0
             });
             setCurrentFilters({});
-            setSearchComplete(false);
-            localStorage.removeItem('searchResults');
-            localStorage.removeItem('currentFilters');
-            localStorage.removeItem('scoreFilterRanges');
+            sessionStorage.removeItem('searchResults');
+            sessionStorage.removeItem('currentFilters');
+            sessionStorage.removeItem('scoreFilterRanges');
           }}
         />
         
@@ -508,7 +500,6 @@ const SearchDashboard = () => {
                       style={{
                         ...styles.scoreRangeLabel,
                         ...(isSelected ? styles.scoreRangeLabelSelected : {}),
-                        ...(searchComplete ? {} : styles.scoreRangeLabelDisabled),
                         borderColor: isSelected ? range.color : '#e5e7eb'
                       }}
                     >
@@ -516,7 +507,6 @@ const SearchDashboard = () => {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleScoreRangeToggle(range)}
-                        disabled={false}
                         style={styles.scoreRangeCheckbox}
                       />
                       <div style={styles.scoreRangeContent}>
@@ -1015,12 +1005,6 @@ const styles = {
   scoreRangeLabelSelected: {
     backgroundColor: '#ffffff',
     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-  },
-
-  // ✅ OPTIMIZATION #2: Disabled style
-  scoreRangeLabelDisabled: {
-    opacity: 0.5,
-    cursor: 'not-allowed',
   },
 
   scoreRangeCheckbox: {

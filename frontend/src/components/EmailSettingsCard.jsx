@@ -21,7 +21,6 @@ const EmailSettingsCard = () => {
     const parsed = JSON.parse(cached);
     setSenderEmail(parsed.sender_email || '');
     setEmailTemplate(parsed.email_template || '');
-    setHasCustomTemplate(parsed.has_custom_template);
     setLoading(false);
     // Still fetch in background to update
   } else {
