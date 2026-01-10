@@ -495,11 +495,11 @@ const SearchDashboard = () => {
 
               <div style={styles.scoreRanges}>
                 {[
-                  { label: '0-30 (Beginner)', min: 0, max: 30, color: '#6b7280' },
-                  { label: '30-50 (Junior)', min: 30, max: 50, color: '#f59e0b' },
-                  { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#3b82f6' },
-                  { label: '70-85 (Senior)', min: 70, max: 85, color: '#10b981' },
-                  { label: '85-100 (Expert)', min: 85, max: 100, color: '#8b5cf6' }
+                  { label: '0-30 (Beginner)', min: 0, max: 30, color: '' },
+                  { label: '30-50 (Junior)', min: 30, max: 50, color: '#6b7280' },
+                  { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#f59e0b' },
+                  { label: '70-85 (Senior)', min: 70, max: 85, color: '#3b82f6' },
+                  { label: '85-100 (Expert)', min: 85, max: 100, color: '#10b981' }
                 ].map(range => {
                   const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
                   return (
