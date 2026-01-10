@@ -11,6 +11,7 @@ class UsageService:
             "searches": 5,
             "profile_views": 25,
             "emails_sent": 10,
+            "csv_exports": 10,
             "lists": 1,
             "profiles_per_list": 25,
             "trial_days": 14
@@ -19,6 +20,7 @@ class UsageService:
             "searches": -1,  # unlimited
             "profile_views": 1000,
             "emails_sent": 300,
+            "csv_exports": -1,
             "lists": -1,  # unlimited
             "profiles_per_list": -1,  # unlimited
             "trial_days": 0
@@ -145,6 +147,61 @@ class UsageService:
         }
     
     @staticmethod
+    def check_csv_limit(db: Session, user_id: int) -> dict:
+        """
+        Check if user can export more CSVs.
+        Free trial: 10 total (lifetime, not monthly)
+        Paid plans: Unlimited
+        """
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return {
+                "limit": 0,
+                "used": 0,
+                "remaining": 0,
+                "can_export": False
+            }
+        
+        # Get plan limit
+        plan = getattr(user, 'plan', 'free')
+        limits = UsageService.PLAN_LIMITS.get(plan, UsageService.PLAN_LIMITS["free"])
+        limit = limits["csv_exports"]
+        
+        # For free trial, it's LIFETIME limit (not monthly)
+        used = getattr(user, 'usage_csv_exports', 0)
+        
+        remaining = max(0, limit - used) if limit != -1 else 999999
+        
+        return {
+            "limit": limit,
+            "used": used,
+            "remaining": remaining,
+            "can_export": (limit == -1) or (used < limit)
+        }
+
+    @staticmethod
+    def log_csv_export(db: Session, user_id: int):
+        """Log a CSV export"""
+        user = db.query(User).filter(User.id == user_id).first()
+        if not user:
+            return
+        
+        # Increment counter
+        if not hasattr(user, 'usage_csv_exports'):
+            user.usage_csv_exports = 0
+        user.usage_csv_exports += 1
+        
+        # Log detailed usage
+        log = UsageLog(
+            user_id=user_id,
+            action_type="csv_export",
+            details={"timestamp": datetime.now(timezone.utc).isoformat()}
+        )
+        db.add(log)
+        db.commit()
+
+
+    @staticmethod
     def log_usage(db: Session, user_id: int, action_type: str, details: dict = None):
         """Log usage and increment counter"""
         user = db.query(User).filter(User.id == user_id).first()
@@ -195,6 +252,11 @@ class UsageService:
                     "used": user.usage_emails_sent,
                     "limit": limits["emails_sent"],
                     "unlimited": limits["emails_sent"] == -1
+                },
+                "csv_exports": {  # ← ADD THIS
+                    "used": getattr(user, 'usage_csv_exports', 0),
+                    "limit": limits["csv_exports"],
+                    "unlimited": limits["csv_exports"] == -1
                 }
             },
             "trial_end_date": user.trial_end_date.isoformat() if user.trial_end_date else None

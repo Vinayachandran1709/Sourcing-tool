@@ -44,7 +44,6 @@ const SearchDashboard = () => {
     const saved = localStorage.getItem('scoreFilterRanges');
     return saved ? JSON.parse(saved) : [];
   });
-  const [showScoreFilter, setShowScoreFilter] = useState(false);
 
   // ✅ OPTIMIZATION #2: Search completion state (controls score filter)
   const [searchComplete, setSearchComplete] = useState(false);
@@ -310,7 +309,21 @@ const SearchDashboard = () => {
     setShowEmailModal(true);
   };
 
-  const handleExportCSV = () => {
+  const handleExportCSV = async () => {
+  // Check CSV export limits
+  try {
+    const { checkCsvLimit, logCsvExport } = await import('../../services/api');
+    const limits = await checkCsvLimit();
+    
+    if (!limits.can_export) {
+      alert(`CSV export limit reached! You've used ${limits.used}/${limits.limit} exports. ${limits.limit === 10 ? 'This is a lifetime limit for free trial users.' : 'Upgrade to export more.'}`);
+      return;
+    }
+  } catch (error) {
+    console.error('Failed to check CSV limits:', error);
+    alert('Failed to check export limits. Please try again.');
+    return;
+  }
     const csv = [
       ['Name', 'Username', 'Score', 'Location', 'Email', 'Stars', 'Repos', 'Contributions', 'Primary Language'],
       ...profiles.map(p => [
@@ -335,6 +348,13 @@ const SearchDashboard = () => {
     a.click();
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
+    // Log the export
+    try {
+      const { logCsvExport } = await import('../../services/api');
+      await logCsvExport();
+    } catch (error) {
+      console.error('Failed to log CSV export:', error);
+    }
   };
 
   const handleScoreRangeToggle = (range) => {
@@ -447,20 +467,13 @@ const SearchDashboard = () => {
           </div>
         )}
 
-        {/* Stats Bar */}
+        {/* Export Button */}
         {profiles.length > 0 && !loading && (
-          <div style={styles.statsBar}>
-            <div style={styles.statItem}>
-              <span style={styles.statValue}>{profiles.length}</span>
-              <span style={styles.statLabel}>Developers Found</span>
-            </div>
-            <div style={styles.statDivider}></div>
-            <div style={styles.statItem}>
-              <button onClick={handleExportCSV} style={styles.exportButton}>
-                <Download size={16} />
-                Export CSV
-              </button>
-            </div>
+          <div style={styles.exportBar}>
+            <button onClick={handleExportCSV} style={styles.exportButton}>
+              <Download size={16} />
+              Export CSV
+            </button>
           </div>
         )}
 
@@ -477,16 +490,8 @@ const SearchDashboard = () => {
                   </span>
                 )}
               </div>
-              <button 
-                onClick={() => setShowScoreFilter(!showScoreFilter)}
-                style={styles.scoreFilterToggle}
-                disabled={!searchComplete}
-              >
-                {showScoreFilter ? 'Hide' : 'Show'} Score Ranges
-              </button>
             </div>
 
-            {showScoreFilter && (
               <div style={styles.scoreRanges}>
                 {[
                   { label: '0-30 (Beginner)', min: 0, max: 30, color: '#6b7280' },
@@ -510,7 +515,7 @@ const SearchDashboard = () => {
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => handleScoreRangeToggle(range)}
-                        disabled={!searchComplete}
+                        disabled={false}
                         style={styles.scoreRangeCheckbox}
                       />
                       <div style={styles.scoreRangeContent}>
@@ -526,7 +531,7 @@ const SearchDashboard = () => {
                   );
                 })}
               </div>
-            )}
+            
 
             {scoreFilterRanges.length > 0 && (
               <div style={styles.scoreFilterInfo}>
@@ -1066,6 +1071,12 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     fontFamily: 'Outfit, sans-serif',
+  },
+  exportBar: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    padding: '16px 0',
+    marginBottom: '24px',
   },
 };
 

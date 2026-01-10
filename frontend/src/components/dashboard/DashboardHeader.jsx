@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, User, LogOut } from 'lucide-react';
+import { User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const DashboardHeader = ({ title, subtitle }) => {
@@ -26,12 +26,6 @@ const DashboardHeader = ({ title, subtitle }) => {
               }
             </div>
           )}
-
-          {/* Notifications */}
-          <button style={styles.iconButton}>
-            <Bell size={20} />
-            <span style={styles.badge}>3</span>
-          </button>
 
           {/* User Menu */}
           <div style={styles.userMenu}>

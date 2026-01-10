@@ -119,6 +119,16 @@ export const getEmailUsage = async () => {
   return response.data;
 };
 
+export const checkCsvLimit = async () => {
+  const response = await apiClient.get('/api/check-csv-limit');
+  return response.data;
+};
+
+export const logCsvExport = async () => {
+  const response = await apiClient.post('/api/log-csv-export');
+  return response.data;
+};
+
 // ===== EMAIL TEMPLATES APIs (FIXED ENDPOINTS) =====
 
 export const getEmailTemplates = async () => {

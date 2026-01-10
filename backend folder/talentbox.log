@@ -19774,3 +19774,111 @@ WHERE users.email = %(email_1)s
 2026-01-10 11:14:01,894 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jghoman/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
 2026-01-10 11:15:14,997 - main - INFO - 📤 Sending 24 new profiles
 2026-01-10 11:15:15,000 - main - INFO - 📊 Progress: 50% - Total: 190
+2026-01-10 19:00:35,292 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 19:00:35,295 - main - INFO - Environment: development
+2026-01-10 19:00:35,296 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 19:00:35,352 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 19:00:35,790 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 19:00:41,494 - main - INFO - ✅ Database connection successful
+2026-01-10 19:00:41,496 - main - INFO - ✅ JWT Secret configured
+2026-01-10 19:00:41,523 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:16:55,687 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:16:55,689 - main - INFO - Environment: development
+2026-01-10 21:16:55,690 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:16:55,744 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:16:55,833 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:17:01,758 - main - INFO - ✅ Database connection successful
+2026-01-10 21:17:01,758 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:17:01,759 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:20:25,585 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:20:25,587 - main - INFO - Environment: development
+2026-01-10 21:20:25,588 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:20:25,640 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:20:25,709 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:20:32,355 - main - INFO - ✅ Database connection successful
+2026-01-10 21:20:32,356 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:20:32,357 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:20:35,275 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:20:35,276 - main - INFO - Environment: development
+2026-01-10 21:20:35,277 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:20:35,359 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:20:35,420 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:20:41,355 - main - INFO - ✅ Database connection successful
+2026-01-10 21:20:41,356 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:20:41,356 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:22:15,212 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:22:15,214 - main - INFO - Environment: development
+2026-01-10 21:22:15,215 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:22:15,325 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:22:15,425 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:22:21,607 - main - INFO - ✅ Database connection successful
+2026-01-10 21:22:21,608 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:22:21,609 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:22:24,525 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:22:24,526 - main - INFO - Environment: development
+2026-01-10 21:22:24,527 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:22:24,591 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:22:24,639 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:22:30,670 - main - INFO - ✅ Database connection successful
+2026-01-10 21:22:30,671 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:22:30,672 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:27:49,262 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:27:49,263 - main - INFO - Environment: development
+2026-01-10 21:27:49,264 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:27:49,311 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:27:49,353 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:27:56,439 - main - INFO - ✅ Database connection successful
+2026-01-10 21:27:56,440 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:27:56,440 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:27:59,212 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:27:59,213 - main - INFO - Environment: development
+2026-01-10 21:27:59,215 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:27:59,261 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:27:59,302 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:28:05,578 - main - INFO - ✅ Database connection successful
+2026-01-10 21:28:05,579 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:28:05,580 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:30:10,826 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:30:10,827 - main - INFO - Environment: development
+2026-01-10 21:30:10,828 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:30:10,880 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:30:10,922 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:30:17,266 - main - INFO - ✅ Database connection successful
+2026-01-10 21:30:17,267 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:30:17,267 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:30:20,013 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:30:20,013 - main - INFO - Environment: development
+2026-01-10 21:30:20,014 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:30:20,061 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:30:20,100 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:30:26,789 - main - INFO - ✅ Database connection successful
+2026-01-10 21:30:26,790 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:30:26,790 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:32:22,118 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:32:22,120 - main - INFO - Environment: development
+2026-01-10 21:32:22,121 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:32:22,204 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:32:22,260 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:32:28,132 - main - INFO - ✅ Database connection successful
+2026-01-10 21:32:28,133 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:32:28,134 - main - INFO - 🎯 Startup validation complete
+
+2026-01-10 21:32:30,960 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-10 21:32:30,961 - main - INFO - Environment: development
+2026-01-10 21:32:30,962 - main - INFO - CORS origins: ['http://localhost:3000']
+2026-01-10 21:32:31,024 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-10 21:32:31,071 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-10 21:32:37,014 - main - INFO - ✅ Database connection successful
+2026-01-10 21:32:37,014 - main - INFO - ✅ JWT Secret configured
+2026-01-10 21:32:37,015 - main - INFO - 🎯 Startup validation complete
+

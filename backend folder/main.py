@@ -685,6 +685,28 @@ def get_usage_stats(
     stats = UsageService.get_usage_stats(db, user_id)
     return stats
 
+# ===== CHECK CSV EXPORT LIMIT =====
+
+@app.get("/api/check-csv-limit")
+def check_csv_limit(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Check if user can export CSV"""
+    usage = UsageService.check_csv_limit(db, current_user.id)
+    return usage
+
+
+# ===== LOG CSV EXPORT =====
+
+@app.post("/api/log-csv-export")
+def log_csv_export(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Log a CSV export"""
+    UsageService.log_csv_export(db, current_user.id)
+    return {"success": True}
 
 # ===== HEALTH CHECK =====
 

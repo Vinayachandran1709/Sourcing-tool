@@ -17,18 +17,6 @@ const DashboardSidebar = () => {
       description: 'Your saved devs'
     },
     {
-      name: 'Email Templates',
-      path: '/dashboard/email-templates',
-      icon: Mail,
-      description: 'Outreach templates'
-    },
-    {
-      name: 'Outreach History',
-      path: '/dashboard/outreach-history',
-      icon: Send,
-      description: 'Email campaigns'
-    },
-    {
       name: 'Subscription',
       path: '/dashboard/subscription',
       icon: CreditCard,

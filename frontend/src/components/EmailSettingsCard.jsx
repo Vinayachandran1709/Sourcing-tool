@@ -5,7 +5,7 @@ import { getEmailSettings, updateEmailSettings, getEmailUsage } from '../service
 const EmailSettingsCard = () => {
   const [senderEmail, setSenderEmail] = useState('');
   const [emailTemplate, setEmailTemplate] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   const [emailUsage, setEmailUsage] = useState(null);
@@ -16,7 +16,18 @@ const EmailSettingsCard = () => {
   }, []);
 
   const loadSettings = async () => {
+  // Check cache first
+  const cached = localStorage.getItem('emailSettings');
+  if (cached) {
+    const parsed = JSON.parse(cached);
+    setSenderEmail(parsed.sender_email || '');
+    setEmailTemplate(parsed.email_template || '');
+    setHasCustomTemplate(parsed.has_custom_template);
+    setLoading(false);
+    // Still fetch in background to update
+  } else {
     setLoading(true);
+  }
     try {
       const [settings, usage] = await Promise.all([
         getEmailSettings(),
@@ -27,6 +38,8 @@ const EmailSettingsCard = () => {
       setEmailTemplate(settings.email_template || '');
       setHasCustomTemplate(settings.has_custom_template);
       setEmailUsage(usage.usage);
+      // Cache settings for instant load next time
+      localStorage.setItem('emailSettings', JSON.stringify(settings));
     } catch (error) {
       console.error('Failed to load settings:', error);
       setMessage({ type: 'error', text: 'Failed to load email settings' });

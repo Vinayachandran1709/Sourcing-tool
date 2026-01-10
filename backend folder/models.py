@@ -47,6 +47,7 @@ class User(Base):
     usage_searches = Column(Integer, default=0)
     usage_profile_views = Column(Integer, default=0)
     usage_emails_sent = Column(Integer, default=0)
+    usage_csv_exports = Column(Integer, default=0) 
     usage_reset_date = Column(DateTime(timezone=True), server_default=func.now())
 
     # ===== EMAIL OUTREACH FIELDS (ONE TEMPLATE) =====
