@@ -186,33 +186,6 @@ export const getUsageStats = async () => {
   return response.data;
 };
 
-// ===== RAZORPAY PAYMENT APIs =====
-
-export const createRazorpayOrder = async (planId, billingCycle) => {
-  const response = await api.post('/api/razorpay/create-order', { 
-    plan_id: planId,
-    billing_cycle: billingCycle
-  });
-  return response.data;
-};
-
-export const verifyRazorpayPayment = async (paymentData) => {
-  const response = await api.post('/api/razorpay/verify-payment', paymentData);
-  return response.data;
-};
-
-export const getSubscriptionDetails = async () => {
-  const response = await api.get('/api/razorpay/subscription');
-  return response.data;
-};
-
-// ===== WAITLIST API (PUBLIC) =====
-
-export const joinWaitlist = async (name, company, email) => {
-  const response = await api.post('/api/public/waitlist/join', { name, company, email });
-  return response.data;
-};
-
 // ===== HEALTH CHECK =====
 
 export const healthCheck = async () => {

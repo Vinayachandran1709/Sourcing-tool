@@ -10,7 +10,6 @@ import PricingPage from './pages/PricingPage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
-import LandingPage from './pages/LandingPage';
 
 // Dashboard Layout & Pages
 import DashboardLayout from './components/dashboard/DashboardLayout';
