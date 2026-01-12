@@ -31,8 +31,6 @@ class User(Base):
     # Subscription info
     plan = Column(String, default="free")  # "free", "starter"
     billing_cycle = Column(String, default="monthly")  # "monthly", "annual"
-    razorpay_customer_id = Column(String, nullable=True)
-    razorpay_subscription_id = Column(String, nullable=True)
     subscription_status = Column(String, default="trial")  # "trial", "active", "cancelled", "expired"
     trial_start_date = Column(DateTime(timezone=True), server_default=func.now())
     trial_end_date = Column(DateTime(timezone=True), nullable=True)

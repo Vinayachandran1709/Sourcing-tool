@@ -36,10 +36,8 @@ for handler in logging.root.handlers:
 
 # Import routers
 from auth_routes import router as auth_router
-from waitlist_routes import router as waitlist_router
 from lists_routes import router as lists_router
 from email_settings_routes import router as email_settings_router
-from razorpay_routes import router as razorpay_router
 
 # Import services
 from filter_service import FilterService
@@ -167,11 +165,9 @@ app.add_middleware(
 
 # ===== INCLUDE ROUTERS =====
 
-app.include_router(waitlist_router)
 app.include_router(auth_router)
 app.include_router(lists_router)
 app.include_router(email_settings_router)
-app.include_router(razorpay_router)
 
 # ===== REQUEST/RESPONSE MODELS =====
 
