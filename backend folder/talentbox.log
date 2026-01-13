@@ -20372,3 +20372,19 @@ WHERE users.email = %(email_1)s
 2026-01-12 23:24:10,507 - main - INFO - ✅ JWT Secret configured
 2026-01-12 23:24:10,508 - main - INFO - 🎯 Startup validation complete
 
+2026-01-13 23:10:12,837 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-13 23:10:12,845 - main - INFO - Environment: development
+2026-01-13 23:10:12,846 - main - INFO - CORS origins: ['http://localhost:3000', ' https://talentbox.co', ' https://www.talentbox.co']
+2026-01-13 23:10:12,901 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-13 23:10:13,426 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-13 23:10:20,871 - main - INFO - ✅ Database connection successful
+2026-01-13 23:10:20,872 - main - INFO - ✅ JWT Secret configured
+2026-01-13 23:10:20,874 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 00:14:39,676 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 00:14:39,677 - main - INFO - Environment: development
+2026-01-14 00:14:39,678 - main - INFO - CORS origins: ['http://localhost:3000', ' https://talentbox.co', ' https://www.talentbox.co']
+2026-01-14 00:14:39,726 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 00:14:39,797 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 00:14:46,034 - main - INFO - ✅ Database connection successful
+2026-01-14 00:14:46,038 - main - INFO - ✅ JWT Secret configured

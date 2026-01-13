@@ -5,9 +5,7 @@ import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
 import FilterPanel from '../../components/FilterPanel';
-import { 
-  toggleProfileSelection
-} from '../../services/api';
+import {toggleProfileSelection} from '../../services/api';
 
 const SearchDashboard = () => {
   // ✅ PERSIST: Load profiles and filters from localStorage on mount
