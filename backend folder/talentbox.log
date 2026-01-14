@@ -20435,3 +20435,77 @@ WHERE users.email = %(email_1)s
 2026-01-14 23:12:08,838 - main - INFO - ✅ JWT Secret configured
 2026-01-14 23:12:08,839 - main - INFO - 🎯 Startup validation complete
 
+2026-01-14 23:29:07,236 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:29:07,238 - main - INFO - Environment: development
+2026-01-14 23:29:07,240 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:29:07,303 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:29:07,392 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:29:13,616 - main - INFO - ✅ Database connection successful
+2026-01-14 23:29:13,617 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:29:13,618 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:29:16,513 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:29:16,514 - main - INFO - Environment: development
+2026-01-14 23:29:16,515 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:29:16,565 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:29:16,621 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:29:22,832 - main - INFO - ✅ Database connection successful
+2026-01-14 23:29:22,833 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:29:22,833 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:29:34,094 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:29:34,094 - main - INFO - Environment: development
+2026-01-14 23:29:34,095 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:29:34,156 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:29:34,222 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:29:40,548 - main - INFO - ✅ Database connection successful
+2026-01-14 23:29:40,549 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:29:40,549 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:29:56,456 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:29:56,464 - main - INFO - Environment: development
+2026-01-14 23:29:56,465 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:29:56,529 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:29:56,651 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:30:02,770 - main - INFO - ✅ Database connection successful
+2026-01-14 23:30:02,772 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:30:02,773 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:38:46,376 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+2026-01-14 23:38:46,833 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:38:46,834 - main - INFO - Environment: development
+2026-01-14 23:38:46,835 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:38:46,900 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:38:47,016 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:38:54,649 - main - INFO - ✅ Database connection successful
+2026-01-14 23:38:54,650 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:38:54,651 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:38:57,576 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+2026-01-14 23:38:57,900 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:38:57,901 - main - INFO - Environment: development
+2026-01-14 23:38:57,902 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:38:58,034 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:38:58,107 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:39:04,032 - main - INFO - ✅ Database connection successful
+2026-01-14 23:39:04,040 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:39:04,043 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:39:08,003 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+2026-01-14 23:39:08,321 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:39:08,322 - main - INFO - Environment: development
+2026-01-14 23:39:08,323 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:39:08,389 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:39:08,472 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:39:14,867 - main - INFO - ✅ Database connection successful
+2026-01-14 23:39:14,868 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:39:14,869 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:39:20,832 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+2026-01-14 23:39:21,104 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:39:21,104 - main - INFO - Environment: development
+2026-01-14 23:39:21,105 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:39:21,146 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:39:21,203 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:39:27,868 - main - INFO - ✅ Database connection successful
+2026-01-14 23:39:27,870 - main - INFO - ✅ JWT Secret configured
