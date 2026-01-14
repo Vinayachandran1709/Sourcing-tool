@@ -20408,3 +20408,30 @@ WHERE users.email = %(email_1)s
 2026-01-14 21:42:15,964 - main - INFO - ✅ JWT Secret configured
 2026-01-14 21:42:15,965 - main - INFO - 🎯 Startup validation complete
 
+2026-01-14 22:48:03,479 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 22:48:03,481 - main - INFO - Environment: development
+2026-01-14 22:48:03,482 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 22:48:03,516 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 22:48:03,616 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 22:48:10,518 - main - INFO - ✅ Database connection successful
+2026-01-14 22:48:10,519 - main - INFO - ✅ JWT Secret configured
+2026-01-14 22:48:10,520 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:11:53,677 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:11:53,679 - main - INFO - Environment: development
+2026-01-14 23:11:53,683 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:11:53,729 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:11:53,796 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:11:59,954 - main - INFO - ✅ Database connection successful
+2026-01-14 23:11:59,955 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:11:59,956 - main - INFO - 🎯 Startup validation complete
+
+2026-01-14 23:12:02,423 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-14 23:12:02,424 - main - INFO - Environment: development
+2026-01-14 23:12:02,425 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-14 23:12:02,459 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-14 23:12:02,501 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-14 23:12:08,836 - main - INFO - ✅ Database connection successful
+2026-01-14 23:12:08,838 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:12:08,839 - main - INFO - 🎯 Startup validation complete
+
