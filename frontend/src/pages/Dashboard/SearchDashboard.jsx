@@ -280,7 +280,7 @@ const SearchDashboard = () => {
     
     // Check email limits before opening modal
     try {
-      const { getEmailUsage } = await import('../services/api');
+      const { getEmailUsage } = await import('../../services/api');
       const usageData = await getEmailUsage();
       
       if (!usageData.usage.can_send) {
