@@ -20509,3 +20509,5 @@ WHERE users.email = %(email_1)s
 2026-01-14 23:39:21,203 - main - INFO - ✅ GitHub Token found (length: 40)
 2026-01-14 23:39:27,868 - main - INFO - ✅ Database connection successful
 2026-01-14 23:39:27,870 - main - INFO - ✅ JWT Secret configured
+2026-01-14 23:39:27,871 - main - INFO - 🎯 Startup validation complete
+
