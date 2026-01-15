@@ -20511,3 +20511,11 @@ WHERE users.email = %(email_1)s
 2026-01-14 23:39:27,870 - main - INFO - ✅ JWT Secret configured
 2026-01-14 23:39:27,871 - main - INFO - 🎯 Startup validation complete
 
+2026-01-15 11:00:12,826 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+2026-01-15 11:00:14,781 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-15 11:00:14,782 - main - INFO - Environment: development
+2026-01-15 11:00:14,783 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-15 11:00:14,829 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-15 11:00:15,241 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-15 11:00:20,869 - main - INFO - ✅ Database connection successful
+2026-01-15 11:00:20,870 - main - INFO - ✅ JWT Secret configured
