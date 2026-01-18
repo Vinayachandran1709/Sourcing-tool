@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import { CreditCard, Calendar, TrendingUp, Mail, Search, Eye, CheckCircle, X } from 'lucide-react';
