@@ -10,6 +10,9 @@ import PricingPage from './pages/PricingPage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
+import TermsPage from './pages/TermsPage';          // ← ADD THIS
+import PrivacyPage from './pages/PrivacyPage';      // ← ADD THIS
+import RefundPage from './pages/RefundPage';        // ← ADD THIS
 
 // Dashboard Layout & Pages
 import DashboardLayout from './components/dashboard/DashboardLayout';
@@ -29,6 +32,9 @@ function App() {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/signup" element={<SignupPage />} />
+            <Route path="/terms" element={<TermsPage />} />              // ← ADD THIS
+            <Route path="/privacy-policy" element={<PrivacyPage />} />   // ← ADD THIS
+            <Route path="/refund-policy" element={<RefundPage />} />     // ← ADD THIS
 
             {/* Protected Dashboard Routes */}
             <Route

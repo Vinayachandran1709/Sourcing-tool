@@ -35,15 +35,15 @@ const Footer = () => {
           </div>
 
           <div style={styles.linksSection}>
-            <h4 style={styles.linksTitle}>Company</h4>
-            <Link to="/about" style={styles.link}>About</Link>
-            <Link to="/privacy" style={styles.link}>Privacy</Link>
-            <Link to="/terms" style={styles.link}>Terms</Link>
+            <h4 style={styles.linksTitle}>Legal</h4>
+            <Link to="/terms" style={styles.link}>Terms & Conditions</Link>
+            <Link to="/privacy-policy" style={styles.link}>Privacy Policy</Link>
+            <Link to="/refund-policy" style={styles.link}>Refund Policy</Link>
           </div>
         </div>
 
         <div style={styles.bottom}>
-          <p style={styles.copyright}>© 2025 TalentBox. All rights reserved.</p>
+          <p style={styles.copyright}>© 2026 TalentBox. All rights reserved.</p>
         </div>
       </div>
     </footer>
