@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Users, Download, Trash2 } from 'lucide-react';
+import { Star, Download, Trash2 } from 'lucide-react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
