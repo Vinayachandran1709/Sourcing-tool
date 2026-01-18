@@ -62,15 +62,14 @@ Looking forward to hearing from you!`);
               </div>
               <div style={styles.priceWrapper}>
                 <span style={styles.price}>$0</span>
-                <span style={styles.period}>/ 14 days</span>
+                <span style={styles.period}>/ 7 days</span>
               </div>
               <ul style={styles.featureList}>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 5 searches total</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 25 profile views</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 15 searches</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 75 profile views</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 10 emails</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by Programming languages</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> All names & usernames visible</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Search history (read-only)</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Outreach tracking</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
               </ul>
               <Link to="/signup" style={styles.trialBtn}>Start Free Trial</Link>
@@ -98,7 +97,6 @@ Looking forward to hearing from you!`);
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Advanced developer scoring</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Save profiles to shortlist</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> One-click outreach</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Search history (30 days)</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email from your domain</li>
               </ul>
               <Link to="/signup" style={styles.primaryBtn}>Get Started</Link>
