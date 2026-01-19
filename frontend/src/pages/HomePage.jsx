@@ -38,7 +38,8 @@ const HomePage = () => {
     }, isDeleting ? 40 : 80);
 
     return () => clearTimeout(timeout);
-  }, [currentText, isDeleting, currentWordIndex, developerTypes]);
+  }, [currentText, isDeleting, currentWordIndex]);
+
 
   useEffect(() => {
     window.scrollTo(0, 0);

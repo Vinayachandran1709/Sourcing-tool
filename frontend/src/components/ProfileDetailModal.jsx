@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   X, Star, GitBranch, Code, MapPin, Mail, Calendar, ExternalLink, 
-  Award, TrendingUp, Link as LinkIcon, Users, Clock, Globe
+  Award, Link as LinkIcon, Users, Clock, Globe
 } from 'lucide-react';
 
 const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
