@@ -1,4 +1,4 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
 
@@ -52,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     initializeAuth();
-  }, []);
+  }, [logout]);
 
   // Auto-check trial expiry every 5 minutes
   useEffect(() => {
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
 
     const interval = setInterval(checkTrialExpiry, 5 * 60 * 1000); // Check every 5 minutes
     return () => clearInterval(interval);
-  }, [user]);
+  }, [user, logout]);
 
 const login = async (email, password) => {
   try {
@@ -151,17 +151,17 @@ const signup = async (name, email, company, password) => {
   }
 };
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setUser(null);
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
-    
+
     // Clear all search session data
     sessionStorage.clear();
-    
+
     navigate('/login');
-  };
+  }, [navigate]);
 
   const updateUser = (updates) => {
     const updatedUser = { ...user, ...updates };
