@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, Users, Mail, TrendingUp, CheckCircle, ArrowRight, Star } from 'lucide-react';
+import { Search, Users, Mail, TrendingUp, ArrowRight, Star } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
-const HomePage = () => {
-  const developerTypes = [
-    'Frontend Developers',
-    'Backend Developers', 
-    'AI Engineers',
-    'Full Stack Developers',
-    'DevOps Engineers',
-    'Mobile Developers',
-    'Data Scientists'
-  ];
+const developerTypes = [
+  'Frontend Developers',
+  'Backend Developers', 
+  'AI Engineers',
+  'Full Stack Developers',
+  'DevOps Engineers',
+  'Mobile Developers',
+  'Data Scientists'
+];
 
+const HomePage = () => {
   const [currentWordIndex, setCurrentWordIndex] = useState(0);
   const [currentText, setCurrentText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);

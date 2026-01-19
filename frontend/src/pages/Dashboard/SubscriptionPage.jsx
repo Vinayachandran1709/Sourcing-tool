@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
-import { CreditCard, Calendar, TrendingUp, Mail, Search, Eye, CheckCircle, X } from 'lucide-react';
+import { CreditCard, Mail, Search, Eye, CheckCircle } from 'lucide-react';
 import EmailSettingsCard from '../../components/EmailSettingsCard';
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
   // Mock user data - replace with real API call
-  const [userData, setUserData] = useState({
+  const [userData] = useState({
     plan: 'Starter',
     billing_cycle: 'monthly',
     price: 79,
