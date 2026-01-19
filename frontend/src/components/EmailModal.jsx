@@ -12,12 +12,6 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
   const [emailUsage, setEmailUsage] = useState(null);
   const [error, setError] = useState(null);
 
-    useEffect(() => {
-      if (isOpen) {
-        loadEmailSettings();
-      }
-    }, [isOpen, loadEmailSettings]);
-
     const loadEmailSettings = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -51,10 +45,17 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
     } catch (error) {
       console.error('Failed to load email settings:', error);
       setError('Failed to load email settings. Please try again.');
-        } finally {
+    } finally {
         setLoading(false);
-      }
-    }, []);
+    }
+    }, [subject]);
+    
+  useEffect(() => {
+    if (isOpen) {
+      loadEmailSettings();
+    }
+  }, [isOpen, loadEmailSettings]);
+
 
 
   const handleSubmit = async (e) => {
