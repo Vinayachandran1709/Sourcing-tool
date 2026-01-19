@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, Mail, Loader, AlertCircle } from 'lucide-react';
 import { getEmailSettings, updateSenderEmail, getEmailUsage, sendBulkEmails } from '../services/api';
 
@@ -12,13 +12,13 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
   const [emailUsage, setEmailUsage] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    if (isOpen) {
-      loadEmailSettings();
-    }
-  }, [isOpen]);
+    useEffect(() => {
+      if (isOpen) {
+        loadEmailSettings();
+      }
+    }, [isOpen, loadEmailSettings]);
 
-  const loadEmailSettings = async () => {
+    const loadEmailSettings = useCallback(async () => {
     setLoading(true);
     setError(null);
     
@@ -51,10 +51,11 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
     } catch (error) {
       console.error('Failed to load email settings:', error);
       setError('Failed to load email settings. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+        } finally {
+        setLoading(false);
+      }
+    }, []);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

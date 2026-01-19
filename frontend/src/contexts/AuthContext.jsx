@@ -18,6 +18,21 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const navigate = useNavigate();
 
+  
+  // Define logout first so it can be used in useEffect hooks below
+  const logout = useCallback(() => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('user');
+    localStorage.removeItem('token');
+
+    // Clear all search session data
+    sessionStorage.clear();
+
+    navigate('/login');
+  }, [navigate]);
+
+
   // Initialize auth state from localStorage
   useEffect(() => {
     const initializeAuth = () => {
@@ -150,19 +165,6 @@ const signup = async (name, email, company, password) => {
     return { success: false, error: errorMessage };
   }
 };
-
-    const logout = useCallback(() => {
-      setUser(null);
-      setToken(null);
-      localStorage.removeItem('user');
-      localStorage.removeItem('token');
-
-      // Clear all search session data
-      sessionStorage.clear();
-
-      navigate('/login');
-    }, [navigate]);
-
 
   const updateUser = (updates) => {
     const updatedUser = { ...user, ...updates };
