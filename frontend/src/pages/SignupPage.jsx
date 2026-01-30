@@ -40,16 +40,26 @@ const SignupPage = () => {
     return '#10b981';
   };
 
+  const getPasswordErrors = (password) => {
+    const errors = [];
+    if (password.length < 8) errors.push('At least 8 characters');
+    if (!/[A-Z]/.test(password)) errors.push('An uppercase letter');
+    if (!/[a-z]/.test(password)) errors.push('A lowercase letter');
+    if (!/\d/.test(password)) errors.push('A number');
+    return errors;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    if (formData.password !== formData.confirmPassword) { 
-      setError('Passwords do not match'); 
-      return; 
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
     }
-    if (formData.password.length < 8) { 
-      setError('Password must be at least 8 characters'); 
-      return; 
+    const pwErrors = getPasswordErrors(formData.password);
+    if (pwErrors.length > 0) {
+      setError('Password must include: ' + pwErrors.join(', '));
+      return;
     }
     setLoading(true);
 
@@ -125,10 +135,27 @@ const SignupPage = () => {
                 </button>
               </div>
               {formData.password && (
-                <div style={styles.strengthWrapper}>
-                  <div style={styles.strengthBar}><div style={{ height: '100%', width: `${(passwordStrength.score / 5) * 100}%`, background: getStrengthColor(), borderRadius: '2px', transition: 'all 0.3s' }} /></div>
-                  <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: getStrengthColor(), minWidth: '80px' }}>{passwordStrength.text}</span>
-                </div>
+                <>
+                  <div style={styles.strengthWrapper}>
+                    <div style={styles.strengthBar}><div style={{ height: '100%', width: `${(passwordStrength.score / 5) * 100}%`, background: getStrengthColor(), borderRadius: '2px', transition: 'all 0.3s' }} /></div>
+                    <span style={{ fontSize: '0.8125rem', fontWeight: '600', color: getStrengthColor(), minWidth: '80px' }}>{passwordStrength.text}</span>
+                  </div>
+                  <div style={styles.requirementsList}>
+                    {[
+                      { met: formData.password.length >= 8, label: 'At least 8 characters' },
+                      { met: /[A-Z]/.test(formData.password), label: 'An uppercase letter' },
+                      { met: /[a-z]/.test(formData.password), label: 'A lowercase letter' },
+                      { met: /\d/.test(formData.password), label: 'A number' },
+                    ].map((req) => (
+                      <div key={req.label} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        {req.met
+                          ? <CheckCircle size={14} color="#10b981" />
+                          : <AlertCircle size={14} color="#9ca3af" />}
+                        <span style={{ color: req.met ? '#10b981' : '#9ca3af', fontSize: '0.8125rem' }}>{req.label}</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
             </div>
 
@@ -184,6 +211,7 @@ const styles = {
   input: { width: '100%', padding: '0.875rem 1rem 0.875rem 3rem', fontSize: '1rem', color: '#1a1a1a', background: '#f9fafb', border: '2px solid #e5e7eb', borderRadius: '10px', fontFamily: "'Outfit', sans-serif", boxSizing: 'border-box' },
   inputWithToggle: { width: '100%', padding: '0.875rem 3rem 0.875rem 3rem', fontSize: '1rem', color: '#1a1a1a', background: '#f9fafb', border: '2px solid #e5e7eb', borderRadius: '10px', fontFamily: "'Outfit', sans-serif", boxSizing: 'border-box' },
   passwordToggle: { position: 'absolute', right: '1rem', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '0', display: 'flex' },
+  requirementsList: { display: 'flex', flexDirection: 'column', gap: '0.3rem', marginTop: '0.5rem' },
   strengthWrapper: { display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '0.5rem' },
   strengthBar: { flex: 1, height: '4px', background: '#e5e7eb', borderRadius: '2px', overflow: 'hidden' },
   matchIndicator: { display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '0.5rem', fontSize: '0.8125rem', fontWeight: '500' },
