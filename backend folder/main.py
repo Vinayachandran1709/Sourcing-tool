@@ -195,6 +195,9 @@ class SearchRequest(BaseModel):
     location: Optional[str] = None
     language: Optional[str] = None
     min_repos: Optional[int] = 0
+    contributionRanges: Optional[List[dict]] = []
+    repoRanges: Optional[List[dict]] = []
+    scoreRanges: Optional[List[dict]] = []
 
 class ProfileResponse(BaseModel):
     """Response model for profile data"""
@@ -287,7 +290,10 @@ async def search_profiles(
         "min_contributions": search.min_contributions or 0,
         "recent_activity": search.recent_activity,
         "location": search.location,
-        "min_repos": search.min_repos or 0
+        "min_repos": search.min_repos or 0,
+        "contributionRanges": search.contributionRanges or [],
+        "repoRanges": search.repoRanges or [],
+        "scoreRanges": search.scoreRanges or []
     }
     
     # ⭐ HYBRID SEARCH: Database + GitHub API
@@ -803,8 +809,13 @@ async def search_profiles_stream(
             filters = {
                 "role": search.role,
                 "languages": languages_list,
+                "frameworks": search.frameworks or [],
+                "tools": search.tools or [],
                 "location": search.location,
-                "min_repos": search.min_repos or 0
+                "min_repos": search.min_repos or 0,
+                "contributionRanges": search.contributionRanges or [],
+                "repoRanges": search.repoRanges or [],
+                "scoreRanges": search.scoreRanges or []
             }
             
             # ===== PHASE 2: Return Cached Profiles =====

@@ -85,7 +85,12 @@ const SearchDashboard = () => {
       const requestBody = {
         role: filters.role || null,
         languages: filters.languages || [],
+        frameworks: filters.frameworks || [],
+        tools: filters.tools || [],
         location: filters.location || null,
+        contributionRanges: filters.contributionRanges || [],
+        repoRanges: filters.repoRanges || [],
+        scoreRanges: filters.scoreRanges || [],
         min_repos: filters.min_repos || 0
       };
       
@@ -415,9 +420,10 @@ const SearchDashboard = () => {
       <DashboardHeader />
       <div style={styles.content}>
         {/* Filters */}
-        <FilterPanel 
-          onApplyFilters={handleSearch} 
+        <FilterPanel
+          onApplyFilters={handleSearch}
           initialFilters={currentFilters}
+          hasProfiles={profiles.length > 0}
           onReset={() => {
             setProfiles([]);
             setSearchProgress({
