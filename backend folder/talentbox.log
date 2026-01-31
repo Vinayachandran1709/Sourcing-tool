@@ -20541,3 +20541,154 @@ WHERE users.email = %(email_1)s
 2026-01-18 21:57:59,942 - main - INFO - ✅ JWT Secret configured
 2026-01-18 21:57:59,943 - main - INFO - 🎯 Startup validation complete
 
+2026-01-31 14:52:29,624 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 14:52:31,830 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 14:52:31,831 - main - INFO - Environment: development
+2026-01-31 14:52:31,832 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 14:52:31,885 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 14:52:32,391 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 14:52:38,836 - main - INFO - ✅ Database connection successful
+2026-01-31 14:52:38,837 - main - INFO - ✅ JWT Secret configured
+2026-01-31 14:52:38,839 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:08:58,317 - main - ERROR - ❌ Streaming search error: No module named 'github_integration_service'
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\main.py", line 811, in event_stream
+    from github_integration_service import GitHubIntegrationService
+ModuleNotFoundError: No module named 'github_integration_service'
+2026-01-31 15:11:24,220 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:11:24,628 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:11:24,629 - main - INFO - Environment: development
+2026-01-31 15:11:24,629 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:11:24,727 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:11:24,823 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:11:30,070 - main - INFO - ✅ Database connection successful
+2026-01-31 15:11:30,072 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:11:30,073 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:11:32,902 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:11:33,211 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:11:33,212 - main - INFO - Environment: development
+2026-01-31 15:11:33,213 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:11:33,315 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:11:33,372 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:11:38,129 - main - INFO - ✅ Database connection successful
+2026-01-31 15:11:38,130 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:11:38,131 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:11:58,478 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:11:58,751 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:11:58,752 - main - INFO - Environment: development
+2026-01-31 15:11:58,752 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:11:58,800 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:11:58,840 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:12:04,479 - main - INFO - ✅ Database connection successful
+2026-01-31 15:12:04,480 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:12:04,481 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:12:27,262 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:12:27,496 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:12:27,497 - main - INFO - Environment: development
+2026-01-31 15:12:27,497 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:12:27,563 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:12:27,610 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:12:33,050 - main - INFO - ✅ Database connection successful
+2026-01-31 15:12:33,051 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:12:33,053 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:12:35,353 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:12:35,531 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:12:35,532 - main - INFO - Environment: development
+2026-01-31 15:12:35,532 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:12:35,567 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:12:35,601 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:12:40,363 - main - INFO - ✅ Database connection successful
+2026-01-31 15:12:40,364 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:12:40,365 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:16:30,397 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:16:30,650 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:16:30,650 - main - INFO - Environment: development
+2026-01-31 15:16:30,651 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:16:30,695 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:16:30,740 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:16:35,645 - main - INFO - ✅ Database connection successful
+2026-01-31 15:16:35,647 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:16:35,648 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:16:38,076 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:16:38,246 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:16:38,247 - main - INFO - Environment: development
+2026-01-31 15:16:38,248 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:16:38,279 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:16:38,314 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:16:43,009 - main - INFO - ✅ Database connection successful
+2026-01-31 15:16:43,010 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:16:43,010 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:17:01,201 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:17:01,424 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:17:01,425 - main - INFO - Environment: development
+2026-01-31 15:17:01,425 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:17:01,483 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:17:01,557 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:17:06,463 - main - INFO - ✅ Database connection successful
+2026-01-31 15:17:06,464 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:17:06,465 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:17:09,706 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:17:10,023 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:17:10,024 - main - INFO - Environment: development
+2026-01-31 15:17:10,025 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:17:10,074 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:17:10,126 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:17:14,863 - main - INFO - ✅ Database connection successful
+2026-01-31 15:17:14,864 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:17:14,865 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:48:34,580 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 15:48:37,694 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 15:48:37,695 - main - INFO - Environment: development
+2026-01-31 15:48:37,695 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 15:48:37,771 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 15:48:38,408 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 15:48:44,084 - main - INFO - ✅ Database connection successful
+2026-01-31 15:48:44,085 - main - INFO - ✅ JWT Secret configured
+2026-01-31 15:48:44,086 - main - INFO - 🎯 Startup validation complete
+
+2026-01-31 15:48:59,606 - main - INFO - 📦 Fetching cached profiles...
+2026-01-31 15:49:01,498 - main - INFO - ✅ Sending 120 initial results
+2026-01-31 15:49:01,503 - main - INFO - 🔍 Searching for 67 more profiles
+2026-01-31 15:49:01,529 - main - INFO - 🔍 Searching GitHub: language=Python, location=New York
+2026-01-31 15:49:04,215 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-01-31 15:49:05,888 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-01-31 15:49:07,737 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-01-31 15:49:09,656 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-01-31 15:49:11,436 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-01-31 15:49:13,364 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Python+location:New%20York&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-01-31 15:49:13,367 - main - INFO - 📥 Processing 150 profiles
+2026-01-31 15:49:13,979 - main - INFO - ⏭️  Skipping 134 already cached profiles
+2026-01-31 15:49:13,979 - main - INFO - 📥 Fetching 16 new profiles
+2026-01-31 15:49:27,900 - httpx - INFO - HTTP Request: GET https://api.github.com/users/CityOfNewYork "HTTP/1.1 200 OK"
+2026-01-31 15:49:27,916 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Rlincoln01 "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,753 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NYSCF "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,755 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RomanSima "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,757 - httpx - INFO - HTTP Request: GET https://api.github.com/users/BDNYC "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,759 - httpx - INFO - HTTP Request: GET https://api.github.com/users/VIDA-NYU "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,761 - httpx - INFO - HTTP Request: GET https://api.github.com/users/vital2 "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,764 - httpx - INFO - HTTP Request: GET https://api.github.com/users/bu-air-lab "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,766 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nygenome "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,768 - httpx - INFO - HTTP Request: GET https://api.github.com/users/SMLC-NYSBC "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,770 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nyartcc "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,772 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anikpram "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,774 - httpx - INFO - HTTP Request: GET https://api.github.com/users/sonyc-project "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,776 - httpx - INFO - HTTP Request: GET https://api.github.com/users/10xbeta "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,778 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MilanEngineer "HTTP/1.1 200 OK"
+2026-01-31 15:49:28,784 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nypl-openaudio "HTTP/1.1 200 OK"
+2026-01-31 15:49:31,897 - httpx - INFO - HTTP Request: GET https://api.github.com/users/RomanSima/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-31 15:49:32,001 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MilanEngineer/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-31 15:49:32,104 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Rlincoln01/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-31 15:49:32,113 - httpx - INFO - HTTP Request: GET https://api.github.com/users/anikpram/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-01-31 15:49:41,153 - main - INFO - 📤 Sending 3 new profiles
+2026-01-31 15:49:41,154 - main - INFO - 📊 Progress: 100% - Total: 136
+2026-01-31 15:49:41,155 - main - INFO - ✅ Search complete! Total: 136
