@@ -62,15 +62,15 @@ Looking forward to hearing from you!`);
               </div>
               <div style={styles.priceWrapper}>
                 <span style={styles.price}>$0</span>
-                <span style={styles.period}>/ 7 days</span>
+                <span style={styles.period}>/ 14 days</span>
               </div>
               <ul style={styles.featureList}>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 15 searches</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 75 profile views</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 10 emails</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by Programming languages</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> All names & usernames visible</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 25 searches</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 40 profile unlocks</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 15 emails</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by programming languages</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Names & scores visible</li>
               </ul>
               <Link to="/signup" style={styles.trialBtn}>Start Free Trial</Link>
               <p style={styles.noCreditCard}>No credit card required</p>
@@ -90,14 +90,16 @@ Looking forward to hearing from you!`);
               </div>
               {isAnnual && <p style={styles.billedAnnually}>Billed ${starterAnnual}/year</p>}
               <ul style={styles.featureList}>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 profile views/month</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Unlimited searches</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by roles & expertise</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 100 searches/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 profile unlocks/month</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 emails/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by roles & expertise</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Advanced developer scoring</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Full GitHub profile access + links</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Save profiles to shortlist</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> One-click outreach</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email from your domain</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Export candidates</li>
               </ul>
               <Link to="/signup" style={styles.primaryBtn}>Get Started</Link>
             </div>

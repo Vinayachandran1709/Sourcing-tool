@@ -13,67 +13,74 @@ const SubscriptionPage = () => {
     price: 79,
     next_billing_date: '2025-01-06',
     usage: {
-      profile_views: { used: 45, limit: 100 },
-      searches: { used: 12, limit: 50 },
-      personalized_emails: { used: 8, limit: 20 },
+      profile_unlocks: { used: 45, limit: 300 },
+      searches: { used: 12, limit: 100 },
+      emails: { used: 8, limit: 300 },
     }
   });
 
   const plans = [
     {
+      name: 'Free Trial',
+      price_monthly: 0,
+      price_annual: 0,
+      period: '14 days',
+      features: [
+        '25 searches',
+        '40 profile unlocks',
+        '15 emails',
+        'Filter by programming languages',
+        'Basic developer scoring',
+        'Names & scores visible'
+      ],
+      limits: {
+        profile_unlocks: 40,
+        searches: 25,
+        emails: 15
+      }
+    },
+    {
       name: 'Starter',
       price_monthly: 79,
       price_annual: 790,
       features: [
-        '100 profile views/month',
-        '50 searches/month',
-        '20 AI-personalized emails/month',
-        'Basic developer scoring',
-        'Email support'
-      ],
-      limits: {
-        profile_views: 100,
-        searches: 50,
-        personalized_emails: 20
-      }
-    },
-    {
-      name: 'Professional',
-      price_monthly: 199,
-      price_annual: 1990,
-      features: [
-        '500 profile views/month',
-        'Unlimited searches',
-        '100 AI-personalized emails/month',
+        '100 searches/month',
+        '300 profile unlocks/month',
+        '300 emails/month',
+        'Filter by roles & expertise',
         'Advanced developer scoring',
-        'Priority email support',
-        'Team collaboration (up to 3 users)'
+        'Full GitHub profile access + links',
+        'Save profiles to shortlist',
+        'One-click outreach',
+        'Email from your domain',
+        'Export candidates'
       ],
       limits: {
-        profile_views: 500,
-        searches: -1, // unlimited
-        personalized_emails: 100
+        profile_unlocks: 300,
+        searches: 100,
+        emails: 300
       },
       popular: true
     },
     {
-      name: 'Scale',
-      price_monthly: 449,
-      price_annual: 4490,
+      name: 'Professional',
+      price_monthly: null,
+      price_annual: null,
+      comingSoon: true,
       features: [
         'Unlimited profile views',
         'Unlimited searches',
-        '500 AI-personalized emails/month',
-        'Advanced developer scoring',
-        'Dedicated account manager',
-        'Team collaboration (unlimited users)',
-        'Custom integrations',
+        '500+ emails/month',
+        'Advanced AI scoring',
+        'Priority 24/7 support',
+        'Team collaboration',
+        'Analytics dashboard',
         'API access'
       ],
       limits: {
-        profile_views: -1,
+        profile_unlocks: -1,
         searches: -1,
-        personalized_emails: 500
+        emails: 500
       }
     }
   ];
@@ -116,28 +123,6 @@ const SubscriptionPage = () => {
           <div style={styles.usageSection}>
             <h4 style={styles.usageTitle}>Usage This Month</h4>
             
-            {/* Profile Views */}
-            <div style={styles.usageItem}>
-              <div style={styles.usageHeader}>
-                <div style={styles.usageLabel}>
-                  <Eye size={18} color="#6b7280" />
-                  <span>Profile Views</span>
-                </div>
-                <div style={styles.usageNumbers}>
-                  {userData.usage.profile_views.used} / {userData.usage.profile_views.limit}
-                </div>
-              </div>
-              <div style={styles.progressBar}>
-                <div 
-                  style={{
-                    ...styles.progressFill,
-                    width: `${getUsagePercentage(userData.usage.profile_views.used, userData.usage.profile_views.limit)}%`,
-                    background: getUsageColor(getUsagePercentage(userData.usage.profile_views.used, userData.usage.profile_views.limit))
-                  }}
-                ></div>
-              </div>
-            </div>
-
             {/* Searches */}
             <div style={styles.usageItem}>
               <div style={styles.usageHeader}>
@@ -150,7 +135,7 @@ const SubscriptionPage = () => {
                 </div>
               </div>
               <div style={styles.progressBar}>
-                <div 
+                <div
                   style={{
                     ...styles.progressFill,
                     width: `${getUsagePercentage(userData.usage.searches.used, userData.usage.searches.limit)}%`,
@@ -160,23 +145,45 @@ const SubscriptionPage = () => {
               </div>
             </div>
 
-            {/* Personalized Emails */}
+            {/* Profile Unlocks */}
+            <div style={styles.usageItem}>
+              <div style={styles.usageHeader}>
+                <div style={styles.usageLabel}>
+                  <Eye size={18} color="#6b7280" />
+                  <span>Profile Unlocks</span>
+                </div>
+                <div style={styles.usageNumbers}>
+                  {userData.usage.profile_unlocks.used} / {userData.usage.profile_unlocks.limit}
+                </div>
+              </div>
+              <div style={styles.progressBar}>
+                <div
+                  style={{
+                    ...styles.progressFill,
+                    width: `${getUsagePercentage(userData.usage.profile_unlocks.used, userData.usage.profile_unlocks.limit)}%`,
+                    background: getUsageColor(getUsagePercentage(userData.usage.profile_unlocks.used, userData.usage.profile_unlocks.limit))
+                  }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Emails */}
             <div style={styles.usageItem}>
               <div style={styles.usageHeader}>
                 <div style={styles.usageLabel}>
                   <Mail size={18} color="#6b7280" />
-                  <span>AI-Personalized Emails</span>
+                  <span>Emails</span>
                 </div>
                 <div style={styles.usageNumbers}>
-                  {userData.usage.personalized_emails.used} / {userData.usage.personalized_emails.limit}
+                  {userData.usage.emails.used} / {userData.usage.emails.limit}
                 </div>
               </div>
               <div style={styles.progressBar}>
-                <div 
+                <div
                   style={{
                     ...styles.progressFill,
-                    width: `${getUsagePercentage(userData.usage.personalized_emails.used, userData.usage.personalized_emails.limit)}%`,
-                    background: getUsageColor(getUsagePercentage(userData.usage.personalized_emails.used, userData.usage.personalized_emails.limit))
+                    width: `${getUsagePercentage(userData.usage.emails.used, userData.usage.emails.limit)}%`,
+                    background: getUsageColor(getUsagePercentage(userData.usage.emails.used, userData.usage.emails.limit))
                   }}
                 ></div>
               </div>
@@ -193,52 +200,77 @@ const SubscriptionPage = () => {
 
           <div style={styles.plansGrid}>
             {plans.map((plan) => (
-              <div 
-                key={plan.name} 
+              <div
+                key={plan.name}
                 style={{
                   ...styles.planCard,
                   ...(plan.popular ? styles.planCardPopular : {}),
+                  ...(plan.comingSoon ? styles.planCardComingSoon : {}),
                   ...(userData.plan === plan.name ? styles.planCardCurrent : {})
                 }}
               >
                 {plan.popular && (
                   <div style={styles.popularBadge}>Most Popular</div>
                 )}
-                
+                {plan.comingSoon && (
+                  <div style={styles.comingSoonBadge}>Coming Soon</div>
+                )}
+
                 <h4 style={styles.cardPlanName}>{plan.name}</h4>
-                
-                <div style={styles.cardPrice}>
-                  <span style={styles.cardPriceAmount}>${plan.price_monthly}</span>
-                  <span style={styles.cardPriceLabel}>/month</span>
-                </div>
-                
-                <div style={styles.annualPrice}>
-                  ${plan.price_annual}/year (save 17%)
-                </div>
+
+                {plan.comingSoon ? (
+                  <div style={styles.cardPrice}>
+                    <span style={styles.comingSoonPrice}>Coming Soon</span>
+                  </div>
+                ) : (
+                  <>
+                    <div style={styles.cardPrice}>
+                      <span style={styles.cardPriceAmount}>${plan.price_monthly}</span>
+                      <span style={styles.cardPriceLabel}>{plan.period ? `/ ${plan.period}` : '/month'}</span>
+                    </div>
+                    {plan.price_annual > 0 && (
+                      <div style={styles.annualPrice}>
+                        ${plan.price_annual}/year (save 17%)
+                      </div>
+                    )}
+                    {plan.period && (
+                      <div style={styles.noCreditCard}>No credit card required</div>
+                    )}
+                  </>
+                )}
 
                 <div style={styles.featuresList}>
                   {plan.features.map((feature, index) => (
-                    <div key={index} style={styles.feature}>
-                      <CheckCircle size={16} color="#10b981" />
+                    <div key={index} style={{...styles.feature, ...(plan.comingSoon ? {color: '#9ca3af'} : {})}}>
+                      <CheckCircle size={16} color={plan.comingSoon ? '#9ca3af' : '#10b981'} />
                       <span>{feature}</span>
                     </div>
                   ))}
                 </div>
 
-                <button 
-                  onClick={() => {
-                    if (userData.plan !== plan.name) {
-                      navigate(`/checkout?plan=${plan.name}&cycle=monthly`);
-                    }
-                  }}
-                  style={{
-                    ...styles.selectPlanBtn,
-                    ...(userData.plan === plan.name ? styles.currentPlanBtn : {})
-                  }}
-                  disabled={userData.plan === plan.name}
-                >
-                  {userData.plan === plan.name ? 'Current Plan' : 'Upgrade'}
-                </button>
+                {plan.comingSoon ? (
+                  <button style={styles.comingSoonBtn} disabled>Coming Soon</button>
+                ) : (
+                  <button
+                    onClick={() => {
+                      if (userData.plan !== plan.name) {
+                        if (plan.period) {
+                          navigate('/signup');
+                        } else {
+                          navigate(`/checkout?plan=${plan.name}&cycle=monthly`);
+                        }
+                      }
+                    }}
+                    style={{
+                      ...styles.selectPlanBtn,
+                      ...(userData.plan === plan.name ? styles.currentPlanBtn : {}),
+                      ...(plan.period ? styles.trialBtn : {})
+                    }}
+                    disabled={userData.plan === plan.name}
+                  >
+                    {userData.plan === plan.name ? 'Current Plan' : plan.period ? 'Start Free Trial' : 'Upgrade'}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -463,6 +495,57 @@ const styles = {
     color: '#10b981',
     fontWeight: '600',
     marginBottom: '1.5rem',
+  },
+
+  noCreditCard: {
+    fontSize: '0.8125rem',
+    color: '#6b7280',
+    marginBottom: '1.5rem',
+  },
+
+  planCardComingSoon: {
+    border: '2px dashed #c7d2fe',
+    background: '#fafafe',
+  },
+
+  comingSoonBadge: {
+    position: 'absolute',
+    top: '-12px',
+    right: '1.5rem',
+    padding: '0.375rem 0.875rem',
+    background: '#6366f1',
+    color: '#fff',
+    fontSize: '0.75rem',
+    fontWeight: '700',
+    borderRadius: '6px',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px',
+  },
+
+  comingSoonPrice: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#6366f1',
+  },
+
+  comingSoonBtn: {
+    width: '100%',
+    padding: '0.875rem',
+    fontSize: '1rem',
+    fontWeight: '600',
+    background: '#6366f1',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'not-allowed',
+    opacity: 0.7,
+    fontFamily: "'Outfit', sans-serif",
+  },
+
+  trialBtn: {
+    background: '#ffffff',
+    color: '#FF6B35',
+    border: '2px solid #FF6B35',
   },
 
   featuresList: {

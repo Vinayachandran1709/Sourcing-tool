@@ -20829,3 +20829,80 @@ ModuleNotFoundError: No module named 'github_integration_service'
 2026-01-31 19:47:56,919 - main - INFO - 📤 Sending 3 new profiles
 2026-01-31 19:47:56,921 - main - INFO - 📊 Progress: 100% - Total: 130
 2026-01-31 19:47:56,922 - main - INFO - ✅ Search complete! Total: 130
+2026-01-31 23:44:55,354 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-01-31 23:44:57,404 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-01-31 23:44:57,405 - main - INFO - Environment: development
+2026-01-31 23:44:57,405 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-01-31 23:44:57,461 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-01-31 23:44:57,945 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-01-31 23:45:04,411 - main - INFO - ✅ Database connection successful
+2026-01-31 23:45:04,412 - main - INFO - ✅ JWT Secret configured
+2026-01-31 23:45:04,412 - main - INFO - 🎯 Startup validation complete
+
+2026-02-01 00:38:04,347 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-01 00:38:04,816 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-02-01 00:38:04,817 - main - INFO - Environment: development
+2026-02-01 00:38:04,818 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-01 00:38:04,890 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-01 00:38:04,986 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-01 00:38:13,695 - main - INFO - ✅ Database connection successful
+2026-02-01 00:38:13,696 - main - INFO - ✅ JWT Secret configured
+2026-02-01 00:38:13,697 - main - INFO - 🎯 Startup validation complete
+
+2026-02-01 00:38:58,343 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-01 00:38:58,709 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-02-01 00:38:58,711 - main - INFO - Environment: development
+2026-02-01 00:38:58,711 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-01 00:38:58,780 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-01 00:38:58,847 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-01 00:39:19,929 - main - INFO - ✅ Database connection successful
+2026-02-01 00:39:19,930 - main - INFO - ✅ JWT Secret configured
+2026-02-01 00:39:19,930 - main - INFO - 🎯 Startup validation complete
+
+2026-02-01 00:56:22,555 - main - INFO - 📦 Fetching cached profiles...
+2026-02-01 00:56:22,930 - main - INFO - ✅ Sending 0 initial results
+2026-02-01 00:56:22,931 - main - INFO - 🔍 Searching for 200 more profiles
+2026-02-01 00:56:22,944 - main - INFO - 🔍 Searching GitHub: language=JavaScript, location=United Arab Emirates
+2026-02-01 00:56:26,805 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-02-01 00:56:28,183 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:JavaScript+location:United%20Arab%20Emirates&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-02-01 00:56:29,792 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:JavaScript+location:United%20Arab%20Emirates&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-02-01 00:56:29,796 - main - INFO - 📥 Processing 3 profiles
+2026-02-01 00:56:30,087 - main - INFO - 📥 Fetching 3 new profiles
+2026-02-01 00:56:33,170 - httpx - INFO - HTTP Request: GET https://api.github.com/users/babystores "HTTP/1.1 200 OK"
+2026-02-01 00:56:33,961 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nabeelshah96 "HTTP/1.1 200 OK"
+2026-02-01 00:56:34,903 - httpx - INFO - HTTP Request: GET https://api.github.com/users/moocodelol "HTTP/1.1 200 OK"
+2026-02-01 00:56:35,628 - httpx - INFO - HTTP Request: GET https://api.github.com/users/babystores/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:56:36,040 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nabeelshah96/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:57:03,071 - main - INFO - 📤 Sending 2 new profiles
+2026-02-01 00:57:03,074 - main - INFO - 📊 Progress: 100% - Total: 2
+2026-02-01 00:57:03,076 - main - INFO - ✅ Search complete! Total: 2
+2026-02-01 00:57:58,347 - main - INFO - 📦 Fetching cached profiles...
+2026-02-01 00:57:58,639 - main - INFO - ✅ Sending 0 initial results
+2026-02-01 00:57:58,641 - main - INFO - 🔍 Searching for 200 more profiles
+2026-02-01 00:57:58,643 - main - INFO - 🔍 Searching GitHub: language=JavaScript, location=Abu Dhabi
+2026-02-01 00:58:00,109 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-02-01 00:58:01,545 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:JavaScript+location:Abu%20Dhabi&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-02-01 00:58:03,608 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:JavaScript+location:Abu%20Dhabi&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-02-01 00:58:03,610 - main - INFO - 📥 Processing 11 profiles
+2026-02-01 00:58:03,898 - main - INFO - 📥 Fetching 11 new profiles
+2026-02-01 00:58:12,786 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NomanMunir "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,521 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nyuadsg "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,523 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NYUAD-IM "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,526 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nav3417 "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,528 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kyyberi "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,530 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NYUAD-Hackathon-2016 "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,532 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Zaldhaheri "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,534 - httpx - INFO - HTTP Request: GET https://api.github.com/users/thegazelle-ad "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,535 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ayah1-8 "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,537 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Deia-ElDin "HTTP/1.1 200 OK"
+2026-02-01 00:58:13,538 - httpx - INFO - HTTP Request: GET https://api.github.com/users/faizqadir "HTTP/1.1 200 OK"
+2026-02-01 00:58:18,981 - httpx - INFO - HTTP Request: GET https://api.github.com/users/faizqadir/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:58:19,154 - httpx - INFO - HTTP Request: GET https://api.github.com/users/nav3417/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:58:19,160 - httpx - INFO - HTTP Request: GET https://api.github.com/users/ayah1-8/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:58:19,364 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Zaldhaheri/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:58:19,384 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NomanMunir/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:58:19,504 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Deia-ElDin/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:58:19,560 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kyyberi/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 00:58:49,160 - main - INFO - 📤 Sending 7 new profiles
+2026-02-01 00:58:49,164 - main - INFO - 📊 Progress: 100% - Total: 7
+2026-02-01 00:58:49,166 - main - INFO - ✅ Search complete! Total: 7

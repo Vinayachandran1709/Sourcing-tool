@@ -8,17 +8,17 @@ class UsageService:
     
     PLAN_LIMITS = {
         "free": {
-            "searches": 5,
-            "profile_views": 25,
-            "emails_sent": 10,
+            "searches": 25,
+            "profile_views": 40,
+            "emails_sent": 15,
             "csv_exports": 10,
             "lists": 1,
             "profiles_per_list": 25,
             "trial_days": 14
         },
         "starter": {
-            "searches": -1,  # unlimited
-            "profile_views": 1000,
+            "searches": 100,
+            "profile_views": 300,
             "emails_sent": 300,
             "csv_exports": -1,
             "lists": -1,  # unlimited
