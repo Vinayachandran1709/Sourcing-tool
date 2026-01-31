@@ -19,18 +19,35 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
 
   return (
     <div style={styles.card}>
-      {/* ✅ NEW: Checkbox (Top-Left) */}
-      <div style={styles.checkboxContainer}>
-        <input
-          type="checkbox"
-          checked={profile.selected || false}
-          onChange={(e) => {
-            e.stopPropagation();
-            onSelect && onSelect(profile.id);
+      {/* Select Checkbox (Top-Left) */}
+      {onSelect && (
+        <div
+          style={{
+            ...styles.checkboxContainer,
+            background: profile.selected ? '#FF6B35' : '#FFF7F3',
           }}
-          style={styles.checkbox}
-        />
-      </div>
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(profile.id);
+          }}
+        >
+          <input
+            type="checkbox"
+            checked={profile.selected || false}
+            onChange={(e) => {
+              e.stopPropagation();
+              onSelect(profile.id);
+            }}
+            style={styles.checkbox}
+          />
+          <span style={{
+            ...styles.checkboxLabel,
+            color: profile.selected ? '#fff' : '#FF6B35',
+          }}>
+            {profile.selected ? 'Selected' : 'Select'}
+          </span>
+        </div>
+      )}
 
       {/* Star Button (Repositioned) */}
       <button
@@ -192,21 +209,29 @@ const styles = {
     position: 'absolute',
     top: '12px',
     left: '12px',
-    background: '#fff',
-    border: '2px solid #d1d5db',
-    borderRadius: '6px',
-    width: '28px',
-    height: '28px',
+    background: '#FFF7F3',
+    border: '2px solid #FF6B35',
+    borderRadius: '8px',
+    padding: '4px 10px 4px 4px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+    gap: '4px',
+    boxShadow: '0 2px 8px rgba(255, 107, 53, 0.25)',
     zIndex: 10,
+    cursor: 'pointer',
+  },
+
+  checkboxLabel: {
+    fontSize: '11px',
+    fontWeight: '700',
+    color: '#FF6B35',
+    userSelect: 'none',
+    letterSpacing: '0.3px',
   },
 
   checkbox: {
-    width: '18px',
-    height: '18px',
+    width: '16px',
+    height: '16px',
     cursor: 'pointer',
     accentColor: '#FF6B35',
   },

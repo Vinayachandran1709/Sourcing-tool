@@ -1,21 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Download, Trash2 } from 'lucide-react';
+import { Star, Download, Trash2, Mail, CheckSquare } from 'lucide-react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
+import EmailModal from '../../components/EmailModal';
 
 const SavedProfilesPage = () => {
   const [savedProfiles, setSavedProfiles] = useState([]);
   const [savedProfileIds, setSavedProfileIds] = useState([]);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
 
   // Load saved profiles from localStorage
   useEffect(() => {
     const loadSavedProfiles = () => {
       const profiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
       const ids = JSON.parse(localStorage.getItem('savedProfileIds') || '[]');
-      setSavedProfiles(profiles);
+      // Initialize with selected: false
+      setSavedProfiles(profiles.map(p => ({ ...p, selected: false })));
       setSavedProfileIds(ids);
     };
 
@@ -25,6 +28,22 @@ const SavedProfilesPage = () => {
     window.addEventListener('storage', loadSavedProfiles);
     return () => window.removeEventListener('storage', loadSavedProfiles);
   }, []);
+
+  // Selection handlers
+  const handleProfileSelect = (profileId) => {
+    setSavedProfiles(prev =>
+      prev.map(p => p.id === profileId ? { ...p, selected: !p.selected } : p)
+    );
+  };
+
+  const handleSelectAll = () => {
+    const allSelected = savedProfiles.every(p => p.selected);
+    setSavedProfiles(savedProfiles.map(p => ({ ...p, selected: !allSelected })));
+  };
+
+  const handleDeselectAll = () => {
+    setSavedProfiles(savedProfiles.map(p => ({ ...p, selected: false })));
+  };
 
   const handleToggleSave = (profile) => {
     // Remove from saved
@@ -41,6 +60,35 @@ const SavedProfilesPage = () => {
   const handleViewProfile = (profile) => {
     setSelectedProfile(profile);
     setShowDetailModal(true);
+  };
+
+  const handleBulkEmail = async () => {
+    const selected = savedProfiles.filter(p => p.selected);
+    if (selected.length === 0) {
+      alert('Please select at least one profile to send emails.');
+      return;
+    }
+
+    // Check email limits before opening modal
+    try {
+      const { getEmailUsage } = await import('../../services/api');
+      const usageData = await getEmailUsage();
+
+      if (!usageData.usage.can_send) {
+        alert(`Email limit reached! You've used ${usageData.usage.used}/${usageData.usage.limit} emails this month. Upgrade to send more.`);
+        return;
+      }
+
+      if (selected.length > usageData.usage.remaining) {
+        alert(`Cannot send ${selected.length} emails. Only ${usageData.usage.remaining} emails remaining this month.`);
+        return;
+      }
+    } catch (error) {
+      console.error('Failed to check email limits:', error);
+      // Continue anyway - backend will enforce limits
+    }
+
+    setShowEmailModal(true);
   };
 
   const handleClearAll = () => {
@@ -83,6 +131,8 @@ const SavedProfilesPage = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  const selectedCount = savedProfiles.filter(p => p.selected).length;
+
   return (
     <div style={styles.page}>
       <DashboardHeader
@@ -113,6 +163,30 @@ const SavedProfilesPage = () => {
           </div>
         )}
 
+        {/* Bulk Actions Bar */}
+        {selectedCount > 0 && (
+          <div style={styles.bulkActions}>
+            <div style={styles.bulkActionsLeft}>
+              <CheckSquare size={20} color="#FF6B35" />
+              <span style={styles.bulkActionsText}>
+                {selectedCount} profile{selectedCount !== 1 ? 's' : ''} selected
+              </span>
+            </div>
+            <div style={styles.bulkActionsRight}>
+              <button onClick={handleSelectAll} style={styles.bulkActionButton}>
+                {savedProfiles.every(p => p.selected) ? 'Deselect All' : 'Select All'}
+              </button>
+              <button onClick={handleBulkEmail} style={styles.bulkActionButtonPrimary}>
+                <Mail size={16} />
+                Send Bulk Email
+              </button>
+              <button onClick={handleDeselectAll} style={styles.bulkActionButton}>
+                Clear Selection
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Profiles Grid */}
         {savedProfiles.length > 0 ? (
           <div style={styles.profilesGrid}>
@@ -120,6 +194,7 @@ const SavedProfilesPage = () => {
               <ProfileCard
                 key={profile.id}
                 profile={profile}
+                onSelect={() => handleProfileSelect(profile.id)}
                 onViewDetails={() => handleViewProfile(profile)}
                 onToggleSave={handleToggleSave}
                 isSaved={true}
@@ -146,6 +221,18 @@ const SavedProfilesPage = () => {
           setSelectedProfile(null);
         }}
       />
+
+      {/* Email Modal */}
+      {showEmailModal && (
+        <EmailModal
+          profiles={savedProfiles.filter(p => p.selected)}
+          onClose={() => setShowEmailModal(false)}
+          onSuccess={() => {
+            setShowEmailModal(false);
+            handleDeselectAll();
+          }}
+        />
+      )}
     </div>
   );
 };
@@ -220,6 +307,61 @@ const styles = {
     cursor: 'pointer',
     fontFamily: "'Outfit', sans-serif",
     transition: 'all 0.2s',
+  },
+
+  bulkActions: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '16px 24px',
+    backgroundColor: '#fffbf5',
+    border: '2px solid #FF6B35',
+    borderRadius: '12px',
+    marginBottom: '1.5rem',
+  },
+
+  bulkActionsLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+  },
+
+  bulkActionsText: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#1a1a1a',
+  },
+
+  bulkActionsRight: {
+    display: 'flex',
+    gap: '8px',
+  },
+
+  bulkActionButton: {
+    padding: '8px 16px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    color: '#374151',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
+  },
+
+  bulkActionButtonPrimary: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '8px 16px',
+    backgroundColor: '#FF6B35',
+    border: 'none',
+    borderRadius: '8px',
+    color: '#ffffff',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
   },
 
   profilesGrid: {

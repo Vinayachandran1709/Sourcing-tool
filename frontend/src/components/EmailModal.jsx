@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { X, Mail, Loader, AlertCircle } from 'lucide-react';
 import { getEmailSettings, updateSenderEmail, getEmailUsage, sendBulkEmails } from '../services/api';
 
-const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
+const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) => {
   const [senderEmail, setSenderEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
@@ -11,6 +11,10 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
   const [isFirstTime, setIsFirstTime] = useState(false);
   const [emailUsage, setEmailUsage] = useState(null);
   const [error, setError] = useState(null);
+
+  // Support both prop naming patterns
+  const activeProfiles = selectedProfiles || profiles || [];
+  const handleComplete = onSend || onSuccess;
 
     const loadEmailSettings = useCallback(async () => {
     setLoading(true);
@@ -51,10 +55,8 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
     }, [subject]);
     
   useEffect(() => {
-    if (isOpen) {
-      loadEmailSettings();
-    }
-  }, [isOpen, loadEmailSettings]);
+    loadEmailSettings();
+  }, [loadEmailSettings]);
 
 
 
@@ -74,8 +76,8 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
     }
     
     // Check if trying to send more than remaining
-    if (emailUsage && selectedProfiles.length > emailUsage.remaining) {
-      setError(`Cannot send ${selectedProfiles.length} emails. Only ${emailUsage.remaining} remaining this month.`);
+    if (emailUsage && activeProfiles.length > emailUsage.remaining) {
+      setError(`Cannot send ${activeProfiles.length} emails. Only ${emailUsage.remaining} remaining this month.`);
       return;
     }
     
@@ -89,13 +91,13 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
       
       // Send emails
       const result = await sendBulkEmails({
-        profile_ids: selectedProfiles.map(p => p.id),
+        profile_ids: activeProfiles.map(p => p.id),
         subject,
         body
       });
       
       // Success callback
-      onSend(result);
+      handleComplete && handleComplete(result);
       onClose();
       
     } catch (error) {
@@ -114,7 +116,7 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
     }
   };
 
-  if (!isOpen) return null;
+  // Render is controlled by parent conditional rendering
 
   return (
     <div style={styles.overlay} onClick={onClose}>
@@ -155,7 +157,7 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
             {/* Info Banner */}
             <div style={styles.info}>
               <Mail size={20} color="#4f46e5" />
-              <span>Sending to {selectedProfiles.length} developers</span>
+              <span>Sending to {activeProfiles.length} developers</span>
             </div>
 
             <form onSubmit={handleSubmit} style={styles.form}>
@@ -227,7 +229,7 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
                 </button>
                 <button 
                   type="submit" 
-                  disabled={sending || (emailUsage && selectedProfiles.length > emailUsage.remaining)} 
+                  disabled={sending || (emailUsage && activeProfiles.length > emailUsage.remaining)} 
                   style={styles.sendButton}
                 >
                   {sending ? (
@@ -238,7 +240,7 @@ const EmailModal = ({ isOpen, onClose, selectedProfiles, onSend }) => {
                   ) : (
                     <>
                       <Mail size={20} />
-                      <span>Send {selectedProfiles.length} Emails</span>
+                      <span>Send {activeProfiles.length} Emails</span>
                     </>
                   )}
                 </button>

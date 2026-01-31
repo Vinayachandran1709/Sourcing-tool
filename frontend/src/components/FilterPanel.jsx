@@ -34,39 +34,134 @@ const TOOL_OPTIONS = [
   'Redis', 'Elasticsearch', 'GraphQL', 'REST API', 'Git', 'Jira', 'Figma'
 ];
 
-// ✅ UPDATED: Cleaner location options with consistent structure
-// Grouped by: Countries → Cities → Regions → Remote
+// Hierarchical location options: Regions → Countries → Cities
+// If city-specific profiles aren't found, backend falls back to country → region
 const LOCATION_OPTIONS = [
-  // North America - United States
+  // ===== NORTH AMERICA =====
+  // United States
   { value: 'United States', label: '🇺🇸 United States', category: 'country' },
   { value: 'San Francisco', label: '  📍 San Francisco, CA', category: 'city' },
   { value: 'New York', label: '  📍 New York, NY', category: 'city' },
   { value: 'Seattle', label: '  📍 Seattle, WA', category: 'city' },
   { value: 'Austin', label: '  📍 Austin, TX', category: 'city' },
-  
-  // Europe
+  { value: 'Los Angeles', label: '  📍 Los Angeles, CA', category: 'city' },
+  { value: 'Boston', label: '  📍 Boston, MA', category: 'city' },
+  { value: 'Chicago', label: '  📍 Chicago, IL', category: 'city' },
+  { value: 'Denver', label: '  📍 Denver, CO', category: 'city' },
+  { value: 'Atlanta', label: '  📍 Atlanta, GA', category: 'city' },
+  { value: 'Miami', label: '  📍 Miami, FL', category: 'city' },
+  { value: 'San Diego', label: '  📍 San Diego, CA', category: 'city' },
+
+  // Canada
+  { value: 'Canada', label: '🇨🇦 Canada', category: 'country' },
+  { value: 'Toronto', label: '  📍 Toronto', category: 'city' },
+  { value: 'Vancouver', label: '  📍 Vancouver', category: 'city' },
+
+  // Mexico
+  { value: 'Mexico', label: '🇲🇽 Mexico', category: 'country' },
+  { value: 'Mexico City', label: '  📍 Mexico City', category: 'city' },
+
+  // ===== SOUTH AMERICA =====
+  { value: 'Brazil', label: '🇧🇷 Brazil', category: 'country' },
+  { value: 'São Paulo', label: '  📍 São Paulo', category: 'city' },
+
+  // ===== EUROPE =====
   { value: 'Europe', label: '🌍 Europe', category: 'region' },
+
+  // United Kingdom
   { value: 'United Kingdom', label: '  🇬🇧 United Kingdom', category: 'country' },
   { value: 'London', label: '    📍 London', category: 'city' },
+
+  // Germany
   { value: 'Germany', label: '  🇩🇪 Germany', category: 'country' },
   { value: 'Berlin', label: '    📍 Berlin', category: 'city' },
+
+  // Netherlands
   { value: 'Netherlands', label: '  🇳🇱 Netherlands', category: 'country' },
   { value: 'Amsterdam', label: '    📍 Amsterdam', category: 'city' },
-  
-  // Asia - India
+
+  // France
+  { value: 'France', label: '  🇫🇷 France', category: 'country' },
+  { value: 'Paris', label: '    📍 Paris', category: 'city' },
+
+  // Spain
+  { value: 'Spain', label: '  🇪🇸 Spain', category: 'country' },
+  { value: 'Barcelona', label: '    📍 Barcelona', category: 'city' },
+  { value: 'Madrid', label: '    📍 Madrid', category: 'city' },
+
+  // Italy
+  { value: 'Italy', label: '  🇮🇹 Italy', category: 'country' },
+
+  // Sweden
+  { value: 'Sweden', label: '  🇸🇪 Sweden', category: 'country' },
+  { value: 'Stockholm', label: '    📍 Stockholm', category: 'city' },
+
+  // Switzerland
+  { value: 'Switzerland', label: '  🇨🇭 Switzerland', category: 'country' },
+  { value: 'Zurich', label: '    📍 Zurich', category: 'city' },
+
+  // Poland
+  { value: 'Poland', label: '  🇵🇱 Poland', category: 'country' },
+  { value: 'Warsaw', label: '    📍 Warsaw', category: 'city' },
+
+  // Czech Republic
+  { value: 'Prague', label: '    📍 Prague', category: 'city' },
+
+  // Ireland
+  { value: 'Ireland', label: '  🇮🇪 Ireland', category: 'country' },
+  { value: 'Dublin', label: '    📍 Dublin', category: 'city' },
+
+  // ===== MIDDLE EAST =====
+  { value: 'Middle East', label: '🌍 Middle East', category: 'region' },
+
+  // United Arab Emirates
+  { value: 'United Arab Emirates', label: '  🇦🇪 United Arab Emirates', category: 'country' },
+  { value: 'Dubai', label: '    📍 Dubai', category: 'city' },
+  { value: 'Abu Dhabi', label: '    📍 Abu Dhabi', category: 'city' },
+
+  // Israel
+  { value: 'Israel', label: '  🇮🇱 Israel', category: 'country' },
+  { value: 'Tel Aviv', label: '    📍 Tel Aviv', category: 'city' },
+
+  // Saudi Arabia
+  { value: 'Saudi Arabia', label: '  🇸🇦 Saudi Arabia', category: 'country' },
+  { value: 'Riyadh', label: '    📍 Riyadh', category: 'city' },
+
+  // ===== ASIA-PACIFIC =====
   { value: 'Asia', label: '🌏 Asia', category: 'region' },
+
+  // India
   { value: 'India', label: '  🇮🇳 India', category: 'country' },
   { value: 'Bangalore', label: '    📍 Bangalore', category: 'city' },
   { value: 'Mumbai', label: '    📍 Mumbai', category: 'city' },
   { value: 'Delhi', label: '    📍 Delhi', category: 'city' },
-  
-  // Asia - Other
+
+  // Singapore
   { value: 'Singapore', label: '  🇸🇬 Singapore', category: 'city' },
+
+  // Japan
   { value: 'Japan', label: '  🇯🇵 Japan', category: 'country' },
   { value: 'Tokyo', label: '    📍 Tokyo', category: 'city' },
-  
-  // Remote
-  { value: 'Remote', label: '🌐 Remote / Anywhere', category: 'remote' }
+
+  // South Korea
+  { value: 'South Korea', label: '  🇰🇷 South Korea', category: 'country' },
+  { value: 'Seoul', label: '    📍 Seoul', category: 'city' },
+
+  // China
+  { value: 'China', label: '  🇨🇳 China', category: 'country' },
+  { value: 'Beijing', label: '    📍 Beijing', category: 'city' },
+  { value: 'Shanghai', label: '    📍 Shanghai', category: 'city' },
+
+  // Hong Kong
+  { value: 'Hong Kong', label: '  🇭🇰 Hong Kong', category: 'city' },
+
+  // Australia
+  { value: 'Australia', label: '  🇦🇺 Australia', category: 'country' },
+  { value: 'Sydney', label: '    📍 Sydney', category: 'city' },
+  { value: 'Melbourne', label: '    📍 Melbourne', category: 'city' },
+
+  // ===== REMOTE =====
+  { value: 'Remote', label: '🌐 Remote / Anywhere', category: 'remote' },
 ];
 
 const CONTRIBUTION_RANGES = [

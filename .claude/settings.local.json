@@ -4,7 +4,10 @@
       "Bash(cd:*)",
       "Bash(dir /b \"C:\\\\Users\\\\vinayachandran\\\\OneDrive\\\\Desktop\\\\Github folder\\\\Sourcing-tool\\\\frontend\\\\src\\\\contexts\"\")",
       "Bash(powershell:*)",
-      "Bash(git diff-tree:*)"
+      "Bash(git diff-tree:*)",
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(tree:*)"
     ]
   }
 }
