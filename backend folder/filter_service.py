@@ -96,37 +96,80 @@ class FilterService:
                 "new york": "united states",
                 "seattle": "united states",
                 "austin": "united states",
+                "los angeles": "united states",
+                "boston": "united states",
+                "chicago": "united states",
+                "denver": "united states",
+                "atlanta": "united states",
+                "miami": "united states",
+                "san diego": "united states",
                 "sf": "united states",
                 "nyc": "united states",
+                "la": "united states",
                 "usa": "united states",
                 "us": "united states",
-                
+
+                # Canada cities
+                "toronto": "canada",
+                "vancouver": "canada",
+
+                # Mexico cities
+                "mexico city": "mexico",
+
+                # South America cities
+                "são paulo": "brazil",
+                "sao paulo": "brazil",
+
                 # European cities
                 "london": "united kingdom",
                 "berlin": "germany",
                 "amsterdam": "netherlands",
+                "paris": "france",
+                "barcelona": "spain",
+                "madrid": "spain",
+                "stockholm": "sweden",
+                "zurich": "switzerland",
+                "warsaw": "poland",
+                "prague": "czech republic",
+                "dublin": "ireland",
                 "uk": "united kingdom",
-                
+
                 # Indian cities
                 "bangalore": "india",
                 "mumbai": "india",
                 "delhi": "india",
                 "bengaluru": "india",
-                
+
+                # Middle East cities
+                "dubai": "united arab emirates",
+                "abu dhabi": "united arab emirates",
+                "tel aviv": "israel",
+                "riyadh": "saudi arabia",
+
                 # Asian cities
                 "singapore": "singapore",
                 "tokyo": "japan",
+                "seoul": "south korea",
+                "beijing": "china",
+                "shanghai": "china",
+                "hong kong": "hong kong",
+
+                # Australian cities
+                "sydney": "australia",
+                "melbourne": "australia",
             }
             
             # ===== COUNTRY-TO-REGION MAPPING =====
             # Maps countries to broader regions for fallback
             COUNTRY_TO_REGION = {
+                # Americas
                 "united states": "americas",
                 "canada": "americas",
                 "mexico": "americas",
                 "brazil": "americas",
                 "argentina": "americas",
-                
+
+                # Europe
                 "united kingdom": "europe",
                 "germany": "europe",
                 "netherlands": "europe",
@@ -136,17 +179,28 @@ class FilterService:
                 "poland": "europe",
                 "sweden": "europe",
                 "norway": "europe",
-                
+                "switzerland": "europe",
+                "czech republic": "europe",
+                "ireland": "europe",
+
+                # Middle East
+                "united arab emirates": "middle_east",
+                "israel": "middle_east",
+                "saudi arabia": "middle_east",
+
+                # Asia
                 "india": "asia",
                 "singapore": "asia",
                 "japan": "asia",
                 "china": "asia",
                 "south korea": "asia",
+                "hong kong": "asia",
                 "indonesia": "asia",
                 "thailand": "asia",
                 "vietnam": "asia",
                 "philippines": "asia",
-                
+
+                # Asia-Pacific
                 "australia": "apac",
                 "new zealand": "apac",
             }
@@ -158,6 +212,8 @@ class FilterService:
                 "asia": "asia",
                 "americas": "americas",
                 "apac": "apac",
+                "middle east": "middle_east",
+                "middle_east": "middle_east",
                 "remote": "global",  # "Remote" means global
                 "anywhere": "global",
                 "worldwide": "global",

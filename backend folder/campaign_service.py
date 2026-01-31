@@ -1,7 +1,6 @@
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
-from models import EmailCampaign, Profile, User, EmailTemplate
-from email_templates_service import EmailTemplatesService
+from models import EmailCampaign, Profile, User
 from usage_service import UsageService
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
@@ -108,19 +107,17 @@ class CampaignService:
         # Get user
         user = db.query(User).filter(User.id == campaign.user_id).first()
         
-        # Get template
-        template = EmailTemplatesService.get_template_by_type(db, campaign.user_id, "initial")
-        if not template:
-            # Create defaults if missing
-            EmailTemplatesService.create_default_templates(db, campaign.user_id)
-            template = EmailTemplatesService.get_template_by_type(db, campaign.user_id, "initial")
-        
         # Prepare variables
         profile_vars = CampaignService.get_profile_variables(profile)
         all_vars = {**profile_vars, **user_variables}
-        
-        # Personalize template
-        personalized = EmailTemplatesService.personalize_template(template, all_vars)
+
+        # Get subject and body from user_variables and personalize
+        subject = user_variables.get("subject", "Opportunity for you")
+        body = user_variables.get("body", "")
+        for key, value in all_vars.items():
+            subject = subject.replace("{{" + key + "}}", str(value))
+            body = body.replace("{{" + key + "}}", str(value))
+        personalized = {"subject": subject, "body": body}
         
         # Get email credentials
         sender_email = os.getenv("COMPANY_EMAIL")
@@ -252,17 +249,17 @@ class CampaignService:
         if not profile or not profile.email:
             raise HTTPException(status_code=400, detail="Profile has no email")
         
-        # Get template
-        template = EmailTemplatesService.get_template_by_type(db, campaign.user_id, followup_type)
-        if not template:
-            raise HTTPException(status_code=404, detail=f"Template for {followup_type} not found")
-        
         # Prepare variables
         profile_vars = CampaignService.get_profile_variables(profile)
         all_vars = {**profile_vars, **user_variables}
-        
-        # Personalize template
-        personalized = EmailTemplatesService.personalize_template(template, all_vars)
+
+        # Get subject and body from user_variables and personalize
+        subject = user_variables.get("subject", f"Following up - {followup_type}")
+        body = user_variables.get("body", "")
+        for key, value in all_vars.items():
+            subject = subject.replace("{{" + key + "}}", str(value))
+            body = body.replace("{{" + key + "}}", str(value))
+        personalized = {"subject": subject, "body": body}
         
         # Get email credentials
         sender_email = os.getenv("COMPANY_EMAIL")
