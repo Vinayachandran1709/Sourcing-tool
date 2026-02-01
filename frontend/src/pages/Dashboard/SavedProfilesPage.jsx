@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Download, Trash2, Mail, CheckSquare } from 'lucide-react';
+import { Star, Trash2, Mail, CheckSquare } from 'lucide-react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
@@ -12,13 +12,13 @@ const SavedProfilesPage = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
 
-  // Load saved profiles from localStorage
+  // Load saved profiles from localStorage - REVERSED so latest saved appears first
   useEffect(() => {
     const loadSavedProfiles = () => {
       const profiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
       const ids = JSON.parse(localStorage.getItem('savedProfileIds') || '[]');
-      // Initialize with selected: false
-      setSavedProfiles(profiles.map(p => ({ ...p, selected: false })));
+      // Reverse so latest saved profile appears first, initialize with selected: false
+      setSavedProfiles(profiles.slice().reverse().map(p => ({ ...p, selected: false })));
       setSavedProfileIds(ids);
     };
 
@@ -53,7 +53,10 @@ const SavedProfilesPage = () => {
     setSavedProfiles(updatedProfiles);
     setSavedProfileIds(updatedIds);
 
-    localStorage.setItem('savedProfiles', JSON.stringify(updatedProfiles));
+    // Also update localStorage (keep original order there, just remove the item)
+    const storedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
+    const filteredStored = storedProfiles.filter(p => p.id !== profile.id);
+    localStorage.setItem('savedProfiles', JSON.stringify(filteredStored));
     localStorage.setItem('savedProfileIds', JSON.stringify(updatedIds));
   };
 
@@ -102,35 +105,6 @@ const SavedProfilesPage = () => {
     localStorage.setItem('savedProfileIds', JSON.stringify([]));
   };
 
-  const handleExportCSV = () => {
-    if (savedProfiles.length === 0) return;
-
-    const csv = [
-      ['Name', 'GitHub Username', 'Email', 'Location', 'Score', 'Repos', 'Stars', 'Contributions', 'Primary Language'],
-      ...savedProfiles.map(p => [
-        p.name || p.github_username,
-        p.github_username,
-        p.email || '',
-        p.location || '',
-        p.developer_score || 0,
-        p.public_repos || 0,
-        p.total_stars || 0,
-        p.contributions_last_year || 0,
-        p.primary_language || ''
-      ])
-    ].map(row => row.join(',')).join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `saved-profiles-${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-  };
-
   const selectedCount = savedProfiles.filter(p => p.selected).length;
 
   return (
@@ -151,10 +125,6 @@ const SavedProfilesPage = () => {
               </span>
             </div>
             <div style={styles.actionsRight}>
-              <button onClick={handleExportCSV} style={styles.exportBtn}>
-                <Download size={18} />
-                <span>Export CSV</span>
-              </button>
               <button onClick={handleClearAll} style={styles.clearBtn}>
                 <Trash2 size={18} />
                 <span>Clear All</span>
@@ -277,22 +247,6 @@ const styles = {
     gap: '0.75rem',
   },
 
-  exportBtn: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.75rem 1.25rem',
-    background: '#fff',
-    color: '#1a1a1a',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    fontSize: '0.9375rem',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: "'Outfit', sans-serif",
-    transition: 'all 0.2s',
-  },
-
   clearBtn: {
     display: 'flex',
     alignItems: 'center',
@@ -401,11 +355,6 @@ const styles = {
 // Hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
-  button[style*="exportBtn"]:hover {
-    border-color: #FF6B35 !important;
-    color: #FF6B35 !important;
-  }
-
   button[style*="clearBtn"]:hover {
     background: #fee2e2 !important;
   }

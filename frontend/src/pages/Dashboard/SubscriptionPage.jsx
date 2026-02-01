@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
-import { CreditCard, Mail, Search, Eye, CheckCircle } from 'lucide-react';
+import { Mail, Search, Eye, CheckCircle } from 'lucide-react';
 import EmailSettingsCard from '../../components/EmailSettingsCard';
 
 const SubscriptionPage = () => {
@@ -276,28 +276,6 @@ const SubscriptionPage = () => {
           </div>
         </div>
 
-        {/* Billing Info */}
-        <div style={styles.billingCard}>
-          <div style={styles.billingHeader}>
-            <CreditCard size={24} color="#FF6B35" />
-            <h4 style={styles.billingTitle}>Billing Information</h4>
-          </div>
-          <div style={styles.billingContent}>
-            <div style={styles.billingRow}>
-              <span style={styles.billingLabel}>Payment Method</span>
-              <span style={styles.billingValue}>•••• •••• •••• 4242</span>
-            </div>
-            <div style={styles.billingRow}>
-              <span style={styles.billingLabel}>Billing Email</span>
-              <span style={styles.billingValue}>demo@company.com</span>
-            </div>
-            <div style={styles.billingRow}>
-              <span style={styles.billingLabel}>Next Billing Date</span>
-              <span style={styles.billingValue}>{new Date(userData.next_billing_date).toLocaleDateString()}</span>
-            </div>
-          </div>
-          <button style={styles.updateBillingBtn}>Update Billing Info</button>
-        </div>
       </div>
     </div>
   );
@@ -583,68 +561,6 @@ const styles = {
     cursor: 'not-allowed',
   },
 
-  billingCard: {
-    background: '#fff',
-    border: '1px solid #e5e7eb',
-    borderRadius: '12px',
-    padding: '2rem',
-    marginTop: '2rem',
-  },
-
-  billingHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    marginBottom: '1.5rem',
-    paddingBottom: '1rem',
-    borderBottom: '1px solid #f3f4f6',
-  },
-
-  billingTitle: {
-    fontSize: '1.25rem',
-    fontWeight: '600',
-    color: '#1a1a1a',
-    margin: 0,
-  },
-
-  billingContent: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '1rem',
-    marginBottom: '1.5rem',
-  },
-
-  billingRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '0.75rem 0',
-  },
-
-  billingLabel: {
-    fontSize: '0.9375rem',
-    color: '#6b7280',
-    fontWeight: '500',
-  },
-
-  billingValue: {
-    fontSize: '0.9375rem',
-    color: '#1a1a1a',
-    fontWeight: '600',
-  },
-
-  updateBillingBtn: {
-    padding: '0.75rem 1.5rem',
-    fontSize: '0.9375rem',
-    fontWeight: '600',
-    background: '#fff',
-    color: '#1a1a1a',
-    border: '2px solid #e5e7eb',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontFamily: "'Outfit', sans-serif",
-  },
 };
 
 // Add hover effects
@@ -656,11 +572,6 @@ styleSheet.textContent = `
     box-shadow: 0 4px 12px rgba(255,107,53,0.3);
   }
   
-  button[style*="updateBillingBtn"]:hover {
-    border-color: #FF6B35 !important;
-    color: #FF6B35 !important;
-  }
-
   div[style*="planCard"]:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;

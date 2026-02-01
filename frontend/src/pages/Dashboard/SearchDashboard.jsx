@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Mail, Download, AlertCircle, CheckSquare } from 'lucide-react';
+import { Search, Mail, AlertCircle, CheckSquare } from 'lucide-react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
@@ -141,20 +141,18 @@ const SearchDashboard = () => {
               case 'profiles':
                 // Initial results loaded
                 setProfiles(data.profiles);
-                // ✅ OPTIMIZATION #1: Update smooth progress
                 setSearchProgress(prev => ({
                   ...prev,
                   totalFound: data.count,
-                  message: `Found ${data.count} developers...`
+                  message: 'Loading developer profiles...'
                 }));
                 break;
-                
+
               case 'progress':
-                // ✅ OPTIMIZATION #1: Update smooth progress (no phases)
                 setSearchProgress(prev => ({
                   ...prev,
                   totalFound: data.total_found,
-                  message: `Found ${data.total_found} developers...`
+                  message: 'Finding more developers...'
                 }));
                 break;
                 
@@ -164,10 +162,9 @@ const SearchDashboard = () => {
                 break;
                 
               case 'complete':
-                // ✅ OPTIMIZATION #1: Smooth completion message
                 setSearchProgress({
                   isSearching: false,
-                  message: `Search complete! Found ${data.total} developers`,
+                  message: 'Search complete!',
                   totalFound: data.total
                 });
                 setLoading(false);
@@ -301,54 +298,6 @@ const SearchDashboard = () => {
     setShowEmailModal(true);
   };
 
-  const handleExportCSV = async () => {
-  // Check CSV export limits
-  try {
-    const { checkCsvLimit } = await import('../../services/api');
-    const limits = await checkCsvLimit();
-    
-    if (!limits.can_export) {
-      alert(`CSV export limit reached! You've used ${limits.used}/${limits.limit} exports. ${limits.limit === 10 ? 'This is a lifetime limit for free trial users.' : 'Upgrade to export more.'}`);
-      return;
-    }
-  } catch (error) {
-    console.error('Failed to check CSV limits:', error);
-    alert('Failed to check export limits. Please try again.');
-    return;
-  }
-    const csv = [
-      ['Name', 'Username', 'Score', 'Location', 'Email', 'Stars', 'Repos', 'Contributions', 'Primary Language'],
-      ...profiles.map(p => [
-        p.name || p.github_username,
-        p.github_username,
-        p.developer_score,
-        p.location || '',
-        p.email || '',
-        p.total_stars,
-        p.public_repos,
-        p.contributions_last_year,
-        p.primary_language || ''
-      ])
-    ].map(row => row.join(',')).join('\n');
-    
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `developers_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    window.URL.revokeObjectURL(url);
-    // Log the export
-    try {
-      const { logCsvExport } = await import('../../services/api');
-      await logCsvExport();
-    } catch (error) {
-      console.error('Failed to log CSV export:', error);
-    }
-  };
-
   const handleScoreRangeToggle = (range) => {
     const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
     if (isSelected) {
@@ -432,21 +381,12 @@ const SearchDashboard = () => {
           }}
         />
         
-        {/* ✅ OPTIMIZATION #1: SMOOTH PROGRESS (no phase numbers, side stats) */}
+        {/* Search Progress - no total count shown */}
         {searchProgress.isSearching && (
           <div style={styles.progressContainer}>
             <div style={styles.progressHeader}>
               <span style={styles.progressStatus}>{searchProgress.message}</span>
             </div>
-            
-            {searchProgress.totalFound > 0 && (
-              <div style={styles.progressStats}>
-                <div style={styles.progressStat}>
-                  <span style={styles.progressStatValue}>{searchProgress.totalFound}</span>
-                  <span style={styles.progressStatLabel}>developers found</span>
-                </div>
-              </div>
-            )}
           </div>
         )}
 
@@ -458,15 +398,6 @@ const SearchDashboard = () => {
           </div>
         )}
 
-        {/* Export Button */}
-        {profiles.length > 0 && !loading && (
-          <div style={styles.exportBar}>
-            <button onClick={handleExportCSV} style={styles.exportButton}>
-              <Download size={16} />
-              Export CSV
-            </button>
-          </div>
-        )}
 
 
         {/* ✅ OPTIMIZATION #2: Score filter disabled during search */}
@@ -524,8 +455,8 @@ const SearchDashboard = () => {
 
             {scoreFilterRanges.length > 0 && (
               <div style={styles.scoreFilterInfo}>
-                Showing {filteredProfiles.length} of {profiles.length} profiles
-                <button 
+                {filteredProfiles.length} profiles selected
+                <button
                   onClick={() => setScoreFilterRanges([])}
                   style={styles.clearScoreFilter}
                 >

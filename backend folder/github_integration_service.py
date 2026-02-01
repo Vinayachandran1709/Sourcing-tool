@@ -142,10 +142,34 @@ class GitHubIntegrationService:
             
             query = query.filter(or_(*conditions))
         
-        # Location filter
+        # Location filter - expand country to include all its predefined cities
         location = filters.get("location")
         if location:
-            query = query.filter(Profile.location.ilike(f"%{location}%"))
+            from sqlalchemy import or_
+            from filter_service import FilterService
+
+            location_lower = location.lower().strip()
+            location_terms = [location]
+
+            # Check if this is a country with predefined cities
+            for country, cities in FilterService.COUNTRY_CITIES.items():
+                if location_lower == country or location_lower in country or country in location_lower:
+                    location_terms.extend(cities)
+                    break
+
+            # Check aliases
+            COUNTRY_ALIASES = {
+                "usa": "united states", "us": "united states",
+                "uk": "united kingdom", "uae": "united arab emirates",
+            }
+            alias_country = COUNTRY_ALIASES.get(location_lower)
+            if alias_country and alias_country in FilterService.COUNTRY_CITIES:
+                location_terms.append(alias_country)
+                location_terms.extend(FilterService.COUNTRY_CITIES[alias_country])
+
+            location_terms = list(set(location_terms))
+            location_filters = [Profile.location.ilike(f"%{term}%") for term in location_terms]
+            query = query.filter(or_(*location_filters))
         
         # Min score filter
         min_score = filters.get("min_score", 0)

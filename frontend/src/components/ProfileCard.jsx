@@ -1,5 +1,5 @@
 import React from 'react';
-import { Star, GitBranch, MapPin, Mail, ExternalLink, Code, Eye } from 'lucide-react';
+import { Star, MapPin, Eye } from 'lucide-react';
 
 const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }) => {
   const getScoreColor = (score) => {
@@ -15,6 +15,18 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
     if (score >= 50) return 'Mid-Level';
     if (score >= 30) return 'Junior';
     return 'Beginner';
+  };
+
+  // Show first name + last initial, or just username
+  const getDisplayName = () => {
+    if (profile.name) {
+      const parts = profile.name.trim().split(/\s+/);
+      if (parts.length >= 2) {
+        return `${parts[0]} ${parts[parts.length - 1][0]}.`;
+      }
+      return parts[0];
+    }
+    return profile.github_username;
   };
 
   return (
@@ -49,7 +61,7 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
         </div>
       )}
 
-      {/* Star Button (Repositioned) */}
+      {/* Star Button (Top-Right) */}
       <button
         onClick={(e) => {
           e.stopPropagation();
@@ -70,20 +82,11 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
       <div style={styles.header}>
         <img
           src={profile.avatar_url || 'https://via.placeholder.com/80'}
-          alt={profile.name || profile.github_username}
+          alt={getDisplayName()}
           style={styles.avatar}
         />
         <div style={styles.info}>
-          <h3 style={styles.name}>{profile.name || profile.github_username}</h3>
-          <a
-            href={`https://github.com/${profile.github_username}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={styles.username}
-            onClick={(e) => e.stopPropagation()}
-          >
-            @{profile.github_username} <ExternalLink size={14} />
-          </a>
+          <h3 style={styles.name}>{getDisplayName()}</h3>
           {profile.location && (
             <div style={styles.location}>
               <MapPin size={14} />
@@ -100,43 +103,27 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
         </div>
       </div>
 
-      {/* Bio */}
+      {/* Bio - truncated to 50 chars */}
       {profile.bio && (
         <p style={styles.bio}>
-          {profile.bio.length > 120 ? profile.bio.substring(0, 120) + '...' : profile.bio}
+          {profile.bio.length > 50 ? profile.bio.substring(0, 50) + '...' : profile.bio}
         </p>
       )}
 
-      {/* Stats */}
-      <div style={styles.stats}>
-        <div style={styles.stat}>
-          <Star size={16} color="#f59e0b" />
-          <span>{profile.total_stars?.toLocaleString() || 0} stars</span>
-        </div>
-        <div style={styles.stat}>
-          <GitBranch size={16} color="#3b82f6" />
-          <span>{profile.public_repos || 0} repos</span>
-        </div>
-        <div style={styles.stat}>
-          <Code size={16} color="#8b5cf6" />
-          <span>{profile.contributions_last_year || 0} contributions</span>
-        </div>
-      </div>
-
-      {/* Languages */}
+      {/* Languages - Top 2 only */}
       {profile.languages_data && Object.keys(profile.languages_data).length > 0 && (
         <div style={styles.languages}>
           {(() => {
-            const languagesObj = typeof profile.languages_data === 'string' 
-              ? JSON.parse(profile.languages_data) 
+            const languagesObj = typeof profile.languages_data === 'string'
+              ? JSON.parse(profile.languages_data)
               : profile.languages_data;
-            
+
             const total = Object.values(languagesObj).reduce((a, b) => a + b, 0);
-            
+
             return Object.entries(languagesObj)
               .map(([lang, bytes]) => [lang, ((bytes / total) * 100).toFixed(1)])
               .sort((a, b) => b[1] - a[1])
-              .slice(0, 3)
+              .slice(0, 2)
               .map(([lang, percent]) => (
                 <span key={lang} style={styles.languageTag}>
                   {lang} ({percent}%)
@@ -146,20 +133,17 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
         </div>
       )}
 
-      {/* Actions */}
-      {/* Actions */}
+      {/* Actions - View Profile + Save only, no email on card */}
       <div style={styles.actions}>
-        {/* ✅ NEW: View Profile Button */}
-        <button 
-          onClick={() => onViewDetails && onViewDetails(profile)} 
+        <button
+          onClick={() => onViewDetails && onViewDetails(profile)}
           style={styles.viewButton}
         >
           <Eye size={16} />
           <span>View Profile</span>
         </button>
-        
-        {/* ✅ REDESIGNED: Star Button replaces Select */}
-        <button 
+
+        <button
           onClick={(e) => {
             e.stopPropagation();
             onToggleSave && onToggleSave(profile);
@@ -179,16 +163,6 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
             {isSaved ? 'Saved' : 'Save'}
           </span>
         </button>
-        
-        {profile.email && (
-          <a 
-            href={`mailto:${profile.email}`} 
-            style={styles.emailLink}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <Mail size={16} />
-          </a>
-        )}
       </div>
     </div>
   );
@@ -284,17 +258,6 @@ const styles = {
     lineHeight: 1.3,
   },
 
-  username: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.25rem',
-    color: '#4f46e5',
-    textDecoration: 'none',
-    fontSize: '0.875rem',
-    fontWeight: 500,
-    transition: 'color 0.2s',
-  },
-
   location: {
     display: 'flex',
     alignItems: 'center',
@@ -338,21 +301,6 @@ const styles = {
     overflow: 'hidden',
   },
 
-  stats: {
-    display: 'flex',
-    gap: '1.25rem',
-    marginBottom: '1rem',
-    flexWrap: 'wrap',
-  },
-
-  stat: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    fontSize: '0.875rem',
-    color: '#4b5563',
-  },
-
   languages: {
     display: 'flex',
     flexWrap: 'wrap',
@@ -375,7 +323,6 @@ const styles = {
     alignItems: 'center',
   },
 
-  // ✅ NEW: View Profile Button
   viewButton: {
     flex: 1,
     display: 'flex',
@@ -409,24 +356,8 @@ const styles = {
     transition: 'all 0.2s',
     fontFamily: 'Outfit, sans-serif',
   },
-
-  emailLink: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: '0.625rem',
-    backgroundColor: '#f3f4f6',
-    color: '#374151',
-    textDecoration: 'none',
-    borderRadius: '8px',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    transition: 'all 0.2s',
-    minWidth: '40px',
-  },
 };
 
-// Hover effects
 // Hover effects
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
@@ -448,10 +379,6 @@ styleSheet.textContent = `
   button[style*="starActionButton"]:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
-  }
-
-  a[style*="emailLink"]:hover {
-    background: #e5e7eb !important;
   }
 
   div[style*="card"]:hover {

@@ -20906,3 +20906,57 @@ ModuleNotFoundError: No module named 'github_integration_service'
 2026-02-01 00:58:49,160 - main - INFO - 📤 Sending 7 new profiles
 2026-02-01 00:58:49,164 - main - INFO - 📊 Progress: 100% - Total: 7
 2026-02-01 00:58:49,166 - main - INFO - ✅ Search complete! Total: 7
+2026-02-01 11:45:23,027 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-01 11:45:24,288 - main - INFO - TalentBox API initialized - Version 2.0.0 (FIXED)
+2026-02-01 11:45:24,288 - main - INFO - Environment: development
+2026-02-01 11:45:24,289 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-01 11:45:24,342 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-01 11:45:24,880 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-01 11:45:31,088 - main - INFO - ✅ Database connection successful
+2026-02-01 11:45:31,089 - main - INFO - ✅ JWT Secret configured
+2026-02-01 11:45:31,090 - main - INFO - 🎯 Startup validation complete
+
+2026-02-01 11:47:33,515 - main - INFO - 📦 Fetching cached profiles...
+2026-02-01 11:47:35,328 - main - INFO - ✅ Sending 120 initial results
+2026-02-01 11:47:35,342 - main - INFO - 🔍 Searching for 54 more profiles
+2026-02-01 11:47:35,367 - main - INFO - 🔍 Searching GitHub: language=Java, location=New York
+2026-02-01 11:47:37,988 - httpx - INFO - HTTP Request: GET https://api.github.com/rate_limit "HTTP/1.1 200 OK"
+2026-02-01 11:47:39,413 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Java+location:New%20York&per_page=30&page=1 "HTTP/1.1 200 OK"
+2026-02-01 11:47:41,359 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Java+location:New%20York&per_page=30&page=2 "HTTP/1.1 200 OK"
+2026-02-01 11:47:43,163 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Java+location:New%20York&per_page=30&page=3 "HTTP/1.1 200 OK"
+2026-02-01 11:47:45,044 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Java+location:New%20York&per_page=30&page=4 "HTTP/1.1 200 OK"
+2026-02-01 11:47:46,785 - httpx - INFO - HTTP Request: GET https://api.github.com/search/users?q=language:Java+location:New%20York&per_page=30&page=5 "HTTP/1.1 200 OK"
+2026-02-01 11:47:46,788 - main - INFO - 📥 Processing 118 profiles
+2026-02-01 11:47:47,086 - main - INFO - ⏭️  Skipping 1 already cached profiles
+2026-02-01 11:47:47,086 - main - INFO - 📥 Fetching 117 new profiles
+2026-02-01 11:48:07,378 - httpx - INFO - HTTP Request: GET https://api.github.com/users/yunyuntsai "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,009 - httpx - INFO - HTTP Request: GET https://api.github.com/users/reubenvarghese1 "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,011 - httpx - INFO - HTTP Request: GET https://api.github.com/users/egk265 "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,013 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Mach-A "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,015 - httpx - INFO - HTTP Request: GET https://api.github.com/users/EngineerMichael "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,018 - httpx - INFO - HTTP Request: GET https://api.github.com/users/viet "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,020 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hazems "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,021 - httpx - INFO - HTTP Request: GET https://api.github.com/users/JohnSebastian3 "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,023 - httpx - INFO - HTTP Request: GET https://api.github.com/users/HelalChow "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,025 - httpx - INFO - HTTP Request: GET https://api.github.com/users/joncolon "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,027 - httpx - INFO - HTTP Request: GET https://api.github.com/users/navdeepjaswal "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,029 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kcherianthomas "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,031 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rknoll "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,034 - httpx - INFO - HTTP Request: GET https://api.github.com/users/demianrenzulli "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,036 - httpx - INFO - HTTP Request: GET https://api.github.com/users/NYC-Cyber-Command "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,039 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Neil-Opena "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,041 - httpx - INFO - HTTP Request: GET https://api.github.com/users/khatchad "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,043 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MarvinMartin24 "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,045 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AlvarezKevin "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,047 - httpx - INFO - HTTP Request: GET https://api.github.com/users/akshitalakkad "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,049 - httpx - INFO - HTTP Request: GET https://api.github.com/users/denysmy "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,051 - httpx - INFO - HTTP Request: GET https://api.github.com/users/baoziiiii "HTTP/1.1 200 OK"
+2026-02-01 11:48:08,053 - httpx - INFO - HTTP Request: GET https://api.github.com/users/deepkaushik "HTTP/1.1 200 OK"
+2026-02-01 11:48:21,497 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jiaowcg88 "HTTP/1.1 200 OK"
+2026-02-01 11:48:21,500 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jacirrone "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,760 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Mach-A/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,768 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jiaowcg88/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,772 - httpx - INFO - HTTP Request: GET https://api.github.com/users/viet/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,780 - httpx - INFO - HTTP Request: GET https://api.github.com/users/navdeepjaswal/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,785 - httpx - INFO - HTTP Request: GET https://api.github.com/users/denysmy/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,788 - httpx - INFO - HTTP Request: GET https://api.github.com/users/HelalChow/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"

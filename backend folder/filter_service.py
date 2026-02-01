@@ -19,21 +19,80 @@ class FilterService:
        - Always returns results (graceful fallback)
     """
     
+    # ===== PREDEFINED COUNTRY → CITIES MAPPING =====
+    # Only uses countries and cities from our FilterPanel options
+    COUNTRY_CITIES = {
+        "united states": ["san francisco", "new york", "seattle", "austin", "los angeles",
+                          "boston", "chicago", "denver", "atlanta", "miami", "san diego"],
+        "canada": ["toronto", "vancouver"],
+        "mexico": ["mexico city"],
+        "brazil": ["são paulo", "sao paulo"],
+        "united kingdom": ["london"],
+        "germany": ["berlin"],
+        "netherlands": ["amsterdam"],
+        "france": ["paris"],
+        "spain": ["barcelona", "madrid"],
+        "sweden": ["stockholm"],
+        "switzerland": ["zurich"],
+        "poland": ["warsaw"],
+        "ireland": ["dublin"],
+        "united arab emirates": ["dubai", "abu dhabi"],
+        "israel": ["tel aviv"],
+        "saudi arabia": ["riyadh"],
+        "india": ["bangalore", "bengaluru", "mumbai", "delhi", "hyderabad", "chennai", "pune", "kolkata"],
+        "japan": ["tokyo"],
+        "south korea": ["seoul"],
+        "china": ["beijing", "shanghai"],
+        "australia": ["sydney", "melbourne"],
+    }
+
     @staticmethod
     def apply_filters(db: Session, filters: Dict) -> List[Profile]:
         """
         Apply smart filters with role-based matching and location hierarchy.
+        When a country is selected, also search for profiles from all its predefined cities.
         """
         logger.info(f"🔍 FilterService with filters: {filters}")
-        
+
         # ===== STEP 1: LOAD PROFILES FROM DATABASE =====
         query = db.query(Profile)
-        
+
         # Apply location filter at SQL level (optimization)
+        # When a country is selected, also search for all its predefined cities
         location = filters.get("location")
         if location:
-            query = query.filter(Profile.location.ilike(f"%{location}%"))
-        
+            from sqlalchemy import or_
+            location_lower = location.lower().strip()
+
+            # Build list of location terms to search for
+            location_terms = [location]  # Always include the original term
+
+            # Check if this is a country with predefined cities
+            for country, cities in FilterService.COUNTRY_CITIES.items():
+                if location_lower == country or location_lower in country or country in location_lower:
+                    # Add all cities belonging to this country
+                    location_terms.extend(cities)
+                    break
+
+            # Also check reverse: if a known alias maps to a country
+            COUNTRY_ALIASES = {
+                "usa": "united states", "us": "united states",
+                "uk": "united kingdom", "uae": "united arab emirates",
+            }
+            alias_country = COUNTRY_ALIASES.get(location_lower)
+            if alias_country and alias_country in FilterService.COUNTRY_CITIES:
+                location_terms.append(alias_country)
+                location_terms.extend(FilterService.COUNTRY_CITIES[alias_country])
+
+            # Remove duplicates
+            location_terms = list(set(location_terms))
+
+            # Build OR filter: location LIKE '%term%' for each term
+            location_filters = [Profile.location.ilike(f"%{term}%") for term in location_terms]
+            query = query.filter(or_(*location_filters))
+
+            logger.info(f"📍 Location search terms: {location_terms}")
+
         all_profiles = query.all()
         logger.info(f"📊 Loaded {len(all_profiles)} profiles from database")
         

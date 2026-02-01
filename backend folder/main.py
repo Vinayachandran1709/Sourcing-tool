@@ -416,8 +416,23 @@ def get_all_profiles(
             query = query.filter(or_(Profile.email.is_(None), Profile.email == ""))
     
     if location:
-        query = query.filter(Profile.location.ilike(f"%{location}%"))
-    
+        from filter_service import FilterService
+        location_lower = location.lower().strip()
+        location_terms = [location]
+        for country, cities in FilterService.COUNTRY_CITIES.items():
+            if location_lower == country or location_lower in country or country in location_lower:
+                location_terms.extend(cities)
+                break
+        COUNTRY_ALIASES = {"usa": "united states", "us": "united states", "uk": "united kingdom", "uae": "united arab emirates"}
+        alias_country = COUNTRY_ALIASES.get(location_lower)
+        if alias_country and alias_country in FilterService.COUNTRY_CITIES:
+            location_terms.append(alias_country)
+            location_terms.extend(FilterService.COUNTRY_CITIES[alias_country])
+        location_terms = list(set(location_terms))
+        from sqlalchemy import or_ as or_loc
+        loc_filters = [Profile.location.ilike(f"%{term}%") for term in location_terms]
+        query = query.filter(or_loc(*loc_filters))
+
     if language:
         query = query.filter(Profile.primary_language.ilike(language))
     
