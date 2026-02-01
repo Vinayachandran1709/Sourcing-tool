@@ -12,6 +12,12 @@ const SavedProfilesPage = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
 
+  // Track unlocked profile IDs (shared with SearchDashboard via localStorage)
+  const [unlockedProfileIds, setUnlockedProfileIds] = useState(() => {
+    const saved = localStorage.getItem('unlockedProfileIds');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   // Load saved profiles from localStorage - REVERSED so latest saved appears first
   useEffect(() => {
     const loadSavedProfiles = () => {
@@ -60,7 +66,34 @@ const SavedProfilesPage = () => {
     localStorage.setItem('savedProfileIds', JSON.stringify(updatedIds));
   };
 
+  // Persist unlocked IDs to localStorage
+  useEffect(() => {
+    localStorage.setItem('unlockedProfileIds', JSON.stringify(unlockedProfileIds));
+  }, [unlockedProfileIds]);
+
   const handleViewProfile = (profile) => {
+    const alreadyUnlocked = unlockedProfileIds.includes(profile.id);
+
+    if (!alreadyUnlocked) {
+      // Mark as unlocked immediately for instant UI update
+      setUnlockedProfileIds(prev => [...prev, profile.id]);
+
+      // Check limits in background - if over limit, revert
+      const token = localStorage.getItem('token');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      fetch(`${API_URL}/api/usage-stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(res => res.ok ? res.json() : null).then(usage => {
+        if (usage?.profile_unlocks && usage.profile_unlocks.used >= usage.profile_unlocks.limit) {
+          setUnlockedProfileIds(prev => prev.filter(id => id !== profile.id));
+          setShowDetailModal(false);
+          setSelectedProfile(null);
+          alert(`Profile unlock limit reached! You've used ${usage.profile_unlocks.used}/${usage.profile_unlocks.limit} unlocks. Upgrade to unlock more profiles.`);
+        }
+      }).catch(() => {});
+    }
+
+    // Open modal instantly
     setSelectedProfile(profile);
     setShowDetailModal(true);
   };
@@ -168,6 +201,7 @@ const SavedProfilesPage = () => {
                 onViewDetails={() => handleViewProfile(profile)}
                 onToggleSave={handleToggleSave}
                 isSaved={true}
+                isUnlocked={unlockedProfileIds.includes(profile.id)}
               />
             ))}
           </div>

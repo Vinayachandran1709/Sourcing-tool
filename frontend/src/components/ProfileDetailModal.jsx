@@ -1,11 +1,42 @@
-import React from 'react';
-import { 
-  X, Star, GitBranch, Code, MapPin, Mail, Calendar, ExternalLink, 
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  X, Star, GitBranch, Code, MapPin, Mail, Calendar, ExternalLink,
   Award, Link as LinkIcon, Users, Clock, Globe
 } from 'lucide-react';
 
 const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
-  if (!isOpen || !profile) return null;
+  const [animationState, setAnimationState] = useState('closed');
+  // 'closed' | 'entering' | 'open' | 'exiting'
+
+  useEffect(() => {
+    if (isOpen && profile) {
+      setAnimationState('entering');
+      const raf = requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          setAnimationState('open');
+        });
+      });
+      return () => cancelAnimationFrame(raf);
+    } else if (!isOpen && animationState !== 'closed') {
+      setAnimationState('exiting');
+      const timer = setTimeout(() => {
+        setAnimationState('closed');
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, profile]);
+
+  const handleClose = useCallback(() => {
+    setAnimationState('exiting');
+    setTimeout(() => {
+      setAnimationState('closed');
+      onClose();
+    }, 300);
+  }, [onClose]);
+
+  if (animationState === 'closed') return null;
+
+  const isVisible = animationState === 'open';
 
   const getScoreColor = (score) => {
     if (score >= 85) return '#10b981';
@@ -54,20 +85,33 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
 
   const activityStatus = getActivityStatus(profile.last_active_date);
 
+  const overlayAnimStyle = {
+    ...styles.overlay,
+    opacity: isVisible ? 1 : 0,
+    transition: 'opacity 0.3s ease',
+  };
+
+  const modalAnimStyle = {
+    ...styles.modal,
+    opacity: isVisible ? 1 : 0,
+    transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(30px) scale(0.97)',
+    transition: 'opacity 0.3s ease, transform 0.3s ease',
+  };
+
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+    <div style={overlayAnimStyle} onClick={handleClose}>
+      <div style={modalAnimStyle} onClick={(e) => e.stopPropagation()}>
         {/* Header */}
         <div style={styles.header}>
           <div style={styles.headerLeft}>
-            <img 
-              src={profile.avatar_url || 'https://via.placeholder.com/100'} 
+            <img
+              src={profile.avatar_url || 'https://via.placeholder.com/100'}
               alt={profile.name || profile.github_username}
               style={styles.avatar}
             />
             <div style={styles.headerInfo}>
               <h2 style={styles.name}>{profile.name || profile.github_username}</h2>
-              <a 
+              <a
                 href={`https://github.com/${profile.github_username}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -77,7 +121,7 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
                 <ExternalLink size={16} />
               </a>
               {profile.portfolio_url && (
-                <a 
+                <a
                   href={profile.portfolio_url}
                   target="_blank"
                   rel="noopener noreferrer"
@@ -89,8 +133,8 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
               )}
             </div>
           </div>
-          
-          <button onClick={onClose} style={styles.closeBtn}>
+
+          <button onClick={handleClose} style={styles.closeBtn}>
             <X size={24} />
           </button>
         </div>

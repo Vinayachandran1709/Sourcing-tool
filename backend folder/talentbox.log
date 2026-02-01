@@ -20960,3 +20960,28 @@ ModuleNotFoundError: No module named 'github_integration_service'
 2026-02-01 11:48:23,780 - httpx - INFO - HTTP Request: GET https://api.github.com/users/navdeepjaswal/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
 2026-02-01 11:48:23,785 - httpx - INFO - HTTP Request: GET https://api.github.com/users/denysmy/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
 2026-02-01 11:48:23,788 - httpx - INFO - HTTP Request: GET https://api.github.com/users/HelalChow/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,792 - httpx - INFO - HTTP Request: GET https://api.github.com/users/rknoll/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,797 - httpx - INFO - HTTP Request: GET https://api.github.com/users/khatchad/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,807 - httpx - INFO - HTTP Request: GET https://api.github.com/users/kcherianthomas/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,811 - httpx - INFO - HTTP Request: GET https://api.github.com/users/egk265/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,815 - httpx - INFO - HTTP Request: GET https://api.github.com/users/demianrenzulli/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,819 - httpx - INFO - HTTP Request: GET https://api.github.com/users/deepkaushik/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,822 - httpx - INFO - HTTP Request: GET https://api.github.com/users/AlvarezKevin/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,824 - httpx - INFO - HTTP Request: GET https://api.github.com/users/joncolon/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,842 - httpx - INFO - HTTP Request: GET https://api.github.com/users/yunyuntsai/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,856 - httpx - INFO - HTTP Request: GET https://api.github.com/users/hazems/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,923 - httpx - INFO - HTTP Request: GET https://api.github.com/users/reubenvarghese1/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:23,939 - httpx - INFO - HTTP Request: GET https://api.github.com/users/EngineerMichael/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:24,068 - httpx - INFO - HTTP Request: GET https://api.github.com/users/jacirrone/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:24,075 - httpx - INFO - HTTP Request: GET https://api.github.com/users/JohnSebastian3/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:24,080 - httpx - INFO - HTTP Request: GET https://api.github.com/users/Neil-Opena/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:24,084 - httpx - INFO - HTTP Request: GET https://api.github.com/users/akshitalakkad/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:24,175 - httpx - INFO - HTTP Request: GET https://api.github.com/users/baoziiiii/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:48:24,746 - httpx - INFO - HTTP Request: GET https://api.github.com/users/MarvinMartin24/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
+2026-02-01 11:49:38,313 - main - INFO - 📤 Sending 24 new profiles
+2026-02-01 11:49:38,315 - main - INFO - 📊 Progress: 21% - Total: 170
+2026-02-01 11:58:26,545 - main - WARNING - HTTP 401 on /api/auth/login: Invalid credentials
+2026-02-01 11:58:31,563 - main - WARNING - HTTP 401 on /api/auth/login: Invalid credentials
+2026-02-01 11:59:08,711 - main - INFO - 📦 Fetching cached profiles...
+2026-02-01 11:59:10,725 - main - INFO - ✅ Sending 120 initial results
+2026-02-01 11:59:10,731 - main - INFO - ✅ Search complete

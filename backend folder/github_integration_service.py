@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 from models import Profile
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 import asyncio
 from github_service import (
     search_github_users_paginated,
@@ -182,6 +183,59 @@ class GitHubIntegrationService:
         return query.limit(200).all()
     
     @staticmethod
+    def _upsert_profile(db: Session, details: dict) -> Profile:
+        """
+        Insert a new profile or update an existing one using PostgreSQL
+        ON CONFLICT DO UPDATE. Returns the Profile object.
+        """
+        languages = details.get("languages", {})
+        primary_language = list(languages.keys())[0] if languages else None
+
+        values = {
+            "github_username": details["username"],
+            "name": details.get("name"),
+            "email": details.get("email"),
+            "location": details.get("location"),
+            "bio": details.get("bio"),
+            "public_repos": details.get("public_repos", 0),
+            "primary_language": primary_language,
+            "contributions_last_year": details.get("contributions", 0),
+            "portfolio_url": details.get("portfolio_url"),
+            "avatar_url": details.get("avatar_url"),
+            "total_stars": details.get("total_stars", 0),
+            "languages_data": details.get("languages"),
+            "top_repos": details.get("top_repos"),
+            "last_active_date": details.get("last_active_date"),
+            "cached_at": datetime.now(timezone.utc),
+            "source": "github",
+        }
+
+        stmt = pg_insert(Profile).values(**values)
+        update_dict = {k: v for k, v in values.items() if k != "github_username"}
+        stmt = stmt.on_conflict_do_update(
+            index_elements=["github_username"],
+            set_=update_dict,
+        ).returning(Profile.__table__.c.id)
+
+        result = db.execute(stmt)
+        db.commit()
+
+        profile_id = result.fetchone()[0]
+        profile = db.query(Profile).get(profile_id)
+
+        profile.developer_score = profile.calculate_developer_score()
+        try:
+            from role_detection_service import RoleDetectionService
+            profile.detected_roles = RoleDetectionService.detect_roles(profile)
+            profile.roles_analyzed_at = datetime.now(timezone.utc)
+        except Exception:
+            profile.detected_roles = []
+
+        db.commit()
+        db.refresh(profile)
+        return profile
+
+    @staticmethod
     async def _fetch_from_github(
         db: Session,
         language: str,
@@ -226,10 +280,14 @@ class GitHubIntegrationService:
             # ✅ OPTIMIZATION #4: Batch size 25 (was 12)
             BATCH_SIZE = 25
             
-            # ✅ Filter out existing usernames
+            # ✅ Filter out existing usernames (only skip profiles cached within last 30 days)
+            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
             existing_usernames = set(
                 db.query(Profile.github_username)
-                .filter(Profile.github_username.in_(usernames[:process_limit]))
+                .filter(
+                    Profile.github_username.in_(usernames[:process_limit]),
+                    Profile.cached_at >= thirty_days_ago
+                )
                 .all()
             )
             existing_usernames = {username[0] for username in existing_usernames}
@@ -257,52 +315,20 @@ class GitHubIntegrationService:
                 tasks = [get_user_details(username) for username in batch_usernames]
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
                 
-                # Save profiles
+                # Save profiles using upsert
                 for i, details in enumerate(batch_results):
                     if isinstance(details, Exception) or not details:
                         continue
-                    
+
                     if not is_valid_user_data(details):
                         continue
-                    
+
                     try:
-                        profile = Profile(
-                            github_username=details["username"],
-                            name=details.get("name"),
-                            email=details.get("email"),
-                            location=details.get("location"),
-                            bio=details.get("bio"),
-                            public_repos=details.get("public_repos", 0),
-                            primary_language=list(details.get("languages", {}).keys())[0] if details.get("languages") else None,
-                            contributions_last_year=details.get("contributions", 0),
-                            portfolio_url=details.get("portfolio_url"),
-                            avatar_url=details.get("avatar_url"),
-                            total_stars=details.get("total_stars", 0),
-                            languages_data=details.get("languages"),
-                            top_repos=details.get("top_repos"),
-                            last_active_date=details.get("last_active_date"),
-                            cached_at=datetime.now(timezone.utc),
-                            source="github"
-                        )
-                        
-                        profile.developer_score = profile.calculate_developer_score()
-                        
-                        try:
-                            from role_detection_service import RoleDetectionService
-                            profile.detected_roles = RoleDetectionService.detect_roles(profile)
-                            profile.roles_analyzed_at = datetime.now(timezone.utc)
-                        except:
-                            profile.detected_roles = []
-                        
-                        db.add(profile)
-                        db.commit()
-                        db.refresh(profile)
-                        
+                        profile = GitHubIntegrationService._upsert_profile(db, details)
                         new_profiles.append(profile)
                         print(f"   ✅ {details['username']}: Score {profile.developer_score}")
-                        
                     except Exception as e:
-                        logger.error(f"❌ Failed to save {details['username']}: {e}")
+                        logger.error(f"❌ Failed to upsert {details.get('username', 'unknown')}: {e}")
                         db.rollback()
                 
                 # ✅ OPTIMIZATION #7: Early stopping

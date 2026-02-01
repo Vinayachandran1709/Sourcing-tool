@@ -8,7 +8,6 @@ import FilterPanel from '../../components/FilterPanel';
 import {toggleProfileSelection} from '../../services/api';
 
 const SearchDashboard = () => {
-  // ✅ PERSIST: Load profiles and filters from localStorage on mount
   const [profiles, setProfiles] = useState(() => {
     const saved = sessionStorage.getItem('searchResults');
     return saved ? JSON.parse(saved) : [];
@@ -23,18 +22,22 @@ const SearchDashboard = () => {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [savedProfileIds, setSavedProfileIds] = useState(() => {
-    // Load saved profile IDs from localStorage
     const saved = localStorage.getItem('savedProfileIds');
     return saved ? JSON.parse(saved) : [];
   });
 
-  // ✅ OPTIMIZATION #1: Smooth progress (NO phases)
+  // Track unlocked profile IDs
+  const [unlockedProfileIds, setUnlockedProfileIds] = useState(() => {
+    const saved = localStorage.getItem('unlockedProfileIds');
+    return saved ? JSON.parse(saved) : [];
+  });
+
   const [searchProgress, setSearchProgress] = useState({
     isSearching: false,
     message: '',
     totalFound: 0
   });
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
     const saved = sessionStorage.getItem('scoreFilterRanges');
@@ -46,50 +49,48 @@ const SearchDashboard = () => {
   }, [scoreFilterRanges]);
   const PROFILES_PER_PAGE = 12;
 
-  // ✅ PERSIST: Save profiles to localStorage whenever they change
   useEffect(() => {
     if (profiles.length > 0) {
       sessionStorage.setItem('searchResults', JSON.stringify(profiles));
     }
   }, [profiles]);
 
-  // ✅ PERSIST: Save filters to localStorage whenever they change
   useEffect(() => {
     if (Object.keys(currentFilters).length > 0) {
       sessionStorage.setItem('currentFilters', JSON.stringify(currentFilters));
     }
   }, [currentFilters]);
 
-  // ✅ STREAMING SEARCH with Fetch (supports Authorization headers)
+  // Persist unlocked IDs
+  useEffect(() => {
+    localStorage.setItem('unlockedProfileIds', JSON.stringify(unlockedProfileIds));
+  }, [unlockedProfileIds]);
+
   const handleSearch = async (filters) => {
     setLoading(true);
     setError(null);
     setProfiles([]);
     setCurrentFilters(filters);
     setCurrentPage(1);
-    setScoreFilterRanges([]); // Reset score filter ranges
-    
-    
-    // ✅ OPTIMIZATION #1: Smooth progress initialization
+    setScoreFilterRanges([]);
+
     setSearchProgress({
       isSearching: true,
       message: 'Searching for developers...',
       totalFound: 0
     });
-    
+
     try {
       const token = localStorage.getItem('token');
       const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      
-      // Build request body
+
       const requestBody = {
         role: filters.role || null,
         languages: filters.languages || [],
         location: filters.location || null,
         min_repos: filters.min_repos || 0
       };
-      
-      // Use fetch with streaming
+
       const response = await fetch(
         `${API_URL}/api/search-profiles-stream`,
         {
@@ -112,34 +113,23 @@ const SearchDashboard = () => {
 
       while (true) {
         const { done, value } = await reader.read();
-        
         if (done) break;
-        
-        // Decode chunk
         buffer += decoder.decode(value, { stream: true });
-        
-        // Process complete messages (ending with \n\n)
         const messages = buffer.split('\n\n');
-        buffer = messages.pop() || ''; // Keep incomplete message in buffer
-        
+        buffer = messages.pop() || '';
+
         for (const message of messages) {
           if (!message.trim() || !message.startsWith('data: ')) continue;
-          
+
           try {
             const jsonStr = message.replace(/^data: /, '');
             const data = JSON.parse(jsonStr);
-            
+
             switch (data.type) {
               case 'status':
-                // ✅ OPTIMIZATION #1: Smooth status updates (no phase numbers)
-                setSearchProgress(prev => ({
-                  ...prev,
-                  message: data.message
-                }));
+                setSearchProgress(prev => ({ ...prev, message: data.message }));
                 break;
-                
               case 'profiles':
-                // Initial results loaded
                 setProfiles(data.profiles);
                 setSearchProgress(prev => ({
                   ...prev,
@@ -147,7 +137,6 @@ const SearchDashboard = () => {
                   message: 'Loading developer profiles...'
                 }));
                 break;
-
               case 'progress':
                 setSearchProgress(prev => ({
                   ...prev,
@@ -155,12 +144,9 @@ const SearchDashboard = () => {
                   message: 'Finding more developers...'
                 }));
                 break;
-                
               case 'new_profiles':
-                // Add new profiles as they arrive
                 setProfiles(prev => [...prev, ...data.profiles]);
                 break;
-                
               case 'complete':
                 setSearchProgress({
                   isSearching: false,
@@ -169,53 +155,38 @@ const SearchDashboard = () => {
                 });
                 setLoading(false);
                 break;
-                
               case 'error':
                 setError({ message: data.message });
                 setLoading(false);
-                setSearchProgress({
-                  isSearching: false,
-                  message: '',
-                  totalFound: 0
-                });
+                setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
                 break;
               default:
-              // Ignore unknown message types
-              break;
+                break;
             }
           } catch (e) {
             console.error('Failed to parse SSE data:', e);
           }
         }
       }
-      
+
     } catch (error) {
       console.error('Search failed:', error);
       setError({ message: error.message || 'Failed to start search. Please try again.' });
       setLoading(false);
-      setSearchProgress({
-        isSearching: false,
-        message: '',
-        totalFound: 0
-      });
+      setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
     }
   };
 
-  // ✅ OPTIMIZATION #3: Optimistic select toggle (instant UI update)
   const handleProfileSelect = async (profileId) => {
-    // ✅ Update UI immediately (optimistic)
     setProfiles(prevProfiles =>
       prevProfiles.map(p =>
         p.id === profileId ? { ...p, selected: !p.selected } : p
       )
     );
-
-    // ✅ Then sync with backend in background
     try {
       await toggleProfileSelection(profileId);
     } catch (error) {
       console.error('Failed to toggle selection:', error);
-      // ✅ Revert on error
       setProfiles(prevProfiles =>
         prevProfiles.map(p =>
           p.id === profileId ? { ...p, selected: !p.selected } : p
@@ -225,15 +196,43 @@ const SearchDashboard = () => {
   };
 
   const handleSelectAll = () => {
-    const allSelected = profiles.every(p => p.selected);
-    setProfiles(profiles.map(p => ({ ...p, selected: !allSelected })));
+    const allSelected = filteredProfiles.every(p => p.selected);
+    // Select/deselect ALL filtered profiles (not just current page)
+    const filteredIds = new Set(filteredProfiles.map(p => p.id));
+    setProfiles(profiles.map(p =>
+      filteredIds.has(p.id) ? { ...p, selected: !allSelected } : p
+    ));
   };
 
   const handleDeselectAll = () => {
     setProfiles(profiles.map(p => ({ ...p, selected: false })));
   };
 
+  // Handle unlock profile - check limits, mark as unlocked, open modal
   const handleViewProfile = (profile) => {
+    const alreadyUnlocked = unlockedProfileIds.includes(profile.id);
+
+    if (!alreadyUnlocked) {
+      // Mark as unlocked immediately for instant UI update
+      setUnlockedProfileIds(prev => [...prev, profile.id]);
+
+      // Check limits in background - if over limit, revert
+      const token = localStorage.getItem('token');
+      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      fetch(`${API_URL}/api/usage-stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      }).then(res => res.ok ? res.json() : null).then(usage => {
+        if (usage?.profile_unlocks && usage.profile_unlocks.used >= usage.profile_unlocks.limit) {
+          // Revert unlock and close modal
+          setUnlockedProfileIds(prev => prev.filter(id => id !== profile.id));
+          setShowDetailModal(false);
+          setSelectedProfile(null);
+          alert(`Profile unlock limit reached! You've used ${usage.profile_unlocks.used}/${usage.profile_unlocks.limit} unlocks. Upgrade to unlock more profiles.`);
+        }
+      }).catch(() => {});
+    }
+
+    // Open modal instantly
     setSelectedProfile(profile);
     setShowDetailModal(true);
   };
@@ -243,12 +242,9 @@ const SearchDashboard = () => {
     let updatedSavedIds;
 
     if (isSaved) {
-      // Remove from saved
       updatedSavedIds = savedProfileIds.filter(id => id !== profile.id);
     } else {
-      // Add to saved
       updatedSavedIds = [...savedProfileIds, profile.id];
-      // Also save full profile data to localStorage
       const savedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
       const profileExists = savedProfiles.some(p => p.id === profile.id);
       if (!profileExists) {
@@ -260,7 +256,6 @@ const SearchDashboard = () => {
     setSavedProfileIds(updatedSavedIds);
     localStorage.setItem('savedProfileIds', JSON.stringify(updatedSavedIds));
 
-    // Remove from saved profiles if unsaving
     if (isSaved) {
       const savedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
       const filtered = savedProfiles.filter(p => p.id !== profile.id);
@@ -274,27 +269,24 @@ const SearchDashboard = () => {
       alert('Please select at least one profile to send emails.');
       return;
     }
-    
-    // Check email limits before opening modal
+
     try {
       const { getEmailUsage } = await import('../../services/api');
       const usageData = await getEmailUsage();
-      
+
       if (!usageData.usage.can_send) {
         alert(`Email limit reached! You've used ${usageData.usage.used}/${usageData.usage.limit} emails this month. Upgrade to send more.`);
         return;
       }
-      
+
       if (selectedProfiles.length > usageData.usage.remaining) {
         alert(`Cannot send ${selectedProfiles.length} emails. Only ${usageData.usage.remaining} emails remaining this month.`);
         return;
       }
-      
     } catch (error) {
       console.error('Failed to check email limits:', error);
-      // Continue anyway - backend will enforce limits
     }
-    
+
     setShowEmailModal(true);
   };
 
@@ -305,18 +297,37 @@ const SearchDashboard = () => {
     } else {
       setScoreFilterRanges([...scoreFilterRanges, range]);
     }
-    setCurrentPage(1); // Reset to first page when filter changes
+    setCurrentPage(1);
   };
 
-  // ✅ SCORE FILTER: Apply score filtering
+  // Select all filtered profiles (for score filter quick action)
+  const handleSelectAllFiltered = () => {
+    const filteredIds = new Set(filteredProfiles.map(p => p.id));
+    const allFilteredSelected = filteredProfiles.every(p => p.selected);
+    setProfiles(profiles.map(p =>
+      filteredIds.has(p.id) ? { ...p, selected: !allFilteredSelected } : p
+    ));
+  };
+
+  // Send email to all filtered profiles
+  const handleFilteredBulkEmail = async () => {
+    // First select all filtered profiles
+    const filteredIds = new Set(filteredProfiles.map(p => p.id));
+    setProfiles(profiles.map(p =>
+      filteredIds.has(p.id) ? { ...p, selected: true } : p
+    ));
+    // Then trigger the email flow
+    setTimeout(() => handleBulkEmail(), 100);
+  };
+
+  // Score filtering
   const filteredProfiles = profiles.filter(profile => {
     if (scoreFilterRanges.length === 0) return true;
-    
     const score = profile.developer_score || 0;
-    return scoreFilterRanges.some(range => 
-      score >= range.min && score <= range.max
-    );
+    return scoreFilterRanges.some(range => score >= range.min && score <= range.max);
   });
+
+  const selectedFilteredCount = filteredProfiles.filter(p => p.selected).length;
 
   const totalPages = Math.ceil(filteredProfiles.length / PROFILES_PER_PAGE);
   const paginatedProfiles = filteredProfiles.slice(
@@ -324,30 +335,22 @@ const SearchDashboard = () => {
     currentPage * PROFILES_PER_PAGE
   );
 
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages = [];
     const maxVisible = 7;
-    
+
     if (totalPages <= maxVisible) {
-      // Show all pages
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i);
-      }
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
     } else {
-      // Smart pagination
       if (currentPage <= 4) {
-        // Near start: [1] [2] [3] [4] [5] ... [15]
         for (let i = 1; i <= 5; i++) pages.push(i);
         pages.push('...');
         pages.push(totalPages);
       } else if (currentPage >= totalPages - 3) {
-        // Near end: [1] ... [11] [12] [13] [14] [15]
         pages.push(1);
         pages.push('...');
         for (let i = totalPages - 4; i <= totalPages; i++) pages.push(i);
       } else {
-        // Middle: [1] ... [5] [6] [7] ... [15]
         pages.push(1);
         pages.push('...');
         for (let i = currentPage - 1; i <= currentPage + 1; i++) pages.push(i);
@@ -355,7 +358,6 @@ const SearchDashboard = () => {
         pages.push(totalPages);
       }
     }
-    
     return pages;
   };
 
@@ -363,25 +365,20 @@ const SearchDashboard = () => {
     <>
       <DashboardHeader />
       <div style={styles.content}>
-        {/* Filters */}
-        <FilterPanel 
-          onApplyFilters={handleSearch} 
+        <FilterPanel
+          onApplyFilters={handleSearch}
           initialFilters={currentFilters}
           onReset={() => {
             setProfiles([]);
-            setSearchProgress({
-              isSearching: false,
-              message: '',
-              totalFound: 0
-            });
+            setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
             setCurrentFilters({});
             sessionStorage.removeItem('searchResults');
             sessionStorage.removeItem('currentFilters');
             sessionStorage.removeItem('scoreFilterRanges');
           }}
         />
-        
-        {/* Search Progress - no total count shown */}
+
+        {/* Search Progress */}
         {searchProgress.isSearching && (
           <div style={styles.progressContainer}>
             <div style={styles.progressHeader}>
@@ -398,9 +395,7 @@ const SearchDashboard = () => {
           </div>
         )}
 
-
-
-        {/* ✅ OPTIMIZATION #2: Score filter disabled during search */}
+        {/* Score filter with Select All + Send Email actions */}
         {profiles.length > 0 && !loading && (
           <div style={styles.scoreFilterContainer}>
             <div style={styles.scoreFilterHeader}>
@@ -414,60 +409,81 @@ const SearchDashboard = () => {
               </div>
             </div>
 
-              <div style={styles.scoreRanges}>
-                {[
-                  { label: '0-30 (Beginner)', min: 0, max: 30, color: '' },
-                  { label: '30-50 (Junior)', min: 30, max: 50, color: '#6b7280' },
-                  { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#f59e0b' },
-                  { label: '70-85 (Senior)', min: 70, max: 85, color: '#3b82f6' },
-                  { label: '85-100 (Expert)', min: 85, max: 100, color: '#10b981' }
-                ].map(range => {
-                  const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
-                  return (
-                    <label 
-                      key={range.label}
-                      style={{
-                        ...styles.scoreRangeLabel,
-                        ...(isSelected ? styles.scoreRangeLabelSelected : {}),
-                        borderColor: isSelected ? range.color : '#e5e7eb'
-                      }}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isSelected}
-                        onChange={() => handleScoreRangeToggle(range)}
-                        style={styles.scoreRangeCheckbox}
-                      />
-                      <div style={styles.scoreRangeContent}>
-                        <span style={styles.scoreRangeText}>{range.label}</span>
-                        <div 
-                          style={{
-                            ...styles.scoreRangeIndicator, 
-                            backgroundColor: range.color
-                          }}
-                        ></div>
-                      </div>
-                    </label>
-                  );
-                })}
-              </div>
-            
+            <div style={styles.scoreRanges}>
+              {[
+                { label: '0-30 (Beginner)', min: 0, max: 30, color: '' },
+                { label: '30-50 (Junior)', min: 30, max: 50, color: '#6b7280' },
+                { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#f59e0b' },
+                { label: '70-85 (Senior)', min: 70, max: 85, color: '#3b82f6' },
+                { label: '85-100 (Expert)', min: 85, max: 100, color: '#10b981' }
+              ].map(range => {
+                const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
+                return (
+                  <label
+                    key={range.label}
+                    style={{
+                      ...styles.scoreRangeLabel,
+                      ...(isSelected ? styles.scoreRangeLabelSelected : {}),
+                      borderColor: isSelected ? range.color : '#e5e7eb'
+                    }}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => handleScoreRangeToggle(range)}
+                      style={styles.scoreRangeCheckbox}
+                    />
+                    <div style={styles.scoreRangeContent}>
+                      <span style={styles.scoreRangeText}>{range.label}</span>
+                      <div
+                        style={{
+                          ...styles.scoreRangeIndicator,
+                          backgroundColor: range.color
+                        }}
+                      ></div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
 
+            {/* Score filter actions bar: count + Select All + Send Email + Clear */}
             {scoreFilterRanges.length > 0 && (
-              <div style={styles.scoreFilterInfo}>
-                {filteredProfiles.length} profiles selected
-                <button
-                  onClick={() => setScoreFilterRanges([])}
-                  style={styles.clearScoreFilter}
-                >
-                  Clear Score Filter
-                </button>
+              <div style={styles.scoreFilterActions}>
+                <span style={styles.scoreFilterCount}>
+                  {filteredProfiles.length} profiles
+                  {selectedFilteredCount > 0 && ` (${selectedFilteredCount} selected)`}
+                </span>
+                <div style={styles.scoreFilterButtons}>
+                  <button
+                    onClick={handleSelectAllFiltered}
+                    style={styles.scoreSelectAllBtn}
+                  >
+                    <CheckSquare size={14} />
+                    {filteredProfiles.every(p => p.selected) ? 'Deselect All' : `Select All (${filteredProfiles.length})`}
+                  </button>
+                  {selectedFilteredCount > 0 && (
+                    <button
+                      onClick={handleBulkEmail}
+                      style={styles.scoreSendEmailBtn}
+                    >
+                      <Mail size={14} />
+                      Send Email ({selectedFilteredCount})
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setScoreFilterRanges([])}
+                    style={styles.clearScoreFilter}
+                  >
+                    Clear Filter
+                  </button>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {/* Bulk Actions */}
+        {/* Bulk Actions (shows when any profiles selected) */}
         {profiles.filter(p => p.selected).length > 0 && (
           <div style={styles.bulkActions}>
             <div style={styles.bulkActionsLeft}>
@@ -478,7 +494,7 @@ const SearchDashboard = () => {
             </div>
             <div style={styles.bulkActionsRight}>
               <button onClick={handleSelectAll} style={styles.bulkActionButton}>
-                {profiles.every(p => p.selected) ? 'Deselect All' : 'Select All'}
+                {filteredProfiles.every(p => p.selected) ? 'Deselect All' : 'Select All'}
               </button>
               <button onClick={handleBulkEmail} style={styles.bulkActionButtonPrimary}>
                 <Mail size={16} />
@@ -503,11 +519,11 @@ const SearchDashboard = () => {
                   onViewDetails={() => handleViewProfile(profile)}
                   onToggleSave={handleToggleSave}
                   isSaved={savedProfileIds.includes(profile.id)}
+                  isUnlocked={unlockedProfileIds.includes(profile.id)}
                 />
               ))}
             </div>
 
-            {/* ✅ NEW: Page Number Pagination */}
             {totalPages > 1 && (
               <div style={styles.pagination}>
                 <button
@@ -520,13 +536,12 @@ const SearchDashboard = () => {
                 >
                   ← Previous
                 </button>
-                
+
                 <div style={styles.pageNumbers}>
                   {getPageNumbers().map((page, idx) => {
                     if (page === '...') {
                       return <span key={`ellipsis-${idx}`} style={styles.pageEllipsis}>...</span>;
                     }
-                    
                     return (
                       <button
                         key={page}
@@ -541,7 +556,7 @@ const SearchDashboard = () => {
                     );
                   })}
                 </div>
-                
+
                 <button
                   onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
@@ -580,16 +595,14 @@ const SearchDashboard = () => {
           />
         )}
 
-        {showDetailModal && selectedProfile && (
-          <ProfileDetailModal
-            profile={selectedProfile}
-            isOpen={showDetailModal}
-            onClose={() => {
-              setShowDetailModal(false);
-              setSelectedProfile(null);
-            }}
-          />
-        )}
+        <ProfileDetailModal
+          profile={selectedProfile}
+          isOpen={showDetailModal}
+          onClose={() => {
+            setShowDetailModal(false);
+            setSelectedProfile(null);
+          }}
+        />
       </div>
     </>
   );
@@ -602,7 +615,6 @@ const styles = {
     padding: '2rem',
   },
 
-  // ✅ OPTIMIZATION #1: Smooth progress styles (no phases)
   progressContainer: {
     padding: '24px',
     backgroundColor: '#f0fdf4',
@@ -615,39 +627,12 @@ const styles = {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: '16px',
   },
 
   progressStatus: {
     fontSize: '14px',
     fontWeight: '600',
     color: '#1a1a1a',
-  },
-
-  progressStats: {
-    display: 'flex',
-    gap: '24px',
-    justifyContent: 'center',
-  },
-
-  progressStat: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px',
-  },
-
-  progressStatValue: {
-    fontSize: '24px',
-    fontWeight: '700',
-    color: '#10b981',
-  },
-
-  progressStatLabel: {
-    fontSize: '12px',
-    color: '#6b7280',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
   },
 
   errorBox: {
@@ -660,58 +645,6 @@ const styles = {
     borderRadius: '8px',
     marginBottom: '24px',
     color: '#991b1b',
-  },
-
-  statsBar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '16px',
-    padding: '16px 24px',
-    backgroundColor: '#ffffff',
-    borderRadius: '12px',
-    border: '1px solid #e5e7eb',
-    marginBottom: '24px',
-  },
-
-  statItem: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '4px',
-  },
-
-  statValue: {
-    fontSize: '24px',
-    fontWeight: '700',
-    color: '#1a1a1a',
-  },
-
-  statLabel: {
-    fontSize: '12px',
-    color: '#6b7280',
-    textTransform: 'uppercase',
-    letterSpacing: '0.5px',
-  },
-
-  statDivider: {
-    width: '1px',
-    height: '40px',
-    backgroundColor: '#e5e7eb',
-  },
-
-  exportButton: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '8px',
-    padding: '8px 16px',
-    backgroundColor: '#f9fafb',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
   },
 
   bulkActions: {
@@ -893,25 +826,6 @@ const styles = {
     fontWeight: '600',
   },
 
-  // ✅ OPTIMIZATION #2: Disabled hint
-  scoreFilterDisabledHint: {
-    fontSize: '12px',
-    color: '#9ca3af',
-    fontStyle: 'italic',
-  },
-
-  scoreFilterToggle: {
-    padding: '8px 16px',
-    backgroundColor: '#f9fafb',
-    border: '1px solid #d1d5db',
-    borderRadius: '8px',
-    color: '#374151',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    fontFamily: 'Outfit, sans-serif',
-  },
-
   scoreRanges: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -963,16 +877,60 @@ const styles = {
     flexShrink: 0,
   },
 
-  scoreFilterInfo: {
+  // Score filter actions bar
+  scoreFilterActions: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '12px 16px',
     backgroundColor: '#f0fdf4',
     borderRadius: '8px',
+    flexWrap: 'wrap',
+    gap: '12px',
+  },
+
+  scoreFilterCount: {
     fontSize: '14px',
     color: '#15803d',
     fontWeight: '600',
+  },
+
+  scoreFilterButtons: {
+    display: 'flex',
+    gap: '8px',
+    flexWrap: 'wrap',
+  },
+
+  scoreSelectAllBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 14px',
+    backgroundColor: '#ffffff',
+    border: '1px solid #3b82f6',
+    borderRadius: '6px',
+    color: '#3b82f6',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'Outfit, sans-serif',
+    transition: 'all 0.2s',
+  },
+
+  scoreSendEmailBtn: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    padding: '6px 14px',
+    backgroundColor: '#FF6B35',
+    border: 'none',
+    borderRadius: '6px',
+    color: '#ffffff',
+    fontSize: '13px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: 'Outfit, sans-serif',
+    transition: 'all 0.2s',
   },
 
   clearScoreFilter: {
@@ -985,12 +943,6 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     fontFamily: 'Outfit, sans-serif',
-  },
-  exportBar: {
-    display: 'flex',
-    justifyContent: 'flex-end',
-    padding: '16px 0',
-    marginBottom: '24px',
   },
 };
 

@@ -28,7 +28,7 @@ const SubscriptionPage = () => {
       features: [
         '25 searches',
         '40 profile unlocks',
-        '15 emails',
+        '30 emails',
         'Filter by programming languages',
         'Basic developer scoring',
         'Names & scores visible'
@@ -36,7 +36,7 @@ const SubscriptionPage = () => {
       limits: {
         profile_unlocks: 40,
         searches: 25,
-        emails: 15
+        emails: 30
       }
     },
     {
@@ -52,8 +52,7 @@ const SubscriptionPage = () => {
         'Full GitHub profile access + links',
         'Save profiles to shortlist',
         'One-click outreach',
-        'Email from your domain',
-        'Export candidates'
+        'Email from your domain'
       ],
       limits: {
         profile_unlocks: 300,

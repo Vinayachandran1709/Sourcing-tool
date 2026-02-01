@@ -1,7 +1,19 @@
 import React from 'react';
-import { Star, MapPin, Eye } from 'lucide-react';
+import { Star, MapPin, Lock, Unlock } from 'lucide-react';
 
-const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }) => {
+const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved, isUnlocked }) => {
+  const prevUnlockedRef = React.useRef(isUnlocked);
+  const [justUnlocked, setJustUnlocked] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isUnlocked && !prevUnlockedRef.current) {
+      setJustUnlocked(true);
+      const timer = setTimeout(() => setJustUnlocked(false), 500);
+      return () => clearTimeout(timer);
+    }
+    prevUnlockedRef.current = isUnlocked;
+  }, [isUnlocked]);
+
   const getScoreColor = (score) => {
     if (score >= 85) return '#10b981';
     if (score >= 70) return '#3b82f6';
@@ -27,6 +39,10 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
       return parts[0];
     }
     return profile.github_username;
+  };
+
+  const handleUnlockClick = () => {
+    onViewDetails && onViewDetails(profile);
   };
 
   return (
@@ -133,14 +149,34 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved }
         </div>
       )}
 
-      {/* Actions - View Profile + Save only, no email on card */}
+      {/* Actions - Unlock Profile + Save */}
       <div style={styles.actions}>
         <button
-          onClick={() => onViewDetails && onViewDetails(profile)}
-          style={styles.viewButton}
+          onClick={handleUnlockClick}
+          style={{
+            ...styles.viewButton,
+            ...(isUnlocked ? styles.viewButtonUnlocked : {})
+          }}
+          className={`unlock-profile-btn${justUnlocked ? ' just-unlocked' : ''}`}
         >
-          <Eye size={16} />
-          <span>View Profile</span>
+          <span style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+            transition: 'opacity 0.2s ease',
+          }}>
+            {isUnlocked ? (
+              <>
+                <Unlock size={16} />
+                <span>View Profile</span>
+              </>
+            ) : (
+              <>
+                <Lock size={16} />
+                <span>Unlock Profile</span>
+              </>
+            )}
+          </span>
         </button>
 
         <button
@@ -337,8 +373,12 @@ const styles = {
     fontSize: '0.875rem',
     fontWeight: '600',
     cursor: 'pointer',
-    transition: 'all 0.2s',
+    transition: 'all 0.3s',
     fontFamily: 'Outfit, sans-serif',
+  },
+
+  viewButtonUnlocked: {
+    backgroundColor: '#10b981',
   },
 
   starActionButton: {
@@ -358,7 +398,7 @@ const styles = {
   },
 };
 
-// Hover effects
+// Hover effects + unlock animation
 const styleSheet = document.createElement('style');
 styleSheet.textContent = `
   div[style*="checkboxContainer"]:hover {
@@ -371,9 +411,19 @@ styleSheet.textContent = `
     box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
   }
 
-  button[style*="viewButton"]:hover {
-    background: #e85a26 !important;
+  @keyframes unlockPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.08); }
+    100% { transform: scale(1); }
+  }
+
+  .unlock-profile-btn.just-unlocked {
+    animation: unlockPulse 0.4s ease-out;
+  }
+
+  .unlock-profile-btn:hover {
     transform: translateY(-1px);
+    filter: brightness(0.9);
   }
 
   button[style*="starActionButton"]:hover {
