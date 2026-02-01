@@ -5,38 +5,25 @@ import {
 } from 'lucide-react';
 
 const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
-  const [animationState, setAnimationState] = useState('closed');
-  // 'closed' | 'entering' | 'open' | 'exiting'
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     if (isOpen && profile) {
-      setAnimationState('entering');
-      const raf = requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          setAnimationState('open');
-        });
-      });
+      // Small delay to allow CSS transition to trigger
+      const raf = requestAnimationFrame(() => setVisible(true));
       return () => cancelAnimationFrame(raf);
-    } else if (!isOpen && animationState !== 'closed') {
-      setAnimationState('exiting');
-      const timer = setTimeout(() => {
-        setAnimationState('closed');
-      }, 300);
-      return () => clearTimeout(timer);
+    } else {
+      setVisible(false);
     }
   }, [isOpen, profile]);
 
   const handleClose = useCallback(() => {
-    setAnimationState('exiting');
-    setTimeout(() => {
-      setAnimationState('closed');
-      onClose();
-    }, 300);
+    onClose();
   }, [onClose]);
 
-  if (animationState === 'closed') return null;
+  if (!isOpen || !profile) return null;
 
-  const isVisible = animationState === 'open';
+  const isVisible = visible;
 
   const getScoreColor = (score) => {
     if (score >= 85) return '#10b981';

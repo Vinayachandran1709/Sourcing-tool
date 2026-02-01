@@ -309,17 +309,6 @@ const SearchDashboard = () => {
     ));
   };
 
-  // Send email to all filtered profiles
-  const handleFilteredBulkEmail = async () => {
-    // First select all filtered profiles
-    const filteredIds = new Set(filteredProfiles.map(p => p.id));
-    setProfiles(profiles.map(p =>
-      filteredIds.has(p.id) ? { ...p, selected: true } : p
-    ));
-    // Then trigger the email flow
-    setTimeout(() => handleBulkEmail(), 100);
-  };
-
   // Score filtering
   const filteredProfiles = profiles.filter(profile => {
     if (scoreFilterRanges.length === 0) return true;
