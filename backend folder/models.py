@@ -49,9 +49,13 @@ class User(Base):
     usage_reset_date = Column(DateTime(timezone=True), server_default=func.now())
 
     # ===== EMAIL OUTREACH FIELDS (ONE TEMPLATE) =====
-    sender_email = Column(String, nullable=True)  # Email they send FROM
-    email_template = Column(Text, nullable=True)  # Their ONE reusable template
-    sender_email_verified = Column(Boolean, default=False)  # Future: verify ownership
+    sender_email = Column(String, nullable=True)
+    sender_name = Column(String, nullable=True)
+    email_subject = Column(String, nullable=True)
+    email_template = Column(Text, nullable=True)
+    reply_method = Column(String, nullable=True)  # "email" or "form"
+    reply_link = Column(String, nullable=True)  # URL for application form
+    sender_email_verified = Column(Boolean, default=False)
 
     # Relationships
     saved_lists = relationship("SavedList", back_populates="user")

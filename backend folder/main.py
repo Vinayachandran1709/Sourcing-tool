@@ -61,12 +61,12 @@ limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
     title="TalentBox API",
-    version="2.0.0",  # ✅ Updated version
+    version="2.0.1",  # ✅ Updated version for Resend integration
     description="API for GitHub developer sourcing and recruitment"
 )
 
 # Log initialization
-logger.info("TalentBox API initialized - Version 2.0.0 (FIXED)")
+logger.info("TalentBox API initialized - Version 2.0.1 (Resend Integration)")
 logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
 logger.info(f"CORS origins: {CORS_ORIGINS}")
 
@@ -86,6 +86,13 @@ async def startup_event():
         logger.error("   → Only database cache will work")
     else:
         logger.info(f"✅ GitHub Token found (length: {len(GITHUB_TOKEN)})")
+    
+    # Validate Resend API Key
+    resend_key = os.getenv("RESEND_API_KEY")
+    if not resend_key:
+        logger.warning("⚠️ RESEND_API_KEY not found - email features will not work")
+    else:
+        logger.info("✅ Resend API Key configured")
     
     # Validate Database
     try:
@@ -223,8 +230,6 @@ class ProfileResponse(BaseModel):
 class EmailRequest(BaseModel):
     """Request model for sending emails"""
     profile_ids: List[int]
-    subject: str
-    body: str
 
 
 # ===== ROOT ENDPOINT =====
@@ -234,7 +239,7 @@ def root():
     """Welcome endpoint"""
     return {
         "message": "TalentBox API - Developer Sourcing Platform",
-        "version": "2.0.0",
+        "version": "2.0.1",
         "status": "operational",
         "docs": "/docs"
     }
@@ -519,122 +524,99 @@ def get_selected_profiles(
     return profiles
 
 
-# ===== SEND BULK EMAILS =====
+# ===== SEND BULK EMAILS (UPDATED FOR RESEND) =====
 
 @app.post("/api/send-bulk-emails")
-def send_bulk_emails(
-    email_request: EmailRequest,
+async def send_bulk_emails_endpoint(
+    request: dict,
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    """Send bulk emails to selected profiles"""
-    user_id = current_user.id
-    
-    logger.info(f"Bulk email request from user {user_id} for {len(email_request.profile_ids)} profiles")
-    
-    # ===== CHECK EMAIL LIMITS =====
-    usage = UsageService.check_email_limit(db, user_id)
-    
-    if not usage["can_send"]:
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "error": "EMAIL_LIMIT_EXCEEDED",
-                "message": f"Email limit reached. You've used {usage['used']}/{usage['limit']} emails this month.",
-                "usage": usage
-            }
-        )
-    
-    # Check if trying to send more than remaining
-    if len(email_request.profile_ids) > usage["remaining"]:
-        raise HTTPException(
-            status_code=403,
-            detail={
-                "error": "EMAIL_LIMIT_EXCEEDED",
-                "message": f"Cannot send {len(email_request.profile_ids)} emails. Only {usage['remaining']} remaining this month.",
-                "usage": usage
-            }
-        )
-    
-    # ===== USE USER'S SENDER EMAIL =====
-    sender_email = current_user.sender_email
-    
-    if not sender_email:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "error": "SENDER_EMAIL_NOT_SET",
-                "message": "Please set your sender email in settings first"
-            }
-        )
-    
-    # Get password from env (or user's password if stored)
-    company_password = os.getenv("COMPANY_EMAIL_PASSWORD")
-    
-    if not company_password:
-        raise HTTPException(
-            status_code=500,
-            detail="Email credentials not configured. Add COMPANY_EMAIL_PASSWORD to .env"
-        )
-    
-    # Get profiles
-    profiles = db.query(Profile).filter(Profile.id.in_(email_request.profile_ids)).all()
-    
-    if not profiles:
-        raise HTTPException(status_code=404, detail="No profiles found")
-    
-    # Prepare recipients
-    recipients = []
-    for p in profiles:
-        if p.email and '@' in p.email:
-            recipients.append({
-                "email": p.email,
-                "name": p.name or p.github_username
-            })
-    
-    if not recipients:
-        raise HTTPException(status_code=400, detail="None of the selected profiles have valid email addresses")
-    
-    # Send emails
-    print(f"\n📧 Sending emails to {len(recipients)} developers...")
-    results = EmailService.send_bulk_emails(
-        company_email=sender_email,
-        company_password=company_password,
-        recipients=recipients,
-        subject=email_request.subject,
-        body_template=email_request.body
-    )
-    
-    # Log outreach WITH user_id
-    for profile in profiles:
-        if profile.email and '@' in profile.email:
-            status = "sent" if any(r["email"] == profile.email for r in recipients) else "failed"
-            outreach_log = EmailOutreach(
-                user_id=user_id,  # ← ADD THIS
-                profile_id=profile.id,
-                subject=email_request.subject,
-                body=email_request.body,
-                status=status,
-                company_email=sender_email
+    """Send bulk emails to selected profiles using Resend"""
+    try:
+        profile_ids = request.get("profile_ids", [])
+        
+        if not profile_ids:
+            raise HTTPException(status_code=400, detail="No profiles selected")
+        
+        # current_user is already the User object
+        user = current_user
+        
+        user_settings = {
+            'sender_email': user.sender_email or 'noreply@talentbox.co',
+            'sender_name': user.sender_name or user.name,
+            'email_subject': user.email_subject or 'Exciting Opportunity',
+            'email_template': user.email_template or 'Hi {{name}},\n\nWe found your profile interesting!',
+            'reply_method': user.reply_method or 'email',
+            'reply_link': user.reply_link or ''
+        }
+        
+        # ✅ FIXED: Use check_email_limit instead of check_limit
+        usage = UsageService.check_email_limit(db, current_user.id)
+        
+        if not usage["can_send"]:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "error": "EMAIL_LIMIT_EXCEEDED",
+                    "message": f"Email limit reached. You've used {usage['used']}/{usage['limit']} emails this month.",
+                    "usage": usage
+                }
             )
-            db.add(outreach_log)
-    
-    db.commit()
-    
-    # Get updated usage
-    updated_usage = UsageService.check_email_limit(db, user_id)
-    
-    logger.info(f"Bulk email complete: {results['sent']} sent, {results['failed']} failed")
-    print(f"✅ Sent: {results['sent']}, Failed: {results['failed']}\n")
-    
-    return {
-        "sent": results["sent"],
-        "failed": results["failed"],
-        "errors": results["errors"],
-        "recipients": [r["email"] for r in recipients],
-        "usage": updated_usage  # ← RETURN UPDATED USAGE
-    }
-
+        
+        # Check if trying to send more than remaining
+        if len(profile_ids) > usage["remaining"]:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "error": "EMAIL_LIMIT_EXCEEDED",
+                    "message": f"Cannot send {len(profile_ids)} emails. Only {usage['remaining']} remaining this month.",
+                    "usage": usage
+                }
+            )
+        
+        # Get profiles
+        profiles = db.query(Profile).filter(Profile.id.in_(profile_ids)).all()
+        profiles_data = [{
+            'id': p.id,
+            'name': p.name,
+            'github_username': p.github_username,
+            'email': p.email
+        } for p in profiles]
+        
+        # Send emails using Resend
+        results = EmailService.send_bulk_emails(profiles_data, user_settings)
+        
+        # Log successful sends to EmailOutreach table
+        for detail in results['details']:
+            if detail['status'] == 'sent':
+                profile = db.query(Profile).filter(Profile.id == detail['profile_id']).first()
+                if profile:
+                    outreach = EmailOutreach(
+                        user_id=user.id,
+                        profile_id=profile.id,
+                        subject=user_settings['email_subject'],
+                        body=user_settings['email_template'],
+                        status='sent',
+                        sent_at=datetime.utcnow()
+                    )
+                    db.add(outreach)
+        
+        db.commit()
+        
+        return {
+            "success": True,
+            "sent": results['sent'],
+            "failed": results['failed'],
+            "message": f"Successfully sent {results['sent']} emails. {results['failed']} failed."
+        }
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Bulk email error: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=str(e))
 
 # ===== GET OUTREACH HISTORY =====
 
@@ -647,7 +629,9 @@ def get_outreach_history(
     """Get email outreach history"""
     user_id = current_user.id
     
-    outreach_logs = db.query(EmailOutreach).order_by(
+    outreach_logs = db.query(EmailOutreach).filter(
+        EmailOutreach.user_id == user_id
+    ).order_by(
         EmailOutreach.sent_at.desc()
     ).limit(limit).all()
     
@@ -665,8 +649,7 @@ def get_outreach_history(
                 },
                 "subject": log.subject,
                 "status": log.status,
-                "sent_at": log.sent_at.isoformat() if log.sent_at else None,
-                "company_email": log.company_email
+                "sent_at": log.sent_at.isoformat() if log.sent_at else None
             })
     
     return {
@@ -748,7 +731,7 @@ def health_check(db: Session = Depends(get_db)):
     return {
         "status": "healthy" if db_status == "healthy" else "degraded",
         "database": db_status,
-        "version": "2.0.0",
+        "version": "2.0.1",
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
 
@@ -759,28 +742,28 @@ def health_check(db: Session = Depends(get_db)):
 def version_check():
     """Verify which version of code is running - for debugging only"""
     return {
-        "version": "FIXED_VERSION_2.0",
-        "fixes_applied": [
-            "Fix #3: Empty profiles array bug - proper profile dict conversion",
-            "Fix #4: Enhanced logging in github_integration_service", 
-            "Fix #5: FilterService debug logs with logging import",
-            "Fix #6: Profile saving error handling with try/except",
-            "Fix #7: Missing logging import in filter_service"
+        "version": "2.0.1_RESEND",
+        "features": [
+            "Resend email integration",
+            "Sender name support",
+            "Email subject customization",
+            "Reply method (email/form)",
+            "UTM tracking for forms",
+            "{{name}} variable with first name only"
         ],
-        "critical_fixes": [
-            "GitHubIntegrationService class indentation fixed",
-            "async keyword properly added to search_and_cache_profiles",
-            "Profile conversion to dicts in fallback path"
+        "fixes_applied": [
+            "Fix #3: Empty profiles array bug",
+            "Fix #4: Enhanced logging",
+            "Fix #5: FilterService debug logs",
+            "Fix #6: Profile saving error handling",
+            "Fix #7: Missing logging import"
         ],
         "timestamp": datetime.now(timezone.utc).isoformat(),
-        "status": "All fixes applied ✅"
+        "status": "Resend Integration Complete ✅"
     }
 
 
 # ===== STREAMING SEARCH ENDPOINT (POST with proper auth) =====
-
-from fastapi.responses import StreamingResponse
-import json
 
 from fastapi.responses import StreamingResponse
 import json
@@ -1040,6 +1023,8 @@ async def search_profiles_stream(
             "Connection": "keep-alive"
         }
     )
+
+
 # ===== RUN WITH UVICORN =====
 
 if __name__ == "__main__":
