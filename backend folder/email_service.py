@@ -184,4 +184,4 @@ class EmailService:
                     'error': str(e)
                 })
         
-        return results  
+        return results
