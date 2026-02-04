@@ -1,6 +1,51 @@
 import React from 'react';
 import { Star, MapPin, Lock, Unlock } from 'lucide-react';
 
+const getScoreColor = (score) => {
+  if (score >= 85) return '#10b981';
+  if (score >= 70) return '#3b82f6';
+  if (score >= 50) return '#f59e0b';
+  return '#6b7280';
+};
+
+const getScoreLabel = (score) => {
+  if (score >= 85) return 'Expert';
+  if (score >= 70) return 'Senior';
+  if (score >= 50) return 'Mid-Level';
+  if (score >= 30) return 'Junior';
+  return 'Beginner';
+};
+
+const getDisplayName = (profile, isUnlocked) => {
+  if (!profile.name) return profile.github_username;
+  if (isUnlocked) return profile.name;
+  return profile.name.trim().split(/\s+/)[0];
+};
+
+const LanguageTags = ({ languagesData }) => {
+  if (!languagesData || Object.keys(languagesData).length === 0) return null;
+
+  const languagesObj = typeof languagesData === 'string'
+    ? JSON.parse(languagesData)
+    : languagesData;
+
+  const total = Object.values(languagesObj).reduce((a, b) => a + b, 0);
+
+  return (
+    <div style={styles.languages}>
+      {Object.entries(languagesObj)
+        .map(([lang, bytes]) => [lang, ((bytes / total) * 100).toFixed(1)])
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 2)
+        .map(([lang, percent]) => (
+          <span key={lang} style={styles.languageTag}>
+            {lang} ({percent}%)
+          </span>
+        ))}
+    </div>
+  );
+};
+
 const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved, isUnlocked }) => {
   const prevUnlockedRef = React.useRef(isUnlocked);
   const [justUnlocked, setJustUnlocked] = React.useState(false);
@@ -14,32 +59,7 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved, 
     prevUnlockedRef.current = isUnlocked;
   }, [isUnlocked]);
 
-  const getScoreColor = (score) => {
-    if (score >= 85) return '#10b981';
-    if (score >= 70) return '#3b82f6';
-    if (score >= 50) return '#f59e0b';
-    return '#6b7280';
-  };
-
-  const getScoreLabel = (score) => {
-    if (score >= 85) return 'Expert';
-    if (score >= 70) return 'Senior';
-    if (score >= 50) return 'Mid-Level';
-    if (score >= 30) return 'Junior';
-    return 'Beginner';
-  };
-
-  // Show first name + last initial, or just username
-  const getDisplayName = () => {
-    if (profile.name) {
-      const parts = profile.name.trim().split(/\s+/);
-      if (parts.length >= 2) {
-        return `${parts[0]} ${parts[parts.length - 1][0]}.`;
-      }
-      return parts[0];
-    }
-    return profile.github_username;
-  };
+  const displayName = getDisplayName(profile, isUnlocked);
 
   const handleUnlockClick = () => {
     onViewDetails && onViewDetails(profile);
@@ -98,11 +118,11 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved, 
       <div style={styles.header}>
         <img
           src={profile.avatar_url || 'https://via.placeholder.com/80'}
-          alt={getDisplayName()}
+          alt={displayName}
           style={styles.avatar}
         />
         <div style={styles.info}>
-          <h3 style={styles.name}>{getDisplayName()}</h3>
+          <h3 style={styles.name}>{displayName}</h3>
           {profile.location && (
             <div style={styles.location}>
               <MapPin size={14} />
@@ -127,27 +147,7 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved, 
       )}
 
       {/* Languages - Top 2 only */}
-      {profile.languages_data && Object.keys(profile.languages_data).length > 0 && (
-        <div style={styles.languages}>
-          {(() => {
-            const languagesObj = typeof profile.languages_data === 'string'
-              ? JSON.parse(profile.languages_data)
-              : profile.languages_data;
-
-            const total = Object.values(languagesObj).reduce((a, b) => a + b, 0);
-
-            return Object.entries(languagesObj)
-              .map(([lang, bytes]) => [lang, ((bytes / total) * 100).toFixed(1)])
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 2)
-              .map(([lang, percent]) => (
-                <span key={lang} style={styles.languageTag}>
-                  {lang} ({percent}%)
-                </span>
-              ));
-          })()}
-        </div>
-      )}
+      <LanguageTags languagesData={profile.languages_data} />
 
       {/* Actions - Unlock Profile + Save */}
       <div style={styles.actions}>

@@ -15,6 +15,35 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def _expand_location_terms(location):
+    """Expand a location string into a list of search terms (country + cities)."""
+    from filter_service import FilterService
+    from filter_service import (
+        COUNTRY_UNITED_STATES, COUNTRY_UNITED_KINGDOM, COUNTRY_UNITED_ARAB_EMIRATES
+    )
+
+    location_lower = location.lower().strip()
+    location_terms = [location]
+
+    # Check if this is a country with predefined cities
+    for country, cities in FilterService.COUNTRY_CITIES.items():
+        if location_lower == country or location_lower in country or country in location_lower:
+            location_terms.extend(cities)
+            break
+
+    # Check aliases
+    country_aliases = {
+        "usa": COUNTRY_UNITED_STATES, "us": COUNTRY_UNITED_STATES,
+        "uk": COUNTRY_UNITED_KINGDOM, "uae": COUNTRY_UNITED_ARAB_EMIRATES,
+    }
+    alias_country = country_aliases.get(location_lower)
+    if alias_country and alias_country in FilterService.COUNTRY_CITIES:
+        location_terms.append(alias_country)
+        location_terms.extend(FilterService.COUNTRY_CITIES[alias_country])
+
+    return list(set(location_terms))
+
+
 class GitHubIntegrationService:
     """
     ✅ OPTIMIZED Integration layer for MVP:
@@ -127,59 +156,31 @@ class GitHubIntegrationService:
         Enhanced database search with increased limit
         """
         query = db.query(Profile)
-        
+
         # Language filter - check BOTH primary_language AND languages_data
         languages = filters.get("languages", [])
         if languages:
             from sqlalchemy import or_, cast, String
-            
-            conditions = []
-            
-            for lang in languages:
-                conditions.append(Profile.primary_language.ilike(f"%{lang}%"))
-            
-            for lang in languages:
-                conditions.append(cast(Profile.languages_data, String).ilike(f"%{lang}%"))
-            
+            conditions = [Profile.primary_language.ilike(f"%{lang}%") for lang in languages]
+            conditions += [cast(Profile.languages_data, String).ilike(f"%{lang}%") for lang in languages]
             query = query.filter(or_(*conditions))
-        
+
         # Location filter - expand country to include all its predefined cities
         location = filters.get("location")
         if location:
             from sqlalchemy import or_
-            from filter_service import FilterService
-
-            location_lower = location.lower().strip()
-            location_terms = [location]
-
-            # Check if this is a country with predefined cities
-            for country, cities in FilterService.COUNTRY_CITIES.items():
-                if location_lower == country or location_lower in country or country in location_lower:
-                    location_terms.extend(cities)
-                    break
-
-            # Check aliases
-            COUNTRY_ALIASES = {
-                "usa": "united states", "us": "united states",
-                "uk": "united kingdom", "uae": "united arab emirates",
-            }
-            alias_country = COUNTRY_ALIASES.get(location_lower)
-            if alias_country and alias_country in FilterService.COUNTRY_CITIES:
-                location_terms.append(alias_country)
-                location_terms.extend(FilterService.COUNTRY_CITIES[alias_country])
-
-            location_terms = list(set(location_terms))
+            location_terms = _expand_location_terms(location)
             location_filters = [Profile.location.ilike(f"%{term}%") for term in location_terms]
             query = query.filter(or_(*location_filters))
-        
+
         # Min score filter
         min_score = filters.get("min_score", 0)
         if min_score > 0:
             query = query.filter(Profile.developer_score >= min_score)
-        
+
         # Sort by score
         query = query.order_by(Profile.developer_score.desc())
-        
+
         return query.limit(200).all()
     
     @staticmethod
@@ -236,6 +237,37 @@ class GitHubIntegrationService:
         return profile
 
     @staticmethod
+    def _save_batch_results(db, batch_results, new_profiles):
+        """Save valid batch results using upsert, appending to new_profiles."""
+        for details in batch_results:
+            if isinstance(details, Exception) or not details:
+                continue
+            if not is_valid_user_data(details):
+                continue
+            try:
+                profile = GitHubIntegrationService._upsert_profile(db, details)
+                new_profiles.append(profile)
+                print(f"   ✅ {details['username']}: Score {profile.developer_score}")
+            except Exception as e:
+                logger.error(f"❌ Failed to upsert {details.get('username', 'unknown')}: {e}")
+                db.rollback()
+
+    @staticmethod
+    def _filter_uncached_usernames(db, usernames, process_limit):
+        """Return usernames not already cached within last 30 days."""
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        existing_rows = db.query(Profile.github_username).filter(
+            Profile.github_username.in_(usernames[:process_limit]),
+            Profile.cached_at >= thirty_days_ago
+        ).all()
+        existing_usernames = {row[0] for row in existing_rows}
+
+        if existing_usernames:
+            print(f"   ⏭️  Skipping {len(existing_usernames)} already cached profiles")
+
+        return [u for u in usernames[:process_limit] if u not in existing_usernames]
+
+    @staticmethod
     async def _fetch_from_github(
         db: Session,
         language: str,
@@ -245,102 +277,56 @@ class GitHubIntegrationService:
         profiles_needed: int = 120
     ) -> List[Profile]:
         """
-        ✅ OPTIMIZED: Fetch profiles from GitHub with aggressive optimizations
-        
-        Optimizations:
-        - Batch size: 25 (was 12)
-        - No cooldown between batches (was 0.3s)
-        - Process limit: 150 (was 300)
-        - Early stopping at target
+        Fetch profiles from GitHub with batching and early stopping.
         """
-        
+        BATCH_SIZE = 25
+
         try:
-            # Search GitHub
             print(f"   Searching GitHub: language={language}, location={location}")
             users = await search_github_users_paginated(
                 language=language,
                 location=location,
                 min_repos=min_repos,
-                max_pages=5,  # ✅ Reduced from 12
-                target_users=min(250, max_results)  # ✅ Reduced from 300
+                max_pages=5,
+                target_users=min(250, max_results)
             )
-            
+
             if not users:
                 print("   ⚠️ No users found from GitHub")
                 return []
-            
-            # Get usernames
+
             usernames = [user["login"] for user in users[:max_results]]
             print(f"   Found {len(usernames)} GitHub users")
-            
-            # ✅ OPTIMIZATION #7: Process up to 150 profiles (was 300)
+
             process_limit = min(250, len(usernames))
             print(f"   Processing up to {process_limit} profiles...")
-            
-            # ✅ OPTIMIZATION #4: Batch size 25 (was 12)
-            BATCH_SIZE = 25
-            
-            # ✅ Filter out existing usernames (only skip profiles cached within last 30 days)
-            thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-            existing_usernames = set(
-                db.query(Profile.github_username)
-                .filter(
-                    Profile.github_username.in_(usernames[:process_limit]),
-                    Profile.cached_at >= thirty_days_ago
-                )
-                .all()
+
+            usernames_to_fetch = GitHubIntegrationService._filter_uncached_usernames(
+                db, usernames, process_limit
             )
-            existing_usernames = {username[0] for username in existing_usernames}
-            usernames_to_fetch = [u for u in usernames[:process_limit] if u not in existing_usernames]
-            
-            if existing_usernames:
-                print(f"   ⏭️  Skipping {len(existing_usernames)} already cached profiles")
-            
+
             if not usernames_to_fetch:
                 print(f"   ✅ All profiles already in cache!")
                 return []
-            
+
             print(f"   📥 Fetching {len(usernames_to_fetch)} new profiles...")
-            
             new_profiles = []
-            
-            # Process profiles in parallel batches
+
             for batch_start in range(0, len(usernames_to_fetch), BATCH_SIZE):
-                batch_end = min(batch_start + BATCH_SIZE, len(usernames_to_fetch))
-                batch_usernames = usernames_to_fetch[batch_start:batch_end]
-                
+                batch_usernames = usernames_to_fetch[batch_start:batch_start + BATCH_SIZE]
                 print(f"\n   🔄 Batch {batch_start//BATCH_SIZE + 1} ({len(batch_usernames)} profiles)...")
-                
-                # Process batch in parallel
+
                 tasks = [get_user_details(username) for username in batch_usernames]
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
-                
-                # Save profiles using upsert
-                for i, details in enumerate(batch_results):
-                    if isinstance(details, Exception) or not details:
-                        continue
 
-                    if not is_valid_user_data(details):
-                        continue
+                GitHubIntegrationService._save_batch_results(db, batch_results, new_profiles)
 
-                    try:
-                        profile = GitHubIntegrationService._upsert_profile(db, details)
-                        new_profiles.append(profile)
-                        print(f"   ✅ {details['username']}: Score {profile.developer_score}")
-                    except Exception as e:
-                        logger.error(f"❌ Failed to upsert {details.get('username', 'unknown')}: {e}")
-                        db.rollback()
-                
-                # ✅ OPTIMIZATION #7: Early stopping
                 if len(new_profiles) >= profiles_needed:
                     print(f"\n   ✅ Target reached! Stopping at {len(new_profiles)} profiles.")
                     break
-                
-                # ✅ OPTIMIZATION #5: NO COOLDOWN (was 0.3s)
-                # GitHub rate limit: 5000/hour = safe without cooldown
-            
+
             return new_profiles
-            
+
         except Exception as e:
             logger.error(f"❌ GitHub fetch failed: {e}", exc_info=True)
             print(f"❌ GitHub API Error: {e}")

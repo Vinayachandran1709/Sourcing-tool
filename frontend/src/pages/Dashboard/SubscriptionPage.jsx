@@ -1,23 +1,126 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import { Mail, Search, Eye, CheckCircle } from 'lucide-react';
 import EmailSettingsCard from '../../components/EmailSettingsCard';
+import { getUsageStats } from '../../services/api';
+
+const PlanCardPrice = ({ plan }) => {
+  if (plan.comingSoon) {
+    return (
+      <div style={styles.cardPrice}>
+        <span style={styles.comingSoonPrice}>Coming Soon</span>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div style={styles.cardPrice}>
+        <span style={styles.cardPriceAmount}>${plan.price_monthly}</span>
+        <span style={styles.cardPriceLabel}>{plan.period ? `/ ${plan.period}` : '/month'}</span>
+      </div>
+      {plan.price_annual > 0 && (
+        <div style={styles.annualPrice}>
+          ${plan.price_annual}/year (save 17%)
+        </div>
+      )}
+      {plan.period && (
+        <div style={styles.noCreditCard}>No credit card required</div>
+      )}
+    </>
+  );
+};
+
+const PlanCardButton = ({ plan, currentPlanName, onEarlyAccess, onSelectPlan }) => {
+  if (plan.comingSoon) {
+    return <button onClick={onEarlyAccess} style={styles.earlyAccessBtn}>Get Early Access</button>;
+  }
+
+  const isCurrent = currentPlanName === plan.name;
+  let label = 'Upgrade';
+  if (isCurrent) label = 'Current Plan';
+  else if (plan.period) label = 'Start Free Trial';
+
+  return (
+    <button
+      onClick={() => !isCurrent && onSelectPlan(plan)}
+      style={{
+        ...styles.selectPlanBtn,
+        ...(isCurrent ? styles.currentPlanBtn : {}),
+        ...(plan.period ? styles.trialBtn : {})
+      }}
+      disabled={isCurrent}
+    >
+      {label}
+    </button>
+  );
+};
+
+const PlanCard = ({ plan, currentPlanName, onEarlyAccess, onSelectPlan }) => {
+  const cardStyle = {
+    ...styles.planCard,
+    ...(plan.popular ? styles.planCardPopular : {}),
+    ...(plan.comingSoon ? styles.planCardComingSoon : {}),
+    ...(currentPlanName === plan.name ? styles.planCardCurrent : {})
+  };
+
+  return (
+    <div style={cardStyle}>
+      {plan.popular && <div style={styles.popularBadge}>Most Popular</div>}
+      {plan.comingSoon && <div style={styles.comingSoonBadge}>Coming Soon</div>}
+      <h4 style={styles.cardPlanName}>{plan.name}</h4>
+      <PlanCardPrice plan={plan} />
+      <div style={styles.featuresList}>
+        {plan.features.map((feature, index) => (
+          <div key={index} style={{...styles.feature, ...(plan.comingSoon ? {color: '#9ca3af'} : {})}}>
+            <CheckCircle size={16} color={plan.comingSoon ? '#9ca3af' : '#10b981'} />
+            <span>{feature}</span>
+          </div>
+        ))}
+      </div>
+      <PlanCardButton
+        plan={plan}
+        currentPlanName={currentPlanName}
+        onEarlyAccess={onEarlyAccess}
+        onSelectPlan={onSelectPlan}
+      />
+    </div>
+  );
+};
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
-  // Mock user data - replace with real API call
-  const [userData] = useState({
-    plan: 'Starter',
-    billing_cycle: 'monthly',
-    price: 79,
-    next_billing_date: '2025-01-06',
-    usage: {
-      profile_unlocks: { used: 45, limit: 300 },
-      searches: { used: 12, limit: 100 },
-      emails: { used: 8, limit: 300 },
-    }
-  });
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchUsageData = async () => {
+      try {
+        const data = await getUsageStats();
+        const planName = data.plan === 'free' ? 'Free Trial' :
+                         data.plan === 'starter' ? 'Starter' : data.plan;
+        const planPrices = { 'Free Trial': 0, 'Starter': 79 };
+        setUserData({
+          plan: planName,
+          billing_cycle: 'monthly',
+          price: planPrices[planName] || 0,
+          subscription_status: data.subscription_status,
+          trial_end_date: data.trial_end_date,
+          usage: {
+            searches: { used: data.usage.searches.used, limit: data.usage.searches.limit },
+            profile_unlocks: { used: data.usage.profile_views.used, limit: data.usage.profile_views.limit },
+            emails: { used: data.usage.emails_sent.used, limit: data.usage.emails_sent.limit },
+          }
+        });
+      } catch (err) {
+        console.error('Failed to fetch usage stats:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUsageData();
+  }, []);
 
   const plans = [
     {
@@ -28,7 +131,7 @@ const SubscriptionPage = () => {
       features: [
         '25 searches',
         '40 profile unlocks',
-        '30 emails',
+        '25 emails',
         'Filter by programming languages',
         'Basic developer scoring',
         'Names & scores visible'
@@ -36,7 +139,7 @@ const SubscriptionPage = () => {
       limits: {
         profile_unlocks: 40,
         searches: 25,
-        emails: 30
+        emails: 25
       }
     },
     {
@@ -84,6 +187,20 @@ const SubscriptionPage = () => {
     }
   ];
 
+  const handleEarlyAccess = () => {
+    const subject = encodeURIComponent('Professional Plan Early Access');
+    const body = encodeURIComponent(`Hi TalentBox Team,
+
+I'm interested in getting early access to the Professional plan.
+
+Company:
+Team Size:
+Current Hiring Needs:
+
+Looking forward to hearing from you!`);
+    window.location.href = `mailto:vinay@talentbox.co?subject=${subject}&body=${body}`;
+  };
+
   const getUsagePercentage = (used, limit) => {
     if (limit === -1) return 0; // unlimited
     return Math.min((used / limit) * 100, 100);
@@ -94,6 +211,34 @@ const SubscriptionPage = () => {
     if (percentage < 80) return '#f59e0b'; // amber
     return '#ef4444'; // red
   };
+
+  if (loading) {
+    return (
+      <div style={styles.page}>
+        <DashboardHeader
+          title="Subscription & Usage"
+          subtitle="Manage your plan and track your usage"
+        />
+        <div style={{ ...styles.content, textAlign: 'center', padding: '4rem 2rem' }}>
+          <p style={{ color: '#6b7280', fontSize: '1rem' }}>Loading usage data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!userData) {
+    return (
+      <div style={styles.page}>
+        <DashboardHeader
+          title="Subscription & Usage"
+          subtitle="Manage your plan and track your usage"
+        />
+        <div style={{ ...styles.content, textAlign: 'center', padding: '4rem 2rem' }}>
+          <p style={{ color: '#ef4444', fontSize: '1rem' }}>Failed to load usage data. Please try again.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={styles.page}>
@@ -109,7 +254,10 @@ const SubscriptionPage = () => {
             <div>
               <h3 style={styles.planTitle}>Current Plan: {userData.plan}</h3>
               <p style={styles.planSubtitle}>
-                Billed {userData.billing_cycle} • Next billing on {new Date(userData.next_billing_date).toLocaleDateString()}
+                {userData.plan === 'Free Trial'
+                  ? `Trial ${userData.subscription_status === 'expired' ? 'expired' : 'active'}${userData.trial_end_date ? ` • Ends ${new Date(userData.trial_end_date).toLocaleDateString()}` : ''}`
+                  : `Billed ${userData.billing_cycle}`
+                }
               </p>
             </div>
             <div style={styles.priceBox}>
@@ -199,78 +347,19 @@ const SubscriptionPage = () => {
 
           <div style={styles.plansGrid}>
             {plans.map((plan) => (
-              <div
+              <PlanCard
                 key={plan.name}
-                style={{
-                  ...styles.planCard,
-                  ...(plan.popular ? styles.planCardPopular : {}),
-                  ...(plan.comingSoon ? styles.planCardComingSoon : {}),
-                  ...(userData.plan === plan.name ? styles.planCardCurrent : {})
+                plan={plan}
+                currentPlanName={userData.plan}
+                onEarlyAccess={handleEarlyAccess}
+                onSelectPlan={(p) => {
+                  if (p.period) {
+                    navigate('/signup');
+                  } else {
+                    navigate(`/checkout?plan=${p.name}&cycle=monthly`);
+                  }
                 }}
-              >
-                {plan.popular && (
-                  <div style={styles.popularBadge}>Most Popular</div>
-                )}
-                {plan.comingSoon && (
-                  <div style={styles.comingSoonBadge}>Coming Soon</div>
-                )}
-
-                <h4 style={styles.cardPlanName}>{plan.name}</h4>
-
-                {plan.comingSoon ? (
-                  <div style={styles.cardPrice}>
-                    <span style={styles.comingSoonPrice}>Coming Soon</span>
-                  </div>
-                ) : (
-                  <>
-                    <div style={styles.cardPrice}>
-                      <span style={styles.cardPriceAmount}>${plan.price_monthly}</span>
-                      <span style={styles.cardPriceLabel}>{plan.period ? `/ ${plan.period}` : '/month'}</span>
-                    </div>
-                    {plan.price_annual > 0 && (
-                      <div style={styles.annualPrice}>
-                        ${plan.price_annual}/year (save 17%)
-                      </div>
-                    )}
-                    {plan.period && (
-                      <div style={styles.noCreditCard}>No credit card required</div>
-                    )}
-                  </>
-                )}
-
-                <div style={styles.featuresList}>
-                  {plan.features.map((feature, index) => (
-                    <div key={index} style={{...styles.feature, ...(plan.comingSoon ? {color: '#9ca3af'} : {})}}>
-                      <CheckCircle size={16} color={plan.comingSoon ? '#9ca3af' : '#10b981'} />
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-
-                {plan.comingSoon ? (
-                  <button style={styles.comingSoonBtn} disabled>Coming Soon</button>
-                ) : (
-                  <button
-                    onClick={() => {
-                      if (userData.plan !== plan.name) {
-                        if (plan.period) {
-                          navigate('/signup');
-                        } else {
-                          navigate(`/checkout?plan=${plan.name}&cycle=monthly`);
-                        }
-                      }
-                    }}
-                    style={{
-                      ...styles.selectPlanBtn,
-                      ...(userData.plan === plan.name ? styles.currentPlanBtn : {}),
-                      ...(plan.period ? styles.trialBtn : {})
-                    }}
-                    disabled={userData.plan === plan.name}
-                  >
-                    {userData.plan === plan.name ? 'Current Plan' : plan.period ? 'Start Free Trial' : 'Upgrade'}
-                  </button>
-                )}
-              </div>
+              />
             ))}
           </div>
         </div>
@@ -505,7 +594,7 @@ const styles = {
     color: '#6366f1',
   },
 
-  comingSoonBtn: {
+  earlyAccessBtn: {
     width: '100%',
     padding: '0.875rem',
     fontSize: '1rem',
@@ -514,9 +603,9 @@ const styles = {
     color: '#fff',
     border: 'none',
     borderRadius: '8px',
-    cursor: 'not-allowed',
-    opacity: 0.7,
+    cursor: 'pointer',
     fontFamily: "'Outfit', sans-serif",
+    boxSizing: 'border-box',
   },
 
   trialBtn: {

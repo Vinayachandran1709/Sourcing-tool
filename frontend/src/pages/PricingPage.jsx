@@ -67,7 +67,7 @@ Looking forward to hearing from you!`);
               <ul style={styles.featureList}>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 25 searches</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 40 profile unlocks</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 15 emails</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 25 emails</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by programming languages</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Names & scores visible</li>

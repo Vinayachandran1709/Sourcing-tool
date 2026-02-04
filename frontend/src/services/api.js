@@ -85,49 +85,12 @@ export const sendBulkEmails = async (emailData) => {
   return response.data;
 };
 
-// ===== EMAIL SETTINGS APIs =====
-
-export const getEmailSettings = async () => {
-  const response = await api.get('/api/email-settings/settings');
-  return response.data;
-};
-
-export const updateEmailSettings = async (senderEmail, emailTemplate) => {
-  const response = await api.post('/api/email-settings/settings', {
-    sender_email: senderEmail,
-    email_template: emailTemplate
-  });
-  return response.data;
-};
-
-export const updateSenderEmail = async (senderEmail) => {
-  const response = await api.post('/api/email-settings/sender-email', {
-    sender_email: senderEmail
-  });
-  return response.data;
-};
-
-export const updateEmailTemplate = async (emailTemplate) => {
-  const response = await api.post('/api/email-settings/template', {
-    email_template: emailTemplate
-  });
-  return response.data;
-};
-
 export const getEmailUsage = async () => {
   const response = await api.get('/api/email-settings/usage');
   return response.data;
 };
 
-export const checkCsvLimit = async () => {
-  const response = await api.get('/api/check-csv-limit');
-  return response.data;
-};
-
-export const logCsvExport = async () => {
-  const response = await api.post('/api/log-csv-export');
-  return response.data;
-};
+// ===== EMAIL SETTINGS APIs (RESEND INTEGRATION) =====
 
 export const getEmailSettings = async () => {
   const response = await fetch(`${API_BASE_URL}/api/email-settings/settings`, {
@@ -155,7 +118,19 @@ export const updateEmailSettings = async (settings) => {
   return response.json();
 };
 
-// ===== SAVED LISTS APIs (FIXED ENDPOINTS) =====
+// ===== CSV EXPORT APIs =====
+
+export const checkCsvLimit = async () => {
+  const response = await api.get('/api/check-csv-limit');
+  return response.data;
+};
+
+export const logCsvExport = async () => {
+  const response = await api.post('/api/log-csv-export');
+  return response.data;
+};
+
+// ===== SAVED LISTS APIs =====
 
 export const getSavedLists = async () => {
   const response = await api.get('/api/lists');

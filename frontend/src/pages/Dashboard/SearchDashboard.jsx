@@ -208,31 +208,31 @@ const SearchDashboard = () => {
     setProfiles(profiles.map(p => ({ ...p, selected: false })));
   };
 
+  // Check unlock limits in background and revert if over limit
+  const checkUnlockLimit = (profileId) => {
+    const token = localStorage.getItem('token');
+    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+    fetch(`${API_URL}/api/usage-stats`, {
+      headers: { 'Authorization': `Bearer ${token}` }
+    })
+      .then(res => (res.ok ? res.json() : null))
+      .then(usage => {
+        if (!usage?.profile_unlocks) return;
+        if (usage.profile_unlocks.used < usage.profile_unlocks.limit) return;
+        setUnlockedProfileIds(prev => prev.filter(id => id !== profileId));
+        setShowDetailModal(false);
+        setSelectedProfile(null);
+        alert(`Profile unlock limit reached! You've used ${usage.profile_unlocks.used}/${usage.profile_unlocks.limit} unlocks. Upgrade to unlock more profiles.`);
+      })
+      .catch(() => {});
+  };
+
   // Handle unlock profile - check limits, mark as unlocked, open modal
   const handleViewProfile = (profile) => {
-    const alreadyUnlocked = unlockedProfileIds.includes(profile.id);
-
-    if (!alreadyUnlocked) {
-      // Mark as unlocked immediately for instant UI update
+    if (!unlockedProfileIds.includes(profile.id)) {
       setUnlockedProfileIds(prev => [...prev, profile.id]);
-
-      // Check limits in background - if over limit, revert
-      const token = localStorage.getItem('token');
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-      fetch(`${API_URL}/api/usage-stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      }).then(res => res.ok ? res.json() : null).then(usage => {
-        if (usage?.profile_unlocks && usage.profile_unlocks.used >= usage.profile_unlocks.limit) {
-          // Revert unlock and close modal
-          setUnlockedProfileIds(prev => prev.filter(id => id !== profile.id));
-          setShowDetailModal(false);
-          setSelectedProfile(null);
-          alert(`Profile unlock limit reached! You've used ${usage.profile_unlocks.used}/${usage.profile_unlocks.limit} unlocks. Upgrade to unlock more profiles.`);
-        }
-      }).catch(() => {});
+      checkUnlockLimit(profile.id);
     }
-
-    // Open modal instantly
     setSelectedProfile(profile);
     setShowDetailModal(true);
   };

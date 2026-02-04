@@ -78,28 +78,113 @@ query($username: String!) {
 """
 
 
+def _process_top_repos(repos):
+    """Extract top 5 repositories as dicts."""
+    top_repos = []
+    for repo in repos[:5]:
+        primary_lang = repo.get("primaryLanguage")
+        top_repos.append({
+            "name": repo.get("name", ""),
+            "description": repo.get("description") or "No description",
+            "stars": repo.get("stargazerCount", 0),
+            "forks": repo.get("forkCount", 0),
+            "url": repo.get("url", ""),
+            "language": primary_lang.get("name") if primary_lang else "Unknown",
+            "last_updated": repo.get("pushedAt", "")
+        })
+    return top_repos
+
+
+def _calculate_language_distribution(repos):
+    """Calculate language percentages from all repos."""
+    language_stats = {}
+    total_bytes = 0
+
+    for repo in repos:
+        for edge in repo.get("languages", {}).get("edges", []):
+            lang_name = edge.get("node", {}).get("name")
+            lang_size = edge.get("size", 0)
+            if lang_name:
+                language_stats[lang_name] = language_stats.get(lang_name, 0) + lang_size
+                total_bytes += lang_size
+
+    if total_bytes == 0:
+        return {}
+
+    languages_data = {
+        lang: round((bytes_count / total_bytes) * 100, 1)
+        for lang, bytes_count in language_stats.items()
+    }
+    return dict(sorted(languages_data.items(), key=lambda x: x[1], reverse=True))
+
+
+def _get_last_active_date(repos):
+    """Find the most recent push date across repos."""
+    last_active = None
+    for repo in repos:
+        pushed_at = repo.get("pushedAt")
+        if not pushed_at:
+            continue
+        try:
+            date_obj = datetime.fromisoformat(pushed_at.replace('Z', '+00:00'))
+            if last_active is None or date_obj > last_active:
+                last_active = date_obj
+        except (ValueError, TypeError):
+            continue
+    return last_active
+
+
+def _parse_graphql_response(data, username):
+    """Validate GraphQL response and return user_data or None."""
+    if "errors" in data:
+        logger.error(f"GraphQL errors for {username}: {data['errors']}")
+        return None
+    if not data.get("data") or not data["data"].get("user"):
+        logger.warning(f"User {username} not found")
+        return None
+    return data["data"]["user"]
+
+
+def _build_profile_from_user_data(user_data):
+    """Build a profile dict from GraphQL user data."""
+    repos = user_data.get("repositories", {}).get("nodes", [])
+
+    return {
+        "username": user_data.get("login"),
+        "name": user_data.get("name"),
+        "email": user_data.get("email"),
+        "location": user_data.get("location"),
+        "bio": user_data.get("bio"),
+        "avatar_url": user_data.get("avatarUrl"),
+        "portfolio_url": user_data.get("websiteUrl"),
+        "public_repos": user_data.get("repositories", {}).get("totalCount", 0),
+        "top_repos": _process_top_repos(repos),
+        "total_stars": sum(repo.get("stargazerCount", 0) for repo in repos),
+        "languages": _calculate_language_distribution(repos),
+        "contributions": user_data.get("contributionsCollection", {}).get(
+            "contributionCalendar", {}
+        ).get("totalContributions", 0),
+        "last_active_date": _get_last_active_date(repos),
+        "followers": user_data.get("followers", {}).get("totalCount", 0),
+        "is_hireable": user_data.get("isHireable", False)
+    }
+
+
 async def get_user_details_graphql(username: str):
     """
-    ✅ OPTIMIZED: Fetch complete user profile in ONE GraphQL call
-    
-    Replaces 3-4 REST API calls:
-    - GET /users/{username} (user basic info)
-    - GET /users/{username}/repos (repositories)
-    - GET /repos/{owner}/{repo}/languages (language breakdown) [per repo]
-    
-    PERFORMANCE: 3-4x faster per profile
+    Fetch complete user profile in ONE GraphQL call.
+    Replaces 3-4 REST API calls per profile.
     """
-    
     headers = {
         "Authorization": f"bearer {GITHUB_TOKEN}",
         "Content-Type": "application/json"
     }
-    
+
     query_data = {
         "query": GRAPHQL_USER_QUERY,
         "variables": {"username": username}
     }
-    
+
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(
@@ -108,104 +193,17 @@ async def get_user_details_graphql(username: str):
                 json=query_data,
                 timeout=30.0
             )
-            
+
             if response.status_code != 200:
                 logger.error(f"GraphQL error {response.status_code} for {username}")
                 return None
-            
-            data = response.json()
-            
-            # Check for errors
-            if "errors" in data:
-                logger.error(f"GraphQL errors for {username}: {data['errors']}")
+
+            user_data = _parse_graphql_response(response.json(), username)
+            if not user_data:
                 return None
-            
-            # Check if user exists
-            if not data.get("data") or not data["data"].get("user"):
-                logger.warning(f"User {username} not found")
-                return None
-            
-            user_data = data["data"]["user"]
-            
-            # ✅ Process repositories
-            repos = user_data.get("repositories", {}).get("nodes", [])
-            top_repos = []
-            
-            for repo in repos[:5]:  # Top 5 repos
-                top_repos.append({
-                    "name": repo.get("name", ""),
-                    "description": repo.get("description") or "No description",
-                    "stars": repo.get("stargazerCount", 0),
-                    "forks": repo.get("forkCount", 0),
-                    "url": repo.get("url", ""),
-                    "language": repo.get("primaryLanguage", {}).get("name") if repo.get("primaryLanguage") else "Unknown",
-                    "last_updated": repo.get("pushedAt", "")
-                })
-            
-            # ✅ Calculate total stars
-            total_stars = sum(repo.get("stargazerCount", 0) for repo in repos)
-            
-            # ✅ Calculate language distribution from ALL repos
-            language_stats = {}
-            total_bytes = 0
-            
-            for repo in repos:
-                languages = repo.get("languages", {})
-                for edge in languages.get("edges", []):
-                    lang_name = edge.get("node", {}).get("name")
-                    lang_size = edge.get("size", 0)
-                    
-                    if lang_name:
-                        language_stats[lang_name] = language_stats.get(lang_name, 0) + lang_size
-                        total_bytes += lang_size
-            
-            # Convert to percentages
-            languages_data = {}
-            if total_bytes > 0:
-                for lang, bytes_count in language_stats.items():
-                    percentage = round((bytes_count / total_bytes) * 100, 1)
-                    languages_data[lang] = percentage
-            
-            # Sort by percentage
-            languages_data = dict(sorted(languages_data.items(), key=lambda x: x[1], reverse=True))
-            
-            # ✅ Get last activity from most recent push
-            last_active = None
-            for repo in repos:
-                pushed_at = repo.get("pushedAt")
-                if pushed_at:
-                    try:
-                        date_obj = datetime.fromisoformat(pushed_at.replace('Z', '+00:00'))
-                        if last_active is None or date_obj > last_active:
-                            last_active = date_obj
-                    except:
-                        continue
-            
-            # ✅ Get contribution count
-            contributions = user_data.get("contributionsCollection", {}).get("contributionCalendar", {}).get("totalContributions", 0)
-            
-            # ✅ Get follower count
-            followers = user_data.get("followers", {}).get("totalCount", 0)
-            
-            # ✅ Return complete profile
-            return {
-                "username": user_data.get("login"),
-                "name": user_data.get("name"),
-                "email": user_data.get("email"),
-                "location": user_data.get("location"),
-                "bio": user_data.get("bio"),
-                "avatar_url": user_data.get("avatarUrl"),
-                "portfolio_url": user_data.get("websiteUrl"),
-                "public_repos": user_data.get("repositories", {}).get("totalCount", 0),
-                "top_repos": top_repos,
-                "total_stars": total_stars,
-                "languages": languages_data,
-                "contributions": contributions,
-                "last_active_date": last_active,
-                "followers": followers,
-                "is_hireable": user_data.get("isHireable", False)
-            }
-            
+
+            return _build_profile_from_user_data(user_data)
+
         except Exception as e:
             logger.error(f"GraphQL fetch failed for {username}: {e}", exc_info=True)
             return None

@@ -10,7 +10,7 @@ class UsageService:
         "free": {
             "searches": 25,
             "profile_views": 40,
-            "emails_sent": 15,
+            "emails_sent": 25,
             "csv_exports": 10,
             "lists": 1,
             "profiles_per_list": 25,

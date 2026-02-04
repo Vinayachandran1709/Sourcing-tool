@@ -428,7 +428,10 @@ def get_all_profiles(
             if location_lower == country or location_lower in country or country in location_lower:
                 location_terms.extend(cities)
                 break
-        COUNTRY_ALIASES = {"usa": "united states", "us": "united states", "uk": "united kingdom", "uae": "united arab emirates"}
+        from filter_service import (
+            COUNTRY_UNITED_STATES, COUNTRY_UNITED_KINGDOM, COUNTRY_UNITED_ARAB_EMIRATES
+        )
+        COUNTRY_ALIASES = {"usa": COUNTRY_UNITED_STATES, "us": COUNTRY_UNITED_STATES, "uk": COUNTRY_UNITED_KINGDOM, "uae": COUNTRY_UNITED_ARAB_EMIRATES}
         alias_country = COUNTRY_ALIASES.get(location_lower)
         if alias_country and alias_country in FilterService.COUNTRY_CITIES:
             location_terms.append(alias_country)
@@ -526,6 +529,51 @@ def get_selected_profiles(
 
 # ===== SEND BULK EMAILS (UPDATED FOR RESEND) =====
 
+def _validate_email_usage(db, user_id, profile_count):
+    """Check email limits and raise HTTPException if exceeded."""
+    usage = UsageService.check_email_limit(db, user_id)
+
+    if not usage["can_send"]:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "EMAIL_LIMIT_EXCEEDED",
+                "message": f"Email limit reached. You've used {usage['used']}/{usage['limit']} emails this month.",
+                "usage": usage
+            }
+        )
+
+    if profile_count > usage["remaining"]:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "EMAIL_LIMIT_EXCEEDED",
+                "message": f"Cannot send {profile_count} emails. Only {usage['remaining']} remaining this month.",
+                "usage": usage
+            }
+        )
+
+
+def _log_sent_emails(db, user, results, user_settings):
+    """Log successfully sent emails to the EmailOutreach table."""
+    for detail in results['details']:
+        if detail['status'] != 'sent':
+            continue
+        profile = db.query(Profile).filter(Profile.id == detail['profile_id']).first()
+        if not profile:
+            continue
+        outreach = EmailOutreach(
+            user_id=user.id,
+            profile_id=profile.id,
+            subject=user_settings['email_subject'],
+            body=user_settings['email_template'],
+            status='sent',
+            sent_at=datetime.now(timezone.utc)
+        )
+        db.add(outreach)
+    db.commit()
+
+
 @app.post("/api/send-bulk-emails")
 async def send_bulk_emails_endpoint(
     request: dict,
@@ -535,47 +583,21 @@ async def send_bulk_emails_endpoint(
     """Send bulk emails to selected profiles using Resend"""
     try:
         profile_ids = request.get("profile_ids", [])
-        
+
         if not profile_ids:
             raise HTTPException(status_code=400, detail="No profiles selected")
-        
-        # current_user is already the User object
-        user = current_user
-        
+
         user_settings = {
-            'sender_email': user.sender_email or 'noreply@talentbox.co',
-            'sender_name': user.sender_name or user.name,
-            'email_subject': user.email_subject or 'Exciting Opportunity',
-            'email_template': user.email_template or 'Hi {{name}},\n\nWe found your profile interesting!',
-            'reply_method': user.reply_method or 'email',
-            'reply_link': user.reply_link or ''
+            'sender_email': current_user.sender_email or 'noreply@talentbox.co',
+            'sender_name': current_user.sender_name or current_user.name,
+            'email_subject': current_user.email_subject or 'Exciting Opportunity',
+            'email_template': current_user.email_template or 'Hi {{name}},\n\nWe found your profile interesting!',
+            'reply_method': current_user.reply_method or 'email',
+            'reply_link': current_user.reply_link or ''
         }
-        
-        # ✅ FIXED: Use check_email_limit instead of check_limit
-        usage = UsageService.check_email_limit(db, current_user.id)
-        
-        if not usage["can_send"]:
-            raise HTTPException(
-                status_code=403,
-                detail={
-                    "error": "EMAIL_LIMIT_EXCEEDED",
-                    "message": f"Email limit reached. You've used {usage['used']}/{usage['limit']} emails this month.",
-                    "usage": usage
-                }
-            )
-        
-        # Check if trying to send more than remaining
-        if len(profile_ids) > usage["remaining"]:
-            raise HTTPException(
-                status_code=403,
-                detail={
-                    "error": "EMAIL_LIMIT_EXCEEDED",
-                    "message": f"Cannot send {len(profile_ids)} emails. Only {usage['remaining']} remaining this month.",
-                    "usage": usage
-                }
-            )
-        
-        # Get profiles
+
+        _validate_email_usage(db, current_user.id, len(profile_ids))
+
         profiles = db.query(Profile).filter(Profile.id.in_(profile_ids)).all()
         profiles_data = [{
             'id': p.id,
@@ -583,34 +605,18 @@ async def send_bulk_emails_endpoint(
             'github_username': p.github_username,
             'email': p.email
         } for p in profiles]
-        
-        # Send emails using Resend
+
         results = EmailService.send_bulk_emails(profiles_data, user_settings)
-        
-        # Log successful sends to EmailOutreach table
-        for detail in results['details']:
-            if detail['status'] == 'sent':
-                profile = db.query(Profile).filter(Profile.id == detail['profile_id']).first()
-                if profile:
-                    outreach = EmailOutreach(
-                        user_id=user.id,
-                        profile_id=profile.id,
-                        subject=user_settings['email_subject'],
-                        body=user_settings['email_template'],
-                        status='sent',
-                        sent_at=datetime.utcnow()
-                    )
-                    db.add(outreach)
-        
-        db.commit()
-        
+
+        _log_sent_emails(db, current_user, results, user_settings)
+
         return {
             "success": True,
             "sent": results['sent'],
             "failed": results['failed'],
             "message": f"Successfully sent {results['sent']} emails. {results['failed']} failed."
         }
-        
+
     except HTTPException:
         raise
     except Exception as e:

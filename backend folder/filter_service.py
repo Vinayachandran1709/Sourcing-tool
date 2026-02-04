@@ -5,6 +5,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# ===== COUNTRY NAME CONSTANTS =====
+COUNTRY_UNITED_STATES = "united states"
+COUNTRY_UNITED_KINGDOM = "united kingdom"
+COUNTRY_UNITED_ARAB_EMIRATES = "united arab emirates"
+COUNTRY_SAUDI_ARABIA = "saudi arabia"
+COUNTRY_SOUTH_KOREA = "south korea"
+COUNTRY_HONG_KONG = "hong kong"
+
 
 class FilterService:
     """
@@ -22,12 +30,12 @@ class FilterService:
     # ===== PREDEFINED COUNTRY → CITIES MAPPING =====
     # Only uses countries and cities from our FilterPanel options
     COUNTRY_CITIES = {
-        "united states": ["san francisco", "new york", "seattle", "austin", "los angeles",
+        COUNTRY_UNITED_STATES: ["san francisco", "new york", "seattle", "austin", "los angeles",
                           "boston", "chicago", "denver", "atlanta", "miami", "san diego"],
         "canada": ["toronto", "vancouver"],
         "mexico": ["mexico city"],
         "brazil": ["são paulo", "sao paulo"],
-        "united kingdom": ["london"],
+        COUNTRY_UNITED_KINGDOM: ["london"],
         "germany": ["berlin"],
         "netherlands": ["amsterdam"],
         "france": ["paris"],
@@ -36,12 +44,12 @@ class FilterService:
         "switzerland": ["zurich"],
         "poland": ["warsaw"],
         "ireland": ["dublin"],
-        "united arab emirates": ["dubai", "abu dhabi"],
+        COUNTRY_UNITED_ARAB_EMIRATES: ["dubai", "abu dhabi"],
         "israel": ["tel aviv"],
-        "saudi arabia": ["riyadh"],
+        COUNTRY_SAUDI_ARABIA: ["riyadh"],
         "india": ["bangalore", "bengaluru", "mumbai", "delhi", "hyderabad", "chennai", "pune", "kolkata"],
         "japan": ["tokyo"],
-        "south korea": ["seoul"],
+        COUNTRY_SOUTH_KOREA: ["seoul"],
         "china": ["beijing", "shanghai"],
         "australia": ["sydney", "melbourne"],
     }
@@ -76,8 +84,8 @@ class FilterService:
 
             # Also check reverse: if a known alias maps to a country
             COUNTRY_ALIASES = {
-                "usa": "united states", "us": "united states",
-                "uk": "united kingdom", "uae": "united arab emirates",
+                "usa": COUNTRY_UNITED_STATES, "us": COUNTRY_UNITED_STATES,
+                "uk": COUNTRY_UNITED_KINGDOM, "uae": COUNTRY_UNITED_ARAB_EMIRATES,
             }
             alias_country = COUNTRY_ALIASES.get(location_lower)
             if alias_country and alias_country in FilterService.COUNTRY_CITIES:
@@ -151,22 +159,22 @@ class FilterService:
             # Maps predefined cities to their countries
             CITY_TO_COUNTRY = {
                 # United States cities
-                "san francisco": "united states",
-                "new york": "united states",
-                "seattle": "united states",
-                "austin": "united states",
-                "los angeles": "united states",
-                "boston": "united states",
-                "chicago": "united states",
-                "denver": "united states",
-                "atlanta": "united states",
-                "miami": "united states",
-                "san diego": "united states",
-                "sf": "united states",
-                "nyc": "united states",
-                "la": "united states",
-                "usa": "united states",
-                "us": "united states",
+                "san francisco": COUNTRY_UNITED_STATES,
+                "new york": COUNTRY_UNITED_STATES,
+                "seattle": COUNTRY_UNITED_STATES,
+                "austin": COUNTRY_UNITED_STATES,
+                "los angeles": COUNTRY_UNITED_STATES,
+                "boston": COUNTRY_UNITED_STATES,
+                "chicago": COUNTRY_UNITED_STATES,
+                "denver": COUNTRY_UNITED_STATES,
+                "atlanta": COUNTRY_UNITED_STATES,
+                "miami": COUNTRY_UNITED_STATES,
+                "san diego": COUNTRY_UNITED_STATES,
+                "sf": COUNTRY_UNITED_STATES,
+                "nyc": COUNTRY_UNITED_STATES,
+                "la": COUNTRY_UNITED_STATES,
+                "usa": COUNTRY_UNITED_STATES,
+                "us": COUNTRY_UNITED_STATES,
 
                 # Canada cities
                 "toronto": "canada",
@@ -180,7 +188,7 @@ class FilterService:
                 "sao paulo": "brazil",
 
                 # European cities
-                "london": "united kingdom",
+                "london": COUNTRY_UNITED_KINGDOM,
                 "berlin": "germany",
                 "amsterdam": "netherlands",
                 "paris": "france",
@@ -191,7 +199,7 @@ class FilterService:
                 "warsaw": "poland",
                 "prague": "czech republic",
                 "dublin": "ireland",
-                "uk": "united kingdom",
+                "uk": COUNTRY_UNITED_KINGDOM,
 
                 # Indian cities
                 "bangalore": "india",
@@ -200,18 +208,18 @@ class FilterService:
                 "bengaluru": "india",
 
                 # Middle East cities
-                "dubai": "united arab emirates",
-                "abu dhabi": "united arab emirates",
+                "dubai": COUNTRY_UNITED_ARAB_EMIRATES,
+                "abu dhabi": COUNTRY_UNITED_ARAB_EMIRATES,
                 "tel aviv": "israel",
-                "riyadh": "saudi arabia",
+                "riyadh": COUNTRY_SAUDI_ARABIA,
 
                 # Asian cities
                 "singapore": "singapore",
                 "tokyo": "japan",
-                "seoul": "south korea",
+                "seoul": COUNTRY_SOUTH_KOREA,
                 "beijing": "china",
                 "shanghai": "china",
-                "hong kong": "hong kong",
+                COUNTRY_HONG_KONG: COUNTRY_HONG_KONG,
 
                 # Australian cities
                 "sydney": "australia",
@@ -222,14 +230,14 @@ class FilterService:
             # Maps countries to broader regions for fallback
             COUNTRY_TO_REGION = {
                 # Americas
-                "united states": "americas",
+                COUNTRY_UNITED_STATES: "americas",
                 "canada": "americas",
                 "mexico": "americas",
                 "brazil": "americas",
                 "argentina": "americas",
 
                 # Europe
-                "united kingdom": "europe",
+                COUNTRY_UNITED_KINGDOM: "europe",
                 "germany": "europe",
                 "netherlands": "europe",
                 "france": "europe",
@@ -243,17 +251,17 @@ class FilterService:
                 "ireland": "europe",
 
                 # Middle East
-                "united arab emirates": "middle_east",
+                COUNTRY_UNITED_ARAB_EMIRATES: "middle_east",
                 "israel": "middle_east",
-                "saudi arabia": "middle_east",
+                COUNTRY_SAUDI_ARABIA: "middle_east",
 
                 # Asia
                 "india": "asia",
                 "singapore": "asia",
                 "japan": "asia",
                 "china": "asia",
-                "south korea": "asia",
-                "hong kong": "asia",
+                COUNTRY_SOUTH_KOREA: "asia",
+                COUNTRY_HONG_KONG: "asia",
                 "indonesia": "asia",
                 "thailand": "asia",
                 "vietnam": "asia",

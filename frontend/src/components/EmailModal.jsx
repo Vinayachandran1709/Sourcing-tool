@@ -1,23 +1,24 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { X, Mail, Loader, AlertCircle } from 'lucide-react';
-import { getEmailSettings, updateSenderEmail, getEmailUsage, sendBulkEmails } from '../services/api';
+import { X, Mail, Loader, AlertCircle, Settings } from 'lucide-react';
+import { getEmailSettings, getEmailUsage, sendBulkEmails } from '../services/api';
 import EmailSettingsModal from './EmailSettingsModal';
 
 const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) => {
-  const [senderEmail, setSenderEmail] = useState('');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [isFirstTime, setIsFirstTime] = useState(false);
   const [emailUsage, setEmailUsage] = useState(null);
   const [error, setError] = useState(null);
+  
+  // ✅ NEW: Email settings modal state
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [hasEmailSettings, setHasEmailSettings] = useState(false);
 
   // Support both prop naming patterns
   const activeProfiles = selectedProfiles || profiles || [];
   const handleComplete = onSend || onSuccess;
 
-    const loadEmailSettings = useCallback(async () => {
+  // ✅ NEW: Check if email settings are configured
+  const checkEmailSettings = async () => {
     setLoading(true);
     setError(null);
     
@@ -30,49 +31,35 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
       
       setEmailUsage(usage.usage);
       
-      // Check if first time (no sender email)
-      if (!settings.has_sender_email) {
-        setIsFirstTime(true);
-        setSenderEmail('');
-      } else {
-        setIsFirstTime(false);
-        setSenderEmail(settings.sender_email);
-      }
+      // Check if email settings are configured
+      const hasSettings = settings.sender_email && settings.email_template;
+      setHasEmailSettings(hasSettings);
       
-      // Pre-fill template
-      setBody(settings.email_template);
-      
-      // Set default subject if empty
-      if (!subject) {
-        setSubject('Exciting opportunity at [Your Company]');
+      // Auto-open settings modal if not configured
+      if (!hasSettings) {
+        setShowSettingsModal(true);
       }
       
     } catch (error) {
       console.error('Failed to load email settings:', error);
       setError('Failed to load email settings. Please try again.');
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
-    }, [subject]);
-    
+  };
+
   useEffect(() => {
-    loadEmailSettings();
-  }, [loadEmailSettings]);
-
-
+    checkEmailSettings();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     
-    // Validation
-    if (!senderEmail || !subject || !body) {
-      setError('Please fill in all fields');
-      return;
-    }
-    
-    if (!senderEmail.includes('@')) {
-      setError('Please enter a valid email address');
+    // Check if settings are configured
+    if (!hasEmailSettings) {
+      setError('Please configure email settings first');
+      setShowSettingsModal(true);
       return;
     }
     
@@ -85,16 +72,9 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
     setSending(true);
     
     try {
-      // If first time, save sender email
-      if (isFirstTime) {
-        await updateSenderEmail(senderEmail);
-      }
-      
-      // Send emails
+      // Send emails (settings already configured on backend)
       const result = await sendBulkEmails({
-        profile_ids: activeProfiles.map(p => p.id),
-        subject,
-        body
+        profile_ids: activeProfiles.map(p => p.id)
       });
       
       // Success callback
@@ -107,8 +87,6 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
       // Handle specific error types
       if (error.response?.data?.error === 'EMAIL_LIMIT_EXCEEDED') {
         setError(error.response.data.message);
-      } else if (error.response?.data?.error === 'SENDER_EMAIL_NOT_SET') {
-        setError('Please enter your sender email address');
       } else {
         setError(error.response?.data?.message || 'Failed to send emails. Please try again.');
       }
@@ -117,140 +95,122 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
     }
   };
 
-  // Render is controlled by parent conditional rendering
-
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
-          <h2 style={styles.title}>Send Bulk Emails</h2>
-          <button onClick={onClose} style={styles.closeButton}>
-            <X size={24} />
-          </button>
-        </div>
-
-        {loading ? (
-          <div style={styles.loadingContainer}>
-            <Loader size={32} color="#4f46e5" />
-            <p style={styles.loadingText}>Loading email settings...</p>
-          </div>
-        ) : (
-          <>
-            {/* Email Usage */}
-            {emailUsage && (
-              <div style={styles.usageBar}>
-                <Mail size={20} color="#4f46e5" />
-                <span style={styles.usageText}>
-                  {emailUsage.used}/{emailUsage.limit === -1 ? '∞' : emailUsage.limit} emails used this month
-                  {emailUsage.limit !== -1 && ` (${emailUsage.remaining} remaining)`}
-                </span>
-              </div>
-            )}
-
-            {/* Error Message */}
-            {error && (
-              <div style={styles.errorBox}>
-                <AlertCircle size={20} color="#dc2626" />
-                <span style={styles.errorText}>{error}</span>
-              </div>
-            )}
-
-            {/* Info Banner */}
-            <div style={styles.info}>
-              <Mail size={20} color="#4f46e5" />
-              <span>Sending to {activeProfiles.length} developers</span>
+    <>
+      <div style={styles.overlay} onClick={onClose}>
+        <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+          <div style={styles.header}>
+            <h2 style={styles.title}>Send Bulk Emails</h2>
+            <div style={styles.headerButtons}>
+              {/* ✅ NEW: Settings button */}
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                style={styles.settingsButton}
+                title="Email Settings"
+              >
+                <Settings size={20} />
+              </button>
+              <button onClick={onClose} style={styles.closeButton}>
+                <X size={24} />
+              </button>
             </div>
+          </div>
 
-            <form onSubmit={handleSubmit} style={styles.form}>
-              {/* Sender Email (First Time or Always Visible) */}
-              <div style={styles.field}>
-                <label style={styles.label}>
-                  From: {isFirstTime && <span style={styles.required}>*</span>}
-                </label>
-                <input
-                  type="email"
-                  value={senderEmail}
-                  onChange={(e) => setSenderEmail(e.target.value)}
-                  placeholder="your-email@company.com"
-                  style={styles.input}
-                  disabled={!isFirstTime}
-                  required
-                />
-                {isFirstTime && (
+          {loading ? (
+            <div style={styles.loadingContainer}>
+              <Loader size={32} color="#4f46e5" />
+              <p style={styles.loadingText}>Loading email settings...</p>
+            </div>
+          ) : (
+            <>
+              {/* Email Usage */}
+              {emailUsage && (
+                <div style={styles.usageBar}>
+                  <Mail size={20} color="#4f46e5" />
+                  <span style={styles.usageText}>
+                    {emailUsage.used}/{emailUsage.limit === -1 ? '∞' : emailUsage.limit} emails used this month
+                    {emailUsage.limit !== -1 && ` (${emailUsage.remaining} remaining)`}
+                  </span>
+                </div>
+              )}
+
+              {/* Error Message */}
+              {error && (
+                <div style={styles.errorBox}>
+                  <AlertCircle size={20} color="#dc2626" />
+                  <span style={styles.errorText}>{error}</span>
+                </div>
+              )}
+
+              {/* Warning if settings not configured */}
+              {!hasEmailSettings && (
+                <div style={styles.warningBox}>
+                  <AlertCircle size={20} color="#f59e0b" />
+                  <span style={styles.warningText}>
+                    Please configure your email settings before sending emails
+                  </span>
+                </div>
+              )}
+
+              {/* Info Banner */}
+              <div style={styles.info}>
+                <Mail size={20} color="#4f46e5" />
+                <span>Ready to send to {activeProfiles.length} developers</span>
+              </div>
+
+              <form onSubmit={handleSubmit} style={styles.form}>
+                <div style={styles.infoText}>
+                  <p>✅ <strong>Your email settings are configured</strong></p>
                   <p style={styles.hint}>
-                    This will be saved and used for future emails
+                    Emails will be sent using your saved template and settings.
+                    Click the Settings button above to modify them.
                   </p>
-                )}
-                {!isFirstTime && (
-                  <p style={styles.hint}>
-                    To change sender email, go to Subscription settings
-                  </p>
-                )}
-              </div>
+                </div>
 
-              {/* Subject */}
-              <div style={styles.field}>
-                <label style={styles.label}>
-                  Subject <span style={styles.required}>*</span>
-                </label>
-                <input
-                  type="text"
-                  value={subject}
-                  onChange={(e) => setSubject(e.target.value)}
-                  placeholder="e.g., Exciting Python Developer Role"
-                  style={styles.input}
-                  required
-                />
-              </div>
-
-              {/* Body (Template) */}
-              <div style={styles.field}>
-                <label style={styles.label}>
-                  Email Body <span style={styles.required}>*</span>
-                </label>
-                <textarea
-                  value={body}
-                  onChange={(e) => setBody(e.target.value)}
-                  rows={10}
-                  style={styles.textarea}
-                  required
-                />
-                <p style={styles.hint}>
-                  💡 Use variables: {'{{name}}'}, {'{{github_username}}'}, {'{{primary_language}}'}, {'{{top_repo}}'}
-                </p>
-                <p style={styles.hint}>
-                  To change default template, go to Subscription settings
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div style={styles.actions}>
-                <button type="button" onClick={onClose} style={styles.cancelButton}>
-                  Cancel
-                </button>
-                <button 
-                  type="submit" 
-                  disabled={sending || (emailUsage && activeProfiles.length > emailUsage.remaining)} 
-                  style={styles.sendButton}
-                >
-                  {sending ? (
-                    <>
-                      <Loader size={20} />
-                      <span>Sending...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Mail size={20} />
-                      <span>Send {activeProfiles.length} Emails</span>
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </>
-        )}
+                {/* Actions */}
+                <div style={styles.actions}>
+                  <button type="button" onClick={onClose} style={styles.cancelButton}>
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={sending || !hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)} 
+                    style={{
+                      ...styles.sendButton,
+                      opacity: (!hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)) ? 0.5 : 1,
+                      cursor: (!hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)) ? 'not-allowed' : 'pointer'
+                    }}
+                  >
+                    {sending ? (
+                      <>
+                        <Loader size={20} />
+                        <span>Sending...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Mail size={20} />
+                        <span>Send {activeProfiles.length} Emails</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </form>
+            </>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* ✅ NEW: Email Settings Modal */}
+      <EmailSettingsModal
+        isOpen={showSettingsModal}
+        onClose={() => setShowSettingsModal(false)}
+        onSuccess={() => {
+          setHasEmailSettings(true);
+          setShowSettingsModal(false);
+          checkEmailSettings(); // Reload settings
+        }}
+      />
+    </>
   );
 };
 
@@ -288,11 +248,30 @@ const styles = {
     fontWeight: 'bold',
     margin: 0,
   },
+  headerButtons: {
+    display: 'flex',
+    gap: '0.5rem',
+    alignItems: 'center',
+  },
+  settingsButton: {
+    background: '#f3f4f6',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '8px',
+    cursor: 'pointer',
+    color: '#374151',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   closeButton: {
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     color: '#6b7280',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   loadingContainer: {
     display: 'flex',
@@ -331,6 +310,19 @@ const styles = {
     color: '#991b1b',
     fontWeight: '500',
   },
+  warningBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1rem 1.5rem',
+    backgroundColor: '#fffbeb',
+    borderBottom: '1px solid #fde68a',
+  },
+  warningText: {
+    fontSize: '0.875rem',
+    color: '#92400e',
+    fontWeight: '500',
+  },
   info: {
     display: 'flex',
     alignItems: 'center',
@@ -344,40 +336,17 @@ const styles = {
   form: {
     padding: '1.5rem',
   },
-  field: {
+  infoText: {
     marginBottom: '1.5rem',
-  },
-  label: {
-    display: 'block',
-    fontSize: '0.875rem',
-    fontWeight: '500',
-    marginBottom: '0.5rem',
-    color: '#374151',
-  },
-  required: {
-    color: '#dc2626',
+    padding: '1rem',
+    backgroundColor: '#f9fafb',
+    borderRadius: '6px',
+    border: '1px solid #e5e7eb',
   },
   hint: {
-    marginTop: '0.375rem',
-    fontSize: '0.75rem',
+    marginTop: '0.5rem',
+    fontSize: '0.875rem',
     color: '#6b7280',
-  },
-  input: {
-    width: '100%',
-    padding: '0.75rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    fontFamily: 'inherit',
-  },
-  textarea: {
-    width: '100%',
-    padding: '0.75rem',
-    border: '1px solid #d1d5db',
-    borderRadius: '4px',
-    fontSize: '1rem',
-    fontFamily: 'inherit',
-    resize: 'vertical',
   },
   actions: {
     display: 'flex',
