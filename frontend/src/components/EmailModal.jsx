@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { X, Mail, Loader, AlertCircle } from 'lucide-react';
 import { getEmailSettings, updateSenderEmail, getEmailUsage, sendBulkEmails } from '../services/api';
+import EmailSettingsModal from './EmailSettingsModal';
 
 const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) => {
   const [senderEmail, setSenderEmail] = useState('');

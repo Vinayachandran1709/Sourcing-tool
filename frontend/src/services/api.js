@@ -129,6 +129,32 @@ export const logCsvExport = async () => {
   return response.data;
 };
 
+export const getEmailSettings = async () => {
+  const response = await fetch(`${API_BASE_URL}/api/email-settings/settings`, {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  if (!response.ok) throw new Error('Failed to get email settings');
+  return response.json();
+};
+
+export const updateEmailSettings = async (settings) => {
+  const response = await fetch(`${API_BASE_URL}/api/email-settings/settings`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify(settings)
+  });
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.detail || 'Failed to update email settings');
+  }
+  return response.json();
+};
+
 // ===== SAVED LISTS APIs (FIXED ENDPOINTS) =====
 
 export const getSavedLists = async () => {
