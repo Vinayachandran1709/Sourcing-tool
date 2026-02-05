@@ -7,7 +7,9 @@
       "Bash(git diff-tree:*)",
       "Bash(dir:*)",
       "Bash(findstr:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(npx react-scripts build:*)",
+      "Bash(del \"C:\\\\Users\\\\vinayachandran\\\\OneDrive\\\\Desktop\\\\Github folder\\\\Sourcing-tool\\\\frontend\\\\src\\\\pages\\\\Dashboard\\\\OutreachHistoryPage.jsx\")"
     ]
   }
 }

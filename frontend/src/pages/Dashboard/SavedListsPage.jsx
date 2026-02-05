@@ -181,49 +181,49 @@ const SavedListsPage = () => {
               </button>
             </div>
 
-            {loading ? (
-              <div style={styles.loading}>Loading lists...</div>
-            ) : (
-              <div style={styles.listsList}>
-                {lists.map(list => (
-                  <div
-                    key={list.id}
-                    onClick={() => setSelectedList(list)}
-                    style={{
-                      ...styles.listItem,
-                      ...(selectedList?.id === list.id ? styles.listItemActive : {})
+            <div style={{
+              ...styles.listsList,
+              opacity: loading ? 0.5 : 1,
+              transition: 'opacity 0.25s ease',
+            }}>
+              {lists.map(list => (
+                <div
+                  key={list.id}
+                  onClick={() => setSelectedList(list)}
+                  style={{
+                    ...styles.listItem,
+                    ...(selectedList?.id === list.id ? styles.listItemActive : {})
+                  }}
+                >
+                  <div style={styles.listItemIcon}>
+                    <Folder size={20} color={selectedList?.id === list.id ? '#FF6B35' : '#6b7280'} />
+                  </div>
+                  <div style={styles.listItemContent}>
+                    <div style={styles.listItemName}>{list.name}</div>
+                    <div style={styles.listItemCount}>{list.profiles_count} profiles</div>
+                  </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteList(list.id);
                     }}
+                    style={styles.deleteListBtn}
                   >
-                    <div style={styles.listItemIcon}>
-                      <Folder size={20} color={selectedList?.id === list.id ? '#FF6B35' : '#6b7280'} />
-                    </div>
-                    <div style={styles.listItemContent}>
-                      <div style={styles.listItemName}>{list.name}</div>
-                      <div style={styles.listItemCount}>{list.profiles_count} profiles</div>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteList(list.id);
-                      }}
-                      style={styles.deleteListBtn}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
+                    <Trash2 size={16} />
+                  </button>
+                </div>
+              ))}
 
-                {lists.length === 0 && (
-                  <div style={styles.emptyLists}>
-                    <Folder size={48} color="#d1d5db" />
-                    <p style={styles.emptyText}>No lists yet</p>
-                    <button onClick={() => setShowCreateModal(true)} style={styles.emptyCreateBtn}>
-                      Create Your First List
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
+              {!loading && lists.length === 0 && (
+                <div style={styles.emptyLists}>
+                  <Folder size={48} color="#d1d5db" />
+                  <p style={styles.emptyText}>No lists yet</p>
+                  <button onClick={() => setShowCreateModal(true)} style={styles.emptyCreateBtn}>
+                    Create Your First List
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Main Content - Profiles */}

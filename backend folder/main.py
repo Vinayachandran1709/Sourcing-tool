@@ -624,46 +624,6 @@ async def send_bulk_emails_endpoint(
         logger.error(f"Bulk email error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 
-# ===== GET OUTREACH HISTORY =====
-
-@app.get("/api/outreach-history")
-def get_outreach_history(
-    limit: int = 100,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
-):
-    """Get email outreach history"""
-    user_id = current_user.id
-    
-    outreach_logs = db.query(EmailOutreach).filter(
-        EmailOutreach.user_id == user_id
-    ).order_by(
-        EmailOutreach.sent_at.desc()
-    ).limit(limit).all()
-    
-    results = []
-    for log in outreach_logs:
-        profile = db.query(Profile).filter(Profile.id == log.profile_id).first()
-        if profile:
-            results.append({
-                "id": log.id,
-                "profile": {
-                    "id": profile.id,
-                    "name": profile.name,
-                    "github_username": profile.github_username,
-                    "email": profile.email
-                },
-                "subject": log.subject,
-                "status": log.status,
-                "sent_at": log.sent_at.isoformat() if log.sent_at else None
-            })
-    
-    return {
-        "outreach_history": results,
-        "total": len(results)
-    }
-
-
 # ===== FILTER BY SCORE =====
 
 @app.post("/api/filter-by-score")

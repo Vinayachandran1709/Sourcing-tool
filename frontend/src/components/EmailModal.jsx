@@ -4,12 +4,11 @@ import { getEmailSettings, getEmailUsage, sendBulkEmails } from '../services/api
 import EmailSettingsModal from './EmailSettingsModal';
 
 const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) => {
-  const [loading, setLoading] = useState(true);
+  const [settingsReady, setSettingsReady] = useState(false);
   const [sending, setSending] = useState(false);
   const [emailUsage, setEmailUsage] = useState(null);
   const [error, setError] = useState(null);
-  
-  // ✅ NEW: Email settings modal state
+
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [hasEmailSettings, setHasEmailSettings] = useState(false);
 
@@ -17,40 +16,35 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
   const activeProfiles = selectedProfiles || profiles || [];
   const handleComplete = onSend || onSuccess;
 
-  // ✅ NEW: Check if email settings are configured
-  const checkEmailSettings = async () => {
-    setLoading(true);
+  const checkEmailSettings = useCallback(async () => {
     setError(null);
-    
+
     try {
-      // Load settings and usage in parallel
       const [settings, usage] = await Promise.all([
         getEmailSettings(),
         getEmailUsage()
       ]);
-      
+
       setEmailUsage(usage.usage);
-      
-      // Check if email settings are configured
+
       const hasSettings = settings.sender_email && settings.email_template;
       setHasEmailSettings(hasSettings);
-      
-      // Auto-open settings modal if not configured
+
       if (!hasSettings) {
         setShowSettingsModal(true);
       }
-      
+
     } catch (error) {
       console.error('Failed to load email settings:', error);
       setError('Failed to load email settings. Please try again.');
     } finally {
-      setLoading(false);
+      setSettingsReady(true);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkEmailSettings();
-  }, []);
+  }, [checkEmailSettings]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -116,87 +110,86 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
             </div>
           </div>
 
-          {loading ? (
-            <div style={styles.loadingContainer}>
-              <Loader size={32} color="#4f46e5" />
-              <p style={styles.loadingText}>Loading email settings...</p>
+          {/* Email Usage */}
+          {emailUsage && (
+            <div style={styles.usageBar}>
+              <Mail size={20} color="#4f46e5" />
+              <span style={styles.usageText}>
+                {emailUsage.used}/{emailUsage.limit === -1 ? '∞' : emailUsage.limit} emails used this month
+                {emailUsage.limit !== -1 && ` (${emailUsage.remaining} remaining)`}
+              </span>
             </div>
-          ) : (
-            <>
-              {/* Email Usage */}
-              {emailUsage && (
-                <div style={styles.usageBar}>
-                  <Mail size={20} color="#4f46e5" />
-                  <span style={styles.usageText}>
-                    {emailUsage.used}/{emailUsage.limit === -1 ? '∞' : emailUsage.limit} emails used this month
-                    {emailUsage.limit !== -1 && ` (${emailUsage.remaining} remaining)`}
-                  </span>
-                </div>
-              )}
+          )}
 
-              {/* Error Message */}
-              {error && (
-                <div style={styles.errorBox}>
-                  <AlertCircle size={20} color="#dc2626" />
-                  <span style={styles.errorText}>{error}</span>
-                </div>
-              )}
+          {/* Error Message */}
+          {error && (
+            <div style={styles.errorBox}>
+              <AlertCircle size={20} color="#dc2626" />
+              <span style={styles.errorText}>{error}</span>
+            </div>
+          )}
 
-              {/* Warning if settings not configured */}
-              {!hasEmailSettings && (
-                <div style={styles.warningBox}>
-                  <AlertCircle size={20} color="#f59e0b" />
-                  <span style={styles.warningText}>
-                    Please configure your email settings before sending emails
-                  </span>
-                </div>
-              )}
+          {/* Warning if settings not configured */}
+          {settingsReady && !hasEmailSettings && (
+            <div style={styles.warningBox}>
+              <AlertCircle size={20} color="#f59e0b" />
+              <span style={styles.warningText}>
+                Please configure your email settings before sending emails
+              </span>
+            </div>
+          )}
 
-              {/* Info Banner */}
-              <div style={styles.info}>
-                <Mail size={20} color="#4f46e5" />
-                <span>Ready to send to {activeProfiles.length} developers</span>
-              </div>
+          {/* Info Banner */}
+          <div style={styles.info}>
+            <Mail size={20} color="#4f46e5" />
+            <span>Ready to send to {activeProfiles.length} developers</span>
+          </div>
 
-              <form onSubmit={handleSubmit} style={styles.form}>
-                <div style={styles.infoText}>
-                  <p>✅ <strong>Your email settings are configured</strong></p>
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.infoText}>
+              {settingsReady && hasEmailSettings ? (
+                <>
+                  <p>Your email settings are configured</p>
                   <p style={styles.hint}>
                     Emails will be sent using your saved template and settings.
                     Click the Settings button above to modify them.
                   </p>
-                </div>
+                </>
+              ) : (
+                <p style={{ ...styles.hint, margin: 0 }}>
+                  {settingsReady ? 'Configure your email settings to get started.' : 'Checking email settings...'}
+                </p>
+              )}
+            </div>
 
-                {/* Actions */}
-                <div style={styles.actions}>
-                  <button type="button" onClick={onClose} style={styles.cancelButton}>
-                    Cancel
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={sending || !hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)} 
-                    style={{
-                      ...styles.sendButton,
-                      opacity: (!hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)) ? 0.5 : 1,
-                      cursor: (!hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)) ? 'not-allowed' : 'pointer'
-                    }}
-                  >
-                    {sending ? (
-                      <>
-                        <Loader size={20} />
-                        <span>Sending...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Mail size={20} />
-                        <span>Send {activeProfiles.length} Emails</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </form>
-            </>
-          )}
+            {/* Actions */}
+            <div style={styles.actions}>
+              <button type="button" onClick={onClose} style={styles.cancelButton}>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={sending || !settingsReady || !hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)}
+                style={{
+                  ...styles.sendButton,
+                  opacity: (!settingsReady || !hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)) ? 0.5 : 1,
+                  cursor: (!settingsReady || !hasEmailSettings || (emailUsage && activeProfiles.length > emailUsage.remaining)) ? 'not-allowed' : 'pointer'
+                }}
+              >
+                {sending ? (
+                  <>
+                    <Loader size={20} />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <>
+                    <Mail size={20} />
+                    <span>Send {activeProfiles.length} Emails</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
 
@@ -272,17 +265,6 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '3rem',
-  },
-  loadingText: {
-    color: '#6b7280',
-    fontSize: '0.875rem',
   },
   usageBar: {
     display: 'flex',

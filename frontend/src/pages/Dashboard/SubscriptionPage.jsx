@@ -91,8 +91,19 @@ const PlanCard = ({ plan, currentPlanName, onEarlyAccess, onSelectPlan }) => {
 
 const SubscriptionPage = () => {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [userData, setUserData] = useState({
+    plan: 'Free Trial',
+    billing_cycle: 'monthly',
+    price: 0,
+    subscription_status: 'active',
+    trial_end_date: null,
+    usage: {
+      searches: { used: 0, limit: 25 },
+      profile_unlocks: { used: 0, limit: 40 },
+      emails: { used: 0, limit: 25 },
+    }
+  });
+  const [dataReady, setDataReady] = useState(false);
 
   useEffect(() => {
     const fetchUsageData = async () => {
@@ -116,7 +127,7 @@ const SubscriptionPage = () => {
       } catch (err) {
         console.error('Failed to fetch usage stats:', err);
       } finally {
-        setLoading(false);
+        setDataReady(true);
       }
     };
     fetchUsageData();
@@ -212,42 +223,18 @@ Looking forward to hearing from you!`);
     return '#ef4444'; // red
   };
 
-  if (loading) {
-    return (
-      <div style={styles.page}>
-        <DashboardHeader
-          title="Subscription & Usage"
-          subtitle="Manage your plan and track your usage"
-        />
-        <div style={{ ...styles.content, textAlign: 'center', padding: '4rem 2rem' }}>
-          <p style={{ color: '#6b7280', fontSize: '1rem' }}>Loading usage data...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!userData) {
-    return (
-      <div style={styles.page}>
-        <DashboardHeader
-          title="Subscription & Usage"
-          subtitle="Manage your plan and track your usage"
-        />
-        <div style={{ ...styles.content, textAlign: 'center', padding: '4rem 2rem' }}>
-          <p style={{ color: '#ef4444', fontSize: '1rem' }}>Failed to load usage data. Please try again.</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div style={styles.page}>
-      <DashboardHeader 
-        title="Subscription & Usage" 
+      <DashboardHeader
+        title="Subscription & Usage"
         subtitle="Manage your plan and track your usage"
       />
 
-      <div style={styles.content}>
+      <div style={{
+        ...styles.content,
+        opacity: dataReady ? 1 : 0.6,
+        transition: 'opacity 0.3s ease',
+      }}>
         {/* Current Plan Card */}
         <div style={styles.currentPlanCard}>
           <div style={styles.planHeader}>

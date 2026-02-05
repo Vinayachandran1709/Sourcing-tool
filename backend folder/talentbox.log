@@ -170,3 +170,14 @@ TypeError: UsageService.check_limit() got an unexpected keyword argument 'limit_
 2026-02-05 00:12:50,968 - main - INFO - ✅ JWT Secret configured
 2026-02-05 00:12:50,969 - main - INFO - 🎯 Startup validation complete
 
+2026-02-05 23:32:30,452 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-05 23:32:35,599 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-05 23:32:35,601 - main - INFO - Environment: development
+2026-02-05 23:32:35,602 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-05 23:32:35,671 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-05 23:32:36,172 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-05 23:32:36,172 - main - INFO - ✅ Resend API Key configured
+2026-02-05 23:32:42,865 - main - INFO - ✅ Database connection successful
+2026-02-05 23:32:42,866 - main - INFO - ✅ JWT Secret configured
+2026-02-05 23:32:42,867 - main - INFO - 🎯 Startup validation complete
+
