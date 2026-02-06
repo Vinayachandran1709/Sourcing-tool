@@ -130,7 +130,7 @@ const SignupPage = () => {
               <div style={styles.inputWrapper}>
                 <Lock size={20} color="#9ca3af" style={styles.inputIcon} />
                 <input type={showPassword ? 'text' : 'password'} name="password" value={formData.password} onChange={handleChange} placeholder="Min 8 characters" style={styles.inputWithToggle} required disabled={loading} minLength={8} />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.passwordToggle} tabIndex={-1}>
+                <button type="button" onClick={() => setShowPassword(!showPassword)} style={styles.passwordToggle} tabIndex={-1} aria-label={showPassword ? 'Hide password' : 'Show password'}>
                   {showPassword ? <EyeOff size={20} color="#9ca3af" /> : <Eye size={20} color="#9ca3af" />}
                 </button>
               </div>
@@ -164,7 +164,7 @@ const SignupPage = () => {
               <div style={styles.inputWrapper}>
                 <Lock size={20} color="#9ca3af" style={styles.inputIcon} />
                 <input type={showConfirmPassword ? 'text' : 'password'} name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} placeholder="Confirm your password" style={styles.inputWithToggle} required disabled={loading} />
-                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.passwordToggle} tabIndex={-1}>
+                <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.passwordToggle} tabIndex={-1} aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}>
                   {showConfirmPassword ? <EyeOff size={20} color="#9ca3af" /> : <Eye size={20} color="#9ca3af" />}
                 </button>
               </div>

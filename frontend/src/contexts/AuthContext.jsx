@@ -16,6 +16,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
+  const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false);
   const navigate = useNavigate();
 
 
@@ -25,6 +26,7 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     localStorage.removeItem('user');
     localStorage.removeItem('token');
+    localStorage.removeItem('emailSettings');
 
     // Clear all search session data
     sessionStorage.clear();
@@ -51,9 +53,7 @@ export const AuthProvider = ({ children }) => {
             const now = new Date();
 
             if (now > trialEndDate) {
-              // Trial expired - log out user
-              logout();
-              alert('Your free trial has expired. Please upgrade to continue using TalentBox.');
+              setShowTrialExpiredModal(true);
             }
           }
         }
@@ -79,8 +79,7 @@ export const AuthProvider = ({ children }) => {
         const now = new Date();
 
         if (now > trialEndDate) {
-          logout();
-          alert('Your free trial has expired. Please upgrade to continue using TalentBox.');
+          setShowTrialExpiredModal(true);
         }
       }
     };
@@ -220,8 +219,50 @@ const signup = async (name, email, company, password) => {
     getDaysRemainingInTrial,
   };
 
+  const handleDismissTrialExpired = () => {
+    setShowTrialExpiredModal(false);
+    logout();
+  };
+
   return (
     <AuthContext.Provider value={value}>
+      {showTrialExpiredModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center',
+          justifyContent: 'center', zIndex: 9999, fontFamily: "'Outfit', sans-serif",
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '16px', padding: '2.5rem',
+            maxWidth: '420px', width: '90%', textAlign: 'center',
+            boxShadow: '0 20px 60px rgba(0,0,0,0.15)',
+          }}>
+            <div style={{
+              width: '56px', height: '56px', borderRadius: '50%', background: '#fef3c7',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 1.25rem', fontSize: '1.75rem',
+            }}>
+              &#9200;
+            </div>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1a1a1a', marginBottom: '0.75rem' }}>
+              Free Trial Expired
+            </h3>
+            <p style={{ fontSize: '1rem', color: '#6b7280', lineHeight: '1.6', marginBottom: '1.5rem' }}>
+              Your 14-day free trial has ended. Upgrade to the Starter plan to continue finding and hiring top developers.
+            </p>
+            <button
+              onClick={handleDismissTrialExpired}
+              style={{
+                width: '100%', padding: '0.875rem', background: '#FF6B35', color: '#fff',
+                border: 'none', borderRadius: '10px', fontSize: '1rem', fontWeight: '600',
+                cursor: 'pointer', fontFamily: "'Outfit', sans-serif",
+              }}
+            >
+              Got it
+            </button>
+          </div>
+        </div>
+      )}
       {children}
     </AuthContext.Provider>
   );

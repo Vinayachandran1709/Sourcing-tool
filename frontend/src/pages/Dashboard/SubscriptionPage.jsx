@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
-import { Mail, Search, Eye, CheckCircle } from 'lucide-react';
+import { Mail, Search, Eye, CheckCircle, Loader, AlertCircle, RefreshCw } from 'lucide-react';
 import EmailSettingsCard from '../../components/EmailSettingsCard';
 import { getUsageStats } from '../../services/api';
 
@@ -97,6 +97,7 @@ const SubscriptionPage = () => {
     price: 0,
     subscription_status: 'active',
     trial_end_date: null,
+    next_billing_date: null,
     usage: {
       searches: { used: 0, limit: 25 },
       profile_unlocks: { used: 0, limit: 40 },
@@ -104,6 +105,7 @@ const SubscriptionPage = () => {
     }
   });
   const [dataReady, setDataReady] = useState(false);
+  const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
     const fetchUsageData = async () => {
@@ -111,21 +113,24 @@ const SubscriptionPage = () => {
         const data = await getUsageStats();
         const planName = (data.plan === 'free' || data.plan === 'free_trial') ? 'Free Trial' :
                          data.plan === 'starter' ? 'Starter' : data.plan;
-        const planPrices = { 'Free Trial': 0, 'Starter': 79 };
+        const matchedPlan = plans.find(p => p.name === planName);
         setUserData({
           plan: planName,
           billing_cycle: 'monthly',
-          price: planPrices[planName] || 0,
+          price: matchedPlan?.price_monthly || 0,
           subscription_status: data.subscription_status,
           trial_end_date: data.trial_end_date,
+          next_billing_date: data.next_billing_date || null,
           usage: {
             searches: { used: data.usage.searches.used, limit: data.usage.searches.limit },
             profile_unlocks: { used: data.usage.profile_views.used, limit: data.usage.profile_views.limit },
             emails: { used: data.usage.emails_sent.used, limit: data.usage.emails_sent.limit },
           }
         });
+        setFetchError(null);
       } catch (err) {
         console.error('Failed to fetch usage stats:', err);
+        setFetchError('Failed to load subscription data. Please try refreshing the page.');
       } finally {
         setDataReady(true);
       }
@@ -230,20 +235,32 @@ Looking forward to hearing from you!`);
         subtitle="Manage your plan and track your usage"
       />
 
-      <div style={{
-        ...styles.content,
-        opacity: dataReady ? 1 : 0.6,
-        transition: 'opacity 0.3s ease',
-      }}>
+      <div style={styles.content}>
+        {/* Loading State */}
+        {!dataReady && (
+          <div style={styles.loadingState}>
+            <Loader size={32} color="#FF6B35" style={{ animation: 'spin 1s linear infinite' }} />
+            <p style={styles.loadingText}>Loading subscription data...</p>
+          </div>
+        )}
+
+        {/* Error State */}
+        {fetchError && (
+          <div style={styles.errorBanner}>
+            <AlertCircle size={20} color="#dc2626" />
+            <span>{fetchError}</span>
+          </div>
+        )}
+
         {/* Current Plan Card */}
-        <div style={styles.currentPlanCard}>
+        <div style={{ ...styles.currentPlanCard, opacity: dataReady ? 1 : 0.4, transition: 'opacity 0.3s ease' }}>
           <div style={styles.planHeader}>
             <div>
               <h3 style={styles.planTitle}>Current Plan: {userData.plan}</h3>
               <p style={styles.planSubtitle}>
                 {userData.plan === 'Free Trial'
                   ? `Trial ${userData.subscription_status === 'expired' ? 'expired' : 'active'}${userData.trial_end_date ? ` • Ends ${new Date(userData.trial_end_date).toLocaleDateString()}` : ''}`
-                  : `Billed ${userData.billing_cycle}`
+                  : `Billed ${userData.billing_cycle}${userData.next_billing_date ? ` • Next billing: ${new Date(userData.next_billing_date).toLocaleDateString()}` : ''}`
                 }
               </p>
             </div>
@@ -253,10 +270,31 @@ Looking forward to hearing from you!`);
             </div>
           </div>
 
+          {/* Renew Button - Show 5 days before billing */}
+          {userData.plan !== 'Free Trial' && userData.next_billing_date && (() => {
+            const daysUntilBilling = Math.ceil((new Date(userData.next_billing_date) - new Date()) / (1000 * 60 * 60 * 24));
+            return daysUntilBilling <= 5 && daysUntilBilling > 0;
+          })() && (
+            <div style={styles.renewBanner}>
+              <div style={styles.renewBannerContent}>
+                <RefreshCw size={20} color="#FF6B35" />
+                <div>
+                  <strong>Billing coming up!</strong> Your next billing date is {new Date(userData.next_billing_date).toLocaleDateString()}.
+                </div>
+              </div>
+              <button
+                onClick={() => navigate(`/checkout?plan=${userData.plan}&cycle=monthly&renew=true`)}
+                style={styles.renewBtn}
+              >
+                Renew Now
+              </button>
+            </div>
+          )}
+
           {/* Usage Metrics */}
           <div style={styles.usageSection}>
-            <h4 style={styles.usageTitle}>Usage This Month</h4>
-            
+            <h4 style={styles.usageTitle}>Usage This {userData.plan === 'Free Trial' ? 'Trial' : 'Month'}</h4>
+
             {/* Searches */}
             <div style={styles.usageItem}>
               <div style={styles.usageHeader}>
@@ -321,6 +359,20 @@ Looking forward to hearing from you!`);
                   }}
                 ></div>
               </div>
+              {/* Email limit reached message */}
+              {userData.usage.emails.used >= userData.usage.emails.limit && (
+                <div style={styles.limitReachedMsg}>
+                  <AlertCircle size={16} color="#ef4444" />
+                  <span>
+                    You've used {userData.usage.emails.used}/{userData.usage.emails.limit} emails this billing cycle.
+                    {userData.next_billing_date
+                      ? ` Resets on ${new Date(userData.next_billing_date).toLocaleDateString()}.`
+                      : userData.trial_end_date
+                        ? ` Upgrade to get more emails.`
+                        : ''}
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -636,22 +688,103 @@ const styles = {
     cursor: 'not-allowed',
   },
 
+  loadingState: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '1rem',
+    padding: '2rem',
+    marginBottom: '1rem',
+  },
+
+  loadingText: {
+    fontSize: '0.9375rem',
+    color: '#6b7280',
+  },
+
+  errorBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    padding: '1rem 1.5rem',
+    background: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '10px',
+    marginBottom: '1.5rem',
+    color: '#dc2626',
+    fontSize: '0.9375rem',
+    fontWeight: '500',
+  },
+
+  renewBanner: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem 1.5rem',
+    background: '#fff7ed',
+    border: '1px solid #fed7aa',
+    borderRadius: '10px',
+    marginBottom: '1.5rem',
+  },
+
+  renewBannerContent: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.75rem',
+    fontSize: '0.9375rem',
+    color: '#9a3412',
+  },
+
+  renewBtn: {
+    padding: '0.625rem 1.25rem',
+    background: '#FF6B35',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
+    whiteSpace: 'nowrap',
+  },
+
+  limitReachedMsg: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    marginTop: '0.5rem',
+    padding: '0.625rem 0.875rem',
+    background: '#fef2f2',
+    borderRadius: '6px',
+    fontSize: '0.8125rem',
+    color: '#dc2626',
+    fontWeight: '500',
+  },
+
 };
 
-// Add hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  button[style*="selectPlanBtn"]:hover:not(:disabled) {
-    background: #ff5722 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255,107,53,0.3);
-  }
-  
-  div[style*="planCard"]:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
-  }
-`;
-document.head.appendChild(styleSheet);
+// Hover effects (guarded to prevent duplicate injection)
+if (!document.getElementById('subscription-page-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'subscription-page-styles';
+  styleSheet.textContent = `
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    button[style*="selectPlanBtn"]:hover:not(:disabled) {
+      background: #ff5722 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+
+    div[style*="planCard"]:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1) !important;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default SubscriptionPage;

@@ -45,7 +45,7 @@ const TermsPage = () => {
             3. Free Trial and Subscription
           </h2>
           <p style={{ lineHeight: '1.8', marginBottom: '15px', color: '#374151', fontSize: '1.0625rem' }}>
-            <strong>Free Trial:</strong> We offer a 7-day free trial with limited features (15 searches, 75 profile views, 10 emails). 
+            <strong>Free Trial:</strong> We offer a 14-day free trial with limited features (25 searches, 40 profile unlocks, 25 emails).
             No credit card required.
           </p>
           <p style={{ lineHeight: '1.8', marginBottom: '15px', color: '#374151', fontSize: '1.0625rem' }}>

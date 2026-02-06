@@ -371,37 +371,40 @@ const styles = {
   },
 };
 
-// Hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  input:focus, textarea:focus {
-    outline: none;
-    border-color: #FF6B35 !important;
-    background: #ffffff !important;
-  }
-  
-  button[style*="submitButton"]:hover:not(:disabled) {
-    background: #ff5722 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,107,53,0.3);
-  }
-  
-  button[style*="submitButton"]:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-  
-  a[style*="contactValue"]:hover {
-    color: #FF6B35 !important;
-  }
-
-  @media (max-width: 768px) {
-    div[style*="grid"] {
-      grid-template-columns: 1fr !important;
-      gap: 2rem !important;
+// Hover effects (guarded to prevent duplicate injection)
+if (!document.getElementById('contact-page-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'contact-page-styles';
+  styleSheet.textContent = `
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #FF6B35 !important;
+      background: #ffffff !important;
     }
-  }
-`;
-document.head.appendChild(styleSheet);
+
+    button[style*="submitButton"]:hover:not(:disabled) {
+      background: #ff5722 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,107,53,0.3);
+    }
+
+    button[style*="submitButton"]:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    a[style*="contactValue"]:hover {
+      color: #FF6B35 !important;
+    }
+
+    @media (max-width: 768px) {
+      div[style*="grid"] {
+        grid-template-columns: 1fr !important;
+        gap: 2rem !important;
+      }
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default ContactPage;

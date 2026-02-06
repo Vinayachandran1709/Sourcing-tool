@@ -423,31 +423,34 @@ const styles = {
   },
 };
 
-// Add hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  input:focus, textarea:focus {
-    outline: none;
-    border-color: #FF6B35 !important;
-    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
-  }
-  
-  button[style*="resetButton"]:hover {
-    border-color: #9ca3af !important;
-    color: #1a1a1a !important;
-  }
-  
-  button[style*="saveButton"]:hover:not(:disabled) {
-    background: #ff5722 !important;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
-  }
-  
-  button[style*="saveButton"]:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-`;
-document.head.appendChild(styleSheet);
+// Hover effects (guarded to prevent duplicate injection)
+if (!document.getElementById('email-settings-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'email-settings-styles';
+  styleSheet.textContent = `
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #FF6B35 !important;
+      box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+    }
+
+    button[style*="resetButton"]:hover {
+      border-color: #9ca3af !important;
+      color: #1a1a1a !important;
+    }
+
+    button[style*="saveButton"]:hover:not(:disabled) {
+      background: #ff5722 !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+    }
+
+    button[style*="saveButton"]:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default EmailSettingsCard;

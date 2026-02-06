@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
-import { Folder, Plus, Trash2, Edit2, Users, Mail, Download, Search, MoreVertical } from 'lucide-react';
+import { Folder, Plus, Trash2, Edit2, Users, Mail, Download, Search, MoreVertical, Loader } from 'lucide-react';
+import { getSavedLists, createSavedList, deleteSavedList, getListProfiles, removeProfileFromList } from '../../services/api';
 
 const SavedListsPage = () => {
   const [lists, setLists] = useState([]);
@@ -11,124 +12,107 @@ const SavedListsPage = () => {
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [newListName, setNewListName] = useState('');
   const [loading, setLoading] = useState(true);
+  const [profilesLoading, setProfilesLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [error, setError] = useState(null);
 
-  // Mock data - replace with actual API calls
-  useEffect(() => {
-    loadLists();
-  }, []);
-
-  const loadLists = async () => {
+  const loadLists = useCallback(async () => {
     setLoading(true);
+    setError(null);
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('API_URL/saved-lists');
-      // const data = await response.json();
-      
-      // Mock data
-      const mockLists = [
-        {
-          id: 1,
-          name: 'Senior Python Developers',
-          description: 'Experienced Python devs for backend team',
-          profiles_count: 12,
-          created_at: '2024-12-15',
-          profiles: [
-            {
-              id: 1,
-              name: 'Alex Johnson',
-              github_username: 'alexjohnson',
-              avatar_url: 'https://avatars.githubusercontent.com/u/1?v=4',
-              developer_score: 87,
-              location: 'San Francisco, CA',
-              email: 'alex@example.com',
-              public_repos: 45,
-              total_stars: 1234,
-              contributions_last_year: 892,
-              followers: 234,
-              bio: 'Senior Python developer with 8+ years experience',
-              languages_data: { Python: 65, JavaScript: 20, Go: 15 }
-            }
-          ]
-        },
-        {
-          id: 2,
-          name: 'React Specialists',
-          description: 'Frontend experts for new project',
-          profiles_count: 8,
-          created_at: '2024-12-10',
-          profiles: []
-        }
-      ];
-      
-      setLists(mockLists);
-      if (mockLists.length > 0) {
-        setSelectedList(mockLists[0]);
+      const data = await getSavedLists();
+      const listsData = (data.lists || []).map(l => ({ ...l, profiles: [] }));
+      setLists(listsData);
+      if (listsData.length > 0 && !selectedList) {
+        setSelectedList(listsData[0]);
       }
-    } catch (error) {
-      console.error('Failed to load lists:', error);
+    } catch (err) {
+      console.error('Failed to load lists:', err);
+      setError('Failed to load lists. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const loadListProfiles = useCallback(async (listId) => {
+    setProfilesLoading(true);
+    try {
+      const data = await getListProfiles(listId);
+      const profiles = data.profiles || [];
+      setSelectedList(prev => prev ? { ...prev, profiles } : prev);
+      setLists(prev => prev.map(l => l.id === listId ? { ...l, profiles } : l));
+    } catch (err) {
+      console.error('Failed to load profiles:', err);
+    } finally {
+      setProfilesLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadLists();
+  }, [loadLists]);
+
+  useEffect(() => {
+    if (selectedList?.id) {
+      loadListProfiles(selectedList.id);
+    }
+  }, [selectedList?.id, loadListProfiles]);
 
   const handleCreateList = async () => {
     if (!newListName.trim()) return;
-    
+
     try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('API_URL/saved-lists', {
-      //   method: 'POST',
-      //   body: JSON.stringify({ name: newListName })
-      // });
-      
+      const data = await createSavedList(newListName.trim());
       const newList = {
-        id: Date.now(),
-        name: newListName,
+        id: data.list_id || data.id,
+        name: newListName.trim(),
         description: '',
         profiles_count: 0,
         created_at: new Date().toISOString(),
         profiles: []
       };
-      
       setLists([newList, ...lists]);
       setSelectedList(newList);
       setNewListName('');
       setShowCreateModal(false);
-    } catch (error) {
-      console.error('Failed to create list:', error);
+    } catch (err) {
+      console.error('Failed to create list:', err);
+      const msg = err.response?.data?.detail || 'Failed to create list.';
+      alert(typeof msg === 'string' ? msg : 'Failed to create list. You may have reached your list limit.');
     }
   };
 
   const handleDeleteList = async (listId) => {
     if (!window.confirm('Are you sure you want to delete this list?')) return;
-    
+
     try {
-      // TODO: Replace with actual API call
-      setLists(lists.filter(l => l.id !== listId));
+      await deleteSavedList(listId);
+      const remaining = lists.filter(l => l.id !== listId);
+      setLists(remaining);
       if (selectedList?.id === listId) {
-        setSelectedList(lists[0] || null);
+        setSelectedList(remaining[0] || null);
       }
-    } catch (error) {
-      console.error('Failed to delete list:', error);
+    } catch (err) {
+      console.error('Failed to delete list:', err);
+      alert('Failed to delete list. Please try again.');
     }
   };
 
   const handleRemoveProfile = async (profileId) => {
     if (!selectedList) return;
-    
+
     try {
-      // TODO: Replace with actual API call
+      await removeProfileFromList(selectedList.id, profileId);
       const updatedList = {
         ...selectedList,
         profiles: selectedList.profiles.filter(p => p.id !== profileId),
-        profiles_count: selectedList.profiles_count - 1
+        profiles_count: Math.max(0, selectedList.profiles_count - 1)
       };
-      
       setSelectedList(updatedList);
       setLists(lists.map(l => l.id === selectedList.id ? updatedList : l));
-    } catch (error) {
-      console.error('Failed to remove profile:', error);
+    } catch (err) {
+      console.error('Failed to remove profile:', err);
+      alert('Failed to remove profile. Please try again.');
     }
   };
 
@@ -171,6 +155,12 @@ const SavedListsPage = () => {
       />
 
       <div style={styles.container}>
+        {error && (
+          <div style={styles.errorBanner}>
+            <span>{error}</span>
+            <button onClick={loadLists} style={styles.retryBtn}>Retry</button>
+          </div>
+        )}
         <div style={styles.layout}>
           {/* Sidebar - Lists */}
           <div style={styles.sidebar}>
@@ -189,7 +179,7 @@ const SavedListsPage = () => {
               {lists.map(list => (
                 <div
                   key={list.id}
-                  onClick={() => setSelectedList(list)}
+                  onClick={() => { if (selectedList?.id !== list.id) setSelectedList(list); }}
                   style={{
                     ...styles.listItem,
                     ...(selectedList?.id === list.id ? styles.listItemActive : {})
@@ -259,8 +249,16 @@ const SavedListsPage = () => {
                   </div>
                 )}
 
+                {/* Profiles Loading */}
+                {profilesLoading && (
+                  <div style={styles.profilesLoading}>
+                    <Loader size={24} color="#FF6B35" style={{ animation: 'spin 1s linear infinite' }} />
+                    <span style={{ color: '#6b7280', fontSize: '0.9375rem' }}>Loading profiles...</span>
+                  </div>
+                )}
+
                 {/* Profiles Grid */}
-                {filteredProfiles.length > 0 ? (
+                {!profilesLoading && filteredProfiles.length > 0 ? (
                   <div style={styles.profilesGrid}>
                     {filteredProfiles.map(profile => (
                       <div key={profile.id} style={styles.profileCard}>
@@ -319,20 +317,20 @@ const SavedListsPage = () => {
                       </div>
                     ))}
                   </div>
-                ) : (
+                ) : !profilesLoading ? (
                   <div style={styles.emptyProfiles}>
                     <Users size={64} color="#d1d5db" />
                     <h3 style={styles.emptyTitle}>
                       {searchQuery ? 'No matching profiles' : 'No profiles in this list'}
                     </h3>
                     <p style={styles.emptyText}>
-                      {searchQuery 
+                      {searchQuery
                         ? 'Try adjusting your search query'
                         : 'Go to Search page to add developers to this list'
                       }
                     </p>
                   </div>
-                )}
+                ) : null}
               </>
             ) : (
               <div style={styles.emptyProfiles}>
@@ -357,7 +355,7 @@ const SavedListsPage = () => {
               placeholder="e.g., Senior React Developers"
               style={styles.modalInput}
               autoFocus
-              onKeyPress={(e) => e.key === 'Enter' && handleCreateList()}
+              onKeyDown={(e) => e.key === 'Enter' && handleCreateList()}
             />
             <div style={styles.modalActions}>
               <button onClick={() => setShowCreateModal(false)} style={styles.cancelBtn}>
@@ -748,6 +746,40 @@ const styles = {
     color: '#6b7280',
   },
 
+  errorBanner: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '1rem 1.5rem',
+    background: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '10px',
+    marginBottom: '1.5rem',
+    color: '#dc2626',
+    fontSize: '0.9375rem',
+    fontWeight: '500',
+  },
+
+  retryBtn: {
+    padding: '0.5rem 1rem',
+    background: '#dc2626',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '6px',
+    fontSize: '0.8125rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
+  },
+
+  profilesLoading: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.75rem',
+    padding: '3rem 2rem',
+  },
+
   modalOverlay: {
     position: 'fixed',
     top: 0,
@@ -818,40 +850,48 @@ const styles = {
   },
 };
 
-// Hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  div[style*="listItem"]:hover {
-    background: #f9fafb !important;
-  }
-  
-  div[style*="listItem"]:hover button {
-    opacity: 1 !important;
-  }
-  
-  button[style*="createBtn"]:hover {
-    background: #ff5722 !important;
-    transform: scale(1.05);
-  }
-  
-  button[style*="exportBtn"]:hover {
-    border-color: #FF6B35 !important;
-    color: #FF6B35 !important;
-  }
-  
-  div[style*="profileCard"]:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  }
-  
-  button[style*="viewBtn"]:hover {
-    background: #ff5722 !important;
-  }
-  
-  button[style*="removeBtn"]:hover {
-    background: #fee2e2 !important;
-  }
-`;
-document.head.appendChild(styleSheet);
+// Hover effects (guarded to prevent duplicate injection)
+if (!document.getElementById('saved-lists-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'saved-lists-styles';
+  styleSheet.textContent = `
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    div[style*="listItem"]:hover {
+      background: #f9fafb !important;
+    }
+
+    div[style*="listItem"]:hover button {
+      opacity: 1 !important;
+    }
+
+    button[style*="createBtn"]:hover {
+      background: #ff5722 !important;
+      transform: scale(1.05);
+    }
+
+    button[style*="exportBtn"]:hover {
+      border-color: #FF6B35 !important;
+      color: #FF6B35 !important;
+    }
+
+    div[style*="profileCard"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    button[style*="viewBtn"]:hover {
+      background: #ff5722 !important;
+    }
+
+    button[style*="removeBtn"]:hover {
+      background: #fee2e2 !important;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default SavedListsPage;

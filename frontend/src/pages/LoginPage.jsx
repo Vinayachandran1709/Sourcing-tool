@@ -3,26 +3,29 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
-// Add animations
-const styleSheet = document.createElement("style");
-styleSheet.textContent = `
-  @keyframes slideIn {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
+// Animations (guarded to prevent duplicate injection)
+if (!document.getElementById('login-page-styles')) {
+  const styleSheet = document.createElement("style");
+  styleSheet.id = 'login-page-styles';
+  styleSheet.textContent = `
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
-    to {
-      opacity: 1;
-      transform: translateY(0);
+
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
     }
-  }
-  
-  @keyframes spin {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-  }
-`;
-document.head.appendChild(styleSheet);
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 
 const LoginPage = () => {
@@ -161,6 +164,7 @@ const LoginPage = () => {
                   onClick={() => setShowPassword(!showPassword)}
                   style={styles.passwordToggle}
                   tabIndex={-1}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
                 >
                   {showPassword ? <EyeOff size={20} color="#9ca3af" /> : <Eye size={20} color="#9ca3af" />}
                 </button>

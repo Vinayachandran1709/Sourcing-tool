@@ -208,7 +208,7 @@ const HomePage = () => {
       <section style={styles.cta}>
         <div style={styles.container}>
           <h2 style={styles.ctaTitle}>Ready to Find Your Next Developer?</h2>
-          <p style={styles.ctaSubtitle}>Start your 7-day free trial. No credit card required.</p>
+          <p style={styles.ctaSubtitle}>Start your 14-day free trial. No credit card required.</p>
           <Link to="/signup" style={styles.ctaBtn}>
             Get Started Free <ArrowRight size={20} />
           </Link>

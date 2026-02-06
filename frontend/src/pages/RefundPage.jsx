@@ -48,7 +48,7 @@ const RefundPage = () => {
             2. Free Trial
           </h2>
           <p style={{ lineHeight: '1.8', marginBottom: '15px', color: '#374151', fontSize: '1.0625rem' }}>
-            Our 7-day free trial requires no credit card and has no obligation. Since there's no charge during 
+            Our 14-day free trial requires no credit card and has no obligation. Since there's no charge during
             the trial period, refunds do not apply. You can cancel anytime during the trial without being charged.
           </p>
         </section>
@@ -134,7 +134,7 @@ const RefundPage = () => {
               💡 Pro Tip
             </h3>
             <p style={{ lineHeight: '1.8', color: '#1E40AF', fontSize: '1.0625rem', margin: 0 }}>
-              Not sure if TalentBox is right for you? Start with our free 7-day trial (no credit card required) 
+              Not sure if TalentBox is right for you? Start with our free 14-day trial (no credit card required)
               to test all features risk-free before committing to a paid plan.
             </p>
           </div>

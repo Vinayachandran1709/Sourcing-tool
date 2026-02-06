@@ -386,13 +386,16 @@ const styles = {
   },
 };
 
-// Hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  button[style*="clearBtn"]:hover {
-    background: #fee2e2 !important;
-  }
-`;
-document.head.appendChild(styleSheet);
+// Hover effects (guarded to prevent duplicate injection)
+if (!document.getElementById('saved-profiles-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'saved-profiles-styles';
+  styleSheet.textContent = `
+    button[style*="clearBtn"]:hover {
+      background: #fee2e2 !important;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default SavedProfilesPage;

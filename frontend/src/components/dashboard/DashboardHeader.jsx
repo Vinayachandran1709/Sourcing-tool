@@ -35,8 +35,8 @@ const DashboardHeader = ({ title, subtitle }) => {
             <div style={styles.userInfo}>
               <div style={styles.userName}>{user?.name || 'User'}</div>
               <div style={styles.userPlan}>
-                {(user?.subscription_plan === 'free_trial' || user?.plan === 'free_trial') ? 'Free Trial' :
-                 (user?.subscription_plan === 'starter' || user?.plan === 'starter') ? 'Starter Plan' :
+                {user?.subscription_plan === 'free_trial' ? 'Free Trial' :
+                 user?.subscription_plan === 'starter' ? 'Starter Plan' :
                  'Pro Plan'}
               </div>
             </div>
@@ -186,21 +186,24 @@ const styles = {
   },
 };
 
-// Hover effects
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  button[style*="iconButton"]:hover {
-    background: #f9fafb !important;
-  }
-  
-  div[style*="userMenu"]:hover {
-    background: #f9fafb !important;
-  }
-  
-  button[style*="logoutButton"]:hover {
-    background: #fee2e2 !important;
-  }
-`;
-document.head.appendChild(styleSheet);
+// Hover effects (guarded to prevent duplicate injection)
+if (!document.getElementById('dashboard-header-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'dashboard-header-styles';
+  styleSheet.textContent = `
+    button[style*="iconButton"]:hover {
+      background: #f9fafb !important;
+    }
+
+    div[style*="userMenu"]:hover {
+      background: #f9fafb !important;
+    }
+
+    button[style*="logoutButton"]:hover {
+      background: #fee2e2 !important;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default DashboardHeader;
