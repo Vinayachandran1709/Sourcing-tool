@@ -5,9 +5,9 @@ from fastapi import HTTPException
 
 class UsageService:
     """Handle usage limits and tracking"""
-    
+
     PLAN_LIMITS = {
-        "free": {
+        "free_trial": {
             "searches": 25,
             "profile_views": 40,
             "emails_sent": 25,
@@ -26,16 +26,38 @@ class UsageService:
             "trial_days": 0
         }
     }
-    
+
+    @staticmethod
+    def _maybe_reset_billing_cycle(db: Session, user: User):
+        """Reset usage counters when a new billing cycle starts (starter plan)."""
+        if user.plan != "starter" or user.subscription_status != "active":
+            return
+        if not user.next_billing_date:
+            return
+
+        now = datetime.now(timezone.utc)
+        if now >= user.next_billing_date:
+            # Reset usage counters for new billing cycle
+            user.usage_searches = 0
+            user.usage_profile_views = 0
+            user.usage_emails_sent = 0
+            # Advance billing date by one month (or year)
+            if user.billing_cycle == "annual":
+                user.next_billing_date = user.next_billing_date + timedelta(days=365)
+            else:
+                user.next_billing_date = user.next_billing_date + timedelta(days=30)
+            user.usage_reset_date = now
+            db.commit()
+
     @staticmethod
     def check_limit(db: Session, user_id: int, action_type: str, count: int = 1) -> bool:
 
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        
-        # Check if trial expired
-        if user.subscription_status == "trial":
+
+        # Check if trial expired (block after 14 days if not upgraded)
+        if user.plan == "free_trial" or user.subscription_status == "trial":
             if user.trial_end_date and datetime.now(timezone.utc) > user.trial_end_date:
                 user.subscription_status = "expired"
                 db.commit()
@@ -47,9 +69,23 @@ class UsageService:
                         "trial_end_date": user.trial_end_date.isoformat()
                     }
                 )
-        
-        # Get plan limits
-        limits = UsageService.PLAN_LIMITS.get(user.plan, UsageService.PLAN_LIMITS["free"])
+            # Also block if subscription_status is already expired
+            if user.subscription_status == "expired":
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "error": "TRIAL_EXPIRED",
+                        "message": "Your free trial has expired. Please upgrade to continue.",
+                        "trial_end_date": user.trial_end_date.isoformat() if user.trial_end_date else None
+                    }
+                )
+
+        # Reset billing cycle for starter plan if needed
+        UsageService._maybe_reset_billing_cycle(db, user)
+
+        # Get plan limits (handle legacy "free" value as "free_trial")
+        plan_key = user.plan if user.plan in UsageService.PLAN_LIMITS else "free_trial"
+        limits = UsageService.PLAN_LIMITS[plan_key]
         
         # Check specific limits with detailed error messages
         if action_type == "search":
@@ -108,7 +144,9 @@ class UsageService:
     @staticmethod
     def check_email_limit(db: Session, user_id: int) -> dict:
         """
-        Check if user can send more emails this month.
+        Check if user can send more emails.
+        - Free trial: 25 emails total (lifetime)
+        - Starter: 300 emails per billing cycle
         Returns usage stats with limit, used, remaining, can_send.
         """
         user = db.query(User).filter(User.id == user_id).first()
@@ -119,25 +157,44 @@ class UsageService:
                 "remaining": 0,
                 "can_send": False
             }
-        
+
+        # Check trial expiry first
+        if user.plan == "free_trial" or user.subscription_status == "trial":
+            if user.trial_end_date and datetime.now(timezone.utc) > user.trial_end_date:
+                return {
+                    "limit": 0,
+                    "used": 0,
+                    "remaining": 0,
+                    "can_send": False,
+                    "trial_expired": True
+                }
+
+        # Reset billing cycle for starter if needed
+        UsageService._maybe_reset_billing_cycle(db, user)
+
         # Get plan limit
-        plan = getattr(user, 'plan', 'free')
-        limits = UsageService.PLAN_LIMITS.get(plan, UsageService.PLAN_LIMITS["free"])
+        plan_key = user.plan if user.plan in UsageService.PLAN_LIMITS else "free_trial"
+        limits = UsageService.PLAN_LIMITS[plan_key]
         limit = limits["emails_sent"]
-        
-        # Count emails sent this month
-        from datetime import datetime, timezone
+
         from models import EmailOutreach
-        
-        month_start = datetime.now(timezone.utc).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        
-        sent_count = db.query(EmailOutreach).filter(
-            EmailOutreach.user_id == user_id,
-            EmailOutreach.sent_at >= month_start
-        ).count()
-        
+
+        if user.plan == "starter" and user.next_billing_date:
+            # Starter: count emails since billing cycle start (billing_date - 30 days)
+            if user.billing_cycle == "annual":
+                cycle_start = user.next_billing_date - timedelta(days=365)
+            else:
+                cycle_start = user.next_billing_date - timedelta(days=30)
+            sent_count = db.query(EmailOutreach).filter(
+                EmailOutreach.user_id == user_id,
+                EmailOutreach.sent_at >= cycle_start
+            ).count()
+        else:
+            # Free trial: count all emails ever sent (lifetime limit)
+            sent_count = user.usage_emails_sent or 0
+
         remaining = max(0, limit - sent_count) if limit != -1 else 999999
-        
+
         return {
             "limit": limit,
             "used": sent_count,
@@ -162,8 +219,8 @@ class UsageService:
             }
         
         # Get plan limit
-        plan = getattr(user, 'plan', 'free')
-        limits = UsageService.PLAN_LIMITS.get(plan, UsageService.PLAN_LIMITS["free"])
+        plan_key = user.plan if user.plan in UsageService.PLAN_LIMITS else "free_trial"
+        limits = UsageService.PLAN_LIMITS[plan_key]
         limit = limits["csv_exports"]
         
         # For free trial, it's LIFETIME limit (not monthly)
@@ -231,7 +288,8 @@ class UsageService:
         if not user:
             return {}
         
-        limits = UsageService.PLAN_LIMITS.get(user.plan, UsageService.PLAN_LIMITS["free"])
+        plan_key = user.plan if user.plan in UsageService.PLAN_LIMITS else "free_trial"
+        limits = UsageService.PLAN_LIMITS[plan_key]
         
         return {
             "plan": user.plan,

@@ -35,8 +35,8 @@ const DashboardHeader = ({ title, subtitle }) => {
             <div style={styles.userInfo}>
               <div style={styles.userName}>{user?.name || 'User'}</div>
               <div style={styles.userPlan}>
-                {user?.subscription_plan === 'free_trial' ? 'Free Trial' : 
-                 user?.subscription_plan === 'starter' ? 'Starter Plan' : 
+                {(user?.subscription_plan === 'free_trial' || user?.plan === 'free_trial') ? 'Free Trial' :
+                 (user?.subscription_plan === 'starter' || user?.plan === 'starter') ? 'Starter Plan' :
                  'Pro Plan'}
               </div>
             </div>

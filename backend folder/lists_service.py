@@ -21,20 +21,20 @@ class ListsService:
             SavedList.user_id == user_id
         ).scalar()
         
-        # Free plan: 1 list max
-        if user.plan == "free":
+        # Free trial: 1 list max
+        if user.plan in ("free", "free_trial"):
             if current_lists >= 1:
                 return {
                     "can_create": False,
-                    "reason": "Free plan allows only 1 saved list. Upgrade to Starter plan for unlimited lists.",
+                    "reason": "Free trial allows only 1 saved list. Upgrade to Starter plan for unlimited lists.",
                     "current": current_lists,
                     "limit": 1
                 }
-        
+
         return {
             "can_create": True,
             "current": current_lists,
-            "limit": "unlimited" if user.plan != "free" else 1
+            "limit": "unlimited" if user.plan not in ("free", "free_trial") else 1
         }
     
     @staticmethod
@@ -51,20 +51,20 @@ class ListsService:
             SavedListProfile.list_id == list_id
         ).scalar()
         
-        # Free plan: 25 profiles max per list
-        if user.plan == "free":
+        # Free trial: 25 profiles max per list
+        if user.plan in ("free", "free_trial"):
             if profile_count >= 25:
                 return {
                     "can_add": False,
-                    "reason": "Free plan allows max 25 profiles per list. Upgrade to Starter for unlimited.",
+                    "reason": "Free trial allows max 25 profiles per list. Upgrade to Starter for unlimited.",
                     "current": profile_count,
                     "limit": 25
                 }
-        
+
         return {
             "can_add": True,
             "current": profile_count,
-            "limit": "unlimited" if user.plan != "free" else 25
+            "limit": "unlimited" if user.plan not in ("free", "free_trial") else 25
         }
     
     @staticmethod

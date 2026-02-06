@@ -109,7 +109,7 @@ const SubscriptionPage = () => {
     const fetchUsageData = async () => {
       try {
         const data = await getUsageStats();
-        const planName = data.plan === 'free' ? 'Free Trial' :
+        const planName = (data.plan === 'free' || data.plan === 'free_trial') ? 'Free Trial' :
                          data.plan === 'starter' ? 'Starter' : data.plan;
         const planPrices = { 'Free Trial': 0, 'Starter': 79 };
         setUserData({

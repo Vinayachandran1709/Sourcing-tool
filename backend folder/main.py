@@ -341,17 +341,24 @@ async def search_profiles(
     UsageService.log_usage(db, user_id, "search", filters)
        
     # ✅ FIX #3: Convert Profile objects to dicts properly
+    # Show first name only in search results
+    def _first_name(full_name):
+        if full_name:
+            return full_name.split()[0]
+        return None
+
     profile_dicts = []
     for profile in profiles[:200]:  # Limit to 200 profiles
         if isinstance(profile, dict):
-            # Already a dict
+            # Already a dict - apply first name
+            profile["name"] = _first_name(profile.get("name"))
             profile_dicts.append(profile)
         else:
             # Convert Profile object to dict
             profile_dict = {
                 "id": profile.id,
                 "github_username": profile.github_username,
-                "name": profile.name,
+                "name": _first_name(profile.name),
                 "email": profile.email,
                 "location": profile.location,
                 "bio": profile.bio,
@@ -530,15 +537,25 @@ def get_selected_profiles(
 # ===== SEND BULK EMAILS (UPDATED FOR RESEND) =====
 
 def _validate_email_usage(db, user_id, profile_count):
-    """Check email limits and raise HTTPException if exceeded."""
+    """Check email limits, trial expiry, and raise HTTPException if exceeded."""
     usage = UsageService.check_email_limit(db, user_id)
+
+    # Check trial expiry
+    if usage.get("trial_expired"):
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "error": "TRIAL_EXPIRED",
+                "message": "Your free trial has expired. Please upgrade to continue sending emails."
+            }
+        )
 
     if not usage["can_send"]:
         raise HTTPException(
             status_code=403,
             detail={
                 "error": "EMAIL_LIMIT_EXCEEDED",
-                "message": f"Email limit reached. You've used {usage['used']}/{usage['limit']} emails this month.",
+                "message": f"Email limit reached. You've used {usage['used']}/{usage['limit']} emails.",
                 "usage": usage
             }
         )
@@ -548,7 +565,7 @@ def _validate_email_usage(db, user_id, profile_count):
             status_code=403,
             detail={
                 "error": "EMAIL_LIMIT_EXCEEDED",
-                "message": f"Cannot send {profile_count} emails. Only {usage['remaining']} remaining this month.",
+                "message": f"Cannot send {profile_count} emails. Only {usage['remaining']} remaining.",
                 "usage": usage
             }
         )
@@ -609,6 +626,11 @@ async def send_bulk_emails_endpoint(
         results = EmailService.send_bulk_emails(profiles_data, user_settings)
 
         _log_sent_emails(db, current_user, results, user_settings)
+
+        # Increment usage counter for successfully sent emails
+        if results['sent'] > 0:
+            current_user.usage_emails_sent = (current_user.usage_emails_sent or 0) + results['sent']
+            db.commit()
 
         return {
             "success": True,
@@ -777,13 +799,16 @@ async def search_profiles_stream(
             logger.info("📦 Fetching cached profiles...")
             cached_profiles = GitHubIntegrationService._search_database(db, filters)
             
-            # Convert to dicts
+            # Convert to dicts (first name only in search results)
+            def _first_name_stream(full_name):
+                return full_name.split()[0] if full_name else None
+
             cached_dicts = []
             for profile in cached_profiles[:120]:  # ✅ Limit to 120
                 profile_dict = {
                     "id": profile.id,
                     "github_username": profile.github_username,
-                    "name": profile.name,
+                    "name": _first_name_stream(profile.name),
                     "email": profile.email,
                     "location": profile.location,
                     "bio": profile.bio,
@@ -923,11 +948,11 @@ async def search_profiles_stream(
                         db.commit()
                         db.refresh(profile)
                         
-                        # Convert to dict
+                        # Convert to dict (first name only)
                         profile_dict = {
                             "id": profile.id,
                             "github_username": profile.github_username,
-                            "name": profile.name,
+                            "name": _first_name_stream(profile.name),
                             "email": profile.email,
                             "location": profile.location,
                             "bio": profile.bio,

@@ -146,9 +146,12 @@ def signup(request: Request, signup_data: SignupRequest, db: Session = Depends(g
             "name": user.name,
             "email": user.email,
             "company": user.company,
-            "subscription_plan": user.subscription_plan if hasattr(user, 'subscription_plan') else 'free_trial',
-            "subscription_status": user.subscription_status if hasattr(user, 'subscription_status') else 'active',
-            "trial_end_date": user.trial_end_date.isoformat() if hasattr(user, 'trial_end_date') and user.trial_end_date else None
+            "plan": user.plan or "free_trial",
+            "subscription_plan": user.plan or "free_trial",
+            "subscription_status": user.subscription_status or "trial",
+            "trial_end_date": user.trial_end_date.isoformat() if user.trial_end_date else None,
+            "next_billing_date": user.next_billing_date.isoformat() if user.next_billing_date else None,
+            "billing_cycle": user.billing_cycle or "monthly"
         }
     }
 
@@ -157,20 +160,20 @@ def signup(request: Request, signup_data: SignupRequest, db: Session = Depends(g
 @limiter.limit("5/minute")
 def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_db)):
     """Login user and return JWT token"""
-    
+
     # Find user by email
     user = db.query(User).filter(User.email == login_data.email.lower()).first()
-    
+
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     # Verify password using bcrypt
     if not verify_password(login_data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
+
     # Generate JWT token
     token = create_jwt_token({"user_id": user.id})
-    
+
     return {
         "success": True,
         "token": token,
@@ -179,8 +182,11 @@ def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_
             "name": user.name,
             "email": user.email,
             "company": user.company,
-            "subscription_plan": user.subscription_plan if hasattr(user, 'subscription_plan') else 'free_trial',
-            "subscription_status": user.subscription_status if hasattr(user, 'subscription_status') else 'active',
-            "trial_end_date": user.trial_end_date.isoformat() if hasattr(user, 'trial_end_date') and user.trial_end_date else None
+            "plan": user.plan or "free_trial",
+            "subscription_plan": user.plan or "free_trial",
+            "subscription_status": user.subscription_status or "trial",
+            "trial_end_date": user.trial_end_date.isoformat() if user.trial_end_date else None,
+            "next_billing_date": user.next_billing_date.isoformat() if user.next_billing_date else None,
+            "billing_cycle": user.billing_cycle or "monthly"
         }
     }

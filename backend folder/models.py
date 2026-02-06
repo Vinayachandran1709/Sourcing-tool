@@ -29,7 +29,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Subscription info
-    plan = Column(String, default="free")  # "free", "starter"
+    plan = Column(String, default="free_trial")  # "free_trial", "starter"
     billing_cycle = Column(String, default="monthly")  # "monthly", "annual"
     subscription_status = Column(String, default="trial")  # "trial", "active", "cancelled", "expired"
     trial_start_date = Column(DateTime(timezone=True), server_default=func.now())
