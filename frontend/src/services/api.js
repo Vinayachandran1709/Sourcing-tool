@@ -99,17 +99,17 @@ export const sendBulkEmails = async (profiles, template, subject) => {
 };
 
 export const getEmailUsage = async () => {
-  const response = await api.get('/api/email-usage');
+  const response = await api.get('/api/email-settings/usage');
   return response.data;
 };
 
 export const getEmailSettings = async () => {
-  const response = await api.get('/api/email-settings');
+  const response = await api.get('/api/email-settings/settings');
   return response.data;
 };
 
 export const updateEmailSettings = async (settings) => {
-  const response = await api.put('/api/email-settings', settings);
+  const response = await api.post('/api/email-settings/settings', settings);
   return response.data;
 };
 

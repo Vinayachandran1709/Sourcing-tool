@@ -247,3 +247,58 @@ TypeError: UsageService.check_limit() got an unexpected keyword argument 'limit_
 2026-02-07 18:57:13,062 - main - INFO - ✅ JWT Secret configured
 2026-02-07 18:57:13,063 - main - INFO - 🎯 Startup validation complete
 
+2026-02-07 20:20:27,832 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-07 20:20:28,927 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-07 20:20:28,929 - main - INFO - Environment: development
+2026-02-07 20:20:28,930 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-07 20:20:29,008 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-07 20:20:29,095 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-07 20:20:29,096 - main - INFO - ✅ Resend API Key configured
+2026-02-07 20:20:38,349 - main - INFO - ✅ Database connection successful
+2026-02-07 20:20:38,349 - main - INFO - ✅ JWT Secret configured
+2026-02-07 20:20:38,350 - main - INFO - 🎯 Startup validation complete
+
+2026-02-07 20:21:04,100 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-07 20:21:04,702 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-07 20:21:04,703 - main - INFO - Environment: development
+2026-02-07 20:21:04,703 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-07 20:21:04,761 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-07 20:21:04,805 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-07 20:21:04,805 - main - INFO - ✅ Resend API Key configured
+2026-02-07 20:21:14,852 - main - INFO - ✅ Database connection successful
+2026-02-07 20:21:14,853 - main - INFO - ✅ JWT Secret configured
+2026-02-07 20:21:14,853 - main - INFO - 🎯 Startup validation complete
+
+2026-02-07 20:21:38,964 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-07 20:21:39,615 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-07 20:21:39,615 - main - INFO - Environment: development
+2026-02-07 20:21:39,616 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-07 20:21:39,688 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-07 20:21:39,747 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-07 20:21:39,748 - main - INFO - ✅ Resend API Key configured
+2026-02-07 20:21:50,005 - main - INFO - ✅ Database connection successful
+2026-02-07 20:21:50,006 - main - INFO - ✅ JWT Secret configured
+2026-02-07 20:21:50,006 - main - INFO - 🎯 Startup validation complete
+
+2026-02-07 20:22:06,459 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-07 20:22:07,352 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-07 20:22:07,353 - main - INFO - Environment: development
+2026-02-07 20:22:07,353 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-07 20:22:07,471 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-07 20:22:07,579 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-07 20:22:07,587 - main - INFO - ✅ Resend API Key configured
+2026-02-07 20:22:15,974 - main - INFO - ✅ Database connection successful
+2026-02-07 20:22:15,975 - main - INFO - ✅ JWT Secret configured
+2026-02-07 20:22:15,975 - main - INFO - 🎯 Startup validation complete
+
+2026-02-07 21:02:42,363 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-07 21:02:43,088 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-07 21:02:43,089 - main - INFO - Environment: development
+2026-02-07 21:02:43,089 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-07 21:02:43,126 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-07 21:02:43,179 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-07 21:02:43,179 - main - INFO - ✅ Resend API Key configured
+2026-02-07 21:02:48,517 - main - INFO - ✅ Database connection successful
+2026-02-07 21:02:48,518 - main - INFO - ✅ JWT Secret configured
+2026-02-07 21:02:48,519 - main - INFO - 🎯 Startup validation complete
+

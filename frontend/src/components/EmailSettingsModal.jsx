@@ -393,18 +393,21 @@ const styles = {
   }
 };
 
-// Add hover styles
-const styleSheet = document.createElement('style');
-styleSheet.textContent = `
-  input:focus, textarea:focus {
-    outline: none;
-    border-color: #FF6B35 !important;
-  }
-  
-  label[style*="radioLabel"]:hover {
-    border-color: #FF6B35 !important;
-  }
-`;
-document.head.appendChild(styleSheet);
+// Add hover styles (guarded to prevent duplicate injection)
+if (!document.getElementById('email-settings-modal-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'email-settings-modal-styles';
+  styleSheet.textContent = `
+    input:focus, textarea:focus {
+      outline: none;
+      border-color: #FF6B35 !important;
+    }
+
+    label[style*="radioLabel"]:hover {
+      border-color: #FF6B35 !important;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default EmailSettingsModal;

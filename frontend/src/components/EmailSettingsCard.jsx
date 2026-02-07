@@ -61,9 +61,12 @@ const EmailSettingsCard = () => {
     setMessage(null);
 
     try {
-      await updateEmailSettings(senderEmail, emailTemplate);
+      await updateEmailSettings({ sender_email: senderEmail, email_template: emailTemplate });
+      // Update localStorage cache with saved data
+      const cached = JSON.parse(localStorage.getItem('emailSettings') || '{}');
+      localStorage.setItem('emailSettings', JSON.stringify({ ...cached, sender_email: senderEmail, email_template: emailTemplate }));
       setMessage({ type: 'success', text: 'Email settings saved successfully!' });
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => setMessage(null), 3000);
     } catch (error) {

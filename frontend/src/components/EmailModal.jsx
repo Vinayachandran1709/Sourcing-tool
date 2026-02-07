@@ -129,21 +129,34 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
             </div>
           )}
 
-          {/* Warning if settings not configured */}
+          {/* First-time setup prompt */}
           {settingsReady && !hasEmailSettings && (
-            <div style={styles.warningBox}>
-              <AlertCircle size={20} color="#f59e0b" />
-              <span style={styles.warningText}>
-                Please configure your email settings before sending emails
-              </span>
+            <div style={styles.setupBox}>
+              <div style={styles.setupIcon}>
+                <Settings size={32} color="#FF6B35" />
+              </div>
+              <h3 style={styles.setupTitle}>Set up your email first</h3>
+              <p style={styles.setupText}>
+                Before sending emails, you need to configure your sender email, name, subject line, and email template.
+                This is a one-time setup.
+              </p>
+              <button
+                onClick={() => setShowSettingsModal(true)}
+                style={styles.setupButton}
+              >
+                <Settings size={18} />
+                Configure Email Settings
+              </button>
             </div>
           )}
 
-          {/* Info Banner */}
-          <div style={styles.info}>
-            <Mail size={20} color="#4f46e5" />
-            <span>Ready to send to {activeProfiles.length} developers</span>
-          </div>
+          {/* Info Banner (only show when settings are configured) */}
+          {(hasEmailSettings || !settingsReady) && (
+            <div style={styles.info}>
+              <Mail size={20} color="#4f46e5" />
+              <span>Ready to send to {activeProfiles.length} developers</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.infoText}>
@@ -292,18 +305,51 @@ const styles = {
     color: '#991b1b',
     fontWeight: '500',
   },
-  warningBox: {
+  setupBox: {
+    padding: '2rem 1.5rem',
+    textAlign: 'center',
+    backgroundColor: '#fff7ed',
+    borderBottom: '1px solid #fed7aa',
+  },
+  setupIcon: {
+    width: '64px',
+    height: '64px',
+    borderRadius: '50%',
+    backgroundColor: '#fff',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '1rem 1.5rem',
-    backgroundColor: '#fffbeb',
-    borderBottom: '1px solid #fde68a',
+    justifyContent: 'center',
+    margin: '0 auto 1rem',
+    boxShadow: '0 2px 8px rgba(255,107,53,0.15)',
   },
-  warningText: {
+  setupTitle: {
+    fontSize: '1.125rem',
+    fontWeight: '700',
+    color: '#1a1a1a',
+    margin: '0 0 0.5rem',
+  },
+  setupText: {
     fontSize: '0.875rem',
-    color: '#92400e',
-    fontWeight: '500',
+    color: '#6b7280',
+    lineHeight: '1.6',
+    margin: '0 0 1.25rem',
+    maxWidth: '400px',
+    marginLeft: 'auto',
+    marginRight: 'auto',
+  },
+  setupButton: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.75rem 1.5rem',
+    backgroundColor: '#FF6B35',
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    fontSize: '0.9375rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
   },
   info: {
     display: 'flex',

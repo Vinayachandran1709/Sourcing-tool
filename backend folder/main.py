@@ -617,6 +617,12 @@ async def send_bulk_emails_endpoint(
 
         _validate_email_usage(db, current_user.id, len(profile_ids))
 
+        # Reserve quota upfront to prevent race-condition over-usage
+        # (if two requests come in simultaneously, both must claim quota before sending)
+        reserved_count = len(profile_ids)
+        current_user.usage_emails_sent = (current_user.usage_emails_sent or 0) + reserved_count
+        db.commit()
+
         profiles = db.query(Profile).filter(Profile.id.in_(profile_ids)).all()
         profiles_data = [{
             'id': p.id,
@@ -629,9 +635,9 @@ async def send_bulk_emails_endpoint(
 
         _log_sent_emails(db, current_user, results, user_settings)
 
-        # Increment usage counter for successfully sent emails
-        if results['sent'] > 0:
-            current_user.usage_emails_sent = (current_user.usage_emails_sent or 0) + results['sent']
+        # Adjust quota: give back credits for failed emails
+        if results['failed'] > 0:
+            current_user.usage_emails_sent = max(0, (current_user.usage_emails_sent or 0) - results['failed'])
             db.commit()
 
         return {

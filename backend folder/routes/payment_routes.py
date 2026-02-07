@@ -495,12 +495,12 @@ async def get_subscription_status(current_user: dict = Depends(get_current_user)
             plan_config = PLANS.get(plan, {
                 "searches": 25,
                 "profile_unlocks": 40,
-                "emails": 25
+                "emails": 15
             })
-            
+
             # Determine limits based on plan
             if plan == "free_trial" or plan == "free":
-                limits = {"searches": 25, "profile_unlocks": 40, "emails": 25}
+                limits = {"searches": 25, "profile_unlocks": 40, "emails": 15}
             else:
                 limits = {
                     "searches": plan_config.get("searches", 100),

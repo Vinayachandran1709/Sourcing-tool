@@ -302,7 +302,7 @@ const plans = [
     features: [
       '25 searches',
       '40 profile unlocks',
-      '25 emails',
+      '15 emails',
       'Filter by programming languages',
       'Basic developer scoring',
       'Names & scores visible'
@@ -367,7 +367,7 @@ const SubscriptionPage = () => {
     usage: {
       searches: { used: 0, limit: 25 },
       profile_unlocks: { used: 0, limit: 40 },
-      emails: { used: 0, limit: 25 },
+      emails: { used: 0, limit: 15 },
     }
   });
   const [dataReady, setDataReady] = useState(false);
@@ -416,7 +416,7 @@ const SubscriptionPage = () => {
             },
             emails: { 
               used: data.usage?.emails_sent?.used || 0, 
-              limit: data.usage?.emails_sent?.limit || 25 
+              limit: data.usage?.emails_sent?.limit || 15 
             },
           }
         });
