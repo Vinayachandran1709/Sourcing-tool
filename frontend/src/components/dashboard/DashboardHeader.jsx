@@ -3,8 +3,8 @@ import { User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 
 const DashboardHeader = ({ title, subtitle }) => {
-  const { user, logout, getDaysRemainingInTrial } = useAuth();
-  const daysRemaining = getDaysRemainingInTrial();
+  const { user, logout, getTrialDaysRemaining } = useAuth();
+  const daysRemaining = getTrialDaysRemaining();
 
   return (
     <header style={styles.header}>

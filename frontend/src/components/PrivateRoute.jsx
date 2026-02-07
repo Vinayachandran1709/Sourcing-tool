@@ -1,9 +1,10 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const PrivateRoute = ({ children }) => {
-  const { isAuthenticated, loading, isTrialExpired } = useAuth();
+  const { isAuthenticated, loading, checkTrialExpiry } = useAuth();
+  const location = useLocation();
 
   // Show loading state while checking authentication
   if (loading) {
@@ -20,12 +21,13 @@ const PrivateRoute = ({ children }) => {
     return <Navigate to="/login" replace />;
   }
 
-  // If trial expired, redirect to subscription page
-  if (isTrialExpired()) {
+  // If trial expired, redirect to subscription page (but allow subscription page itself)
+  const isOnSubscription = location.pathname === '/dashboard/subscription';
+  if (!isOnSubscription && checkTrialExpiry()) {
     return <Navigate to="/dashboard/subscription" replace />;
   }
 
-  // User is authenticated and trial is valid, render the protected component
+  // User is authenticated and trial is valid (or on subscription page), render the protected component
   return children;
 };
 

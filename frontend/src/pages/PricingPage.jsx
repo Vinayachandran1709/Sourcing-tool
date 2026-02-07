@@ -1,14 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Check, Sparkles, Clock, Zap } from 'lucide-react';
+import { Check, Sparkles, Clock, Zap, CreditCard, CheckCircle, Loader, AlertCircle, X } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
+import { createPaymentOrder, verifyPayment, openRazorpayCheckout } from '../services/api';
 
 const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(false);
   const navigate = useNavigate();
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, refreshSubscription } = useAuth();
+
+  // Payment modal state
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [paymentPlan, setPaymentPlan] = useState(null);
+  const [paymentCycle, setPaymentCycle] = useState('monthly');
+  const [paymentStatus, setPaymentStatus] = useState('idle');
+  const [paymentError, setPaymentError] = useState(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -33,19 +41,64 @@ Looking forward to hearing from you!`);
 
   const handleSelectPlan = (planId, cycle) => {
     if (planId === 'free_trial') {
-      // Free trial - go to signup
       navigate('/signup');
       return;
     }
 
     if (isAuthenticated) {
-      // User is logged in - go to subscription page with upgrade params
-      navigate(`/dashboard/subscription?plan=${planId}&cycle=${cycle}&upgrade=true`);
+      // Open payment modal inline - stay on pricing page
+      setPaymentPlan({ id: planId, name: planId === 'starter' ? 'Starter' : planId, price_monthly: 79, price_annual: 790 });
+      setPaymentCycle(cycle);
+      setPaymentStatus('idle');
+      setPaymentError(null);
+      setShowPaymentModal(true);
     } else {
-      // User not logged in - go to signup first
-      // Store intended plan in sessionStorage for post-signup redirect
       sessionStorage.setItem('intendedPlan', JSON.stringify({ plan: planId, cycle }));
       navigate('/signup');
+    }
+  };
+
+  const handlePricingPayment = async () => {
+    setPaymentStatus('loading');
+    setPaymentError(null);
+
+    try {
+      const orderData = await createPaymentOrder(paymentPlan.id, paymentCycle, false);
+      if (!orderData.success) {
+        throw new Error(orderData.message || 'Failed to create order');
+      }
+
+      openRazorpayCheckout(
+        orderData,
+        async (paymentResponse) => {
+          try {
+            const verification = await verifyPayment(paymentResponse, paymentPlan.id, paymentCycle);
+            if (verification.success) {
+              await refreshSubscription();
+              setPaymentStatus('success');
+              setTimeout(() => {
+                setShowPaymentModal(false);
+                setPaymentStatus('idle');
+              }, 2500);
+            } else {
+              throw new Error('Payment verification failed');
+            }
+          } catch (err) {
+            setPaymentError(err.message || 'Payment verification failed');
+            setPaymentStatus('error');
+          }
+        },
+        (failureData) => {
+          setPaymentError(failureData.error || 'Payment failed');
+          setPaymentStatus('error');
+        },
+        () => {
+          setPaymentStatus('idle');
+        }
+      );
+    } catch (err) {
+      setPaymentError(err.message || 'Failed to initiate payment');
+      setPaymentStatus('error');
     }
   };
 
@@ -235,6 +288,72 @@ Looking forward to hearing from you!`);
         </section>
       )}
 
+      {/* Inline Payment Modal */}
+      {showPaymentModal && paymentPlan && (
+        <div style={styles.modalOverlay} onClick={() => { if (paymentStatus !== 'loading') setShowPaymentModal(false); }}>
+          <div style={styles.modal} onClick={e => e.stopPropagation()}>
+            <button style={styles.modalClose} onClick={() => { if (paymentStatus !== 'loading') setShowPaymentModal(false); }}>
+              <X size={24} />
+            </button>
+
+            {paymentStatus === 'success' ? (
+              <div style={styles.successContent}>
+                <CheckCircle size={64} color="#10b981" />
+                <h3 style={styles.successTitle}>Payment Successful!</h3>
+                <p style={styles.successText}>
+                  Welcome to TalentBox {paymentPlan.name}! Your subscription is now active.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div style={styles.modalHeader}>
+                  <CreditCard size={32} color="#FF6B35" />
+                  <h3 style={styles.modalTitle}>Upgrade to {paymentPlan.name}</h3>
+                </div>
+
+                <div style={styles.orderSummary}>
+                  <div style={styles.summaryRow}>
+                    <span>Plan</span>
+                    <span style={styles.summaryValue}>{paymentPlan.name}</span>
+                  </div>
+                  <div style={styles.summaryRow}>
+                    <span>Billing</span>
+                    <span style={styles.summaryValue}>{paymentCycle === 'annual' ? 'Annual' : 'Monthly'}</span>
+                  </div>
+                  <div style={styles.summaryDivider}></div>
+                  <div style={styles.summaryRow}>
+                    <span style={{ fontWeight: '600' }}>Total</span>
+                    <span style={styles.summaryTotal}>
+                      ${paymentCycle === 'annual' ? paymentPlan.price_annual : paymentPlan.price_monthly} {paymentCycle === 'annual' ? '/year' : '/month'}
+                    </span>
+                  </div>
+                </div>
+
+                {paymentError && (
+                  <div style={styles.errorBox}>
+                    <AlertCircle size={18} />
+                    <span>{paymentError}</span>
+                  </div>
+                )}
+
+                <button
+                  onClick={handlePricingPayment}
+                  disabled={paymentStatus === 'loading'}
+                  style={{ ...styles.payButton, opacity: paymentStatus === 'loading' ? 0.7 : 1 }}
+                >
+                  {paymentStatus === 'loading' ? (
+                    <><Loader size={20} style={{ animation: 'spin 1s linear infinite' }} /> Processing...</>
+                  ) : (
+                    <><CreditCard size={20} /> Pay ${paymentCycle === 'annual' ? paymentPlan.price_annual : paymentPlan.price_monthly} Now</>
+                  )}
+                </button>
+                <p style={styles.secureNote}>Secured by Razorpay. We don't store your card details.</p>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <Footer />
     </div>
   );
@@ -298,6 +417,24 @@ const styles = {
   ctaTitle: { fontSize: '1.75rem', fontWeight: '700', color: '#fff', marginBottom: '0.75rem' },
   ctaText: { fontSize: '1rem', color: 'rgba(255,255,255,0.9)', marginBottom: '1.5rem', lineHeight: '1.6' },
   ctaBtn: { display: 'inline-block', padding: '0.875rem 2rem', background: '#fff', color: '#FF6B35', borderRadius: '10px', textDecoration: 'none', fontWeight: '600', fontSize: '1rem' },
+
+  // Payment modal styles
+  modalOverlay: { position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' },
+  modal: { background: '#fff', borderRadius: '16px', padding: '2rem', maxWidth: '480px', width: '100%', position: 'relative', maxHeight: '90vh', overflowY: 'auto' },
+  modalClose: { position: 'absolute', top: '1rem', right: '1rem', background: 'none', border: 'none', color: '#6b7280', cursor: 'pointer', padding: '0.5rem' },
+  modalHeader: { display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' },
+  modalTitle: { fontSize: '1.5rem', fontWeight: '700', color: '#1a1a1a', margin: 0 },
+  orderSummary: { background: '#f9fafb', borderRadius: '10px', padding: '1.25rem', marginBottom: '1.5rem' },
+  summaryRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', fontSize: '0.9375rem', color: '#4b5563' },
+  summaryValue: { fontWeight: '600', color: '#1a1a1a' },
+  summaryDivider: { height: '1px', background: '#e5e7eb', margin: '0.5rem 0' },
+  summaryTotal: { fontSize: '1.25rem', fontWeight: '700', color: '#FF6B35' },
+  errorBox: { display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', color: '#dc2626', fontSize: '0.875rem', marginBottom: '1rem' },
+  payButton: { width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', padding: '1rem', background: '#FF6B35', color: '#fff', border: 'none', borderRadius: '10px', fontSize: '1.0625rem', fontWeight: '600', cursor: 'pointer', fontFamily: "'Outfit', sans-serif" },
+  secureNote: { fontSize: '0.8125rem', color: '#6b7280', textAlign: 'center', marginTop: '1rem' },
+  successContent: { textAlign: 'center', padding: '2rem 0' },
+  successTitle: { fontSize: '1.75rem', fontWeight: '700', color: '#10b981', marginBottom: '0.75rem' },
+  successText: { fontSize: '1rem', color: '#4b5563', lineHeight: '1.6' },
 };
 
 // Responsive styles
@@ -305,6 +442,11 @@ if (!document.getElementById('pricing-page-styles')) {
   const styleSheet = document.createElement('style');
   styleSheet.id = 'pricing-page-styles';
   styleSheet.textContent = `
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
     @media (max-width: 1024px) {
       div[style*="pricingGrid"] {
         grid-template-columns: 1fr !important;

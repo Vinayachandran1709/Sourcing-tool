@@ -98,18 +98,21 @@ export const AuthProvider = ({ children }) => {
           profile_views_used: data.user.profile_views_used || 0,
           email_credits_used: data.user.email_credits_used || 0,
         };
-        
+
+        // Clear stale session data from previous sessions
+        sessionStorage.clear();
+
         // Store in localStorage
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
-        
+
         // Update state
         setToken(data.access_token);
         setUser(userData);
-        
+
         return { success: true };
       }
-      
+
       return { success: false, error: 'Invalid response from server' };
     } catch (error) {
       console.error('Login error:', error);
@@ -140,11 +143,14 @@ export const AuthProvider = ({ children }) => {
           profile_views_used: 0,
           email_credits_used: 0,
         };
-        
+
+        // Clear any stale session data
+        sessionStorage.clear();
+
         // Store in localStorage
         localStorage.setItem('token', data.access_token);
         localStorage.setItem('user', JSON.stringify(userData));
-        
+
         // Update state
         setToken(data.access_token);
         setUser(userData);

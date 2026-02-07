@@ -294,6 +294,8 @@ class UsageService:
         return {
             "plan": user.plan,
             "subscription_status": user.subscription_status,
+            "billing_cycle": getattr(user, 'billing_cycle', 'monthly') or 'monthly',
+            "next_billing_date": user.next_billing_date.isoformat() if getattr(user, 'next_billing_date', None) else None,
             "usage": {
                 "searches": {
                     "used": user.usage_searches,
@@ -310,7 +312,7 @@ class UsageService:
                     "limit": limits["emails_sent"],
                     "unlimited": limits["emails_sent"] == -1
                 },
-                "csv_exports": {  # ← ADD THIS
+                "csv_exports": {
                     "used": getattr(user, 'usage_csv_exports', 0),
                     "limit": limits["csv_exports"],
                     "unlimited": limits["csv_exports"] == -1

@@ -629,6 +629,19 @@ const SubscriptionPage = () => {
                   }}
                 ></div>
               </div>
+              {userData.usage.searches.used >= userData.usage.searches.limit && (
+                <div style={styles.limitReachedMsg}>
+                  <AlertCircle size={16} color="#ef4444" />
+                  <span>
+                    Search limit reached ({userData.usage.searches.used}/{userData.usage.searches.limit}).
+                    {userData.next_billing_date
+                      ? ` Resets on ${new Date(userData.next_billing_date).toLocaleDateString()}.`
+                      : isTrial
+                        ? ` Upgrade to get more searches.`
+                        : ''}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Profile Unlocks */}
@@ -651,6 +664,19 @@ const SubscriptionPage = () => {
                   }}
                 ></div>
               </div>
+              {userData.usage.profile_unlocks.used >= userData.usage.profile_unlocks.limit && (
+                <div style={styles.limitReachedMsg}>
+                  <AlertCircle size={16} color="#ef4444" />
+                  <span>
+                    Profile unlock limit reached ({userData.usage.profile_unlocks.used}/{userData.usage.profile_unlocks.limit}).
+                    {userData.next_billing_date
+                      ? ` Resets on ${new Date(userData.next_billing_date).toLocaleDateString()}.`
+                      : isTrial
+                        ? ` Upgrade to get more unlocks.`
+                        : ''}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Emails */}
