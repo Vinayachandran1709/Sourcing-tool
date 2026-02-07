@@ -123,12 +123,13 @@ def signup(request: Request, signup_data: SignupRequest, db: Session = Depends(g
     if existing:
         raise HTTPException(status_code=409, detail="Email already registered")
     
-    # Create user
+    # Create user with trial_end_date auto-set to 14 days from now
     user = User(
         name=signup_data.name,
         email=signup_data.email.lower(),
         company=signup_data.company,
-        password_hash=hash_password(signup_data.password)
+        password_hash=hash_password(signup_data.password),
+        trial_end_date=datetime.now(timezone.utc) + timedelta(days=14)
     )
     
     db.add(user)
@@ -146,7 +147,6 @@ def signup(request: Request, signup_data: SignupRequest, db: Session = Depends(g
             "name": user.name,
             "email": user.email,
             "company": user.company,
-            "plan": user.plan or "free_trial",
             "subscription_plan": user.plan or "free_trial",
             "subscription_status": user.subscription_status or "trial",
             "trial_end_date": user.trial_end_date.isoformat() if user.trial_end_date else None,
@@ -182,7 +182,6 @@ def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_
             "name": user.name,
             "email": user.email,
             "company": user.company,
-            "plan": user.plan or "free_trial",
             "subscription_plan": user.plan or "free_trial",
             "subscription_status": user.subscription_status or "trial",
             "trial_end_date": user.trial_end_date.isoformat() if user.trial_end_date else None,
