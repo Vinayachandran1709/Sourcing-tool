@@ -36,6 +36,7 @@ for handler in logging.root.handlers:
 
 # Import routers
 from auth_routes import router as auth_router
+from routes.payment_routes import router as payment_router
 from lists_routes import router as lists_router
 from email_settings_routes import router as email_settings_router
 
@@ -185,6 +186,7 @@ app.add_middleware(
 # ===== INCLUDE ROUTERS =====
 
 app.include_router(auth_router)
+app.include_router(payment_router)
 app.include_router(lists_router)
 app.include_router(email_settings_router)
 

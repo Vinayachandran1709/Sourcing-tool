@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import hmac
 import hashlib
@@ -9,8 +10,11 @@ from pydantic import BaseModel
 from typing import Optional
 import razorpay
 
-from utils.auth import get_current_user
-from utils.db import get_db_connection
+# Add parent directory to path so we can import root-level modules
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from auth_middleware import get_current_user
+from database import get_db_connection
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 

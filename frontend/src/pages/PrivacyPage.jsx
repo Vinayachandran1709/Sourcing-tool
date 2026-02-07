@@ -40,7 +40,7 @@ const PrivacyPage = () => {
           </h3>
           <ul style={{ lineHeight: '1.9', marginLeft: '25px', marginBottom: '20px', color: '#374151', fontSize: '1.0625rem' }}>
             <li><strong>Account Information:</strong> Name, email address, company name</li>
-            <li><strong>Payment Information:</strong> Processed securely through Paddle (we do not store credit card details)</li>
+            <li><strong>Payment Information:</strong> Processed securely through Razorpay (we do not store credit card details)</li>
             <li><strong>Email Outreach:</strong> Your sender email address and custom email templates</li>
             <li><strong>Usage Data:</strong> Search queries, profile views, emails sent</li>
           </ul>
@@ -96,7 +96,7 @@ const PrivacyPage = () => {
             We do not sell your personal information. We may share data with:
           </p>
           <ul style={{ lineHeight: '1.9', marginLeft: '25px', color: '#374151', fontSize: '1.0625rem' }}>
-            <li><strong>Service Providers:</strong> Paddle (payment processing), Neon (database hosting), Railway (application hosting)</li>
+            <li><strong>Service Providers:</strong> Razorpay (payment processing), Neon (database hosting), Railway (application hosting)</li>
             <li><strong>GitHub:</strong> API requests for developer data (public information only)</li>
             <li><strong>Legal Requirements:</strong> When required by law or to protect our rights</li>
           </ul>

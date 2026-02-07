@@ -57,3 +57,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def get_db_connection():
+    """
+    Get a raw database connection for direct SQL operations.
+    Caller is responsible for closing the connection.
+    """
+    return engine.raw_connection()

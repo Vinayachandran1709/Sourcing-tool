@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Check, Sparkles, Clock, Zap } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
+import { useAuth } from '../contexts/AuthContext';
 
 const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(false);
+  const navigate = useNavigate();
+  const { isAuthenticated, user } = useAuth();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -26,6 +29,31 @@ Current Hiring Needs:
 
 Looking forward to hearing from you!`);
     window.location.href = `mailto:vinay@talentbox.co?subject=${subject}&body=${body}`;
+  };
+
+  const handleSelectPlan = (planId, cycle) => {
+    if (planId === 'free_trial') {
+      // Free trial - go to signup
+      navigate('/signup');
+      return;
+    }
+
+    if (isAuthenticated) {
+      // User is logged in - go to subscription page with upgrade params
+      navigate(`/dashboard/subscription?plan=${planId}&cycle=${cycle}&upgrade=true`);
+    } else {
+      // User not logged in - go to signup first
+      // Store intended plan in sessionStorage for post-signup redirect
+      sessionStorage.setItem('intendedPlan', JSON.stringify({ plan: planId, cycle }));
+      navigate('/signup');
+    }
+  };
+
+  // Check if user is on a specific plan
+  const isCurrentPlan = (planId) => {
+    if (!isAuthenticated || !user) return false;
+    const userPlan = user.subscription_plan || user.plan;
+    return userPlan?.toLowerCase() === planId;
   };
 
   return (
@@ -54,7 +82,13 @@ Looking forward to hearing from you!`);
           <div style={styles.pricingGrid}>
             
             {/* Free Trial */}
-            <div style={styles.pricingCard}>
+            <div style={{
+              ...styles.pricingCard,
+              ...(isCurrentPlan('free_trial') || isCurrentPlan('free') ? styles.currentPlanCard : {})
+            }}>
+              {(isCurrentPlan('free_trial') || isCurrentPlan('free')) && (
+                <div style={styles.currentBadge}>Current Plan</div>
+              )}
               <div style={styles.cardHeader}>
                 <div style={styles.planIcon}><Clock size={24} color="#FF6B35" /></div>
                 <h3 style={styles.planName}>Free Trial</h3>
@@ -72,13 +106,30 @@ Looking forward to hearing from you!`);
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Names & scores visible</li>
               </ul>
-              <Link to="/signup" style={styles.trialBtn}>Start Free Trial</Link>
+              {isCurrentPlan('free_trial') || isCurrentPlan('free') ? (
+                <button style={styles.currentPlanBtn} disabled>Current Plan</button>
+              ) : (
+                <button 
+                  onClick={() => handleSelectPlan('free_trial', 'monthly')}
+                  style={styles.trialBtn}
+                >
+                  Start Free Trial
+                </button>
+              )}
               <p style={styles.noCreditCard}>No credit card required</p>
             </div>
 
             {/* Starter */}
-            <div style={{ ...styles.pricingCard, ...styles.popularCard }}>
-              <div style={styles.popularBadge}>Most Popular</div>
+            <div style={{
+              ...styles.pricingCard, 
+              ...styles.popularCard,
+              ...(isCurrentPlan('starter') ? styles.currentPlanCard : {})
+            }}>
+              {isCurrentPlan('starter') ? (
+                <div style={styles.currentBadge}>Current Plan</div>
+              ) : (
+                <div style={styles.popularBadge}>Most Popular</div>
+              )}
               <div style={styles.cardHeader}>
                 <div style={styles.planIcon}><Zap size={24} color="#FF6B35" /></div>
                 <h3 style={styles.planName}>Starter</h3>
@@ -101,7 +152,16 @@ Looking forward to hearing from you!`);
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email from your domain</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Export candidates</li>
               </ul>
-              <Link to="/signup" style={styles.primaryBtn}>Get Started</Link>
+              {isCurrentPlan('starter') ? (
+                <button style={styles.currentPlanBtn} disabled>Current Plan</button>
+              ) : (
+                <button 
+                  onClick={() => handleSelectPlan('starter', isAnnual ? 'annual' : 'monthly')}
+                  style={styles.primaryBtn}
+                >
+                  {isAuthenticated ? 'Upgrade Now' : 'Get Started'}
+                </button>
+              )}
             </div>
 
             {/* Professional - Coming Soon */}
@@ -140,23 +200,40 @@ Looking forward to hearing from you!`);
           <div style={styles.faqGrid}>
             <div style={styles.faqItem}>
               <h4 style={styles.faqQuestion}>What happens after my free trial?</h4>
-              <p style={styles.faqAnswer}>Your trial data is deleted after 14 days unless you upgrade. No automatic charges.</p>
+              <p style={styles.faqAnswer}>Your trial data is preserved for 7 days after expiration. Upgrade anytime to continue where you left off. No automatic charges.</p>
             </div>
             <div style={styles.faqItem}>
               <h4 style={styles.faqQuestion}>Can I cancel anytime?</h4>
-              <p style={styles.faqAnswer}>Yes! Cancel anytime from your dashboard. No questions asked.</p>
+              <p style={styles.faqAnswer}>Yes! Cancel anytime from your dashboard. You'll retain access until the end of your billing period. No questions asked.</p>
             </div>
             <div style={styles.faqItem}>
-              <h4 style={styles.faqQuestion}>What are email templates?</h4>
-              <p style={styles.faqAnswer}>Pre-built outreach templates you can customize. Starter includes 5 templates.</p>
+              <h4 style={styles.faqQuestion}>What payment methods do you accept?</h4>
+              <p style={styles.faqAnswer}>We accept all major credit cards, debit cards, UPI, and net banking through our secure payment partner Razorpay.</p>
             </div>
             <div style={styles.faqItem}>
               <h4 style={styles.faqQuestion}>Do you offer refunds?</h4>
-              <p style={styles.faqAnswer}>Yes, we offer a 30-day money-back guarantee on all paid plans.</p>
+              <p style={styles.faqAnswer}>Yes, we offer a 14-day money-back guarantee on all paid plans. No questions asked.</p>
             </div>
           </div>
         </div>
       </section>
+
+      {/* CTA for logged-in users */}
+      {isAuthenticated && (
+        <section style={styles.ctaSection}>
+          <div style={styles.container}>
+            <div style={styles.ctaCard}>
+              <h3 style={styles.ctaTitle}>Ready to upgrade?</h3>
+              <p style={styles.ctaText}>
+                Go to your subscription page to manage your plan and complete your upgrade.
+              </p>
+              <Link to="/dashboard/subscription" style={styles.ctaBtn}>
+                Go to Subscription
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
 
       <Footer />
     </div>
@@ -178,9 +255,11 @@ const styles = {
 
   pricingSection: { padding: '3rem 2rem 5rem' },
   pricingGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', alignItems: 'start' },
-  pricingCard: { background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '16px', padding: '2rem', position: 'relative' },
+  pricingCard: { background: '#ffffff', border: '2px solid #e5e7eb', borderRadius: '16px', padding: '2rem', position: 'relative', transition: 'all 0.3s' },
   popularCard: { border: '2px solid #FF6B35', boxShadow: '0 8px 32px rgba(255,107,53,0.15)' },
+  currentPlanCard: { background: '#fff5f2', borderColor: '#FF6B35' },
   popularBadge: { position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#FF6B35', color: '#fff', padding: '0.375rem 1rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' },
+  currentBadge: { position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#10b981', color: '#fff', padding: '0.375rem 1rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' },
   comingSoonCard: { border: '2px dashed #c7d2fe', background: '#fafafe' },
   comingSoonBadge: { position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)', background: '#6366f1', color: '#fff', padding: '0.375rem 1rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' },
   
@@ -199,8 +278,9 @@ const styles = {
   featureItem: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', fontSize: '0.9375rem', color: '#1a1a1a' },
   featureItemMuted: { display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.5rem 0', fontSize: '0.9375rem', color: '#9ca3af' },
 
-  trialBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#ffffff', color: '#FF6B35', border: '2px solid #FF6B35', borderRadius: '10px', textAlign: 'center', textDecoration: 'none', fontWeight: '600', fontSize: '1rem', boxSizing: 'border-box' },
-  primaryBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#FF6B35', color: '#ffffff', border: 'none', borderRadius: '10px', textAlign: 'center', textDecoration: 'none', fontWeight: '600', fontSize: '1rem', boxSizing: 'border-box' },
+  trialBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#ffffff', color: '#FF6B35', border: '2px solid #FF6B35', borderRadius: '10px', textAlign: 'center', textDecoration: 'none', fontWeight: '600', fontSize: '1rem', boxSizing: 'border-box', cursor: 'pointer', fontFamily: "'Outfit', sans-serif" },
+  primaryBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#FF6B35', color: '#ffffff', border: 'none', borderRadius: '10px', textAlign: 'center', textDecoration: 'none', fontWeight: '600', fontSize: '1rem', boxSizing: 'border-box', cursor: 'pointer', fontFamily: "'Outfit', sans-serif" },
+  currentPlanBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#e5e7eb', color: '#9ca3af', border: 'none', borderRadius: '10px', textAlign: 'center', fontWeight: '600', fontSize: '1rem', boxSizing: 'border-box', cursor: 'not-allowed', fontFamily: "'Outfit', sans-serif" },
   earlyAccessBtn: { display: 'block', width: '100%', padding: '0.875rem', background: '#6366f1', color: '#ffffff', border: 'none', borderRadius: '10px', textAlign: 'center', fontWeight: '600', fontSize: '1rem', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", boxSizing: 'border-box' },
   
   noCreditCard: { fontSize: '0.8125rem', color: '#6b7280', textAlign: 'center', marginTop: '0.75rem' },
@@ -212,6 +292,44 @@ const styles = {
   faqItem: { background: '#ffffff', padding: '1.5rem', borderRadius: '12px', border: '1px solid #e5e7eb' },
   faqQuestion: { fontSize: '1rem', fontWeight: '700', color: '#1a1a1a', marginBottom: '0.5rem', margin: '0 0 0.5rem' },
   faqAnswer: { fontSize: '0.9375rem', color: '#6b7280', lineHeight: '1.6', margin: 0 },
+
+  ctaSection: { padding: '3rem 2rem', background: '#ffffff' },
+  ctaCard: { background: 'linear-gradient(135deg, #FF6B35 0%, #ff8a65 100%)', borderRadius: '16px', padding: '2.5rem', textAlign: 'center', maxWidth: '600px', margin: '0 auto' },
+  ctaTitle: { fontSize: '1.75rem', fontWeight: '700', color: '#fff', marginBottom: '0.75rem' },
+  ctaText: { fontSize: '1rem', color: 'rgba(255,255,255,0.9)', marginBottom: '1.5rem', lineHeight: '1.6' },
+  ctaBtn: { display: 'inline-block', padding: '0.875rem 2rem', background: '#fff', color: '#FF6B35', borderRadius: '10px', textDecoration: 'none', fontWeight: '600', fontSize: '1rem' },
 };
+
+// Responsive styles
+if (!document.getElementById('pricing-page-styles')) {
+  const styleSheet = document.createElement('style');
+  styleSheet.id = 'pricing-page-styles';
+  styleSheet.textContent = `
+    @media (max-width: 1024px) {
+      div[style*="pricingGrid"] {
+        grid-template-columns: 1fr !important;
+        max-width: 450px !important;
+        margin: 0 auto !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      div[style*="faqGrid"] {
+        grid-template-columns: 1fr !important;
+      }
+    }
+
+    button[style*="primaryBtn"]:hover,
+    button[style*="trialBtn"]:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+    }
+
+    button[style*="earlyAccessBtn"]:hover {
+      background: #4f46e5 !important;
+    }
+  `;
+  document.head.appendChild(styleSheet);
+}
 
 export default PricingPage;
