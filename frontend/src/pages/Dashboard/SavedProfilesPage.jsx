@@ -4,6 +4,9 @@ import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
+import FloatingHelpButton from '../../components/FloatingHelpButton';
+
+const SAVED_PROFILES_LIMIT_FREE = 50;
 
 const SavedProfilesPage = () => {
   const [savedProfiles, setSavedProfiles] = useState([]);
@@ -149,22 +152,31 @@ const SavedProfilesPage = () => {
 
       <div style={styles.container}>
         {/* Header Actions */}
-        {savedProfiles.length > 0 && (
-          <div style={styles.headerActions}>
-            <div style={styles.statsBox}>
-              <Star size={20} color="#FFB800" fill="#FFB800" />
-              <span style={styles.statsText}>
-                {savedProfiles.length} profile{savedProfiles.length !== 1 ? 's' : ''} saved
-              </span>
+        {savedProfiles.length > 0 && (() => {
+          const user = JSON.parse(localStorage.getItem('user') || '{}');
+          const isFree = !user.plan || user.plan === 'free_trial' || user.plan === 'free';
+          return (
+            <div style={styles.headerActions}>
+              <div style={styles.statsBox}>
+                <Star size={20} color="#FFB800" fill="#FFB800" />
+                <span style={styles.statsText}>
+                  {savedProfiles.length}{isFree ? ` / ${SAVED_PROFILES_LIMIT_FREE}` : ''} profile{savedProfiles.length !== 1 ? 's' : ''} saved
+                  {isFree && savedProfiles.length >= SAVED_PROFILES_LIMIT_FREE && (
+                    <span style={{ color: '#ef4444', marginLeft: '8px', fontSize: '0.8125rem' }}>
+                      (Limit reached - <a href="/dashboard/subscription" style={{ color: '#FF6B35', textDecoration: 'underline' }}>Upgrade</a>)
+                    </span>
+                  )}
+                </span>
+              </div>
+              <div style={styles.actionsRight}>
+                <button onClick={handleClearAll} style={styles.clearBtn}>
+                  <Trash2 size={18} />
+                  <span>Clear All</span>
+                </button>
+              </div>
             </div>
-            <div style={styles.actionsRight}>
-              <button onClick={handleClearAll} style={styles.clearBtn}>
-                <Trash2 size={18} />
-                <span>Clear All</span>
-              </button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Bulk Actions Bar */}
         {selectedCount > 0 && (
@@ -237,6 +249,8 @@ const SavedProfilesPage = () => {
           }}
         />
       )}
+
+      <FloatingHelpButton />
     </div>
   );
 };

@@ -1,8 +1,9 @@
+from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, validator
 from database import get_db
-from models import User 
+from models import User
 from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 import jwt
@@ -29,6 +30,8 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
+
+DbSession = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/api/auth", tags=["Authentication"])
 
@@ -115,7 +118,7 @@ def create_jwt_token(data: dict) -> str:
 
 @router.post("/signup")
 @limiter.limit("3/minute")
-def signup(request: Request, signup_data: SignupRequest, db: Session = Depends(get_db)):
+def signup(request: Request, signup_data: SignupRequest, db: DbSession):
     """Create new user account and return JWT token"""
     
     # Check if email exists
@@ -158,7 +161,7 @@ def signup(request: Request, signup_data: SignupRequest, db: Session = Depends(g
 
 @router.post("/login")
 @limiter.limit("5/minute")
-def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_db)):
+def login(request: Request, login_data: LoginRequest, db: DbSession):
     """Login user and return JWT token"""
 
     # Find user by email

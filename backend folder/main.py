@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-from typing import List, Optional
+from typing import Annotated, List, Optional
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime, timezone, timedelta
 import logging
@@ -39,6 +39,7 @@ from auth_routes import router as auth_router
 from routes.payment_routes import router as payment_router
 from lists_routes import router as lists_router
 from email_settings_routes import router as email_settings_router
+from feedback_routes import router as feedback_router
 
 # Import services
 from filter_service import FilterService
@@ -48,6 +49,10 @@ from models import User, Profile, EmailOutreach
 from auth_middleware import get_current_user
 from profile_cache_service import ProfileCacheService
 from email_service import EmailService
+
+# ===== ANNOTATED DEPENDENCY TYPES =====
+CurrentUser = Annotated[User, Depends(get_current_user)]
+DbSession = Annotated[Session, Depends(get_db)]
 
 # ===== INITIALIZE FASTAPI APP =====
 
@@ -189,6 +194,7 @@ app.include_router(auth_router)
 app.include_router(payment_router)
 app.include_router(lists_router)
 app.include_router(email_settings_router)
+app.include_router(feedback_router)
 
 # ===== REQUEST/RESPONSE MODELS =====
 
@@ -252,8 +258,8 @@ def root():
 @app.post("/api/search-profiles")
 async def search_profiles(
     search: SearchRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """
     Enhanced search with GitHub API integration
@@ -390,6 +396,8 @@ async def search_profiles(
 
 @app.get("/api/profiles", response_model=List[ProfileResponse])
 def get_all_profiles(
+    current_user: CurrentUser,
+    db: DbSession,
     min_score: int = 0,
     max_score: int = 100,
     min_stars: int = 0,
@@ -399,8 +407,6 @@ def get_all_profiles(
     active_within_days: int = None,
     sort_by: str = "score",
     limit: int = 100,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
     """Get all profiles with optional filters and sorting"""
     user_id = current_user.id
@@ -484,8 +490,8 @@ def get_all_profiles(
 @app.get("/api/profiles/{profile_id}", response_model=ProfileResponse)
 def get_profile_details(
     profile_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Get full details for a specific profile"""
     
@@ -502,8 +508,8 @@ def get_profile_details(
 @app.patch("/api/profiles/{profile_id}/toggle-select")
 def toggle_profile_selection(
     profile_id: int,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Toggle selection status of a profile"""
     
@@ -527,8 +533,8 @@ def toggle_profile_selection(
 
 @app.get("/api/selected-profiles", response_model=List[ProfileResponse])
 def get_selected_profiles(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Get all profiles marked as selected"""
     
@@ -596,8 +602,8 @@ def _log_sent_emails(db, user, results, user_settings):
 @app.post("/api/send-bulk-emails")
 async def send_bulk_emails_endpoint(
     request: dict,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Send bulk emails to selected profiles using Resend"""
     try:
@@ -659,10 +665,10 @@ async def send_bulk_emails_endpoint(
 @app.post("/api/filter-by-score")
 def filter_by_score(
     profile_ids: List[int],
+    current_user: CurrentUser,
+    db: DbSession,
     min_score: int = 0,
     max_score: int = 100,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
 ):
     """Filter profiles by developer score"""
     
@@ -679,8 +685,8 @@ def filter_by_score(
 
 @app.get("/api/usage-stats")
 def get_usage_stats(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Get current usage statistics for user"""
     user_id = current_user.id
@@ -691,8 +697,8 @@ def get_usage_stats(
 
 @app.get("/api/check-csv-limit")
 def check_csv_limit(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Check if user can export CSV"""
     usage = UsageService.check_csv_limit(db, current_user.id)
@@ -703,8 +709,8 @@ def check_csv_limit(
 
 @app.post("/api/log-csv-export")
 def log_csv_export(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Log a CSV export"""
     UsageService.log_csv_export(db, current_user.id)
@@ -713,7 +719,7 @@ def log_csv_export(
 # ===== HEALTH CHECK =====
 
 @app.get("/api/health")
-def health_check(db: Session = Depends(get_db)):
+def health_check(db: DbSession):
     """Check if API is running"""
     try:
         # Test database connection
@@ -767,8 +773,8 @@ import json
 @app.post("/api/search-profiles-stream")
 async def search_profiles_stream(
     search: SearchRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """
     ✅ OPTIMIZED STREAMING SEARCH - Target < 2 minutes

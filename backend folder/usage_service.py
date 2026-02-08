@@ -14,6 +14,7 @@ class UsageService:
             "csv_exports": 10,
             "lists": 1,
             "profiles_per_list": 25,
+            "saved_profiles": 50,
             "trial_days": 14
         },
         "starter": {
@@ -23,6 +24,7 @@ class UsageService:
             "csv_exports": -1,
             "lists": -1,  # unlimited
             "profiles_per_list": -1,  # unlimited
+            "saved_profiles": -1,  # unlimited
             "trial_days": 0
         }
     }
@@ -291,6 +293,8 @@ class UsageService:
         plan_key = user.plan if user.plan in UsageService.PLAN_LIMITS else "free_trial"
         limits = UsageService.PLAN_LIMITS[plan_key]
         
+        saved_profiles_limit = limits.get("saved_profiles", -1)
+
         return {
             "plan": user.plan,
             "subscription_status": user.subscription_status,
@@ -316,6 +320,10 @@ class UsageService:
                     "used": getattr(user, 'usage_csv_exports', 0),
                     "limit": limits["csv_exports"],
                     "unlimited": limits["csv_exports"] == -1
+                },
+                "saved_profiles": {
+                    "limit": saved_profiles_limit,
+                    "unlimited": saved_profiles_limit == -1
                 }
             },
             "trial_end_date": user.trial_end_date.isoformat() if user.trial_end_date else None

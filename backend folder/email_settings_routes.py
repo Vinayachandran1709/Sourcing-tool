@@ -1,11 +1,14 @@
+from typing import Annotated, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr
-from typing import Optional
 from database import get_db
 from models import User
 from auth_middleware import get_current_user
 from usage_service import UsageService
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+DbSession = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/api/email-settings", tags=["Email Settings"])
 
@@ -42,8 +45,8 @@ Best regards,
 
 @router.get("/settings")
 def get_email_settings(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """
     Get user's email settings (all 6 fields).
@@ -68,8 +71,8 @@ def get_email_settings(
 @router.post("/settings")
 def update_email_settings(
     settings: UpdateEmailSettingsRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """
     Update all email settings (sender email, name, subject, template, reply method, reply link).
@@ -105,8 +108,8 @@ def update_email_settings(
 @router.post("/sender-email")
 def update_sender_email(
     request: UpdateSenderEmailRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """
     Update only sender email (for first-time setup).
@@ -126,8 +129,8 @@ def update_sender_email(
 @router.post("/template")
 def update_template(
     request: UpdateTemplateRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """
     Update only email template.
@@ -146,8 +149,8 @@ def update_template(
 
 @router.get("/usage")
 def get_email_usage(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """
     Get email usage stats (used/remaining this month).

@@ -258,9 +258,27 @@ class EmailCampaign(Base):
 class UsageLog(Base):
     """Detailed usage logging for analytics"""
     __tablename__ = "usage_logs"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     action_type = Column(String, nullable=False)  # "search", "profile_view", "email_sent", "list_created"
     details = Column(JSON, nullable=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class Feedback(Base):
+    """User feedback and support requests"""
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    category = Column(String(50), nullable=False)  # 'bug', 'payment', 'feature', 'general', 'other'
+    message = Column(Text, nullable=False)
+    page_url = Column(String(500), nullable=True)
+    browser_info = Column(String(500), nullable=True)
+    status = Column(String(20), nullable=False, default="new")  # 'new', 'in_progress', 'resolved'
+    admin_notes = Column(Text, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    resolved_at = Column(DateTime(timezone=True), nullable=True)
+
+    user = relationship("User")

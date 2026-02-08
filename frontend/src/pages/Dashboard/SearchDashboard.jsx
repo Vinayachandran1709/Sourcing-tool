@@ -5,6 +5,7 @@ import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
 import FilterPanel from '../../components/FilterPanel';
+import FloatingHelpButton from '../../components/FloatingHelpButton';
 import {toggleProfileSelection} from '../../services/api';
 
 const SearchDashboard = () => {
@@ -244,6 +245,14 @@ const SearchDashboard = () => {
     if (isSaved) {
       updatedSavedIds = savedProfileIds.filter(id => id !== profile.id);
     } else {
+      // Check saved profiles limit for free trial users
+      const user = JSON.parse(localStorage.getItem('user') || '{}');
+      const isFree = !user.plan || user.plan === 'free_trial' || user.plan === 'free';
+      if (isFree && savedProfileIds.length >= 50) {
+        alert('You\'ve reached the 50 saved profiles limit on the Free Trial plan. Upgrade to Starter for unlimited saves.');
+        return;
+      }
+
       updatedSavedIds = [...savedProfileIds, profile.id];
       const savedProfiles = JSON.parse(localStorage.getItem('savedProfiles') || '[]');
       const profileExists = savedProfiles.some(p => p.id === profile.id);
@@ -593,6 +602,7 @@ const SearchDashboard = () => {
           }}
         />
       </div>
+      <FloatingHelpButton />
     </>
   );
 };

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Search, CreditCard, Package, Star } from 'lucide-react';
+import { Search, CreditCard, Package, Star, HelpCircle } from 'lucide-react';
+import FeedbackModal from '../FeedbackModal';
 
 const DashboardSidebar = () => {
+  const [showFeedback, setShowFeedback] = useState(false);
   const navItems = [
     {
       name: 'Search',
@@ -62,6 +64,22 @@ const DashboardSidebar = () => {
         })}
       </nav>
 
+      {/* Help & Feedback */}
+      <div style={styles.helpSection}>
+        <button
+          onClick={() => setShowFeedback(true)}
+          style={styles.helpButton}
+        >
+          <div style={styles.navItemIcon}>
+            <HelpCircle size={20} />
+          </div>
+          <div style={styles.navItemContent}>
+            <span style={styles.navItemName}>Help & Feedback</span>
+            <span style={styles.navItemDesc}>Get support</span>
+          </div>
+        </button>
+      </div>
+
       {/* Footer */}
       <div style={styles.footer}>
         <div style={styles.footerLinks}>
@@ -70,6 +88,11 @@ const DashboardSidebar = () => {
           <a href="/pricing" style={styles.footerLink}>Pricing</a>
         </div>
       </div>
+
+      <FeedbackModal
+        isOpen={showFeedback}
+        onClose={() => setShowFeedback(false)}
+      />
     </aside>
   );
 };
@@ -174,6 +197,26 @@ const styles = {
   navItemDesc: {
     fontSize: '0.75rem',
     opacity: 0.7,
+  },
+
+  helpSection: {
+    padding: '0 0.75rem 0.5rem',
+  },
+
+  helpButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.875rem',
+    padding: '0.75rem 1rem',
+    borderRadius: '10px',
+    border: 'none',
+    background: 'none',
+    color: '#6b7280',
+    cursor: 'pointer',
+    width: '100%',
+    textAlign: 'left',
+    fontFamily: "'Outfit', sans-serif",
+    transition: 'all 0.2s',
   },
 
   footer: {

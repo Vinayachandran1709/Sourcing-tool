@@ -326,5 +326,19 @@ export const sendContactMessage = async (formData) => {
   return response.data;
 };
 
+// ============================================
+// Feedback APIs
+// ============================================
+
+export const submitFeedback = async (feedbackData) => {
+  const response = await api.post('/api/feedback/submit', feedbackData);
+  return response.data;
+};
+
+export const getFeedbackHistory = async () => {
+  const response = await api.get('/api/feedback/history');
+  return response.data;
+};
+
 // Export the axios instance for custom requests
 export default api;

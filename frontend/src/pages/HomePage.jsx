@@ -73,8 +73,8 @@ const HomePage = () => {
           </div>
           <div style={styles.heroStats}>
             <div style={styles.stat}>
-              <span style={styles.statNumber}>300+</span>
-              <span style={styles.statLabel}>Profiles per search</span>
+              <span style={styles.statNumber}>0–100</span>
+              <span style={styles.statLabel}>Candidate expertise scoring</span>
             </div>
             <div style={styles.statDivider}></div>
             <div style={styles.stat}>

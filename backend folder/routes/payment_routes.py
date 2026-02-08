@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Request, Depends, Header
 from pydantic import BaseModel
-from typing import Optional
+from typing import Annotated, Optional
 import razorpay
 
 # Add parent directory to path so we can import root-level modules
@@ -15,6 +15,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from auth_middleware import get_current_user
 from database import get_db_connection
+
+CurrentUser = Annotated[dict, Depends(get_current_user)]
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 
@@ -139,7 +141,7 @@ def log_subscription_event(conn, user_id: int, event_type: str, old_plan: str, n
 # ============================================
 
 @router.post("/create-order")
-async def create_order(request: CreateOrderRequest, current_user: dict = Depends(get_current_user)):
+async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
     """
     Create a Razorpay order for payment
     Returns order details to initialize Razorpay checkout on frontend
@@ -237,7 +239,7 @@ async def create_order(request: CreateOrderRequest, current_user: dict = Depends
     }
 
 @router.post("/verify")
-async def verify_payment(request: VerifyPaymentRequest, current_user: dict = Depends(get_current_user)):
+async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUser):
     """
     Verify Razorpay payment signature and activate subscription
     Called after successful payment on frontend
@@ -461,7 +463,7 @@ async def razorpay_webhook(request: Request):
     return {"status": "ok"}
 
 @router.get("/status")
-async def get_subscription_status(current_user: dict = Depends(get_current_user)):
+async def get_subscription_status(current_user: CurrentUser):
     """
     Get current subscription status for the user
     Used by frontend to refresh subscription data
@@ -532,7 +534,7 @@ async def get_subscription_status(current_user: dict = Depends(get_current_user)
         conn.close()
 
 @router.get("/history")
-async def get_payment_history(current_user: dict = Depends(get_current_user)):
+async def get_payment_history(current_user: CurrentUser):
     """
     Get payment history for the user
     """
@@ -589,7 +591,7 @@ async def get_payment_history(current_user: dict = Depends(get_current_user)):
 @router.post("/cancel")
 async def cancel_subscription(
     request: CancelSubscriptionRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: CurrentUser
 ):
     """
     Cancel user's subscription

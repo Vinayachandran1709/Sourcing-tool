@@ -1,11 +1,14 @@
+from typing import Annotated, Optional, List
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
-from typing import Optional, List
 from database import get_db
-from models import User  # ⭐ ADDED THIS IMPORT
+from models import User
 from lists_service import ListsService
 from auth_middleware import get_current_user
+
+CurrentUser = Annotated[User, Depends(get_current_user)]
+DbSession = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/api/lists", tags=["Saved Lists"])
 
@@ -32,8 +35,8 @@ class UpdateNotesRequest(BaseModel):
 @router.post("/create")
 def create_list(
     request: CreateListRequest, 
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Create a new saved list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -57,8 +60,8 @@ def create_list(
 
 @router.get("/")
 def get_lists(
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Get all lists for user"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -69,8 +72,8 @@ def get_lists(
 @router.get("/{list_id}/profiles")
 def get_list_profiles(
     list_id: int, 
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Get all profiles in a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -82,8 +85,8 @@ def get_list_profiles(
 def add_profile_to_list(
     list_id: int,
     request: AddProfileRequest,
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Add a profile to a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -95,8 +98,8 @@ def add_profile_to_list(
 def remove_profile_from_list(
     list_id: int, 
     profile_id: int,
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Remove a profile from a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -108,8 +111,8 @@ def remove_profile_from_list(
 def update_list(
     list_id: int, 
     request: UpdateListRequest,
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Update list name/description"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -128,8 +131,8 @@ def update_list(
 @router.delete("/{list_id}")
 def delete_list(
     list_id: int,
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Delete a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -142,8 +145,8 @@ def update_profile_notes(
     list_id: int, 
     profile_id: int, 
     request: UpdateNotesRequest,
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Update notes for a profile in a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
@@ -153,8 +156,8 @@ def update_profile_notes(
 
 @router.get("/limits")
 def get_list_limits(
-    current_user: User = Depends(get_current_user),  # ✅ CHANGED dict to User
-    db: Session = Depends(get_db)
+    current_user: CurrentUser,
+    db: DbSession,
 ):
     """Check list creation limits"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
