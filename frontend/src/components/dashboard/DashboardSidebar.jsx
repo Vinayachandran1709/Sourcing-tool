@@ -108,6 +108,7 @@ const styles = {
     position: 'fixed',
     left: 0,
     top: 0,
+    zIndex: 100,
     fontFamily: "'Outfit', sans-serif",
     overflowY: 'auto',
   },

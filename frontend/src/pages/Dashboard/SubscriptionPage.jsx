@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import EmailSettingsCard from '../../components/EmailSettingsCard';
-import FloatingHelpButton from '../../components/FloatingHelpButton';
+
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Mail, Search, Eye, CheckCircle, Loader, AlertCircle, RefreshCw,
@@ -856,7 +856,6 @@ const SubscriptionPage = () => {
         </div>
       )}
 
-      <FloatingHelpButton />
     </div>
   );
 };

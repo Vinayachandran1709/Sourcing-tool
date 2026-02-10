@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -23,6 +23,11 @@ if (!document.getElementById('login-page-styles')) {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+
+    @keyframes fadeOut {
+      from { opacity: 1; }
+      to { opacity: 0; }
+    }
   `;
   document.head.appendChild(styleSheet);
 }
@@ -39,12 +44,14 @@ const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [fadingOut, setFadingOut] = useState(false);
+  const isLoggingIn = useRef(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // If already authenticated, redirect to dashboard
-    if (isAuthenticated) {
-      navigate('/dashboard/search');
+    // If already authenticated (not mid-login), redirect to dashboard
+    if (isAuthenticated && !isLoggingIn.current) {
+      navigate('/dashboard/search', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -53,16 +60,22 @@ const LoginPage = () => {
     setLoading(true);
     setError('');
     setSuccess(false);
+    isLoggingIn.current = true;
 
     const result = await login(formData.email, formData.password);
 
     if (result.success) {
       setSuccess(true);
-      // Wait 800ms before redirect for smooth transition
+      // Start fade-out after brief success message display
       setTimeout(() => {
-        navigate('/dashboard/search');
+        setFadingOut(true);
+      }, 400);
+      // Navigate after fade-out completes
+      setTimeout(() => {
+        navigate('/dashboard/search', { replace: true });
       }, 800);
     } else {
+      isLoggingIn.current = false;
       setError(result.error || 'Login failed. Please try again.');
       setLoading(false);
     }
@@ -78,7 +91,10 @@ const LoginPage = () => {
 
   
   return (
-    <div style={styles.page}>
+    <div style={{
+      ...styles.page,
+      ...(fadingOut ? { animation: 'fadeOut 0.4s ease forwards' } : {}),
+    }}>
       {/* Left Side - Branding */}
       <div style={styles.leftSide}>
         <Link to="/" style={styles.logo}>

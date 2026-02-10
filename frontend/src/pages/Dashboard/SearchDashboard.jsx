@@ -5,7 +5,7 @@ import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
 import FilterPanel from '../../components/FilterPanel';
-import FloatingHelpButton from '../../components/FloatingHelpButton';
+
 import {toggleProfileSelection} from '../../services/api';
 
 const SearchDashboard = () => {
@@ -602,7 +602,6 @@ const SearchDashboard = () => {
           }}
         />
       </div>
-      <FloatingHelpButton />
     </>
   );
 };

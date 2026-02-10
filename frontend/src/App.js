@@ -12,7 +12,9 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import TermsPage from './pages/TermsPage';          
 import PrivacyPage from './pages/PrivacyPage';   
-import RefundPage from './pages/RefundPage';        
+import RefundPage from './pages/RefundPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import ResetPasswordPage from './pages/ResetPasswordPage';
 
 // Dashboard Layout & Pages
 import DashboardLayout from './components/dashboard/DashboardLayout';
@@ -34,7 +36,9 @@ function App() {
             <Route path="/signup" element={<SignupPage />} />
             <Route path="/terms" element={<TermsPage />} />              
             <Route path="/privacy-policy" element={<PrivacyPage />} />   
-            <Route path="/refund-policy" element={<RefundPage />} />     
+            <Route path="/refund-policy" element={<RefundPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
 
             {/* Protected Dashboard Routes */}
             <Route

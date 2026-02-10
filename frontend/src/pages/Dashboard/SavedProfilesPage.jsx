@@ -4,7 +4,7 @@ import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
-import FloatingHelpButton from '../../components/FloatingHelpButton';
+
 
 const SAVED_PROFILES_LIMIT_FREE = 50;
 
@@ -250,7 +250,6 @@ const SavedProfilesPage = () => {
         />
       )}
 
-      <FloatingHelpButton />
     </div>
   );
 };

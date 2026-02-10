@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, User, Building, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
@@ -12,12 +12,14 @@ const SignupPage = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [passwordStrength, setPasswordStrength] = useState({ score: 0, text: '' });
+  const [fadingOut, setFadingOut] = useState(false);
+  const isSigningUp = useRef(false);
 
-  useEffect(() => { 
+  useEffect(() => {
     window.scrollTo(0, 0);
-    // If already authenticated, redirect to dashboard
-    if (isAuthenticated) {
-      navigate('/dashboard/search');
+    // If already authenticated (not mid-signup), redirect to dashboard
+    if (isAuthenticated && !isSigningUp.current) {
+      navigate('/dashboard/search', { replace: true });
     }
   }, [isAuthenticated, navigate]);
 
@@ -62,16 +64,20 @@ const SignupPage = () => {
       return;
     }
     setLoading(true);
+    isSigningUp.current = true;
 
     const result = await signup(formData.name, formData.email, formData.company, formData.password);
 
     if (result.success) {
-      navigate('/dashboard/search');
+      setFadingOut(true);
+      setTimeout(() => {
+        navigate('/dashboard/search', { replace: true });
+      }, 400);
     } else {
+      isSigningUp.current = false;
       setError(result.error || 'Signup failed. Please try again.');
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   const handleChange = (e) => {
@@ -82,7 +88,10 @@ const SignupPage = () => {
   };
   
   return (
-    <div style={styles.page}>
+    <div style={{
+      ...styles.page,
+      ...(fadingOut ? { opacity: 0, transition: 'opacity 0.4s ease' } : { opacity: 1, transition: 'opacity 0.4s ease' }),
+    }}>
       <div style={styles.leftSide}>
         <Link to="/" style={styles.logo}><Package size={32} color="#FF6B35" /><span style={styles.logoText}>TalentBox</span></Link>
         <div style={styles.brandingContent}>

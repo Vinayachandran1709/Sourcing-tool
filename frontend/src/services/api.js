@@ -53,12 +53,22 @@ export const login = async (email, password) => {
 };
 
 export const signup = async (name, email, company, password) => {
-  const response = await api.post('/api/auth/signup', { 
-    name, 
-    email, 
-    company, 
-    password 
+  const response = await api.post('/api/auth/signup', {
+    name,
+    email,
+    company,
+    password
   });
+  return response.data;
+};
+
+export const forgotPassword = async (email) => {
+  const response = await api.post('/api/auth/forgot-password', { email });
+  return response.data;
+};
+
+export const resetPassword = async (token, new_password) => {
+  const response = await api.post('/api/auth/reset-password', { token, new_password });
   return response.data;
 };
 
