@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Package, Menu, X } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   const handleLogoClick = (e) => {
     e.preventDefault();
@@ -28,8 +30,14 @@ const Navbar = () => {
         <div style={styles.navLinks}>
           <Link to="/pricing" style={styles.navLink}>Pricing</Link>
           <Link to="/contact" style={styles.navLink}>Contact</Link>
-          <Link to="/login" style={styles.navLink}>Log in</Link>
-          <Link to="/signup" style={styles.signupBtn}>Start Free Trial</Link>
+          {isAuthenticated ? (
+            <Link to="/dashboard/search" style={styles.signupBtn}>Dashboard</Link>
+          ) : (
+            <>
+              <Link to="/login" style={styles.navLink}>Log in</Link>
+              <Link to="/signup" style={styles.signupBtn}>Start Free Trial</Link>
+            </>
+          )}
         </div>
 
         <button style={styles.mobileMenuBtn} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -41,8 +49,14 @@ const Navbar = () => {
         <div style={styles.mobileMenu}>
           <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-          <Link to="/login" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Log in</Link>
-          <Link to="/signup" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Start Free Trial</Link>
+          {isAuthenticated ? (
+            <Link to="/dashboard/search" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+          ) : (
+            <>
+              <Link to="/login" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Log in</Link>
+              <Link to="/signup" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Start Free Trial</Link>
+            </>
+          )}
         </div>
       )}
     </nav>

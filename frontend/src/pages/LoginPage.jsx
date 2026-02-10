@@ -45,13 +45,16 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [fadingOut, setFadingOut] = useState(false);
+  const [redirecting, setRedirecting] = useState(false);
   const isLoggingIn = useRef(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // If already authenticated (not mid-login), redirect to dashboard
+    // If already authenticated (not mid-login), redirect smoothly to dashboard
     if (isAuthenticated && !isLoggingIn.current) {
-      navigate('/dashboard/search', { replace: true });
+      setRedirecting(true);
+      setTimeout(() => setFadingOut(true), 600);
+      setTimeout(() => navigate('/dashboard/search', { replace: true }), 1000);
     }
   }, [isAuthenticated, navigate]);
 
@@ -104,17 +107,33 @@ const LoginPage = () => {
 
         <div style={styles.brandingContent}>
           <h1 style={styles.brandTitle}>
-            Welcome Back to<br />
-            <span style={styles.highlight}>TalentBox</span>
+            {redirecting ? (
+              <>Taking you to your<br /><span style={styles.highlight}>Dashboard</span></>
+            ) : (
+              <>Welcome Back to<br /><span style={styles.highlight}>TalentBox</span></>
+            )}
           </h1>
           <p style={styles.brandSubtitle}>
-            Continue finding and hiring top developers with AI-powered insights.
+            {redirecting
+              ? "You're already signed in. Redirecting now..."
+              : 'Continue finding and hiring top developers with AI-powered insights.'}
           </p>
         </div>
       </div>
 
-      {/* Right Side - Form */}
+      {/* Right Side - Form or Redirect Message */}
       <div style={styles.rightSide}>
+        {redirecting ? (
+          <div style={{ textAlign: 'center', animation: 'slideIn 0.4s ease-out' }}>
+            <svg width="48" height="48" viewBox="0 0 48 48" style={{ animation: 'spin 1s linear infinite', marginBottom: '1.5rem' }}>
+              <circle cx="24" cy="24" r="20" stroke="#FF6B35" strokeWidth="4" fill="none" strokeDasharray="100" strokeDashoffset="30" strokeLinecap="round"/>
+            </svg>
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#1a1a1a', marginBottom: '0.5rem' }}>
+              Redirecting to Dashboard
+            </h2>
+            <p style={{ color: '#6b7280', fontSize: '1rem' }}>Just a moment...</p>
+          </div>
+        ) : (
         <div style={styles.formContainer}>
           <div style={styles.formHeader}>
             <h2 style={styles.formTitle}>Log in to your account</h2>
@@ -229,6 +248,7 @@ const LoginPage = () => {
             </p>
           </div>
         </div>
+        )}
       </div>
     </div>
   );
