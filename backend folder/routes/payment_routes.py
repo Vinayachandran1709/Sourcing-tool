@@ -284,7 +284,7 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUse
     try:
         with conn.cursor() as cur:
             # Get current user data for event logging
-            cur.execute("SELECT subscription_plan, subscription_status FROM users WHERE id = %s", (user_id,))
+            cur.execute("SELECT plan, subscription_status FROM users WHERE id = %s", (user_id,))
             old_user = cur.fetchone()
             old_plan = old_user[0] if old_user else "free_trial"
             old_status = old_user[1] if old_user else "active"
@@ -317,16 +317,16 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUse
             # Update user subscription
             cur.execute("""
                 UPDATE users SET
-                    subscription_plan = %s,
+                    plan = %s,
                     subscription_status = 'active',
                     billing_cycle = %s,
                     subscription_amount = %s,
                     next_billing_date = %s,
                     last_payment_date = %s,
                     trial_end_date = NULL,
-                    searches_used = 0,
-                    profile_views_used = 0,
-                    email_credits_used = 0,
+                    usage_searches = 0,
+                    usage_profile_views = 0,
+                    usage_emails_sent = 0,
                     auto_renew = TRUE,
                     razorpay_order_id = NULL
                 WHERE id = %s
@@ -475,7 +475,7 @@ async def get_subscription_status(current_user: CurrentUser):
         with conn.cursor() as cur:
             cur.execute("""
                 SELECT 
-                    subscription_plan,
+                    plan,
                     subscription_status,
                     billing_cycle,
                     subscription_amount,
@@ -483,9 +483,9 @@ async def get_subscription_status(current_user: CurrentUser):
                     trial_end_date,
                     auto_renew,
                     last_payment_date,
-                    searches_used,
-                    profile_views_used,
-                    email_credits_used
+                    usage_searches,
+                    usage_profile_views,
+                    usage_emails_sent
                 FROM users WHERE id = %s
             """, (user_id,))
             
@@ -604,7 +604,7 @@ async def cancel_subscription(
         with conn.cursor() as cur:
             # Get current subscription
             cur.execute("""
-                SELECT subscription_plan, subscription_status, next_billing_date
+                SELECT plan, subscription_status, next_billing_date
                 FROM users WHERE id = %s
             """, (user_id,))
             

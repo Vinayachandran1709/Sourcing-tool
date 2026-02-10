@@ -109,6 +109,76 @@ async def startup_event():
         logger.info("✅ Database connection successful")
     except Exception as e:
         logger.error(f"❌ Database connection failed: {e}")
+
+    # Auto-run payment migration (safe - uses IF NOT EXISTS)
+    try:
+        from database import get_db_connection
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cur:
+                # Add payment columns to users table
+                cur.execute("""
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_customer_id VARCHAR(50);
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(50);
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN DEFAULT TRUE;
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method VARCHAR(20);
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_payment_date TIMESTAMP WITH TIME ZONE;
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_amount DECIMAL(10, 2) DEFAULT 0;
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'USD';
+                """)
+
+                # Create payment_history table
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS payment_history (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        razorpay_order_id VARCHAR(50) NOT NULL,
+                        razorpay_payment_id VARCHAR(50),
+                        razorpay_signature VARCHAR(255),
+                        amount DECIMAL(10, 2) NOT NULL,
+                        currency VARCHAR(3) DEFAULT 'USD',
+                        amount_inr DECIMAL(10, 2),
+                        plan_name VARCHAR(50) NOT NULL,
+                        billing_cycle VARCHAR(20) NOT NULL,
+                        status VARCHAR(20) DEFAULT 'created',
+                        payment_method VARCHAR(50),
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                        paid_at TIMESTAMP WITH TIME ZONE,
+                        receipt VARCHAR(100),
+                        notes JSONB,
+                        error_message TEXT,
+                        CONSTRAINT unique_razorpay_order UNIQUE (razorpay_order_id)
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_payment_history_user_id ON payment_history(user_id);
+                    CREATE INDEX IF NOT EXISTS idx_payment_history_status ON payment_history(status);
+                """)
+
+                # Create subscription_events table
+                cur.execute("""
+                    CREATE TABLE IF NOT EXISTS subscription_events (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        event_type VARCHAR(50) NOT NULL,
+                        old_plan VARCHAR(50),
+                        new_plan VARCHAR(50),
+                        old_status VARCHAR(20),
+                        new_status VARCHAR(20),
+                        triggered_by VARCHAR(50),
+                        metadata JSONB,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_subscription_events_user_id ON subscription_events(user_id);
+                """)
+
+                conn.commit()
+            logger.info("✅ Payment tables verified/created")
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"⚠️ Payment migration error: {e}")
+        finally:
+            conn.close()
+    except Exception as e:
+        logger.error(f"⚠️ Could not verify payment tables: {e}")
     
     # Validate JWT Secret
     from auth_middleware import SECRET_KEY
