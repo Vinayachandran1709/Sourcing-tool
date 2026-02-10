@@ -3,7 +3,7 @@ import sys
 import json
 import hmac
 import hashlib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Request, Depends, Header
 from pydantic import BaseModel
@@ -16,7 +16,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from auth_middleware import get_current_user
 from database import get_db_connection
 
-CurrentUser = Annotated[dict, Depends(get_current_user)]
+CurrentUser = Annotated[object, Depends(get_current_user)]
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 
@@ -109,7 +109,7 @@ def get_plan_price(plan_name: str, billing_cycle: str) -> dict:
 
 def calculate_next_billing_date(billing_cycle: str) -> datetime:
     """Calculate next billing date based on cycle"""
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     if billing_cycle == "monthly":
         return now + timedelta(days=30)
     elif billing_cycle == "annual":
@@ -118,7 +118,7 @@ def calculate_next_billing_date(billing_cycle: str) -> datetime:
 
 def generate_receipt_id(user_id: int) -> str:
     """Generate unique receipt ID"""
-    timestamp = datetime.utcnow().strftime("%Y%m%d%H%M%S")
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     return f"TB-{user_id}-{timestamp}"
 
 def log_subscription_event(conn, user_id: int, event_type: str, old_plan: str, new_plan: str, 
@@ -149,10 +149,10 @@ async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
     if not razorpay_client:
         raise HTTPException(status_code=500, detail="Payment system not configured")
     
-    user_id = current_user["id"]
-    user_email = current_user["email"]
-    user_name = current_user.get("name", "Customer")
-    
+    user_id = current_user.id
+    user_email = current_user.email
+    user_name = current_user.name or "Customer"
+
     # Validate plan
     if request.plan.lower() not in PLANS:
         raise HTTPException(status_code=400, detail=f"Invalid plan: {request.plan}")
@@ -246,9 +246,9 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUse
     """
     if not razorpay_client:
         raise HTTPException(status_code=500, detail="Payment system not configured")
-    
-    user_id = current_user["id"]
-    
+
+    user_id = current_user.id
+
     # Verify signature
     try:
         params_dict = {
@@ -290,7 +290,7 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUse
             old_status = old_user[1] if old_user else "active"
             
             # Calculate dates
-            now = datetime.utcnow()
+            now = datetime.now(timezone.utc)
             next_billing = calculate_next_billing_date(request.billing_cycle)
             
             # Get plan details
@@ -468,7 +468,7 @@ async def get_subscription_status(current_user: CurrentUser):
     Get current subscription status for the user
     Used by frontend to refresh subscription data
     """
-    user_id = current_user["id"]
+    user_id = current_user.id
     
     conn = get_db_connection()
     try:
@@ -538,7 +538,7 @@ async def get_payment_history(current_user: CurrentUser):
     """
     Get payment history for the user
     """
-    user_id = current_user["id"]
+    user_id = current_user.id
     
     conn = get_db_connection()
     try:
@@ -597,7 +597,7 @@ async def cancel_subscription(
     Cancel user's subscription
     User retains access until end of billing period
     """
-    user_id = current_user["id"]
+    user_id = current_user.id
     
     conn = get_db_connection()
     try:
