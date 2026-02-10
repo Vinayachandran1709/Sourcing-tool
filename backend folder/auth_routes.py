@@ -144,7 +144,7 @@ def signup(request: Request, signup_data: SignupRequest, db: DbSession):
     
     return {
         "success": True,
-        "token": token,
+        "access_token": token,
         "user": {
             "id": user.id,
             "name": user.name,
@@ -179,7 +179,7 @@ def login(request: Request, login_data: LoginRequest, db: DbSession):
 
     return {
         "success": True,
-        "token": token,
+        "access_token": token,
         "user": {
             "id": user.id,
             "name": user.name,

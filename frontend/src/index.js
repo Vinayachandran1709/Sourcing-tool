@@ -6,13 +6,15 @@ import reportWebVitals from './reportWebVitals';
 import posthog from 'posthog-js';
 import { PostHogProvider } from 'posthog-js/react';
 
-posthog.init(
-  process.env.REACT_APP_POSTHOG_KEY,
-  {
-    api_host: process.env.REACT_APP_POSTHOG_HOST,
-    person_profiles: 'identified_only',
-  }
-);
+if (process.env.REACT_APP_POSTHOG_KEY) {
+  posthog.init(
+    process.env.REACT_APP_POSTHOG_KEY,
+    {
+      api_host: process.env.REACT_APP_POSTHOG_HOST,
+      person_profiles: 'identified_only',
+    }
+  );
+}
 window.posthog = posthog;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
