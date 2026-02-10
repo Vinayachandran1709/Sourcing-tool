@@ -3,12 +3,16 @@ import sys
 import json
 import hmac
 import hashlib
+import traceback
+import logging
 from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Request, Depends, Header
 from pydantic import BaseModel
 from typing import Annotated, Optional
 import razorpay
+
+logger = logging.getLogger(__name__)
 
 # Add parent directory to path so we can import root-level modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -147,96 +151,103 @@ async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
     Returns order details to initialize Razorpay checkout on frontend
     """
     if not razorpay_client:
-        raise HTTPException(status_code=500, detail="Payment system not configured")
-    
-    user_id = current_user.id
-    user_email = current_user.email
-    user_name = current_user.name or "Customer"
+        logger.error("Razorpay client not initialized. Check RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET env vars.")
+        raise HTTPException(status_code=500, detail="Payment system not configured. Razorpay credentials missing on server.")
 
-    # Validate plan
-    if request.plan.lower() not in PLANS:
-        raise HTTPException(status_code=400, detail=f"Invalid plan: {request.plan}")
-    
-    # Get pricing
-    pricing = get_plan_price(request.plan, request.billing_cycle)
-    receipt_id = generate_receipt_id(user_id)
-    
-    # Create Razorpay order
     try:
-        order_data = {
-            "amount": pricing["price_inr"],  # Amount in paise
+        user_id = current_user.id
+        user_email = current_user.email
+        user_name = current_user.name or "Customer"
+
+        # Validate plan
+        if request.plan.lower() not in PLANS:
+            raise HTTPException(status_code=400, detail=f"Invalid plan: {request.plan}")
+
+        # Get pricing
+        pricing = get_plan_price(request.plan, request.billing_cycle)
+        receipt_id = generate_receipt_id(user_id)
+
+        # Create Razorpay order
+        try:
+            order_data = {
+                "amount": pricing["price_inr"],  # Amount in paise
+                "currency": "INR",
+                "receipt": receipt_id,
+                "notes": {
+                    "user_id": str(user_id),
+                    "user_email": user_email,
+                    "plan": request.plan,
+                    "billing_cycle": request.billing_cycle,
+                    "is_renewal": str(request.is_renewal),
+                    "price_usd": str(pricing["price_usd"])
+                }
+            }
+
+            order = razorpay_client.order.create(data=order_data)
+
+        except Exception as e:
+            logger.error(f"Razorpay order creation failed: {e}\n{traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=f"Failed to create payment order: {str(e)}")
+
+        # Store order in database
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cur:
+                # Store order in payment_history
+                cur.execute("""
+                    INSERT INTO payment_history
+                    (user_id, razorpay_order_id, amount, currency, amount_inr, plan_name, billing_cycle, status, receipt)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
+                """, (
+                    user_id,
+                    order["id"],
+                    pricing["price_usd"],
+                    "USD",
+                    pricing["price_inr_display"],
+                    request.plan,
+                    request.billing_cycle,
+                    "created",
+                    receipt_id
+                ))
+
+                # Update user's pending order
+                cur.execute("""
+                    UPDATE users SET razorpay_order_id = %s WHERE id = %s
+                """, (order["id"], user_id))
+
+                conn.commit()
+
+        except Exception as e:
+            conn.rollback()
+            logger.error(f"Database error storing order: {e}\n{traceback.format_exc()}")
+            raise HTTPException(status_code=500, detail=f"Failed to store order in database: {str(e)}")
+        finally:
+            conn.close()
+
+        # Return order details for frontend
+        return {
+            "success": True,
+            "order_id": order["id"],
+            "amount": pricing["price_inr"],
+            "amount_usd": pricing["price_usd"],
             "currency": "INR",
-            "receipt": receipt_id,
+            "key_id": RAZORPAY_KEY_ID,
+            "name": "TalentBox",
+            "description": f"{PLANS[request.plan.lower()]['name']} Plan - {request.billing_cycle.capitalize()}",
+            "prefill": {
+                "name": user_name,
+                "email": user_email
+            },
             "notes": {
-                "user_id": str(user_id),
-                "user_email": user_email,
                 "plan": request.plan,
-                "billing_cycle": request.billing_cycle,
-                "is_renewal": str(request.is_renewal),
-                "price_usd": str(pricing["price_usd"])
+                "billing_cycle": request.billing_cycle
             }
         }
-        
-        order = razorpay_client.order.create(data=order_data)
-        
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Razorpay order creation failed: {e}")
-        raise HTTPException(status_code=500, detail="Failed to create payment order")
-    
-    # Store order in database
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            # Store order in payment_history
-            cur.execute("""
-                INSERT INTO payment_history 
-                (user_id, razorpay_order_id, amount, currency, amount_inr, plan_name, billing_cycle, status, receipt)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-            """, (
-                user_id,
-                order["id"],
-                pricing["price_usd"],
-                "USD",
-                pricing["price_inr_display"],
-                request.plan,
-                request.billing_cycle,
-                "created",
-                receipt_id
-            ))
-            
-            # Update user's pending order
-            cur.execute("""
-                UPDATE users SET razorpay_order_id = %s WHERE id = %s
-            """, (order["id"], user_id))
-            
-            conn.commit()
-            
-    except Exception as e:
-        conn.rollback()
-        print(f"Database error storing order: {e}")
-        raise HTTPException(status_code=500, detail="Failed to store order")
-    finally:
-        conn.close()
-    
-    # Return order details for frontend
-    return {
-        "success": True,
-        "order_id": order["id"],
-        "amount": pricing["price_inr"],
-        "amount_usd": pricing["price_usd"],
-        "currency": "INR",
-        "key_id": RAZORPAY_KEY_ID,
-        "name": "TalentBox",
-        "description": f"{PLANS[request.plan.lower()]['name']} Plan - {request.billing_cycle.capitalize()}",
-        "prefill": {
-            "name": user_name,
-            "email": user_email
-        },
-        "notes": {
-            "plan": request.plan,
-            "billing_cycle": request.billing_cycle
-        }
-    }
+        logger.error(f"Unexpected error in create_order: {e}\n{traceback.format_exc()}")
+        raise HTTPException(status_code=500, detail=f"Unexpected payment error: {str(e)}")
 
 @router.post("/verify")
 async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUser):
@@ -681,4 +692,62 @@ async def get_available_plans():
         "success": True,
         "plans": plans_response,
         "currency": "USD"
+    }
+
+@router.get("/health")
+async def payment_health_check():
+    """
+    Diagnostic endpoint to check payment system configuration.
+    Checks Razorpay credentials and database tables.
+    """
+    checks = {
+        "razorpay_key_id": bool(RAZORPAY_KEY_ID),
+        "razorpay_key_secret": bool(RAZORPAY_KEY_SECRET),
+        "razorpay_webhook_secret": bool(RAZORPAY_WEBHOOK_SECRET),
+        "razorpay_client_initialized": razorpay_client is not None,
+        "payment_history_table": False,
+        "subscription_events_table": False,
+        "users_payment_columns": False,
+    }
+
+    try:
+        conn = get_db_connection()
+        try:
+            with conn.cursor() as cur:
+                # Check payment_history table
+                cur.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables
+                        WHERE table_name = 'payment_history'
+                    )
+                """)
+                checks["payment_history_table"] = cur.fetchone()[0]
+
+                # Check subscription_events table
+                cur.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.tables
+                        WHERE table_name = 'subscription_events'
+                    )
+                """)
+                checks["subscription_events_table"] = cur.fetchone()[0]
+
+                # Check users table has payment columns
+                cur.execute("""
+                    SELECT EXISTS (
+                        SELECT FROM information_schema.columns
+                        WHERE table_name = 'users' AND column_name = 'razorpay_order_id'
+                    )
+                """)
+                checks["users_payment_columns"] = cur.fetchone()[0]
+        finally:
+            conn.close()
+    except Exception as e:
+        checks["db_error"] = str(e)
+
+    all_ok = all(v for k, v in checks.items() if k != "db_error")
+    return {
+        "success": all_ok,
+        "checks": checks,
+        "message": "All payment systems configured" if all_ok else "Some checks failed - see details"
     }
