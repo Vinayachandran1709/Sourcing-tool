@@ -423,3 +423,18 @@ Traceback (most recent call last):
 razorpay.errors.BadRequestError: Authentication failed
 
 2026-02-11 21:31:07,530 - main - WARNING - HTTP 500 on /api/payments/create-order: Failed to create payment order: Authentication failed
+2026-02-13 22:47:21,453 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-13 22:47:22,853 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-13 22:47:22,854 - main - INFO - Environment: development
+2026-02-13 22:47:22,855 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-13 22:47:22,969 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-13 22:47:23,059 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-13 22:47:23,060 - main - INFO - ✅ Resend API Key configured
+2026-02-13 22:47:29,709 - main - INFO - ✅ Database connection successful
+2026-02-13 22:47:33,350 - main - INFO - ✅ Payment tables verified/created
+2026-02-13 22:47:33,352 - main - INFO - ✅ JWT Secret configured
+2026-02-13 22:47:33,353 - main - INFO - 🎯 Startup validation complete
+
+2026-02-13 22:50:35,581 - main - INFO - 📦 Fetching cached profiles...
+2026-02-13 22:50:37,468 - main - INFO - ✅ Sending 120 initial results
+2026-02-13 22:50:37,474 - main - INFO - ✅ Search complete

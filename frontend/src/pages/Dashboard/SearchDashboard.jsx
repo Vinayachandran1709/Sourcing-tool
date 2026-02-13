@@ -436,7 +436,7 @@ const SearchDashboard = () => {
         )}
 
         {/* Score filter with Select All + Send Email actions */}
-        {profiles.length > 0 && !loading && (
+        {profiles.length > 0 && (
           <>
             <div style={styles.scoreFilterContainer}>
               <div style={styles.scoreFilterHeader}>

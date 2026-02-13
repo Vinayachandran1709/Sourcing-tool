@@ -89,9 +89,7 @@ export const getProfiles = async (profileIds) => {
 };
 
 export const toggleProfileSelection = async (profileId) => {
-  const response = await api.post('/api/profiles/toggle-selection', { 
-    profile_id: profileId 
-  });
+  const response = await api.patch(`/api/profiles/${profileId}/toggle-select`);
   return response.data;
 };
 

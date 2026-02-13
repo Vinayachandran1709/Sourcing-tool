@@ -4,11 +4,13 @@ import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
+import { useAuth } from '../../contexts/AuthContext';
 
 
 const SAVED_PROFILES_LIMIT_FREE = 50;
 
 const SavedProfilesPage = () => {
+  const { incrementUsage } = useAuth();
   const [savedProfiles, setSavedProfiles] = useState([]);
   const [savedProfileIds, setSavedProfileIds] = useState([]);
   const [showDetailModal, setShowDetailModal] = useState(false);
@@ -93,9 +95,12 @@ const SavedProfilesPage = () => {
   };
 
   const handleViewProfile = (profile) => {
-    if (!unlockedProfileIds.includes(profile.id)) {
+    const isNewUnlock = !unlockedProfileIds.includes(profile.id);
+    if (isNewUnlock) {
       setUnlockedProfileIds(prev => [...prev, profile.id]);
       checkUnlockLimit(profile.id);
+      // Increment profile unlock usage count
+      incrementUsage('profile_unlock', 1);
     }
     setSelectedProfile(profile);
     setShowDetailModal(true);
