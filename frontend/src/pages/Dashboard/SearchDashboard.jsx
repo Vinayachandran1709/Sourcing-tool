@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Mail, AlertCircle, CheckSquare } from 'lucide-react';
 import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
 import FilterPanel from '../../components/FilterPanel';
+import { useAuth } from '../../contexts/AuthContext';
 
 import {toggleProfileSelection} from '../../services/api';
 
 const SearchDashboard = () => {
+  const { incrementUsage } = useAuth();
   const [profiles, setProfiles] = useState(() => {
     const saved = sessionStorage.getItem('searchResults');
     return saved ? JSON.parse(saved) : [];
@@ -38,6 +40,9 @@ const SearchDashboard = () => {
     message: '',
     totalFound: 0
   });
+
+  const [showSearchMessage, setShowSearchMessage] = useState(true);
+  const searchMessageTimerRef = React.useRef(null);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
@@ -74,6 +79,17 @@ const SearchDashboard = () => {
     setCurrentFilters(filters);
     setCurrentPage(1);
     setScoreFilterRanges([]);
+    setShowSearchMessage(true);
+
+    // Clear any existing timer
+    if (searchMessageTimerRef.current) {
+      clearTimeout(searchMessageTimerRef.current);
+    }
+
+    // Hide the search message after 2 minutes (120000ms)
+    searchMessageTimerRef.current = setTimeout(() => {
+      setShowSearchMessage(false);
+    }, 120000);
 
     setSearchProgress({
       isSearching: true,
@@ -149,14 +165,24 @@ const SearchDashboard = () => {
                 setProfiles(prev => [...prev, ...data.profiles]);
                 break;
               case 'complete':
+                // Clear the timer when search completes
+                if (searchMessageTimerRef.current) {
+                  clearTimeout(searchMessageTimerRef.current);
+                }
                 setSearchProgress({
                   isSearching: false,
                   message: 'Search complete!',
                   totalFound: data.total
                 });
                 setLoading(false);
+                // Increment search usage count
+                incrementUsage('search', 1);
                 break;
               case 'error':
+                // Clear the timer on error
+                if (searchMessageTimerRef.current) {
+                  clearTimeout(searchMessageTimerRef.current);
+                }
                 setError({ message: data.message });
                 setLoading(false);
                 setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
@@ -172,13 +198,26 @@ const SearchDashboard = () => {
 
     } catch (error) {
       console.error('Search failed:', error);
+      // Clear the timer on error
+      if (searchMessageTimerRef.current) {
+        clearTimeout(searchMessageTimerRef.current);
+      }
       setError({ message: error.message || 'Failed to start search. Please try again.' });
       setLoading(false);
       setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
     }
   };
 
-  const handleProfileSelect = async (profileId) => {
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (searchMessageTimerRef.current) {
+        clearTimeout(searchMessageTimerRef.current);
+      }
+    };
+  }, []);
+
+  const handleProfileSelect = useCallback(async (profileId) => {
     setProfiles(prevProfiles =>
       prevProfiles.map(p =>
         p.id === profileId ? { ...p, selected: !p.selected } : p
@@ -194,7 +233,7 @@ const SearchDashboard = () => {
         )
       );
     }
-  };
+  }, []);
 
   const handleSelectAll = () => {
     const allSelected = filteredProfiles.every(p => p.selected);
@@ -230,9 +269,12 @@ const SearchDashboard = () => {
 
   // Handle unlock profile - check limits, mark as unlocked, open modal
   const handleViewProfile = (profile) => {
-    if (!unlockedProfileIds.includes(profile.id)) {
+    const isNewUnlock = !unlockedProfileIds.includes(profile.id);
+    if (isNewUnlock) {
       setUnlockedProfileIds(prev => [...prev, profile.id]);
       checkUnlockLimit(profile.id);
+      // Increment profile unlock usage count
+      incrementUsage('profile_unlock', 1);
     }
     setSelectedProfile(profile);
     setShowDetailModal(true);
@@ -376,8 +418,8 @@ const SearchDashboard = () => {
           }}
         />
 
-        {/* Search Progress */}
-        {searchProgress.isSearching && (
+        {/* Search Progress - Only show for first 2 minutes */}
+        {searchProgress.isSearching && showSearchMessage && (
           <div style={styles.progressContainer}>
             <div style={styles.progressHeader}>
               <span style={styles.progressStatus}>{searchProgress.message}</span>
@@ -395,114 +437,130 @@ const SearchDashboard = () => {
 
         {/* Score filter with Select All + Send Email actions */}
         {profiles.length > 0 && !loading && (
-          <div style={styles.scoreFilterContainer}>
-            <div style={styles.scoreFilterHeader}>
-              <div style={styles.scoreFilterLeft}>
-                <span style={styles.scoreFilterTitle}>Filter by Developer Score</span>
-                {scoreFilterRanges.length > 0 && (
-                  <span style={styles.scoreFilterBadge}>
-                    {scoreFilterRanges.length} range{scoreFilterRanges.length !== 1 ? 's' : ''} selected
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div style={styles.scoreRanges}>
-              {[
-                { label: '0-30 (Beginner)', min: 0, max: 30, color: '' },
-                { label: '30-50 (Junior)', min: 30, max: 50, color: '#6b7280' },
-                { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#f59e0b' },
-                { label: '70-85 (Senior)', min: 70, max: 85, color: '#3b82f6' },
-                { label: '85-100 (Expert)', min: 85, max: 100, color: '#10b981' }
-              ].map(range => {
-                const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
-                return (
-                  <label
-                    key={range.label}
-                    style={{
-                      ...styles.scoreRangeLabel,
-                      ...(isSelected ? styles.scoreRangeLabelSelected : {}),
-                      borderColor: isSelected ? range.color : '#e5e7eb'
-                    }}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={isSelected}
-                      onChange={() => handleScoreRangeToggle(range)}
-                      style={styles.scoreRangeCheckbox}
-                    />
-                    <div style={styles.scoreRangeContent}>
-                      <span style={styles.scoreRangeText}>{range.label}</span>
-                      <div
-                        style={{
-                          ...styles.scoreRangeIndicator,
-                          backgroundColor: range.color
-                        }}
-                      ></div>
-                    </div>
-                  </label>
-                );
-              })}
-            </div>
-
-            {/* Score filter actions bar: count + Select All + Send Email + Clear */}
-            {scoreFilterRanges.length > 0 && (
-              <div style={styles.scoreFilterActions}>
-                <span style={styles.scoreFilterCount}>
-                  {filteredProfiles.length} profiles
-                  {selectedFilteredCount > 0 && ` (${selectedFilteredCount} selected)`}
-                </span>
-                <div style={styles.scoreFilterButtons}>
-                  <button
-                    onClick={handleSelectAllFiltered}
-                    style={styles.scoreSelectAllBtn}
-                  >
-                    <CheckSquare size={14} />
-                    {filteredProfiles.every(p => p.selected) ? 'Deselect All' : `Select All (${filteredProfiles.length})`}
-                  </button>
-                  {selectedFilteredCount > 0 && (
-                    <button
-                      onClick={handleBulkEmail}
-                      style={styles.scoreSendEmailBtn}
-                    >
-                      <Mail size={14} />
-                      Send Email ({selectedFilteredCount})
-                    </button>
+          <>
+            <div style={styles.scoreFilterContainer}>
+              <div style={styles.scoreFilterHeader}>
+                <div style={styles.scoreFilterLeft}>
+                  <span style={styles.scoreFilterTitle}>Filter by Developer Score</span>
+                  {scoreFilterRanges.length > 0 && (
+                    <span style={styles.scoreFilterBadge}>
+                      {scoreFilterRanges.length} range{scoreFilterRanges.length !== 1 ? 's' : ''} selected
+                    </span>
                   )}
-                  <button
-                    onClick={() => setScoreFilterRanges([])}
-                    style={styles.clearScoreFilter}
-                  >
-                    Clear Filter
-                  </button>
                 </div>
               </div>
-            )}
-          </div>
-        )}
 
-        {/* Bulk Actions (shows when any profiles selected) */}
-        {profiles.filter(p => p.selected).length > 0 && (
-          <div style={styles.bulkActions}>
-            <div style={styles.bulkActionsLeft}>
-              <CheckSquare size={20} color="#FF6B35" />
-              <span style={styles.bulkActionsText}>
-                {profiles.filter(p => p.selected).length} profile(s) selected
-              </span>
+              <div style={styles.scoreRanges}>
+                {[
+                  { label: '0-30 (Beginner)', min: 0, max: 30, color: '' },
+                  { label: '30-50 (Junior)', min: 30, max: 50, color: '#6b7280' },
+                  { label: '50-70 (Mid-Level)', min: 50, max: 70, color: '#f59e0b' },
+                  { label: '70-85 (Senior)', min: 70, max: 85, color: '#3b82f6' },
+                  { label: '85-100 (Expert)', min: 85, max: 100, color: '#10b981' }
+                ].map(range => {
+                  const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
+                  return (
+                    <label
+                      key={range.label}
+                      style={{
+                        ...styles.scoreRangeLabel,
+                        ...(isSelected ? styles.scoreRangeLabelSelected : {}),
+                        borderColor: isSelected ? range.color : '#e5e7eb'
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => handleScoreRangeToggle(range)}
+                        style={styles.scoreRangeCheckbox}
+                      />
+                      <div style={styles.scoreRangeContent}>
+                        <span style={styles.scoreRangeText}>{range.label}</span>
+                        <div
+                          style={{
+                            ...styles.scoreRangeIndicator,
+                            backgroundColor: range.color
+                          }}
+                        ></div>
+                      </div>
+                    </label>
+                  );
+                })}
+              </div>
+
+              {/* Score filter actions bar: count + Select All + Send Email + Clear */}
+              {scoreFilterRanges.length > 0 && (
+                <div style={styles.scoreFilterActions}>
+                  <span style={styles.scoreFilterCount}>
+                    {filteredProfiles.length} profiles
+                    {selectedFilteredCount > 0 && ` (${selectedFilteredCount} selected)`}
+                  </span>
+                  <div style={styles.scoreFilterButtons}>
+                    <button
+                      onClick={handleSelectAllFiltered}
+                      style={styles.scoreSelectAllBtn}
+                    >
+                      <CheckSquare size={14} />
+                      {filteredProfiles.every(p => p.selected) ? 'Deselect All' : `Select All (${filteredProfiles.length})`}
+                    </button>
+                    {selectedFilteredCount > 0 && (
+                      <button
+                        onClick={handleBulkEmail}
+                        style={styles.scoreSendEmailBtn}
+                      >
+                        <Mail size={14} />
+                        Send Email ({selectedFilteredCount})
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setScoreFilterRanges([])}
+                      style={styles.clearScoreFilter}
+                    >
+                      Clear Filter
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-            <div style={styles.bulkActionsRight}>
-              <button onClick={handleSelectAll} style={styles.bulkActionButton}>
-                {filteredProfiles.every(p => p.selected) ? 'Deselect All' : 'Select All'}
-              </button>
-              <button onClick={handleBulkEmail} style={styles.bulkActionButtonPrimary}>
-                <Mail size={16} />
-                Send Bulk Email
-              </button>
-              <button onClick={handleDeselectAll} style={styles.bulkActionButton}>
-                Clear Selection
-              </button>
+
+            {/* Bulk Actions - Always visible when profiles exist */}
+            <div style={styles.bulkActions}>
+              <div style={styles.bulkActionsLeft}>
+                <CheckSquare size={20} color={profiles.filter(p => p.selected).length > 0 ? "#FF6B35" : "#9ca3af"} />
+                <span style={styles.bulkActionsText}>
+                  {profiles.filter(p => p.selected).length > 0
+                    ? `${profiles.filter(p => p.selected).length} profile(s) selected`
+                    : 'No profiles selected'}
+                </span>
+              </div>
+              <div style={styles.bulkActionsRight}>
+                <button onClick={handleSelectAll} style={styles.bulkActionButton}>
+                  {filteredProfiles.every(p => p.selected) ? 'Deselect All' : 'Select All'}
+                </button>
+                <button
+                  onClick={handleBulkEmail}
+                  style={{
+                    ...styles.bulkActionButtonPrimary,
+                    ...(profiles.filter(p => p.selected).length === 0 ? styles.bulkActionButtonDisabled : {})
+                  }}
+                  disabled={profiles.filter(p => p.selected).length === 0}
+                >
+                  <Mail size={16} />
+                  Send Email
+                </button>
+                <button
+                  onClick={handleDeselectAll}
+                  style={{
+                    ...styles.bulkActionButton,
+                    ...(profiles.filter(p => p.selected).length === 0 ? styles.bulkActionButtonDisabled : {})
+                  }}
+                  disabled={profiles.filter(p => p.selected).length === 0}
+                >
+                  Clear Selection
+                </button>
+              </div>
             </div>
-          </div>
+          </>
         )}
 
         {/* Profiles Grid */}
@@ -650,8 +708,8 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '16px 24px',
-    backgroundColor: '#fffbf5',
-    border: '2px solid #FF6B35',
+    backgroundColor: '#f9fafb',
+    border: '2px solid #e5e7eb',
     borderRadius: '12px',
     marginBottom: '24px',
   },
@@ -698,6 +756,11 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     fontFamily: 'Outfit, sans-serif',
+  },
+
+  bulkActionButtonDisabled: {
+    opacity: 0.5,
+    cursor: 'not-allowed',
   },
 
   profilesGrid: {

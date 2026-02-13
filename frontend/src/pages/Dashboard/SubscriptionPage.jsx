@@ -354,7 +354,7 @@ const plans = [
 const SubscriptionPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { refreshSubscription } = useAuth();
+  const { refreshSubscription, usageStats, fetchUsageStats } = useAuth();
 
   // State
   const [userData, setUserData] = useState({
@@ -371,7 +371,6 @@ const SubscriptionPage = () => {
       emails: { used: 0, limit: 15 },
     }
   });
-  const [dataReady, setDataReady] = useState(false);
   const [fetchError, setFetchError] = useState(null);
   const [isAnnual, setIsAnnual] = useState(false);
   const [paymentHistory, setPaymentHistory] = useState([]);
@@ -382,56 +381,57 @@ const SubscriptionPage = () => {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [selectedCycle, setSelectedCycle] = useState('monthly');
   const [processingPlan] = useState(null);
-  
+
   // Cancel modal state
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [cancelling, setCancelling] = useState(false);
 
-  // Fetch usage data
+  // Refresh state
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Sync usage data from context
   useEffect(() => {
-    const fetchUsageData = async () => {
-      try {
-        const data = await getUsageStats();
-        
-        const planId = data.plan || 'free_trial';
-        const planName = (planId === 'free' || planId === 'free_trial') ? 'Free Trial' :
-                         planId === 'starter' ? 'Starter' : planId;
-        const matchedPlan = plans.find(p => p.id === planId || p.name === planName);
-        
-        setUserData({
-          plan: planName,
-          planId: planId,
-          billing_cycle: data.billing_cycle || 'monthly',
-          price: matchedPlan?.price_monthly || 0,
-          subscription_status: data.subscription_status || 'active',
-          trial_end_date: data.trial_end_date,
-          next_billing_date: data.next_billing_date || null,
-          usage: {
-            searches: { 
-              used: data.usage?.searches?.used || 0, 
-              limit: data.usage?.searches?.limit || 25 
-            },
-            profile_unlocks: { 
-              used: data.usage?.profile_views?.used || 0, 
-              limit: data.usage?.profile_views?.limit || 40 
-            },
-            emails: { 
-              used: data.usage?.emails_sent?.used || 0, 
-              limit: data.usage?.emails_sent?.limit || 15 
-            },
-          }
-        });
-        setFetchError(null);
-      } catch (err) {
-        console.error('Failed to fetch usage stats:', err);
-        setFetchError('Failed to load subscription data. Please try refreshing the page.');
-      } finally {
-        setDataReady(true);
-      }
-    };
-    
-    fetchUsageData();
-  }, []);
+    if (!usageStats) {
+      // If no cached stats, fetch them
+      fetchUsageStats();
+      return;
+    }
+
+    try {
+      const planId = usageStats.plan || 'free_trial';
+      const planName = (planId === 'free' || planId === 'free_trial') ? 'Free Trial' :
+                       planId === 'starter' ? 'Starter' : planId;
+      const matchedPlan = plans.find(p => p.id === planId || p.name === planName);
+
+      setUserData({
+        plan: planName,
+        planId: planId,
+        billing_cycle: usageStats.billing_cycle || 'monthly',
+        price: matchedPlan?.price_monthly || 0,
+        subscription_status: usageStats.subscription_status || 'active',
+        trial_end_date: usageStats.trial_end_date,
+        next_billing_date: usageStats.next_billing_date || null,
+        usage: {
+          searches: {
+            used: usageStats.searches?.used || 0,
+            limit: usageStats.searches?.limit || 25
+          },
+          profile_unlocks: {
+            used: usageStats.profile_unlocks?.used || 0,
+            limit: usageStats.profile_unlocks?.limit || 40
+          },
+          emails: {
+            used: usageStats.emails?.used || 0,
+            limit: usageStats.emails?.limit || 15
+          },
+        }
+      });
+      setFetchError(null);
+    } catch (err) {
+      console.error('Failed to process usage stats:', err);
+      setFetchError('Failed to load subscription data. Please try refreshing the page.');
+    }
+  }, [usageStats, fetchUsageStats]);
 
   // Check for URL params (e.g., from pricing page)
   useEffect(() => {
@@ -541,6 +541,17 @@ const SubscriptionPage = () => {
     return '#ef4444';
   };
 
+  const handleRefreshUsage = async () => {
+    setRefreshing(true);
+    try {
+      await fetchUsageStats(false);  // Non-silent refresh
+    } catch (err) {
+      console.error('Failed to refresh usage:', err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const isTrial = userData.planId === 'free_trial' || userData.planId === 'free';
   const daysUntilBilling = userData.next_billing_date 
     ? Math.ceil((new Date(userData.next_billing_date) - new Date()) / (1000 * 60 * 60 * 24))
@@ -555,14 +566,6 @@ const SubscriptionPage = () => {
       />
 
       <div style={styles.content}>
-        {/* Loading State */}
-        {!dataReady && (
-          <div style={styles.loadingState}>
-            <Loader size={32} color="#FF6B35" style={{ animation: 'spin 1s linear infinite' }} />
-            <p style={styles.loadingText}>Loading subscription data...</p>
-          </div>
-        )}
-
         {/* Error State */}
         {fetchError && (
           <div style={styles.errorBanner}>
@@ -572,7 +575,7 @@ const SubscriptionPage = () => {
         )}
 
         {/* Current Plan Card */}
-        <div style={{ ...styles.currentPlanCard, opacity: dataReady ? 1 : 0.4, transition: 'opacity 0.3s ease' }}>
+        <div style={styles.currentPlanCard}>
           <div style={styles.planHeader}>
             <div>
               <h3 style={styles.planTitle}>Current Plan: {userData.plan}</h3>
@@ -608,7 +611,26 @@ const SubscriptionPage = () => {
 
           {/* Usage Metrics */}
           <div style={styles.usageSection}>
-            <h4 style={styles.usageTitle}>Usage This {isTrial ? 'Trial' : 'Month'}</h4>
+            <div style={styles.usageHeader}>
+              <h4 style={styles.usageTitle}>Usage This {isTrial ? 'Trial' : 'Month'}</h4>
+              <button
+                onClick={handleRefreshUsage}
+                disabled={refreshing}
+                style={{
+                  ...styles.refreshButton,
+                  opacity: refreshing ? 0.6 : 1
+                }}
+                title="Refresh usage stats"
+              >
+                <RefreshCw
+                  size={16}
+                  style={{
+                    animation: refreshing ? 'spin 1s linear infinite' : 'none'
+                  }}
+                />
+                {refreshing ? 'Refreshing...' : 'Refresh'}
+              </button>
+            </div>
 
             {/* Searches */}
             <div style={styles.usageItem}>
@@ -927,11 +949,34 @@ const styles = {
     marginTop: '1.5rem',
   },
 
+  usageHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '1.5rem',
+  },
+
   usageTitle: {
     fontSize: '1.125rem',
     fontWeight: '600',
     color: '#1a1a1a',
-    marginBottom: '1.5rem',
+    margin: 0,
+  },
+
+  refreshButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '0.5rem 1rem',
+    background: '#ffffff',
+    border: '1px solid #d1d5db',
+    borderRadius: '8px',
+    color: '#374151',
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontFamily: "'Outfit', sans-serif",
+    transition: 'all 0.2s',
   },
 
   usageItem: {
@@ -1639,6 +1684,11 @@ if (!document.getElementById('subscription-page-styles')) {
 
     button[style*="cancelBtn"]:hover {
       background: #fef2f2 !important;
+    }
+
+    button[style*="refreshButton"]:hover:not(:disabled) {
+      background: #f9fafb !important;
+      border-color: #9ca3af !important;
     }
   `;
   document.head.appendChild(styleSheet);

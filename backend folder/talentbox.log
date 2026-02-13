@@ -373,3 +373,53 @@ TypeError: UsageService.check_limit() got an unexpected keyword argument 'limit_
 2026-02-11 00:43:48,208 - main - INFO - ✅ JWT Secret configured
 2026-02-11 00:43:48,208 - main - INFO - 🎯 Startup validation complete
 
+2026-02-11 21:28:43,088 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-11 21:28:44,711 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-11 21:28:44,712 - main - INFO - Environment: development
+2026-02-11 21:28:44,714 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-11 21:28:44,862 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-11 21:28:44,970 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-11 21:28:44,971 - main - INFO - ✅ Resend API Key configured
+2026-02-11 21:28:50,290 - main - INFO - ✅ Database connection successful
+2026-02-11 21:28:53,077 - main - INFO - ✅ Payment tables verified/created
+2026-02-11 21:28:53,078 - main - INFO - ✅ JWT Secret configured
+2026-02-11 21:28:53,079 - main - INFO - 🎯 Startup validation complete
+
+2026-02-11 21:29:51,789 - routes.payment_routes - ERROR - Razorpay order creation failed: Authentication failed
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\routes\payment_routes.py", line 186, in create_order
+    order = razorpay_client.order.create(data=order_data)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\resources\order.py", line 71, in create
+    return self.post_url(url, data, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\resources\base.py", line 20, in post_url
+    return self.client.post(url, data, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\client.py", line 252, in post
+    return self.request('post', path, data=data, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\client.py", line 200, in request
+    raise BadRequestError(msg)
+razorpay.errors.BadRequestError: Authentication failed
+
+2026-02-11 21:29:52,043 - main - WARNING - HTTP 500 on /api/payments/create-order: Failed to create payment order: Authentication failed
+2026-02-11 21:31:07,284 - routes.payment_routes - ERROR - Razorpay order creation failed: Authentication failed
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\backend folder\routes\payment_routes.py", line 186, in create_order
+    order = razorpay_client.order.create(data=order_data)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\resources\order.py", line 71, in create
+    return self.post_url(url, data, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\resources\base.py", line 20, in post_url
+    return self.client.post(url, data, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\client.py", line 252, in post
+    return self.request('post', path, data=data, **options)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\razorpay\client.py", line 200, in request
+    raise BadRequestError(msg)
+razorpay.errors.BadRequestError: Authentication failed
+
+2026-02-11 21:31:07,530 - main - WARNING - HTTP 500 on /api/payments/create-order: Failed to create payment order: Authentication failed

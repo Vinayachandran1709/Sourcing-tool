@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { login as apiLogin, signup as apiSignup, getSubscriptionStatus } from '../services/api';
+import { login as apiLogin, signup as apiSignup, getSubscriptionStatus, getUsageStats } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -11,9 +11,15 @@ export const AuthProvider = ({ children }) => {
   });
   const [token, setToken] = useState(() => localStorage.getItem('token'));
   const [loading, setLoading] = useState(true);
-  
+
   // Trial expiry modal state
   const [showTrialExpiredModal, setShowTrialExpiredModal] = useState(false);
+
+  // Usage stats state with localStorage caching
+  const [usageStats, setUsageStats] = useState(() => {
+    const cached = localStorage.getItem('usageStats');
+    return cached ? JSON.parse(cached) : null;
+  });
 
   // Check if user is authenticated
   const isAuthenticated = Boolean(token && user);
@@ -27,11 +33,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     localStorage.removeItem('emailSettings');  // Clear cached email settings
     localStorage.removeItem('unlockedProfileIds');  // Clear unlocked profiles
+    localStorage.removeItem('usageStats');  // Clear usage stats cache
     sessionStorage.clear();  // Clear session data (search results, filters)
-    
+
     // Reset state
     setUser(null);
     setToken(null);
+    setUsageStats(null);
     setShowTrialExpiredModal(false);
   }, []);
 
@@ -255,14 +263,102 @@ export const AuthProvider = ({ children }) => {
   // ============================================
   const getDaysUntilBilling = useCallback(() => {
     if (!user?.next_billing_date) return null;
-    
+
     const now = new Date();
     const billingDate = new Date(user.next_billing_date);
     const diffTime = billingDate - now;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     return diffDays > 0 ? diffDays : 0;
   }, [user]);
+
+  // ============================================
+  // Fetch and Update Usage Stats
+  // ============================================
+  /**
+   * Fetch latest usage stats from backend
+   * Updates both usageStats state and localStorage cache
+   */
+  const fetchUsageStats = useCallback(async (silent = false) => {
+    if (!token) return null;
+
+    try {
+      const data = await getUsageStats();
+
+      const formattedStats = {
+        searches: {
+          used: data.usage?.searches?.used || 0,
+          limit: data.usage?.searches?.limit || 25,
+          can_use: data.usage?.searches?.can_use !== false
+        },
+        profile_unlocks: {
+          used: data.usage?.profile_views?.used || 0,
+          limit: data.usage?.profile_views?.limit || 40,
+          can_use: data.usage?.profile_views?.can_use !== false
+        },
+        emails: {
+          used: data.usage?.emails_sent?.used || 0,
+          limit: data.usage?.emails_sent?.limit || 15,
+          can_use: data.usage?.emails_sent?.can_use !== false
+        },
+        plan: data.plan || 'free_trial',
+        billing_cycle: data.billing_cycle || 'monthly',
+        subscription_status: data.subscription_status || 'active',
+        trial_end_date: data.trial_end_date,
+        next_billing_date: data.next_billing_date,
+        lastUpdated: Date.now()
+      };
+
+      // Update state and cache
+      setUsageStats(formattedStats);
+      localStorage.setItem('usageStats', JSON.stringify(formattedStats));
+
+      return formattedStats;
+    } catch (error) {
+      if (!silent) {
+        console.error('Failed to fetch usage stats:', error);
+      }
+      return null;
+    }
+  }, [token]);
+
+  // ============================================
+  // Increment Usage (Optimistic Update)
+  // ============================================
+  /**
+   * Increment usage count locally for immediate UI feedback
+   * Backend already tracks usage, this is just for UI responsiveness
+   */
+  const incrementUsage = useCallback((type, count = 1) => {
+    if (!usageStats) return;
+
+    setUsageStats(prev => {
+      if (!prev) return prev;
+
+      const updated = { ...prev };
+
+      if (type === 'search' && updated.searches) {
+        updated.searches = {
+          ...updated.searches,
+          used: updated.searches.used + count
+        };
+      } else if (type === 'profile_unlock' && updated.profile_unlocks) {
+        updated.profile_unlocks = {
+          ...updated.profile_unlocks,
+          used: updated.profile_unlocks.used + count
+        };
+      } else if (type === 'email' && updated.emails) {
+        updated.emails = {
+          ...updated.emails,
+          used: updated.emails.used + count
+        };
+      }
+
+      updated.lastUpdated = Date.now();
+      localStorage.setItem('usageStats', JSON.stringify(updated));
+      return updated;
+    });
+  }, [usageStats]);
 
   // ============================================
   // Initial Auth Check
@@ -271,7 +367,7 @@ export const AuthProvider = ({ children }) => {
     // Verify stored auth is still valid
     const storedToken = localStorage.getItem('token');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
@@ -282,9 +378,38 @@ export const AuthProvider = ({ children }) => {
         logout();
       }
     }
-    
+
     setLoading(false);
   }, [logout]);
+
+  // ============================================
+  // Auto-fetch Usage Stats
+  // ============================================
+  useEffect(() => {
+    if (!token || !isAuthenticated) return;
+
+    // Fetch on mount (silent if cached data exists)
+    fetchUsageStats(!!usageStats);
+
+    // Refresh when tab becomes visible
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        fetchUsageStats(true);  // Silent refresh
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // Periodic refresh every 5 minutes
+    const interval = setInterval(() => {
+      fetchUsageStats(true);  // Silent refresh
+    }, 5 * 60 * 1000);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      clearInterval(interval);
+    };
+  }, [token, isAuthenticated, fetchUsageStats, usageStats]);
 
   // ============================================
   // Context Value
@@ -295,24 +420,29 @@ export const AuthProvider = ({ children }) => {
     token,
     isAuthenticated,
     loading,
-    
+
     // Auth functions
     login,
     signup,
     logout,
-    
+
     // Subscription functions
     refreshSubscription,
     updateUser,
-    
+
     // Trial/billing helpers
     getTrialDaysRemaining,
     getDaysUntilBilling,
     checkTrialExpiry,
-    
+
     // Trial expired modal
     showTrialExpiredModal,
     setShowTrialExpiredModal,
+
+    // Usage stats
+    usageStats,
+    fetchUsageStats,
+    incrementUsage,
   };
 
   return (
