@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Save, CheckCircle, AlertCircle, Info, User, FileText, Link as LinkIcon, Loader } from 'lucide-react';
+import { Mail, Save, CheckCircle, AlertCircle, User, FileText, Link as LinkIcon, Loader } from 'lucide-react';
 import { updateEmailSettings, getEmailUsage, getEmailSettings } from '../services/api';
 
 const DEFAULT_TEMPLATE = `Hi {{name}},
