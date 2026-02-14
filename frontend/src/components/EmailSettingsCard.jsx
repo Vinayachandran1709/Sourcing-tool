@@ -119,7 +119,7 @@ const EmailSettingsCard = () => {
       };
 
       // Save to backend
-      const response = await updateEmailSettings(settingsData);
+      await updateEmailSettings(settingsData);
 
       // Update cache
       localStorage.setItem('emailSettings', JSON.stringify(settingsData));
