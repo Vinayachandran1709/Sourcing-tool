@@ -562,15 +562,16 @@ async def get_subscription_status(current_user: CurrentUser):
 @router.get("/history")
 async def get_payment_history(current_user: CurrentUser):
     """
-    Get payment history for the user
+    Get payment history for the user (only successful payments)
     """
     user_id = current_user.id
-    
+
     conn = get_db_connection()
     try:
         with conn.cursor() as cur:
+            # Only show captured (successful) payments that hit the bank
             cur.execute("""
-                SELECT 
+                SELECT
                     razorpay_order_id,
                     razorpay_payment_id,
                     amount,
@@ -582,9 +583,9 @@ async def get_payment_history(current_user: CurrentUser):
                     created_at,
                     paid_at,
                     receipt
-                FROM payment_history 
-                WHERE user_id = %s 
-                ORDER BY created_at DESC 
+                FROM payment_history
+                WHERE user_id = %s AND status = 'captured'
+                ORDER BY paid_at DESC
                 LIMIT 20
             """, (user_id,))
             

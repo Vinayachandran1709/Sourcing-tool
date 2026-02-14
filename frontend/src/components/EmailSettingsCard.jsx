@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Save, CheckCircle, AlertCircle, Info, User, FileText, Link as LinkIcon, Loader } from 'lucide-react';
-import { updateEmailSettings, getEmailUsage } from '../services/api';
+import { updateEmailSettings, getEmailUsage, getEmailSettings } from '../services/api';
 
 const DEFAULT_TEMPLATE = `Hi {{name}},
 
@@ -19,17 +19,20 @@ const EmailSettingsCard = () => {
   const [emailTemplate, setEmailTemplate] = useState(DEFAULT_TEMPLATE);
   const [replyMethod, setReplyMethod] = useState('email');
   const [replyLink, setReplyLink] = useState('');
-  const [message, setMessage] = useState(null);
   const [emailUsage, setEmailUsage] = useState(null);
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showErrorModal, setShowErrorModal] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     loadSettings();
   }, []);
 
-  const loadSettings = () => {
-    // Load from cache instantly
+  const loadSettings = async () => {
+    // Load from cache instantly for immediate UI update
     const cached = localStorage.getItem('emailSettings');
     if (cached) {
       try {
@@ -45,6 +48,33 @@ const EmailSettingsCard = () => {
       }
     }
 
+    // Fetch from backend (source of truth) to ensure persistence across sessions/plan changes
+    try {
+      const backendSettings = await getEmailSettings();
+
+      // Update state with backend data
+      setSenderEmail(backendSettings.sender_email || '');
+      setSenderName(backendSettings.sender_name || '');
+      setEmailSubject(backendSettings.email_subject || '');
+      setEmailTemplate(backendSettings.email_template || DEFAULT_TEMPLATE);
+      setReplyMethod(backendSettings.reply_method || 'email');
+      setReplyLink(backendSettings.reply_link || '');
+
+      // Sync cache with backend data
+      const settingsToCache = {
+        sender_email: backendSettings.sender_email || '',
+        sender_name: backendSettings.sender_name || '',
+        email_subject: backendSettings.email_subject || '',
+        email_template: backendSettings.email_template || DEFAULT_TEMPLATE,
+        reply_method: backendSettings.reply_method || 'email',
+        reply_link: backendSettings.reply_link || ''
+      };
+      localStorage.setItem('emailSettings', JSON.stringify(settingsToCache));
+    } catch (err) {
+      console.error('Failed to load settings from backend:', err);
+      // Keep using cached data if backend fetch fails
+    }
+
     // Fetch usage in background
     getEmailUsage().then(usage => {
       setEmailUsage(usage.usage);
@@ -53,9 +83,16 @@ const EmailSettingsCard = () => {
     });
   };
 
-  const showMessage = (type, text, duration = 3000) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), duration);
+  const showMessage = (type, text, duration = 2500) => {
+    if (type === 'success') {
+      setSuccessMessage(text);
+      setShowSuccessModal(true);
+      setTimeout(() => setShowSuccessModal(false), duration);
+    } else if (type === 'error') {
+      setErrorMessage(text);
+      setShowErrorModal(true);
+      setTimeout(() => setShowErrorModal(false), duration);
+    }
   };
 
   const handleSave = async () => {
@@ -85,7 +122,6 @@ const EmailSettingsCard = () => {
     };
 
     setSaving(true);
-    showMessage('info', 'Saving changes...');
 
     try {
       // Save to backend
@@ -105,7 +141,6 @@ const EmailSettingsCard = () => {
 
   const resetToDefault = async () => {
     setResetting(true);
-    showMessage('info', 'Resetting to default...');
 
     try {
       // Reset template to default
@@ -156,21 +191,6 @@ const EmailSettingsCard = () => {
             {emailUsage.used}/{emailUsage.limit === -1 ? '∞' : emailUsage.limit} emails used this month
             {emailUsage.limit !== -1 && ` • ${emailUsage.remaining} remaining`}
           </span>
-        </div>
-      )}
-
-      {/* Message */}
-      {message && (
-        <div style={{
-          ...styles.message,
-          ...(message.type === 'success' ? styles.messageSuccess : {}),
-          ...(message.type === 'error' ? styles.messageError : {}),
-          ...(message.type === 'info' ? styles.messageInfo : {})
-        }}>
-          {message.type === 'success' && <CheckCircle size={18} color="#10b981" />}
-          {message.type === 'error' && <AlertCircle size={18} color="#dc2626" />}
-          {message.type === 'info' && <Info size={18} color="#3b82f6" />}
-          <span>{message.text}</span>
         </div>
       )}
 
@@ -359,6 +379,30 @@ const EmailSettingsCard = () => {
           </button>
         </div>
       </div>
+
+      {/* Success Modal */}
+      {showSuccessModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.successModal}>
+            <div style={styles.successIcon}>
+              <CheckCircle size={48} color="#10b981" />
+            </div>
+            <h3 style={styles.successTitle}>{successMessage}</h3>
+          </div>
+        </div>
+      )}
+
+      {/* Error Modal */}
+      {showErrorModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.errorModal}>
+            <div style={styles.errorIcon}>
+              <AlertCircle size={48} color="#ef4444" />
+            </div>
+            <h3 style={styles.errorTitle}>{errorMessage}</h3>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -413,31 +457,64 @@ const styles = {
     fontWeight: '600',
   },
 
-  message: {
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     display: 'flex',
     alignItems: 'center',
-    gap: '0.5rem',
-    padding: '1rem 1.5rem',
-    fontSize: '0.875rem',
-    fontWeight: '500',
+    justifyContent: 'center',
+    zIndex: 9999,
+    animation: 'fadeIn 0.2s ease-in-out',
   },
 
-  messageSuccess: {
-    backgroundColor: '#f0fdf4',
-    color: '#15803d',
-    borderBottom: '1px solid #bbf7d0',
+  successModal: {
+    backgroundColor: '#fff',
+    borderRadius: '16px',
+    padding: '2.5rem 3rem',
+    textAlign: 'center',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+    animation: 'slideIn 0.3s ease-out',
+    minWidth: '400px',
   },
 
-  messageError: {
-    backgroundColor: '#fef2f2',
-    color: '#991b1b',
-    borderBottom: '1px solid #fecaca',
+  successIcon: {
+    marginBottom: '1.5rem',
+    display: 'flex',
+    justifyContent: 'center',
   },
 
-  messageInfo: {
-    backgroundColor: '#eff6ff',
-    color: '#1e40af',
-    borderBottom: '1px solid #dbeafe',
+  successTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#10b981',
+    margin: 0,
+  },
+
+  errorModal: {
+    backgroundColor: '#fff',
+    borderRadius: '16px',
+    padding: '2.5rem 3rem',
+    textAlign: 'center',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+    animation: 'slideIn 0.3s ease-out',
+    minWidth: '400px',
+  },
+
+  errorIcon: {
+    marginBottom: '1.5rem',
+    display: 'flex',
+    justifyContent: 'center',
+  },
+
+  errorTitle: {
+    fontSize: '1.5rem',
+    fontWeight: '600',
+    color: '#ef4444',
+    margin: 0,
   },
 
   content: {
@@ -625,6 +702,22 @@ if (!document.getElementById('email-settings-styles')) {
     @keyframes spin {
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-30px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
     }
 
     input:focus, textarea:focus {

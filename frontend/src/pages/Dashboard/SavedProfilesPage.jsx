@@ -149,8 +149,11 @@ const SavedProfilesPage = () => {
       <div style={styles.container}>
         {/* Header Actions */}
         {savedProfiles.length > 0 && (() => {
-          const user = JSON.parse(localStorage.getItem('user') || '{}');
-          const isFree = !user.plan || user.plan === 'free_trial' || user.plan === 'free';
+          // Use AuthContext for real-time plan info (updates after payment)
+          const { usageStats } = useAuth();
+          const currentPlan = usageStats?.plan || 'free_trial';
+          const isFree = !currentPlan || currentPlan === 'free_trial' || currentPlan === 'free';
+
           return (
             <div style={styles.headerActions}>
               <div style={styles.statsBox}>
