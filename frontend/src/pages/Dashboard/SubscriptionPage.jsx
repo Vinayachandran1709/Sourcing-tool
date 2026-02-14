@@ -610,7 +610,7 @@ const SubscriptionPage = () => {
 
             {/* Searches */}
             <div style={styles.usageItem}>
-              <div style={styles.usageHeader}>
+              <div style={styles.usageItemHeader}>
                 <div style={styles.usageLabel}>
                   <Search size={18} color="#6b7280" />
                   <span>Searches</span>
@@ -645,7 +645,7 @@ const SubscriptionPage = () => {
 
             {/* Profile Unlocks */}
             <div style={styles.usageItem}>
-              <div style={styles.usageHeader}>
+              <div style={styles.usageItemHeader}>
                 <div style={styles.usageLabel}>
                   <Eye size={18} color="#6b7280" />
                   <span>Profile Unlocks</span>
@@ -680,7 +680,7 @@ const SubscriptionPage = () => {
 
             {/* Emails */}
             <div style={styles.usageItem}>
-              <div style={styles.usageHeader}>
+              <div style={styles.usageItemHeader}>
                 <div style={styles.usageLabel}>
                   <Mail size={18} color="#6b7280" />
                   <span>Emails</span>
@@ -959,7 +959,7 @@ const styles = {
     marginBottom: '1.5rem',
   },
 
-  usageHeader: {
+  usageItemHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
