@@ -323,15 +323,28 @@ export const AuthProvider = ({ children }) => {
   }, [token]);
 
   // ============================================
-  // Increment Usage (Optimistic Update)
+  // Refresh Usage From Backend
   // ============================================
   /**
-   * Increment usage count locally for immediate UI feedback
-   * Backend already tracks usage, this is just for UI responsiveness
+   * Called after every user action to get the real usage numbers from backend.
+   * Short delay so backend has time to commit the DB write.
+   */
+  const refreshUsageAfterAction = useCallback(() => {
+    // Small delay to let backend commit, then fetch real numbers
+    setTimeout(() => {
+      fetchUsageStats(true);  // silent refresh
+    }, 500);
+  }, [fetchUsageStats]);
+
+  // ============================================
+  // Increment Usage (Optimistic + Backend Refresh)
+  // ============================================
+  /**
+   * Increment usage count locally for immediate UI feedback,
+   * then refresh from backend to get the real numbers.
    */
   const incrementUsage = useCallback((type, count = 1) => {
-    if (!usageStats) return;
-
+    // Optimistic local update for instant UI feedback
     setUsageStats(prev => {
       if (!prev) return prev;
 
@@ -358,7 +371,10 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem('usageStats', JSON.stringify(updated));
       return updated;
     });
-  }, [usageStats]);
+
+    // Then refresh from backend for real numbers
+    refreshUsageAfterAction();
+  }, [refreshUsageAfterAction]);
 
   // ============================================
   // Initial Auth Check
@@ -388,8 +404,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (!token || !isAuthenticated) return;
 
-    // Fetch on mount (silent if cached data exists)
-    fetchUsageStats(!!usageStats);
+    // Fetch fresh stats on login/mount
+    fetchUsageStats(false);
 
     // Refresh when tab becomes visible
     const handleVisibilityChange = () => {
@@ -409,7 +425,8 @@ export const AuthProvider = ({ children }) => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       clearInterval(interval);
     };
-  }, [token, isAuthenticated, fetchUsageStats, usageStats]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token, isAuthenticated]);
 
   // ============================================
   // Context Value

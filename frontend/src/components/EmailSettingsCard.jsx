@@ -1,12 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Save, Loader, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { getEmailSettings, updateEmailSettings, getEmailUsage } from '../services/api';
+import { Mail, Save, CheckCircle, AlertCircle, Info, User, FileText, Link as LinkIcon } from 'lucide-react';
+import { updateEmailSettings, getEmailUsage } from '../services/api';
+
+const DEFAULT_TEMPLATE = `Hi {{name}},
+
+I came across your GitHub profile and was impressed by your work.
+
+We're looking for talented developers to join our team, and I think you'd be a great fit for our projects.
+
+Would you be open to a quick chat about this opportunity?
+
+Best regards`;
 
 const EmailSettingsCard = () => {
   const [senderEmail, setSenderEmail] = useState('');
-  const [emailTemplate, setEmailTemplate] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
+  const [senderName, setSenderName] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailTemplate, setEmailTemplate] = useState(DEFAULT_TEMPLATE);
+  const [replyMethod, setReplyMethod] = useState('email');
+  const [replyLink, setReplyLink] = useState('');
   const [message, setMessage] = useState(null);
   const [emailUsage, setEmailUsage] = useState(null);
 
@@ -14,95 +26,77 @@ const EmailSettingsCard = () => {
     loadSettings();
   }, []);
 
-  const loadSettings = async () => {
-  // Check cache first
-  const cached = localStorage.getItem('emailSettings');
-  if (cached) {
-    const parsed = JSON.parse(cached);
-    setSenderEmail(parsed.sender_email || '');
-    setEmailTemplate(parsed.email_template || '');
-    setLoading(false);
-    // Still fetch in background to update
-  } else {
-    setLoading(true);
-  }
-    try {
-      const [settings, usage] = await Promise.all([
-        getEmailSettings(),
-        getEmailUsage()
-      ]);
-      
-      setSenderEmail(settings.sender_email || '');
-      setEmailTemplate(settings.email_template || '');
-      setEmailUsage(usage.usage);
-      // Cache settings for instant load next time
-      localStorage.setItem('emailSettings', JSON.stringify(settings));
-    } catch (error) {
-      console.error('Failed to load settings:', error);
-      setMessage({ type: 'error', text: 'Failed to load email settings' });
-    } finally {
-      setLoading(false);
+  const loadSettings = () => {
+    // Load from cache instantly
+    const cached = localStorage.getItem('emailSettings');
+    if (cached) {
+      try {
+        const parsed = JSON.parse(cached);
+        setSenderEmail(parsed.sender_email || '');
+        setSenderName(parsed.sender_name || '');
+        setEmailSubject(parsed.email_subject || '');
+        setEmailTemplate(parsed.email_template || DEFAULT_TEMPLATE);
+        setReplyMethod(parsed.reply_method || 'email');
+        setReplyLink(parsed.reply_link || '');
+      } catch (e) {
+        console.error('Cache error:', e);
+      }
     }
+
+    // Fetch usage in background
+    getEmailUsage().then(usage => {
+      setEmailUsage(usage.usage);
+    }).catch(err => {
+      console.error('Usage fetch error:', err);
+    });
+  };
+
+  const showMessage = (type, text) => {
+    setMessage({ type, text });
+    setTimeout(() => setMessage(null), 2000);
   };
 
   const handleSave = async () => {
     // Validation
-    if (!senderEmail || !emailTemplate) {
-      setMessage({ type: 'error', text: 'Please fill in all fields' });
+    if (!senderEmail || !senderName || !emailSubject || !emailTemplate) {
+      showMessage('error', 'Please fill in all required fields');
       return;
     }
 
     if (!senderEmail.includes('@')) {
-      setMessage({ type: 'error', text: 'Please enter a valid email address' });
+      showMessage('error', 'Please enter a valid email address');
       return;
     }
 
-    setSaving(true);
-    setMessage(null);
-
-    try {
-      await updateEmailSettings({ sender_email: senderEmail, email_template: emailTemplate });
-      // Update localStorage cache with saved data
-      const cached = JSON.parse(localStorage.getItem('emailSettings') || '{}');
-      localStorage.setItem('emailSettings', JSON.stringify({ ...cached, sender_email: senderEmail, email_template: emailTemplate }));
-      setMessage({ type: 'success', text: 'Email settings saved successfully!' });
-
-      // Clear success message after 3 seconds
-      setTimeout(() => setMessage(null), 3000);
-    } catch (error) {
-      console.error('Failed to save settings:', error);
-      setMessage({ type: 'error', text: 'Failed to save settings. Please try again.' });
-    } finally {
-      setSaving(false);
+    if (replyMethod === 'form' && !replyLink) {
+      showMessage('error', 'Please enter an application form URL');
+      return;
     }
+
+    const settingsData = {
+      sender_email: senderEmail,
+      sender_name: senderName,
+      email_subject: emailSubject,
+      email_template: emailTemplate,
+      reply_method: replyMethod,
+      reply_link: replyLink
+    };
+
+    // Save to cache immediately
+    localStorage.setItem('emailSettings', JSON.stringify(settingsData));
+    showMessage('success', 'Saved successfully!');
+
+    // Save to backend in background
+    updateEmailSettings(settingsData).catch(error => {
+      console.error('Save error:', error);
+      showMessage('error', 'Failed to sync. Please try again.');
+    });
   };
 
   const resetToDefault = () => {
-    const defaultTemplate = `Hi {{name}},
-
-I came across your GitHub profile and was impressed by your work on {{top_repo}}.
-
-We're {{company}}, and we're looking for talented developers to join our team. Your expertise in {{primary_language}} would be a great fit for our current projects.
-
-Would you be open to a quick chat about this opportunity?
-
-Best regards,
-{{sender_name}}`;
-    
-    setEmailTemplate(defaultTemplate);
-    setMessage({ type: 'info', text: 'Reset to default template. Click Save to apply.' });
+    setEmailTemplate(DEFAULT_TEMPLATE);
+    showMessage('info', 'Template reset. Click Save to apply.');
   };
-
-  if (loading) {
-    return (
-      <div style={styles.card}>
-        <div style={styles.loadingContainer}>
-          <Loader size={32} color="#FF6B35" />
-          <p style={styles.loadingText}>Loading email settings...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div style={styles.card}>
@@ -111,7 +105,7 @@ Best regards,
           <Mail size={24} color="#FF6B35" />
           <div>
             <h3 style={styles.title}>Email Settings</h3>
-            <p style={styles.subtitle}>Configure your default email template and sender address</p>
+            <p style={styles.subtitle}>Configure your email template and sender details</p>
           </div>
         </div>
       </div>
@@ -146,6 +140,7 @@ Best regards,
         {/* Sender Email */}
         <div style={styles.field}>
           <label style={styles.label}>
+            <Mail size={16} />
             Sender Email Address <span style={styles.required}>*</span>
           </label>
           <input
@@ -156,55 +151,138 @@ Best regards,
             style={styles.input}
           />
           <p style={styles.hint}>
-            This email will be used as the "From" address for all outreach emails
+            Emails sent from noreply@talentbox.co with replies directed to this email
           </p>
+        </div>
+
+        {/* Sender Name */}
+        <div style={styles.field}>
+          <label style={styles.label}>
+            <User size={16} />
+            Your Full Name <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            value={senderName}
+            onChange={(e) => setSenderName(e.target.value)}
+            placeholder="John Doe"
+            style={styles.input}
+          />
+          <p style={styles.hint}>
+            This name will appear in the email sender field
+          </p>
+        </div>
+
+        {/* Email Subject */}
+        <div style={styles.field}>
+          <label style={styles.label}>
+            <FileText size={16} />
+            Email Subject <span style={styles.required}>*</span>
+          </label>
+          <input
+            type="text"
+            value={emailSubject}
+            onChange={(e) => setEmailSubject(e.target.value)}
+            placeholder="Exciting opportunity at [Your Company]"
+            style={styles.input}
+          />
         </div>
 
         {/* Email Template */}
         <div style={styles.field}>
           <label style={styles.label}>
-            Default Email Template <span style={styles.required}>*</span>
+            <FileText size={16} />
+            Email Template <span style={styles.required}>*</span>
           </label>
           <textarea
             value={emailTemplate}
             onChange={(e) => setEmailTemplate(e.target.value)}
-            rows={12}
+            rows={10}
             style={styles.textarea}
-            placeholder="Write your default email template here..."
+            placeholder="Write your email template here..."
           />
           <div style={styles.templateInfo}>
             <div style={styles.variablesBox}>
               <p style={styles.variablesTitle}>Available Variables:</p>
               <div style={styles.variablesGrid}>
                 <code style={styles.variableTag}>{'{{name}}'}</code>
-                <code style={styles.variableTag}>{'{{github_username}}'}</code>
-                <code style={styles.variableTag}>{'{{primary_language}}'}</code>
-                <code style={styles.variableTag}>{'{{top_repo}}'}</code>
-                <code style={styles.variableTag}>{'{{location}}'}</code>
-                <code style={styles.variableTag}>{'{{company}}'}</code>
-                <code style={styles.variableTag}>{'{{sender_name}}'}</code>
               </div>
+              <p style={styles.variablesNote}>
+                💡 More email variables coming soon! (GitHub username, primary language, top repo, etc.)
+              </p>
             </div>
           </div>
         </div>
+
+        {/* Reply Method */}
+        <div style={styles.field}>
+          <label style={styles.label}>How should developers respond?</label>
+          <div style={styles.radioGroup}>
+            <label style={{
+              ...styles.radioLabel,
+              ...(replyMethod === 'email' ? styles.radioLabelSelected : {})
+            }}>
+              <input
+                type="radio"
+                checked={replyMethod === 'email'}
+                onChange={() => {
+                  setReplyMethod('email');
+                  setReplyLink('');
+                }}
+                style={styles.radio}
+              />
+              <div>
+                <div style={styles.radioTitle}>Reply via Email</div>
+                <div style={styles.radioDesc}>They'll reply directly to your email address</div>
+              </div>
+            </label>
+
+            <label style={{
+              ...styles.radioLabel,
+              ...(replyMethod === 'form' ? styles.radioLabelSelected : {})
+            }}>
+              <input
+                type="radio"
+                checked={replyMethod === 'form'}
+                onChange={() => setReplyMethod('form')}
+                style={styles.radio}
+              />
+              <div>
+                <div style={styles.radioTitle}>Apply via Form</div>
+                <div style={styles.radioDesc}>Direct them to your application page</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        {/* Application Form URL (conditional) */}
+        {replyMethod === 'form' && (
+          <div style={styles.field}>
+            <label style={styles.label}>
+              <LinkIcon size={16} />
+              Application Form URL <span style={styles.required}>*</span>
+            </label>
+            <input
+              type="url"
+              value={replyLink}
+              onChange={(e) => setReplyLink(e.target.value)}
+              placeholder="https://yourcompany.com/careers/apply"
+              style={styles.input}
+            />
+            <p style={styles.hint}>
+              We'll automatically add tracking parameters and highlight this URL in emails
+            </p>
+          </div>
+        )}
 
         {/* Actions */}
         <div style={styles.actions}>
           <button onClick={resetToDefault} style={styles.resetButton}>
             Reset to Default
           </button>
-          <button onClick={handleSave} disabled={saving} style={styles.saveButton}>
-            {saving ? (
-              <>
-                <Loader size={18} />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                <span>Save Changes</span>
-              </>
-            )}
+          <button onClick={handleSave} style={styles.saveButton}>
+            <Save size={18} />
+            <span>Save Changes</span>
           </button>
         </div>
       </div>
@@ -218,19 +296,6 @@ const styles = {
     border: '1px solid #e5e7eb',
     borderRadius: '12px',
     overflow: 'hidden',
-  },
-
-  loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '1rem',
-    padding: '3rem',
-  },
-
-  loadingText: {
-    color: '#6b7280',
-    fontSize: '0.9375rem',
   },
 
   header: {
@@ -311,7 +376,9 @@ const styles = {
   },
 
   label: {
-    display: 'block',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
     fontSize: '0.9375rem',
     fontWeight: '600',
     color: '#1a1a1a',
@@ -371,6 +438,7 @@ const styles = {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '0.5rem',
+    marginBottom: '0.75rem',
   },
 
   variableTag: {
@@ -382,6 +450,55 @@ const styles = {
     color: '#4f46e5',
     fontWeight: '600',
     fontFamily: "'Courier New', monospace",
+  },
+
+  variablesNote: {
+    fontSize: '0.8125rem',
+    color: '#6b7280',
+    fontStyle: 'italic',
+    margin: 0,
+  },
+
+  radioGroup: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '0.75rem',
+  },
+
+  radioLabel: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: '0.75rem',
+    padding: '1rem',
+    border: '2px solid #e5e7eb',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+  },
+
+  radioLabelSelected: {
+    borderColor: '#FF6B35',
+    backgroundColor: '#fff7ed',
+  },
+
+  radio: {
+    marginTop: '0.125rem',
+    cursor: 'pointer',
+    width: '18px',
+    height: '18px',
+    flexShrink: 0,
+  },
+
+  radioTitle: {
+    fontSize: '0.9375rem',
+    fontWeight: '600',
+    color: '#1a1a1a',
+    marginBottom: '0.25rem',
+  },
+
+  radioDesc: {
+    fontSize: '0.8125rem',
+    color: '#6b7280',
   },
 
   actions: {
@@ -426,7 +543,7 @@ const styles = {
   },
 };
 
-// Hover effects (guarded to prevent duplicate injection)
+// Hover effects
 if (!document.getElementById('email-settings-styles')) {
   const styleSheet = document.createElement('style');
   styleSheet.id = 'email-settings-styles';
@@ -442,15 +559,14 @@ if (!document.getElementById('email-settings-styles')) {
       color: #1a1a1a !important;
     }
 
-    button[style*="saveButton"]:hover:not(:disabled) {
+    button[style*="saveButton"]:hover {
       background: #ff5722 !important;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
     }
 
-    button[style*="saveButton"]:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
+    label[style*="radioLabel"]:hover {
+      border-color: #FF6B35 !important;
     }
   `;
   document.head.appendChild(styleSheet);

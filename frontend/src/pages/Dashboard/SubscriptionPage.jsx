@@ -8,10 +8,9 @@ import {
   Mail, Search, Eye, CheckCircle, Loader, AlertCircle, RefreshCw,
   CreditCard, X, History
 } from 'lucide-react';
-import { 
-  getUsageStats, 
-  createPaymentOrder, 
-  verifyPayment, 
+import {
+  createPaymentOrder,
+  verifyPayment,
   openRazorpayCheckout,
   cancelSubscription,
   getPaymentHistory
@@ -389,13 +388,15 @@ const SubscriptionPage = () => {
   // Refresh state
   const [refreshing, setRefreshing] = useState(false);
 
-  // Sync usage data from context
+  // Always fetch fresh stats from backend when page mounts
   useEffect(() => {
-    if (!usageStats) {
-      // If no cached stats, fetch them
-      fetchUsageStats();
-      return;
-    }
+    fetchUsageStats(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Sync local UI with usageStats from context (updates on every change)
+  useEffect(() => {
+    if (!usageStats) return;
 
     try {
       const planId = usageStats.plan || 'free_trial';
@@ -431,7 +432,7 @@ const SubscriptionPage = () => {
       console.error('Failed to process usage stats:', err);
       setFetchError('Failed to load subscription data. Please try refreshing the page.');
     }
-  }, [usageStats, fetchUsageStats]);
+  }, [usageStats]);
 
   // Check for URL params (e.g., from pricing page)
   useEffect(() => {
@@ -472,34 +473,9 @@ const SubscriptionPage = () => {
   };
 
   const handlePaymentSuccess = async () => {
-    // Refresh data
+    // Refresh subscription and usage stats from backend
     await refreshSubscription();
-    
-    // Reload usage stats
-    try {
-      const data = await getUsageStats();
-      const planId = data.plan || 'free_trial';
-      const planName = (planId === 'free' || planId === 'free_trial') ? 'Free Trial' :
-                       planId === 'starter' ? 'Starter' : planId;
-      const matchedPlan = plans.find(p => p.id === planId);
-      
-      setUserData({
-        plan: planName,
-        planId: planId,
-        billing_cycle: data.billing_cycle || 'monthly',
-        price: matchedPlan?.price_monthly || 0,
-        subscription_status: 'active',
-        trial_end_date: null,
-        next_billing_date: data.next_billing_date,
-        usage: {
-          searches: { used: 0, limit: data.usage?.searches?.limit || 100 },
-          profile_unlocks: { used: 0, limit: data.usage?.profile_views?.limit || 300 },
-          emails: { used: 0, limit: data.usage?.emails_sent?.limit || 300 },
-        }
-      });
-    } catch (err) {
-      console.error('Failed to refresh data:', err);
-    }
+    await fetchUsageStats(false);
   };
 
   const handleCancelSubscription = async () => {

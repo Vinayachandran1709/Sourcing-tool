@@ -32,14 +32,13 @@ class UpdateTemplateRequest(BaseModel):
 
 DEFAULT_EMAIL_TEMPLATE = """Hi {{name}},
 
-I came across your GitHub profile and was impressed by your work on {{top_repo}}.
+I came across your GitHub profile and was impressed by your work.
 
-We're {{company}}, and we're looking for talented developers to join our team. Your expertise in {{primary_language}} would be a great fit for our current projects.
+We're looking for talented developers to join our team, and I think you'd be a great fit for our projects.
 
 Would you be open to a quick chat about this opportunity?
 
-Best regards,
-{{sender_name}}"""
+Best regards"""
 
 # ===== ENDPOINTS =====
 

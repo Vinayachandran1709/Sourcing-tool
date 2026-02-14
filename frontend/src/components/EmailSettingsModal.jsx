@@ -1,18 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import { X, Mail, User, FileText, Link as LinkIcon, AlertCircle } from 'lucide-react';
+import { X, Mail, User, FileText, Link as LinkIcon, AlertCircle, CheckCircle } from 'lucide-react';
 import { getEmailSettings, updateEmailSettings } from '../services/api';
+
+const DEFAULT_TEMPLATE = `Hi {{name}},
+
+I came across your GitHub profile and was impressed by your work.
+
+We're looking for talented developers to join our team, and I think you'd be a great fit for our projects.
+
+Would you be open to a quick chat about this opportunity?
+
+Best regards`;
 
 const EmailSettingsModal = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     sender_email: '',
     sender_name: '',
     email_subject: '',
-    email_template: '',
+    email_template: DEFAULT_TEMPLATE,
     reply_method: 'email',
     reply_link: ''
   });
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -21,28 +31,44 @@ const EmailSettingsModal = ({ isOpen, onClose, onSuccess }) => {
     }
   }, [isOpen]);
 
-  const loadSettings = async () => {
-    setLoading(true);
-    try {
-      const settings = await getEmailSettings();
+  const loadSettings = () => {
+    // Load from cache instantly
+    const cached = localStorage.getItem('emailSettings');
+    if (cached) {
+      try {
+        const settings = JSON.parse(cached);
+        setFormData({
+          sender_email: settings.sender_email || '',
+          sender_name: settings.sender_name || '',
+          email_subject: settings.email_subject || '',
+          email_template: settings.email_template || DEFAULT_TEMPLATE,
+          reply_method: settings.reply_method || 'email',
+          reply_link: settings.reply_link || ''
+        });
+      } catch (e) {
+        console.error('Cache error:', e);
+      }
+    }
+
+    // Fetch latest in background
+    getEmailSettings().then(settings => {
       setFormData({
         sender_email: settings.sender_email || '',
         sender_name: settings.sender_name || '',
         email_subject: settings.email_subject || '',
-        email_template: settings.email_template || 'Hi {{name}},\n\nI came across your profile and was impressed by your work.\n\nWould love to discuss an opportunity.\n\nBest regards',
+        email_template: settings.email_template || DEFAULT_TEMPLATE,
         reply_method: settings.reply_method || 'email',
         reply_link: settings.reply_link || ''
       });
-    } catch (err) {
-      console.error('Failed to load settings:', err);
-    } finally {
-      setLoading(false);
-    }
+    }).catch(err => {
+      console.error('Load error:', err);
+    });
   };
 
   const handleSave = async () => {
     setError('');
-    
+    setSuccess('');
+
     // Validation
     if (!formData.sender_email) {
       setError('Please enter your email address');
@@ -65,14 +91,22 @@ const EmailSettingsModal = ({ isOpen, onClose, onSuccess }) => {
       return;
     }
 
+    // Save to cache immediately
+    localStorage.setItem('emailSettings', JSON.stringify(formData));
+
     setIsSaving(true);
     try {
       await updateEmailSettings(formData);
-      onSuccess();
-      onClose();
+      setSuccess('Saved successfully!');
+      setIsSaving(false);
+
+      // Close modal after showing success message for 1 second
+      setTimeout(() => {
+        onSuccess();
+        onClose();
+      }, 1000);
     } catch (err) {
       setError(err.message || 'Failed to save settings');
-    } finally {
       setIsSaving(false);
     }
   };
@@ -89,141 +123,149 @@ const EmailSettingsModal = ({ isOpen, onClose, onSuccess }) => {
           </button>
         </div>
 
-        {loading ? (
-          <div style={styles.loading}>Loading settings...</div>
-        ) : (
-          <>
-            {error && (
-              <div style={styles.errorBox}>
-                <AlertCircle size={18} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <div style={styles.form}>
-              {/* Sender Email */}
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
-                  <Mail size={16} />
-                  Your Email Address
-                </label>
-                <input
-                  type="email"
-                  value={formData.sender_email}
-                  onChange={(e) => setFormData({ ...formData, sender_email: e.target.value })}
-                  placeholder="yourname@company.com"
-                  style={styles.input}
-                />
-                <p style={styles.hint}>Developers will see replies sent to this email</p>
-              </div>
-
-              {/* Sender Name */}
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
-                  <User size={16} />
-                  Your Name
-                </label>
-                <input
-                  type="text"
-                  value={formData.sender_name}
-                  onChange={(e) => setFormData({ ...formData, sender_name: e.target.value })}
-                  placeholder="John Doe"
-                  style={styles.input}
-                />
-              </div>
-
-              {/* Email Subject */}
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
-                  <FileText size={16} />
-                  Email Subject
-                </label>
-                <input
-                  type="text"
-                  value={formData.email_subject}
-                  onChange={(e) => setFormData({ ...formData, email_subject: e.target.value })}
-                  placeholder="Exciting opportunity at [Your Company]"
-                  style={styles.input}
-                />
-              </div>
-
-              {/* Email Template */}
-              <div style={styles.formGroup}>
-                <label style={styles.label}>
-                  <FileText size={16} />
-                  Email Template
-                </label>
-                <textarea
-                  value={formData.email_template}
-                  onChange={(e) => setFormData({ ...formData, email_template: e.target.value })}
-                  placeholder="Hi {{name}},&#10;&#10;I came across your profile..."
-                  style={styles.textarea}
-                  rows={8}
-                />
-                <p style={styles.hint}>Use {'{'}{'{'}<strong>name</strong>{'}'}{'}'}  for personalization</p>
-              </div>
-
-              {/* Reply Method */}
-              <div style={styles.formGroup}>
-                <label style={styles.label}>How should developers respond?</label>
-                <div style={styles.radioGroup}>
-                  <label style={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      checked={formData.reply_method === 'email'}
-                      onChange={() => setFormData({ ...formData, reply_method: 'email', reply_link: '' })}
-                      style={styles.radio}
-                    />
-                    <div>
-                      <div style={styles.radioTitle}>Reply via Email</div>
-                      <div style={styles.radioDesc}>They'll reply directly to your email</div>
-                    </div>
-                  </label>
-
-                  <label style={styles.radioLabel}>
-                    <input
-                      type="radio"
-                      checked={formData.reply_method === 'form'}
-                      onChange={() => setFormData({ ...formData, reply_method: 'form' })}
-                      style={styles.radio}
-                    />
-                    <div>
-                      <div style={styles.radioTitle}>Apply via Form</div>
-                      <div style={styles.radioDesc}>Direct them to your application page</div>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Application Form URL (conditional) */}
-              {formData.reply_method === 'form' && (
-                <div style={styles.formGroup}>
-                  <label style={styles.label}>
-                    <LinkIcon size={16} />
-                    Application Form URL
-                  </label>
-                  <input
-                    type="url"
-                    value={formData.reply_link}
-                    onChange={(e) => setFormData({ ...formData, reply_link: e.target.value })}
-                    placeholder="https://yourcompany.com/careers/apply"
-                    style={styles.input}
-                  />
-                  <p style={styles.hint}>We'll automatically add tracking parameters</p>
-                </div>
-              )}
-            </div>
-
-            <div style={styles.footer}>
-              <button onClick={onClose} style={styles.cancelBtn} disabled={isSaving}>
-                Cancel
-              </button>
-              <button onClick={handleSave} style={styles.saveBtn} disabled={isSaving}>
-                {isSaving ? 'Saving...' : 'Save Settings'}
-              </button>
-            </div>
-          </>
+        {error && (
+          <div style={styles.errorBox}>
+            <AlertCircle size={18} />
+            <span>{error}</span>
+          </div>
         )}
+
+        {success && (
+          <div style={styles.successBox}>
+            <CheckCircle size={18} />
+            <span>{success}</span>
+          </div>
+        )}
+
+        <div style={styles.form}>
+          {/* Sender Email */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              <Mail size={16} />
+              Your Email Address
+            </label>
+            <input
+              type="email"
+              value={formData.sender_email}
+              onChange={(e) => setFormData({ ...formData, sender_email: e.target.value })}
+              placeholder="yourname@company.com"
+              style={styles.input}
+            />
+            <p style={styles.hint}>Developers will see replies sent to this email</p>
+          </div>
+
+          {/* Sender Name */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              <User size={16} />
+              Your Name
+            </label>
+            <input
+              type="text"
+              value={formData.sender_name}
+              onChange={(e) => setFormData({ ...formData, sender_name: e.target.value })}
+              placeholder="John Doe"
+              style={styles.input}
+            />
+          </div>
+
+          {/* Email Subject */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              <FileText size={16} />
+              Email Subject
+            </label>
+            <input
+              type="text"
+              value={formData.email_subject}
+              onChange={(e) => setFormData({ ...formData, email_subject: e.target.value })}
+              placeholder="Exciting opportunity at [Your Company]"
+              style={styles.input}
+            />
+          </div>
+
+          {/* Email Template */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>
+              <FileText size={16} />
+              Email Template
+            </label>
+            <textarea
+              value={formData.email_template}
+              onChange={(e) => setFormData({ ...formData, email_template: e.target.value })}
+              placeholder="Hi {{name}},&#10;&#10;I came across your profile..."
+              style={styles.textarea}
+              rows={8}
+            />
+            <div style={styles.variablesInfo}>
+              <p style={styles.hint}>
+                Use <code style={styles.variableCode}>{'{{name}}'}</code> to personalize with developer's first name
+              </p>
+              <p style={styles.variablesNote}>
+                💡 More email variables coming soon! (GitHub username, primary language, top repo, etc.)
+              </p>
+            </div>
+          </div>
+
+          {/* Reply Method */}
+          <div style={styles.formGroup}>
+            <label style={styles.label}>How should developers respond?</label>
+            <div style={styles.radioGroup}>
+              <label style={styles.radioLabel}>
+                <input
+                  type="radio"
+                  checked={formData.reply_method === 'email'}
+                  onChange={() => setFormData({ ...formData, reply_method: 'email', reply_link: '' })}
+                  style={styles.radio}
+                />
+                <div>
+                  <div style={styles.radioTitle}>Reply via Email</div>
+                  <div style={styles.radioDesc}>They'll reply directly to your email</div>
+                </div>
+              </label>
+
+              <label style={styles.radioLabel}>
+                <input
+                  type="radio"
+                  checked={formData.reply_method === 'form'}
+                  onChange={() => setFormData({ ...formData, reply_method: 'form' })}
+                  style={styles.radio}
+                />
+                <div>
+                  <div style={styles.radioTitle}>Apply via Form</div>
+                  <div style={styles.radioDesc}>Direct them to your application page</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          {/* Application Form URL (conditional) */}
+          {formData.reply_method === 'form' && (
+            <div style={styles.formGroup}>
+              <label style={styles.label}>
+                <LinkIcon size={16} />
+                Application Form URL
+              </label>
+              <input
+                type="url"
+                value={formData.reply_link}
+                onChange={(e) => setFormData({ ...formData, reply_link: e.target.value })}
+                placeholder="https://yourcompany.com/careers/apply"
+                style={styles.input}
+              />
+              <p style={styles.hint}>We'll automatically add tracking parameters</p>
+            </div>
+          )}
+        </div>
+
+        <div style={styles.footer}>
+          <button onClick={onClose} style={styles.cancelBtn} disabled={isSaving}>
+            Cancel
+          </button>
+          <button onClick={handleSave} style={styles.saveBtn} disabled={isSaving}>
+            {isSaving ? 'Saving...' : 'Save Settings'}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -273,11 +315,6 @@ const styles = {
     color: '#6b7280',
     display: 'flex'
   },
-  loading: {
-    padding: '40px',
-    textAlign: 'center',
-    color: '#6b7280'
-  },
   errorBox: {
     display: 'flex',
     alignItems: 'center',
@@ -289,6 +326,19 @@ const styles = {
     borderRadius: '8px',
     color: '#dc2626',
     fontSize: '14px'
+  },
+  successBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    margin: '16px 24px',
+    padding: '12px',
+    background: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    borderRadius: '8px',
+    color: '#15803d',
+    fontSize: '14px',
+    fontWeight: '600'
   },
   form: {
     padding: '24px',
@@ -332,6 +382,29 @@ const styles = {
     fontSize: '13px',
     color: '#6b7280',
     margin: 0
+  },
+  variablesInfo: {
+    marginTop: '8px',
+    padding: '12px',
+    backgroundColor: '#f0f7ff',
+    border: '1px solid #dbeafe',
+    borderRadius: '8px',
+  },
+  variableCode: {
+    padding: '2px 6px',
+    backgroundColor: '#fff',
+    border: '1px solid #cbd5e1',
+    borderRadius: '4px',
+    color: '#4f46e5',
+    fontWeight: '600',
+    fontFamily: "'Courier New', monospace",
+    fontSize: '13px',
+  },
+  variablesNote: {
+    fontSize: '12px',
+    color: '#6b7280',
+    fontStyle: 'italic',
+    margin: '8px 0 0 0',
   },
   radioGroup: {
     display: 'flex',
@@ -393,7 +466,7 @@ const styles = {
   }
 };
 
-// Add hover styles (guarded to prevent duplicate injection)
+// Add hover styles
 if (!document.getElementById('email-settings-modal-styles')) {
   const styleSheet = document.createElement('style');
   styleSheet.id = 'email-settings-modal-styles';

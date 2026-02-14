@@ -56,30 +56,31 @@ class EmailService:
         to_email: str,
         subject: str,
         body_html: str,
-        sender_email: str = "noreply@talentbox.co",
         sender_name: str = "TalentBox",
         reply_to: str = None
     ) -> Dict:
         """Send a single email via Resend"""
         try:
+            # Always send from noreply@talentbox.co
             params = {
-                "from": f"{sender_name} <{sender_email}>",
+                "from": f"{sender_name} <noreply@talentbox.co>",
                 "to": [to_email],
                 "subject": subject,
                 "html": body_html,
             }
-            
+
+            # Set reply-to to customer's email
             if reply_to:
                 params["reply_to"] = [reply_to]
-            
+
             response = resend.Emails.send(params)
-            
+
             return {
                 'success': True,
                 'message_id': response.get('id'),
                 'status': 'sent'
             }
-            
+
         except Exception as e:
             return {
                 'success': False,
@@ -151,14 +152,13 @@ class EmailService:
                     })
                     continue
                 
-                # Send email
+                # Send email (always from noreply@talentbox.co, reply-to customer's email)
                 result = EmailService.send_single_email(
                     to_email=to_email,
                     subject=subject,
                     body_html=full_html,
-                    sender_email=sender_email,
                     sender_name=sender_name,
-                    reply_to=sender_email
+                    reply_to=sender_email  # Customer's email as reply-to
                 )
                 
                 if result['success']:

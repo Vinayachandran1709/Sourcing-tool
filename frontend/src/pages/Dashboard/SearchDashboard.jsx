@@ -7,7 +7,7 @@ import EmailModal from '../../components/EmailModal';
 import FilterPanel from '../../components/FilterPanel';
 import { useAuth } from '../../contexts/AuthContext';
 
-import {toggleProfileSelection} from '../../services/api';
+import {toggleProfileSelection, logProfileUnlock} from '../../services/api';
 
 const SearchDashboard = () => {
   const { incrementUsage } = useAuth();
@@ -248,32 +248,22 @@ const SearchDashboard = () => {
     setProfiles(profiles.map(p => ({ ...p, selected: false })));
   };
 
-  // Check unlock limits in background and revert if over limit
-  const checkUnlockLimit = (profileId) => {
-    const token = localStorage.getItem('token');
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-    fetch(`${API_URL}/api/usage-stats`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => (res.ok ? res.json() : null))
-      .then(usage => {
-        if (!usage?.profile_unlocks) return;
-        if (usage.profile_unlocks.used < usage.profile_unlocks.limit) return;
-        setUnlockedProfileIds(prev => prev.filter(id => id !== profileId));
-        setShowDetailModal(false);
-        setSelectedProfile(null);
-        alert(`Profile unlock limit reached! You've used ${usage.profile_unlocks.used}/${usage.profile_unlocks.limit} unlocks. Upgrade to unlock more profiles.`);
-      })
-      .catch(() => {});
-  };
-
   // Handle unlock profile - check limits, mark as unlocked, open modal
   const handleViewProfile = (profile) => {
     const isNewUnlock = !unlockedProfileIds.includes(profile.id);
     if (isNewUnlock) {
       setUnlockedProfileIds(prev => [...prev, profile.id]);
-      checkUnlockLimit(profile.id);
-      // Increment profile unlock usage count
+      // Log unlock on backend (tracks usage_profile_views)
+      logProfileUnlock(profile.id).catch(err => {
+        console.error('Failed to log profile unlock:', err);
+        // If limit exceeded, revert unlock
+        if (err.response?.status === 429) {
+          setUnlockedProfileIds(prev => prev.filter(id => id !== profile.id));
+          alert(err.response?.data?.detail?.message || 'Profile unlock limit reached. Please upgrade.');
+          return;
+        }
+      });
+      // Optimistic UI update
       incrementUsage('profile_unlock', 1);
     }
     setSelectedProfile(profile);

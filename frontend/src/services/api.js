@@ -93,6 +93,11 @@ export const toggleProfileSelection = async (profileId) => {
   return response.data;
 };
 
+export const logProfileUnlock = async (profileId) => {
+  const response = await api.post(`/api/profiles/${profileId}/log-unlock`);
+  return response.data;
+};
+
 // ============================================
 // Email APIs
 // ============================================

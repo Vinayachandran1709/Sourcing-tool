@@ -5,6 +5,7 @@ import ProfileCard from '../../components/ProfileCard';
 import ProfileDetailModal from '../../components/ProfileDetailModal';
 import EmailModal from '../../components/EmailModal';
 import { useAuth } from '../../contexts/AuthContext';
+import { logProfileUnlock } from '../../services/api';
 
 
 const SAVED_PROFILES_LIMIT_FREE = 50;
@@ -76,30 +77,20 @@ const SavedProfilesPage = () => {
     localStorage.setItem('unlockedProfileIds', JSON.stringify(unlockedProfileIds));
   }, [unlockedProfileIds]);
 
-  const checkUnlockLimit = (profileId) => {
-    const token = localStorage.getItem('token');
-    const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-    fetch(`${API_URL}/api/usage-stats`, {
-      headers: { 'Authorization': `Bearer ${token}` }
-    })
-      .then(res => (res.ok ? res.json() : null))
-      .then(usage => {
-        if (!usage?.profile_unlocks) return;
-        if (usage.profile_unlocks.used < usage.profile_unlocks.limit) return;
-        setUnlockedProfileIds(prev => prev.filter(id => id !== profileId));
-        setShowDetailModal(false);
-        setSelectedProfile(null);
-        alert(`Profile unlock limit reached! You've used ${usage.profile_unlocks.used}/${usage.profile_unlocks.limit} unlocks. Upgrade to unlock more profiles.`);
-      })
-      .catch(() => {});
-  };
-
   const handleViewProfile = (profile) => {
     const isNewUnlock = !unlockedProfileIds.includes(profile.id);
     if (isNewUnlock) {
       setUnlockedProfileIds(prev => [...prev, profile.id]);
-      checkUnlockLimit(profile.id);
-      // Increment profile unlock usage count
+      // Log unlock on backend (tracks usage_profile_views)
+      logProfileUnlock(profile.id).catch(err => {
+        console.error('Failed to log profile unlock:', err);
+        if (err.response?.status === 429) {
+          setUnlockedProfileIds(prev => prev.filter(id => id !== profile.id));
+          alert(err.response?.data?.detail?.message || 'Profile unlock limit reached. Please upgrade.');
+          return;
+        }
+      });
+      // Optimistic UI update
       incrementUsage('profile_unlock', 1);
     }
     setSelectedProfile(profile);

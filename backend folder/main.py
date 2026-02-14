@@ -479,13 +479,6 @@ def get_all_profiles(
     limit: int = 100,
 ):
     """Get all profiles with optional filters and sorting"""
-    user_id = current_user.id
-    
-    try:
-        UsageService.check_limit(db, user_id, "profile_view")
-    except HTTPException as e:
-        return {"error": e.detail, "limit_reached": True}
-    
     query = db.query(Profile)
     
     # Apply filters
@@ -547,11 +540,7 @@ def get_all_profiles(
     
     query = query.limit(limit)
     profiles = query.all()
-    
-    # Log usage
-    for _ in profiles:
-        UsageService.log_usage(db, user_id, "profile_view")
-    
+
     return profiles
 
 
@@ -571,6 +560,32 @@ def get_profile_details(
         raise HTTPException(status_code=404, detail=f"Profile with ID {profile_id} not found")
     
     return profile
+
+
+# ===== LOG PROFILE UNLOCK =====
+
+@app.post("/api/profiles/{profile_id}/log-unlock")
+def log_profile_unlock(
+    profile_id: int,
+    current_user: CurrentUser,
+    db: DbSession,
+):
+    """Log that a user unlocked/viewed a profile (increments profile_views usage)"""
+    user_id = current_user.id
+
+    # Check if within limits
+    UsageService.check_limit(db, user_id, "profile_view")
+
+    # Log the unlock
+    UsageService.log_usage(db, user_id, "profile_view", {"profile_id": profile_id})
+
+    # Return updated usage stats
+    stats = UsageService.get_usage_stats(db, user_id)
+    return {
+        "success": True,
+        "profile_id": profile_id,
+        "usage": stats.get("usage", {})
+    }
 
 
 # ===== TOGGLE PROFILE SELECTION =====
@@ -848,14 +863,26 @@ async def search_profiles_stream(
 ):
     """
     ✅ OPTIMIZED STREAMING SEARCH - Target < 2 minutes
-    
+
     Optimizations:
     - Target: 120 profiles (was 350)
     - Smooth progress (no phases)
     - Batch size: 25 (was 12)
     - No cooldown between batches
     """
-    
+
+    # ===== CHECK & LOG SEARCH USAGE BEFORE STREAMING =====
+    user_id = current_user.id
+    UsageService.check_limit(db, user_id, "search")
+
+    filters_for_log = {
+        "role": search.role,
+        "languages": search.languages or ([search.language] if search.language else []),
+        "location": search.location,
+        "min_repos": search.min_repos or 0
+    }
+    UsageService.log_usage(db, user_id, "search", filters_for_log)
+
     async def event_stream():
         """Generator that yields SSE events"""
         
