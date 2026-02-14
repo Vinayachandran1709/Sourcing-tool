@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
+import { SpeedInsights } from '@vercel/speed-insights/react';
 import './App.css';
 
 // Public Pages
@@ -59,6 +60,9 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </div>
+        
+        {/* Vercel Speed Insights - tracks performance */}
+        <SpeedInsights />
       </AuthProvider>
     </Router>
   );
