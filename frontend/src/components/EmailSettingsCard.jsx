@@ -88,19 +88,11 @@ const EmailSettingsCard = () => {
     showMessage('info', 'Saving changes...');
 
     try {
-      // Save to backend first
+      // Save to backend
       await updateEmailSettings(settingsData);
 
-      // Then update cache with the response
+      // Update cache
       localStorage.setItem('emailSettings', JSON.stringify(settingsData));
-      
-      // Update local state with saved values
-      setSenderEmail(response.sender_email || senderEmail);
-      setSenderName(response.sender_name || senderName);
-      setEmailSubject(response.email_subject || emailSubject);
-      setEmailTemplate(response.email_template || emailTemplate);
-      setReplyMethod(response.reply_method || replyMethod);
-      setReplyLink(response.reply_link || replyLink);
 
       showMessage('success', 'Changes saved successfully!', 2000);
     } catch (error) {
