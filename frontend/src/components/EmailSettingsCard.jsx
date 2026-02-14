@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Mail, Save, CheckCircle, AlertCircle, Info, User, FileText, Link as LinkIcon } from 'lucide-react';
+import { Mail, Save, CheckCircle, AlertCircle, Info, User, FileText, Link as LinkIcon, Loader } from 'lucide-react';
 import { updateEmailSettings, getEmailUsage } from '../services/api';
 
 const DEFAULT_TEMPLATE = `Hi {{name}},
@@ -21,6 +21,8 @@ const EmailSettingsCard = () => {
   const [replyLink, setReplyLink] = useState('');
   const [message, setMessage] = useState(null);
   const [emailUsage, setEmailUsage] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [resetting, setResetting] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -51,9 +53,9 @@ const EmailSettingsCard = () => {
     });
   };
 
-  const showMessage = (type, text) => {
+  const showMessage = (type, text, duration = 3000) => {
     setMessage({ type, text });
-    setTimeout(() => setMessage(null), 2000);
+    setTimeout(() => setMessage(null), duration);
   };
 
   const handleSave = async () => {
@@ -82,20 +84,64 @@ const EmailSettingsCard = () => {
       reply_link: replyLink
     };
 
-    // Save to cache immediately
-    localStorage.setItem('emailSettings', JSON.stringify(settingsData));
-    showMessage('success', 'Saved successfully!');
+    setSaving(true);
+    showMessage('info', 'Saving changes...');
 
-    // Save to backend in background
-    updateEmailSettings(settingsData).catch(error => {
+    try {
+      // Save to backend first
+      const response = await updateEmailSettings(settingsData);
+
+      // Then update cache with the response
+      localStorage.setItem('emailSettings', JSON.stringify(settingsData));
+
+      // Update local state with saved values
+      setSenderEmail(response.sender_email || senderEmail);
+      setSenderName(response.sender_name || senderName);
+      setEmailSubject(response.email_subject || emailSubject);
+      setEmailTemplate(response.email_template || emailTemplate);
+      setReplyMethod(response.reply_method || replyMethod);
+      setReplyLink(response.reply_link || replyLink);
+
+      showMessage('success', 'Changes saved successfully!', 2000);
+    } catch (error) {
       console.error('Save error:', error);
-      showMessage('error', 'Failed to sync. Please try again.');
-    });
+      showMessage('error', 'Failed to save changes. Please try again.');
+    } finally {
+      setSaving(false);
+    }
   };
 
-  const resetToDefault = () => {
-    setEmailTemplate(DEFAULT_TEMPLATE);
-    showMessage('info', 'Template reset. Click Save to apply.');
+  const resetToDefault = async () => {
+    setResetting(true);
+    showMessage('info', 'Resetting to default...');
+
+    try {
+      // Reset template to default
+      const settingsData = {
+        sender_email: senderEmail,
+        sender_name: senderName,
+        email_subject: emailSubject,
+        email_template: DEFAULT_TEMPLATE,
+        reply_method: replyMethod,
+        reply_link: replyLink
+      };
+
+      // Save to backend
+      const response = await updateEmailSettings(settingsData);
+
+      // Update cache
+      localStorage.setItem('emailSettings', JSON.stringify(settingsData));
+
+      // Update local state
+      setEmailTemplate(DEFAULT_TEMPLATE);
+
+      showMessage('success', 'Template reset to default successfully!', 2000);
+    } catch (error) {
+      console.error('Reset error:', error);
+      showMessage('error', 'Failed to reset template. Please try again.');
+    } finally {
+      setResetting(false);
+    }
   };
 
   return (
@@ -208,6 +254,9 @@ const EmailSettingsCard = () => {
                 <code style={styles.variableTag}>{'{{name}}'}</code>
               </div>
               <p style={styles.variablesNote}>
+                <strong>{'{{name}}'}</strong> - Automatically replaced with the developer's first name from their GitHub profile
+              </p>
+              <p style={styles.variablesNote}>
                 💡 More email variables coming soon! (GitHub username, primary language, top repo, etc.)
               </p>
             </div>
@@ -277,12 +326,44 @@ const EmailSettingsCard = () => {
 
         {/* Actions */}
         <div style={styles.actions}>
-          <button onClick={resetToDefault} style={styles.resetButton}>
-            Reset to Default
+          <button
+            onClick={resetToDefault}
+            disabled={resetting || saving}
+            style={{
+              ...styles.resetButton,
+              opacity: (resetting || saving) ? 0.6 : 1,
+              cursor: (resetting || saving) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {resetting ? (
+              <>
+                <Loader size={16} style={{ animation: 'spin 1s linear infinite' }} />
+                <span>Resetting...</span>
+              </>
+            ) : (
+              'Reset to Default'
+            )}
           </button>
-          <button onClick={handleSave} style={styles.saveButton}>
-            <Save size={18} />
-            <span>Save Changes</span>
+          <button
+            onClick={handleSave}
+            disabled={saving || resetting}
+            style={{
+              ...styles.saveButton,
+              opacity: (saving || resetting) ? 0.8 : 1,
+              cursor: (saving || resetting) ? 'not-allowed' : 'pointer'
+            }}
+          >
+            {saving ? (
+              <>
+                <Loader size={18} style={{ animation: 'spin 1s linear infinite' }} />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <Save size={18} />
+                <span>Save Changes</span>
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -511,8 +592,9 @@ const styles = {
   },
 
   resetButton: {
-    display: 'flex',
+    display: 'inline-flex',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: '0.5rem',
     padding: '0.75rem 1.5rem',
     fontSize: '0.9375rem',
@@ -543,23 +625,28 @@ const styles = {
   },
 };
 
-// Hover effects
+// Hover effects and animations
 if (!document.getElementById('email-settings-styles')) {
   const styleSheet = document.createElement('style');
   styleSheet.id = 'email-settings-styles';
   styleSheet.textContent = `
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
     input:focus, textarea:focus {
       outline: none;
       border-color: #FF6B35 !important;
       box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
     }
 
-    button[style*="resetButton"]:hover {
+    button[style*="resetButton"]:hover:not(:disabled) {
       border-color: #9ca3af !important;
       color: #1a1a1a !important;
     }
 
-    button[style*="saveButton"]:hover {
+    button[style*="saveButton"]:hover:not(:disabled) {
       background: #ff5722 !important;
       transform: translateY(-1px);
       box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
