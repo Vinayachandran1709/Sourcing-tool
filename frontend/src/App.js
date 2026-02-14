@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import { SpeedInsights } from '@vercel/speed-insights/react';
+import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 
 // Public Pages
@@ -63,6 +64,9 @@ function App() {
         
         {/* Vercel Speed Insights - tracks performance */}
         <SpeedInsights />
+        
+        {/* Vercel Web Analytics - tracks page views and events */}
+        <Analytics />
       </AuthProvider>
     </Router>
   );
