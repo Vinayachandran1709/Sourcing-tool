@@ -89,11 +89,11 @@ const EmailSettingsCard = () => {
 
     try {
       // Save to backend first
-      const response = await updateEmailSettings(settingsData);
+      await updateEmailSettings(settingsData);
 
       // Then update cache with the response
       localStorage.setItem('emailSettings', JSON.stringify(settingsData));
-
+      
       // Update local state with saved values
       setSenderEmail(response.sender_email || senderEmail);
       setSenderName(response.sender_name || senderName);

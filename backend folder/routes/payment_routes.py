@@ -143,6 +143,21 @@ def log_subscription_event(conn, user_id: int, event_type: str, old_plan: str, n
 # ============================================
 # API Endpoints
 # ============================================
+@router.get("/debug-config")
+async def debug_razorpay_config():
+    """Debug endpoint to check Razorpay configuration - REMOVE IN PRODUCTION"""
+    return {
+        "key_id_set": bool(RAZORPAY_KEY_ID),
+        "key_id_prefix": RAZORPAY_KEY_ID[:15] + "..." if RAZORPAY_KEY_ID and len(RAZORPAY_KEY_ID) > 15 else "NOT SET",
+        "key_id_length": len(RAZORPAY_KEY_ID) if RAZORPAY_KEY_ID else 0,
+        "key_secret_set": bool(RAZORPAY_KEY_SECRET),
+        "key_secret_length": len(RAZORPAY_KEY_SECRET) if RAZORPAY_KEY_SECRET else 0,
+        "webhook_secret_set": bool(RAZORPAY_WEBHOOK_SECRET),
+        "client_initialized": razorpay_client is not None,
+        "expected_key_id_length": "20-25 characters",
+        "expected_secret_length": "20-30 characters"
+    }
+
 
 @router.post("/create-order")
 async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
