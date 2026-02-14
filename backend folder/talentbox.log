@@ -1484,3 +1484,15 @@ razorpay.errors.BadRequestError: Authentication failed
 2026-02-14 13:47:09,187 - main - INFO - ✅ JWT Secret configured
 2026-02-14 13:47:09,191 - main - INFO - 🎯 Startup validation complete
 
+2026-02-14 18:58:19,663 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-14 18:58:21,064 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-14 18:58:21,065 - main - INFO - Environment: development
+2026-02-14 18:58:21,065 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-14 18:58:21,173 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-14 18:58:21,260 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-14 18:58:21,261 - main - INFO - ✅ Resend API Key configured
+2026-02-14 18:58:27,246 - main - INFO - ✅ Database connection successful
+2026-02-14 18:58:30,726 - main - INFO - ✅ Payment tables verified/created
+2026-02-14 18:58:30,728 - main - INFO - ✅ JWT Secret configured
+2026-02-14 18:58:30,729 - main - INFO - 🎯 Startup validation complete
+

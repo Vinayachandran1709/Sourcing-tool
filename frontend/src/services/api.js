@@ -353,5 +353,13 @@ export const getFeedbackHistory = async () => {
   return response.data;
 };
 
+// Send test email to verify settings
+export const sendTestEmail = async (testEmail) => {
+  const response = await api.post('/email-settings/send-test', {
+    test_email: testEmail
+  });
+  return response.data;
+};
+
 // Export the axios instance for custom requests
 export default api;
