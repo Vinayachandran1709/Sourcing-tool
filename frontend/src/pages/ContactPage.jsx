@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Mail, Send, CheckCircle } from 'lucide-react';
+import { trackContactFormSubmitted, trackPageEntry, trackPageExit } from '../services/analytics';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +15,9 @@ const ContactPage = () => {
   const [submitted, setSubmitted] = useState(false);
 
   useEffect(() => {
-  window.scrollTo(0, 0);
+    window.scrollTo(0, 0);
+    trackPageEntry('contact_page');
+    return () => trackPageExit('contact_page');
   }, []);
 
   const handleSubmit = async (e) => {
@@ -32,6 +35,7 @@ const ContactPage = () => {
       const data = await response.json();
 
       if (data.success) {
+        trackContactFormSubmitted(formData);
         setSubmitted(true);
         setTimeout(() => {
           setSubmitted(false);

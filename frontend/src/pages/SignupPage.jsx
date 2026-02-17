@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, User, Building, ArrowRight, Eye, EyeOff, AlertCircle, CheckCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { trackPageEntry, trackPageExit } from '../services/analytics';
 
 const SignupPage = () => {
   const navigate = useNavigate();
@@ -17,10 +18,12 @@ const SignupPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    trackPageEntry('signup_page');
     // If already authenticated (not mid-signup), redirect to dashboard
     if (isAuthenticated && !isSigningUp.current) {
       navigate('/dashboard/search', { replace: true });
     }
+    return () => trackPageExit('signup_page');
   }, [isAuthenticated, navigate]);
 
   const checkPasswordStrength = (password) => {

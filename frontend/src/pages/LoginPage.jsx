@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Package, Mail, Lock, ArrowRight, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
+import { trackPageEntry, trackPageExit } from '../services/analytics';
 
 // Animations (guarded to prevent duplicate injection)
 if (!document.getElementById('login-page-styles')) {
@@ -50,12 +51,14 @@ const LoginPage = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0);
+    trackPageEntry('login_page');
     // If already authenticated (not mid-login), redirect smoothly to dashboard
     if (isAuthenticated && !isLoggingIn.current) {
       setRedirecting(true);
       setTimeout(() => setFadingOut(true), 600);
       setTimeout(() => navigate('/dashboard/search', { replace: true }), 1000);
     }
+    return () => trackPageExit('login_page');
   }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (e) => {

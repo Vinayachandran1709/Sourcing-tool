@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { login as apiLogin, signup as apiSignup, getSubscriptionStatus, getUsageStats } from '../services/api';
+import { identifyUser, resetUser, trackLogin, trackSignup, trackLogout, trackUsageSnapshot } from '../services/analytics';
 
 const AuthContext = createContext(null);
 
@@ -28,6 +29,8 @@ export const AuthProvider = ({ children }) => {
   // Logout Function
   // ============================================
   const logout = useCallback(() => {
+    trackLogout();
+    resetUser();
     // Clear all auth-related storage
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -118,6 +121,10 @@ export const AuthProvider = ({ children }) => {
         setToken(data.access_token);
         setUser(userData);
 
+        // PostHog: identify user and track login
+        identifyUser(userData);
+        trackLogin(userData);
+
         return { success: true };
       }
 
@@ -162,10 +169,14 @@ export const AuthProvider = ({ children }) => {
         // Update state
         setToken(data.access_token);
         setUser(userData);
-        
+
+        // PostHog: identify user and track signup
+        identifyUser(userData);
+        trackSignup(userData);
+
         return { success: true };
       }
-      
+
       return { success: false, error: 'Invalid response from server' };
     } catch (error) {
       console.error('Signup error:', error);
@@ -313,6 +324,9 @@ export const AuthProvider = ({ children }) => {
       setUsageStats(formattedStats);
       localStorage.setItem('usageStats', JSON.stringify(formattedStats));
 
+      // Track usage snapshot for retention/usage analytics
+      trackUsageSnapshot(formattedStats);
+
       return formattedStats;
     } catch (error) {
       if (!silent) {
@@ -389,6 +403,8 @@ export const AuthProvider = ({ children }) => {
         const parsedUser = JSON.parse(storedUser);
         setUser(parsedUser);
         setToken(storedToken);
+        // Re-identify user on page reload
+        identifyUser(parsedUser);
       } catch (e) {
         // Invalid stored data, clear it
         logout();

@@ -12,10 +12,21 @@ if (process.env.REACT_APP_POSTHOG_KEY) {
     {
       api_host: process.env.REACT_APP_POSTHOG_HOST,
       person_profiles: 'identified_only',
+      capture_pageview: false, // We handle pageviews manually for better tracking
+      capture_pageleave: true, // Track when users leave pages
+      autocapture: true, // Auto-capture clicks, inputs, form submissions
+      session_recording: {
+        recordCrossOriginIframes: false,
+      },
+      persistence: 'localStorage+cookie',
+      loaded: (posthog) => {
+        if (process.env.NODE_ENV === 'development') {
+          posthog.debug();
+        }
+      },
     }
   );
 }
-window.posthog = posthog;
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

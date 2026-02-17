@@ -15,6 +15,7 @@ import {
   cancelSubscription,
   getPaymentHistory
 } from '../../services/api';
+import { trackUpgradeClicked, trackPaymentStarted, trackPaymentCompleted, trackPaymentFailed, trackSubscriptionCancelled, trackPageEntry, trackPageExit } from '../../services/analytics';
 
 // ============================================
 // Plan Card Components
@@ -131,6 +132,7 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess }) => {
   const handlePayment = async () => {
     setStatus('loading');
     setError(null);
+    trackPaymentStarted(plan, billingCycle);
 
     try {
       // Step 1: Create order
@@ -156,6 +158,7 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess }) => {
             if (verification.success) {
               // Step 4: Refresh subscription data
               await refreshSubscription();
+              trackPaymentCompleted(plan, billingCycle);
               setStatus('success');
               
               // Close modal after delay
@@ -173,6 +176,7 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess }) => {
         },
         // On Failure
         (failureData) => {
+          trackPaymentFailed(plan, billingCycle, failureData.error || 'Payment failed');
           setError(failureData.error || 'Payment failed');
           setStatus('error');
         },
@@ -388,6 +392,12 @@ const SubscriptionPage = () => {
   // Refresh state
   const [refreshing, setRefreshing] = useState(false);
 
+  // Page timing tracking
+  useEffect(() => {
+    trackPageEntry('subscription_page');
+    return () => trackPageExit('subscription_page');
+  }, []);
+
   // Always fetch fresh stats from backend when page mounts
   useEffect(() => {
     fetchUsageStats(false);
@@ -461,12 +471,13 @@ const SubscriptionPage = () => {
   };
 
   const handleUpgrade = (plan, cycle) => {
+    trackUpgradeClicked(plan, cycle);
     if (plan.period) {
       // Free trial - go to signup
       navigate('/signup');
       return;
     }
-    
+
     setSelectedPlan(plan);
     setSelectedCycle(cycle);
     setShowPaymentModal(true);
@@ -483,6 +494,7 @@ const SubscriptionPage = () => {
     try {
       const result = await cancelSubscription('User requested cancellation');
       if (result.success) {
+        trackSubscriptionCancelled();
         setUserData(prev => ({
           ...prev,
           subscription_status: 'cancelled'

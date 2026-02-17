@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Mail, Save, CheckCircle, AlertCircle, User, FileText, Link as LinkIcon, Loader } from 'lucide-react';
 import { updateEmailSettings, getEmailUsage, getEmailSettings } from '../services/api';
+import { trackEmailSettingsSaved } from '../services/analytics';
 
 const DEFAULT_TEMPLATE = `Hi {{name}},
 
@@ -129,6 +130,9 @@ const EmailSettingsCard = () => {
 
       // Update cache
       localStorage.setItem('emailSettings', JSON.stringify(settingsData));
+
+      // Track settings saved
+      trackEmailSettingsSaved(settingsData);
 
       showMessage('success', 'Changes saved successfully!', 2000);
     } catch (error) {

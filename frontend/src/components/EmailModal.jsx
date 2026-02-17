@@ -3,6 +3,7 @@ import { X, Mail, Loader, AlertCircle, Settings } from 'lucide-react';
 import { sendBulkEmails, getEmailUsage } from '../services/api';
 import EmailSettingsModal from './EmailSettingsModal';
 import { useAuth } from '../contexts/AuthContext';
+import { trackEmailsSent } from '../services/analytics';
 
 const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) => {
   const { incrementUsage } = useAuth();
@@ -54,8 +55,11 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
         profile_ids: activeProfiles.map(p => p.id)
       });
 
+      const sentCount = result.sent || activeProfiles.length;
       // Increment usage
-      incrementUsage('email', result.sent || activeProfiles.length);
+      incrementUsage('email', sentCount);
+      // Track emails sent
+      trackEmailsSent(sentCount, true);
 
       // Close and callback
       handleComplete && handleComplete(result);
@@ -63,6 +67,7 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
 
     } catch (error) {
       console.error('Send error:', error);
+      trackEmailsSent(activeProfiles.length, false);
       setError(error.response?.data?.message || 'Failed to send emails. Please try again.');
       setSending(false);
     }

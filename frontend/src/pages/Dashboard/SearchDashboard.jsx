@@ -8,6 +8,7 @@ import FilterPanel from '../../components/FilterPanel';
 import { useAuth } from '../../contexts/AuthContext';
 
 import {toggleProfileSelection, logProfileUnlock} from '../../services/api';
+import { trackSearchStarted, trackSearchPerformed, trackProfileViewed, trackProfileUnlocked, trackProfileSaved, trackEmailModalOpened, trackScoreFilterUsed, trackPageEntry, trackPageExit } from '../../services/analytics';
 
 const SearchDashboard = () => {
   const { incrementUsage } = useAuth();
@@ -97,6 +98,9 @@ const SearchDashboard = () => {
       totalFound: 0
     });
 
+    // Track search started
+    trackSearchStarted(filters);
+
     try {
       const token = localStorage.getItem('token');
       const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
@@ -177,6 +181,8 @@ const SearchDashboard = () => {
                 setLoading(false);
                 // Increment search usage count
                 incrementUsage('search', 1);
+                // Track search completed with results
+                trackSearchPerformed(filters, data.total);
                 break;
               case 'error':
                 // Clear the timer on error
@@ -207,6 +213,12 @@ const SearchDashboard = () => {
       setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
     }
   };
+
+  // Page timing tracking
+  useEffect(() => {
+    trackPageEntry('search_dashboard');
+    return () => trackPageExit('search_dashboard');
+  }, []);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -253,6 +265,7 @@ const SearchDashboard = () => {
     const isNewUnlock = !unlockedProfileIds.includes(profile.id);
     if (isNewUnlock) {
       setUnlockedProfileIds(prev => [...prev, profile.id]);
+      trackProfileUnlocked(profile);
       // Log unlock on backend (tracks usage_profile_views)
       logProfileUnlock(profile.id).catch(err => {
         console.error('Failed to log profile unlock:', err);
@@ -266,12 +279,14 @@ const SearchDashboard = () => {
       // Optimistic UI update
       incrementUsage('profile_unlock', 1);
     }
+    trackProfileViewed(profile);
     setSelectedProfile(profile);
     setShowDetailModal(true);
   };
 
   const handleToggleSave = (profile) => {
     const isSaved = savedProfileIds.includes(profile.id);
+    trackProfileSaved(profile.id, !isSaved);
     let updatedSavedIds;
 
     if (isSaved) {
@@ -328,15 +343,21 @@ const SearchDashboard = () => {
       console.error('Failed to check email limits:', error);
     }
 
+    trackEmailModalOpened(selectedProfiles.length);
     setShowEmailModal(true);
   };
 
   const handleScoreRangeToggle = (range) => {
     const isSelected = scoreFilterRanges.some(r => r.min === range.min && r.max === range.max);
+    let newRanges;
     if (isSelected) {
-      setScoreFilterRanges(scoreFilterRanges.filter(r => !(r.min === range.min && r.max === range.max)));
+      newRanges = scoreFilterRanges.filter(r => !(r.min === range.min && r.max === range.max));
     } else {
-      setScoreFilterRanges([...scoreFilterRanges, range]);
+      newRanges = [...scoreFilterRanges, range];
+    }
+    setScoreFilterRanges(newRanges);
+    if (newRanges.length > 0) {
+      trackScoreFilterUsed(newRanges);
     }
     setCurrentPage(1);
   };
