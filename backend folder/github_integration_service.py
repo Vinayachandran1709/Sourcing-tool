@@ -5,9 +5,11 @@ from datetime import datetime, timezone, timedelta
 import asyncio
 from github_service import (
     search_github_users_paginated,
-    get_user_details,
-    is_valid_user_data,
     check_github_rate_limit
+)
+from github_graphql_service import (
+    get_user_details_graphql as get_user_details,
+    is_valid_user_data_graphql as is_valid_user_data
 )
 from typing import List, Dict
 import logging
@@ -209,6 +211,8 @@ class GitHubIntegrationService:
             "last_active_date": details.get("last_active_date"),
             "cached_at": datetime.now(timezone.utc),
             "source": "github",
+            "followers": details.get("followers", 0),
+            "is_hireable": details.get("is_hireable", False),
         }
 
         stmt = pg_insert(Profile).values(**values)
@@ -225,6 +229,11 @@ class GitHubIntegrationService:
         profile = db.query(Profile).get(profile_id)
 
         profile.developer_score = profile.calculate_developer_score()
+
+        # Set refresh category based on contributions
+        from profile_refresh_service import categorize_profile
+        profile.refresh_category = categorize_profile(profile)
+
         try:
             from role_detection_service import RoleDetectionService
             profile.detected_roles = RoleDetectionService.detect_roles(profile)
@@ -316,7 +325,12 @@ class GitHubIntegrationService:
                 batch_usernames = usernames_to_fetch[batch_start:batch_start + BATCH_SIZE]
                 print(f"\n   🔄 Batch {batch_start//BATCH_SIZE + 1} ({len(batch_usernames)} profiles)...")
 
-                tasks = [get_user_details(username) for username in batch_usernames]
+                async def _fetch_staggered(username, index):
+                    """Stagger request starts by 0.2s to avoid burst."""
+                    await asyncio.sleep(index * 0.2)
+                    return await get_user_details(username)
+
+                tasks = [_fetch_staggered(u, i) for i, u in enumerate(batch_usernames)]
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
                 GitHubIntegrationService._save_batch_results(db, batch_results, new_profiles)

@@ -26,6 +26,7 @@ if (process.env.REACT_APP_POSTHOG_KEY) {
       },
     }
   );
+  window.posthog = posthog;
 }
 
 const root = ReactDOM.createRoot(document.getElementById('root'));

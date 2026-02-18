@@ -89,34 +89,36 @@ async def search_github_users_paginated(
         
         async with httpx.AsyncClient() as client:
             try:
-                response = await client.get(
+                from github_rate_limiter import execute_with_rate_limit
+
+                response = await execute_with_rate_limit(
+                    client, "get",
                     f"{GITHUB_API_URL}/search/users?q={query}&per_page=30&page={page}",
-                    headers=headers,
-                    timeout=30.0
+                    headers=headers, timeout=30.0
                 )
-                
+
                 if response.status_code != 200:
                     print(f"❌ Error {response.status_code}")
                     break
-                
+
                 data = response.json()
                 users = data.get("items", [])
-                
+
                 if not users:
                     print("✅ No more results")
                     break
-                
+
                 all_users.extend(users)
                 print(f"✅ Got {len(users)} users (Total: {len(all_users)})")
-                
+
                 # ✅ EARLY STOPPING: Stop if target reached
                 if len(all_users) >= target_users:
                     print(f"✅ Target reached! Stopping early.")
                     break
-                
-                # ✅ OPTIMIZATION #5: REDUCED cooldown from 0.6s to 0.4s
-                await asyncio.sleep(0.4)
-                        
+
+                # Cooldown between pages (rate limiter adds 0.2s, this adds extra spacing)
+                await asyncio.sleep(0.2)
+
             except Exception as e:
                 print(f"❌ Error: {e}")
                 break

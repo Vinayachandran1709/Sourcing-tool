@@ -187,11 +187,11 @@ async def get_user_details_graphql(username: str):
 
     async with httpx.AsyncClient() as client:
         try:
-            response = await client.post(
-                GITHUB_GRAPHQL_URL,
-                headers=headers,
-                json=query_data,
-                timeout=30.0
+            from github_rate_limiter import execute_with_rate_limit
+
+            response = await execute_with_rate_limit(
+                client, "post", GITHUB_GRAPHQL_URL,
+                headers=headers, json=query_data, timeout=30.0
             )
 
             if response.status_code != 200:

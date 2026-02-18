@@ -318,7 +318,7 @@ const plans = [
     price_monthly: 79,
     price_annual: 790,
     features: [
-      '100 searches/month',
+      '100 smart searches/month',
       '300 profile unlocks/month',
       '300 emails/month',
       'Filter by roles & expertise',

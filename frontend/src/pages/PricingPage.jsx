@@ -194,7 +194,7 @@ Looking forward to hearing from you!`);
               </div>
               {isAnnual && <p style={styles.billedAnnually}>Billed ${starterAnnual}/year</p>}
               <ul style={styles.featureList}>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 100 searches/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 100 smart searches/month</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 profile unlocks/month</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 emails/month</li>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by roles & expertise</li>

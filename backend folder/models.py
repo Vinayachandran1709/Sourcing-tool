@@ -102,6 +102,14 @@ class Profile(Base):
     twitter_url = Column(String, nullable=True)
     personal_website = Column(String, nullable=True)
 
+    # GraphQL-sourced fields
+    followers = Column(Integer, default=0)
+    is_hireable = Column(Boolean, default=False)
+
+    # Smart refresh fields
+    refresh_category = Column(String(20), default="dormant")  # "active", "moderate", "dormant"
+    last_refreshed_at = Column(DateTime(timezone=True), nullable=True)
+
     def calculate_developer_score(self):
         """Calculate developer score (0-100)"""
         EXCELLENT_STARS = 3000
@@ -282,3 +290,50 @@ class Feedback(Base):
     resolved_at = Column(DateTime(timezone=True), nullable=True)
 
     user = relationship("User")
+
+
+# ===== RATE LIMITING & PROTECTION MODELS =====
+
+class SearchLock(Base):
+    """Track concurrent search locks per user (PostgreSQL-based, no Redis)"""
+    __tablename__ = "search_locks"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, unique=True)
+    locked_at = Column(DateTime(timezone=True), server_default=func.now())
+    expires_at = Column(DateTime(timezone=True), nullable=False)
+    search_completed = Column(Boolean, default=False)
+
+
+class RateLimitEvent(Base):
+    """Log GitHub API rate limit events for monitoring"""
+    __tablename__ = "rate_limit_events"
+    id = Column(Integer, primary_key=True, index=True)
+    event_type = Column(String(20), nullable=False)  # '429', '403', 'secondary'
+    status_code = Column(Integer, nullable=False)
+    retry_after = Column(Integer, nullable=True)
+    rate_limit_remaining = Column(Integer, nullable=True)
+    rate_limit_resource = Column(String(50), nullable=True)
+    endpoint = Column(String(200), nullable=True)
+    occurred_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+# ===== SMART REFRESH MODELS =====
+
+class ProfileUnlock(Base):
+    """Track which profiles were unlocked by recruiters (for refresh priority)"""
+    __tablename__ = "profile_unlocks"
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    profile_id = Column(Integer, ForeignKey("profiles.id", ondelete="CASCADE"), nullable=False)
+    unlocked_at = Column(DateTime(timezone=True), server_default=func.now())
+
+
+class RefreshJobLog(Base):
+    """Log nightly profile refresh job runs"""
+    __tablename__ = "refresh_job_log"
+    id = Column(Integer, primary_key=True, index=True)
+    started_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True), nullable=True)
+    profiles_refreshed = Column(Integer, default=0)
+    profiles_failed = Column(Integer, default=0)
+    status = Column(String(20), default="running")

@@ -1,4 +1,5 @@
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 from models import User, UsageLog
 from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException
@@ -51,9 +52,22 @@ class UsageService:
             user.usage_reset_date = now
             db.commit()
 
+    # Maps action_type to the DB column and limit key
+    _ACTION_MAP = {
+        "search": {"column": "usage_searches", "limit_key": "searches", "label": "searches", "usage_type": "searches"},
+        "profile_view": {"column": "usage_profile_views", "limit_key": "profile_views", "label": "views", "usage_type": "profile_views"},
+        "email_sent": {"column": "usage_emails_sent", "limit_key": "emails_sent", "label": "emails", "usage_type": "email_credits"},
+    }
+
     @staticmethod
     def check_limit(db: Session, user_id: int, action_type: str, count: int = 1) -> bool:
+        """
+        Atomically check AND reserve usage in a single UPDATE ... WHERE statement.
+        This prevents race conditions when multiple sessions share the same credentials.
 
+        The counter is incremented at check time. If the action later fails,
+        callers should call rollback_usage() to return the reserved slot.
+        """
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
@@ -71,7 +85,6 @@ class UsageService:
                         "trial_end_date": user.trial_end_date.isoformat()
                     }
                 )
-            # Also block if subscription_status is already expired
             if user.subscription_status == "expired":
                 raise HTTPException(
                     status_code=403,
@@ -85,63 +98,73 @@ class UsageService:
         # Reset billing cycle for starter plan if needed
         UsageService._maybe_reset_billing_cycle(db, user)
 
-        # Get plan limits (handle legacy "free" value as "free_trial")
+        # Get plan limits
         plan_key = user.plan if user.plan in UsageService.PLAN_LIMITS else "free_trial"
         limits = UsageService.PLAN_LIMITS[plan_key]
-        
-        # Check specific limits with detailed error messages
-        if action_type == "search":
-            limit = limits["searches"]
-            current_usage = user.usage_searches or 0
-            
-            if limit != -1 and current_usage + count > limit:
-                raise HTTPException(
-                    status_code=429,
-                    detail={
-                        "error": "LIMIT_EXCEEDED",
-                        "message": f"Search limit exceeded. You have used {current_usage} of {limit} searches.",
-                        "current_usage": current_usage,
-                        "limit": limit,
-                        "usage_type": "searches",
-                        "upgrade_url": "/pricing"
-                    }
-                )
-        
-        elif action_type == "profile_view":
-            limit = limits["profile_views"]
-            current_usage = user.usage_profile_views or 0
-            
-            if limit != -1 and current_usage + count > limit:
-                raise HTTPException(
-                    status_code=429,
-                    detail={
-                        "error": "LIMIT_EXCEEDED",
-                        "message": f"Profile view limit exceeded. You have used {current_usage} of {limit} views.",
-                        "current_usage": current_usage,
-                        "limit": limit,
-                        "usage_type": "profile_views",
-                        "upgrade_url": "/pricing"
-                    }
-                )
-        
-        elif action_type == "email_sent":
-            limit = limits["emails_sent"]
-            current_usage = user.usage_emails_sent or 0
-            
-            if limit != -1 and current_usage + count > limit:
-                raise HTTPException(
-                    status_code=429,
-                    detail={
-                        "error": "LIMIT_EXCEEDED",
-                        "message": f"Email limit exceeded. You have used {current_usage} of {limit} emails.",
-                        "current_usage": current_usage,
-                        "limit": limit,
-                        "usage_type": "email_credits",
-                        "upgrade_url": "/pricing"
-                    }
-                )
-        
+
+        action_info = UsageService._ACTION_MAP.get(action_type)
+        if not action_info:
+            return True
+
+        limit = limits[action_info["limit_key"]]
+        if limit == -1:
+            return True  # Unlimited
+
+        col = action_info["column"]
+
+        # Atomic increment-if-under-limit using UPDATE ... WHERE
+        # This is safe under concurrent access: only one session wins the row lock.
+        result = db.execute(
+            text(f"""
+                UPDATE users
+                SET {col} = COALESCE({col}, 0) + :count
+                WHERE id = :user_id
+                  AND COALESCE({col}, 0) + :count <= :limit
+                RETURNING {col}
+            """),
+            {"user_id": user_id, "count": count, "limit": limit}
+        )
+        row = result.fetchone()
+        db.commit()
+
+        if row is None:
+            # The WHERE clause failed — user is at or over the limit
+            current_usage = getattr(user, col, 0) or 0
+            raise HTTPException(
+                status_code=429,
+                detail={
+                    "error": "LIMIT_EXCEEDED",
+                    "message": f"{action_info['label'].capitalize()} limit exceeded. You have used {current_usage} of {limit} {action_info['label']}.",
+                    "current_usage": current_usage,
+                    "limit": limit,
+                    "usage_type": action_info["usage_type"],
+                    "upgrade_url": "/pricing"
+                }
+            )
+
+        # Refresh the user object so callers see updated count
+        db.refresh(user)
         return True
+
+    @staticmethod
+    def rollback_usage(db: Session, user_id: int, action_type: str, count: int = 1):
+        """
+        Return a reserved usage slot if the action failed after check_limit().
+        This decrements the counter that was atomically incremented.
+        """
+        action_info = UsageService._ACTION_MAP.get(action_type)
+        if not action_info:
+            return
+        col = action_info["column"]
+        db.execute(
+            text(f"""
+                UPDATE users
+                SET {col} = GREATEST(COALESCE({col}, 0) - :count, 0)
+                WHERE id = :user_id
+            """),
+            {"user_id": user_id, "count": count}
+        )
+        db.commit()
     
     @staticmethod
     def check_email_limit(db: Session, user_id: int) -> dict:
@@ -260,21 +283,29 @@ class UsageService:
 
 
     @staticmethod
-    def log_usage(db: Session, user_id: int, action_type: str, details: dict = None):
-        """Log usage and increment counter"""
-        user = db.query(User).filter(User.id == user_id).first()
-        if not user:
-            return
-        
-        # Increment usage counter
-        if action_type == "search":
-            user.usage_searches += 1
-        elif action_type == "profile_view":
-            user.usage_profile_views += 1
-        elif action_type == "email_sent":
-            user.usage_emails_sent += 1
-        
-        # Log detailed usage
+    def log_usage(db: Session, user_id: int, action_type: str, details: dict = None,
+                  increment_counter: bool = False):
+        """
+        Log usage to the UsageLog table for analytics.
+
+        NOTE: When called after check_limit(), the counter is already incremented
+        atomically, so increment_counter should be False (the default).
+        Set increment_counter=True only when logging usage that didn't go through
+        check_limit() (e.g., campaign emails).
+        """
+        if increment_counter:
+            action_info = UsageService._ACTION_MAP.get(action_type)
+            if action_info:
+                col = action_info["column"]
+                db.execute(
+                    text(f"""
+                        UPDATE users
+                        SET {col} = COALESCE({col}, 0) + 1
+                        WHERE id = :user_id
+                    """),
+                    {"user_id": user_id}
+                )
+
         log = UsageLog(
             user_id=user_id,
             action_type=action_type,

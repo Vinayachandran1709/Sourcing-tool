@@ -9,7 +9,12 @@
       "Bash(findstr:*)",
       "Bash(tree:*)",
       "Bash(npx react-scripts build:*)",
-      "Bash(del \"C:\\\\Users\\\\vinayachandran\\\\OneDrive\\\\Desktop\\\\Github folder\\\\Sourcing-tool\\\\frontend\\\\src\\\\pages\\\\Dashboard\\\\OutreachHistoryPage.jsx\")"
+      "Bash(del \"C:\\\\Users\\\\vinayachandran\\\\OneDrive\\\\Desktop\\\\Github folder\\\\Sourcing-tool\\\\frontend\\\\src\\\\pages\\\\Dashboard\\\\OutreachHistoryPage.jsx\")",
+      "Bash(grep:*)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(python:*)",
+      "Bash(python -c:*)"
     ]
   }
 }

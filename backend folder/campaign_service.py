@@ -137,7 +137,7 @@ class CampaignService:
         if success:
             campaign.initial_sent_at = datetime.now(timezone.utc)
             campaign.status = "active"
-            UsageService.log_usage(db, campaign.user_id, "email_sent", {"campaign_id": campaign_id})
+            UsageService.log_usage(db, campaign.user_id, "email_sent", {"campaign_id": campaign_id}, increment_counter=True)
             db.commit()
             
             logger.info(f"Initial email sent successfully for campaign {campaign_id}")
