@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Request, Header
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -334,11 +334,10 @@ async def general_exception_handler(request: Request, exc: Exception):
 # ===== ADMIN ENDPOINTS =====
 
 @app.get("/admin/cache-stats")
-async def cache_stats(request: Request):
+async def cache_stats(x_admin_key: str = Header(..., alias="X-Admin-Key")):
     """Return Redis cache statistics. Requires X-Admin-Key header."""
     admin_secret = os.getenv("ADMIN_SECRET_KEY")
-    provided_key = request.headers.get("X-Admin-Key")
-    if not admin_secret or provided_key != admin_secret:
+    if not admin_secret or x_admin_key != admin_secret:
         raise HTTPException(status_code=403, detail="Forbidden")
     return await get_redis_stats()
 
