@@ -49,6 +49,7 @@ from models import User, Profile, EmailOutreach
 from auth_middleware import get_current_user
 from profile_cache_service import ProfileCacheService
 from email_service import EmailService
+from redis_service import init_redis, get_redis_stats
 
 # ===== ANNOTATED DEPENDENCY TYPES =====
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -256,6 +257,9 @@ async def startup_event():
     except Exception as e:
         logger.error(f"⚠️ Scheduler init failed: {e}")
 
+    # Initialize Redis cache
+    await init_redis()
+
     logger.info("🎯 Startup validation complete\n")
 
 
@@ -325,6 +329,18 @@ async def general_exception_handler(request: Request, exc: Exception):
             "message": "An unexpected error occurred. Please try again later."
         }
     )
+
+
+# ===== ADMIN ENDPOINTS =====
+
+@app.get("/admin/cache-stats")
+async def cache_stats(request: Request):
+    """Return Redis cache statistics. Requires X-Admin-Key header."""
+    admin_secret = os.getenv("ADMIN_SECRET_KEY")
+    provided_key = request.headers.get("X-Admin-Key")
+    if not admin_secret or provided_key != admin_secret:
+        raise HTTPException(status_code=403, detail="Forbidden")
+    return await get_redis_stats()
 
 
 # ===== CORS MIDDLEWARE =====
