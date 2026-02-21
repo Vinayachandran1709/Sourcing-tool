@@ -13,6 +13,11 @@ from github_graphql_service import (
 )
 from typing import List, Dict
 import logging
+from redis_service import (
+    get_cached_search, set_cached_search,
+    get_cached_profile, set_cached_profile,
+    hash_filters,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +82,14 @@ class GitHubIntegrationService:
             await check_github_rate_limit()
         except Exception as e:
             logger.warning(f"Rate limit check failed: {e}")
-        
+
+        # ===== STEP 0: Check Redis search cache =====
+        filter_hash = hash_filters(filters)
+        cached_usernames = await get_cached_search(filter_hash)
+        if cached_usernames is not None:
+            logger.info("Redis cache hit for search")
+            return db.query(Profile).filter(Profile.github_username.in_(cached_usernames)).all()
+
         # ===== STEP 1: Search database cache FIRST =====
         logger.info("📦 Searching database cache...")
         try:
@@ -149,6 +161,7 @@ class GitHubIntegrationService:
         print(f"   - From cache: {len(cached_profiles)}")
         print(f"   - From GitHub: {len(new_profiles)}")
         
+        await set_cached_search(filter_hash, [p.github_username for p in unique_profiles])
         return unique_profiles[:target_profiles]
 
 
@@ -246,7 +259,7 @@ class GitHubIntegrationService:
         return profile
 
     @staticmethod
-    def _save_batch_results(db, batch_results, new_profiles):
+    async def _save_batch_results(db, batch_results, new_profiles):
         """Save valid batch results using upsert, appending to new_profiles."""
         for details in batch_results:
             if isinstance(details, Exception) or not details:
@@ -256,6 +269,7 @@ class GitHubIntegrationService:
             try:
                 profile = GitHubIntegrationService._upsert_profile(db, details)
                 new_profiles.append(profile)
+                await set_cached_profile(details['username'], details, details.get('contributions', 0))
                 print(f"   ✅ {details['username']}: Score {profile.developer_score}")
             except Exception as e:
                 logger.error(f"❌ Failed to upsert {details.get('username', 'unknown')}: {e}")
@@ -330,10 +344,16 @@ class GitHubIntegrationService:
                     await asyncio.sleep(index * 0.2)
                     return await get_user_details(username)
 
-                tasks = [_fetch_staggered(u, i) for i, u in enumerate(batch_usernames)]
+                tasks = []
+                for i, u in enumerate(batch_usernames):
+                    cached = await get_cached_profile(u)
+                    if cached is not None:
+                        logger.info(f"Profile cache hit for {u}")
+                        continue
+                    tasks.append(_fetch_staggered(u, i))
                 batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
-                GitHubIntegrationService._save_batch_results(db, batch_results, new_profiles)
+                await GitHubIntegrationService._save_batch_results(db, batch_results, new_profiles)
 
                 if len(new_profiles) >= profiles_needed:
                     print(f"\n   ✅ Target reached! Stopping at {len(new_profiles)} profiles.")

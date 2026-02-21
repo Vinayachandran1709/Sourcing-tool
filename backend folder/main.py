@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Request, Header
+from fastapi import FastAPI, HTTPException, Depends, Request, Header, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -423,6 +423,7 @@ def root():
 @limiter.limit("30/minute")
 async def search_profiles(
     request: Request,
+    response: Response,
     search: SearchRequest,
     current_user: CurrentUser,
     db: DbSession,
@@ -550,6 +551,7 @@ async def search_profiles(
                 }
                 profile_dicts.append(profile_dict)
 
+        response.headers["Cache-Control"] = "public, max-age=300"
         return {
             "success": True,
             "total_found": len(profiles),
@@ -1263,7 +1265,7 @@ async def search_profiles_stream(
         event_stream(),
         media_type="text/event-stream",
         headers={
-            "Cache-Control": "no-cache",
+            "Cache-Control": "public, max-age=300",
             "X-Accel-Buffering": "no",
             "Connection": "keep-alive"
         }
