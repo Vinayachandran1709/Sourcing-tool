@@ -49,7 +49,7 @@ from models import User, Profile, EmailOutreach
 from auth_middleware import get_current_user
 from profile_cache_service import ProfileCacheService
 from email_service import EmailService
-from redis_service import init_redis, get_redis_stats
+from redis_service import init_redis, get_redis_stats, get_cached_search, set_cached_search, hash_filters
 
 # ===== ANNOTATED DEPENDENCY TYPES =====
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -1050,6 +1050,37 @@ async def search_profiles_stream(
             def _first_name_stream(full_name):
                 return full_name.split()[0] if full_name else None
 
+            # ===== Redis cache check =====
+            filter_hash = hash_filters(filters)
+            cached_usernames = await get_cached_search(filter_hash)
+            if cached_usernames is not None:
+                logger.info("Redis cache hit for search")
+                redis_profiles = db.query(Profile).filter(Profile.github_username.in_(cached_usernames)).all()
+                redis_dicts = []
+                for profile in redis_profiles:
+                    redis_dicts.append({
+                        "id": profile.id,
+                        "github_username": profile.github_username,
+                        "name": _first_name_stream(profile.name),
+                        "email": profile.email,
+                        "location": profile.location,
+                        "bio": profile.bio,
+                        "public_repos": profile.public_repos,
+                        "primary_language": profile.primary_language,
+                        "total_stars": getattr(profile, 'total_stars', 0),
+                        "developer_score": getattr(profile, 'developer_score', 0),
+                        "avatar_url": getattr(profile, 'avatar_url', None),
+                        "contributions_last_year": getattr(profile, 'contributions_last_year', 0),
+                        "followers": getattr(profile, 'followers', 0),
+                        "languages_data": getattr(profile, 'languages_data', None),
+                        "top_repos": getattr(profile, 'top_repos', None),
+                        "selected": False
+                    })
+                yield f"data: {json.dumps({'type': 'profiles', 'profiles': redis_dicts, 'count': len(redis_dicts)})}\n\n"
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(redis_dicts)})}\n\n"
+                return
+
+            all_profile_usernames = [p.github_username for p in cached_profiles]
             cached_dicts = []
             for profile in cached_profiles[:120]:  # ✅ Limit to 120
                 profile_dict = {
@@ -1224,7 +1255,8 @@ async def search_profiles_stream(
                         
                         batch_new_profiles.append(profile_dict)
                         new_profiles_count += 1
-                        
+                        all_profile_usernames.append(profile.github_username)
+
                     except Exception as e:
                         logger.error(f"❌ Failed to save profile: {e}")
                         db.rollback()
@@ -1253,6 +1285,7 @@ async def search_profiles_stream(
             # ===== Complete =====
             total_profiles = len(cached_profiles) + new_profiles_count
             logger.info(f"✅ Search complete! Total: {total_profiles}")
+            await set_cached_search(filter_hash, all_profile_usernames)
             yield f"data: {json.dumps({'type': 'complete', 'total': total_profiles})}\n\n"
             
         except Exception as e:
