@@ -1055,7 +1055,8 @@ async def search_profiles_stream(
             cached_usernames = await get_cached_search(filter_hash)
             if cached_usernames is not None:
                 logger.info("Redis cache hit for search")
-                redis_profiles = db.query(Profile).filter(Profile.github_username.in_(cached_usernames)).all()
+                from models import Profile as ProfileModel
+                redis_profiles = db.query(ProfileModel).filter(ProfileModel.github_username.in_(cached_usernames)).all()
                 redis_dicts = []
                 for profile in redis_profiles:
                     redis_dicts.append({
