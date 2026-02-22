@@ -1864,3 +1864,23 @@ razorpay.errors.BadRequestError: Authentication failed
 2026-02-18 00:30:59,885 - httpx - INFO - HTTP Request: GET https://api.github.com/users/aledista/repos?sort=updated&per_page=30&type=owner "HTTP/1.1 200 OK"
 2026-02-18 00:30:59,892 - main - INFO - 📊 Progress: 100% - Total: 133
 2026-02-18 00:30:59,895 - main - INFO - ✅ Search complete! Total: 133
+2026-02-22 22:38:25,345 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-02-22 22:38:27,182 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-02-22 22:38:27,183 - main - INFO - Environment: development
+2026-02-22 22:38:27,185 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-02-22 22:38:27,306 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-02-22 22:38:27,406 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-02-22 22:38:27,407 - main - INFO - ✅ Resend API Key configured
+2026-02-22 22:38:34,596 - main - INFO - ✅ Database connection successful
+2026-02-22 22:38:41,024 - main - INFO - ✅ Payment tables verified/created
+2026-02-22 22:38:41,025 - main - INFO - ✅ JWT Secret configured
+2026-02-22 22:38:41,410 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-02-22 22:38:41,427 - apscheduler.scheduler - INFO - Added job "_nightly_refresh_wrapper" to job store "default"
+2026-02-22 22:38:41,427 - apscheduler.scheduler - INFO - Scheduler started
+2026-02-22 22:38:41,428 - scheduler - INFO - APScheduler started - nightly profile refresh at 2:00 UTC
+2026-02-22 22:38:41,428 - main - INFO - ✅ Background scheduler initialized
+2026-02-22 22:38:41,429 - redis_service - WARNING - REDIS_URL not set - Redis caching disabled
+2026-02-22 22:38:41,429 - main - INFO - 🎯 Startup validation complete
+
+2026-02-23 00:14:22,166 - scheduler - INFO - APScheduler shut down
+2026-02-23 00:14:22,192 - apscheduler.scheduler - INFO - Scheduler has been shut down

@@ -487,12 +487,14 @@ async def search_profiles(
             from github_integration_service import GitHubIntegrationService
             print("SUCCESS: GitHubIntegrationService imported")
 
+            is_paid_user = current_user.plan == "starter"
             print("\nCALLING search_and_cache_profiles...")
             profiles = await GitHubIntegrationService.search_and_cache_profiles(
                 db,
                 filters,
                 max_github_results=150,
-                target_profiles=200
+                target_profiles=200,
+                is_paid_user=is_paid_user
             )
             print(f"SUCCESS: Got {len(profiles)} profiles from hybrid search")
             from_cache = len(profiles)
@@ -1019,6 +1021,8 @@ async def search_profiles_stream(
     }
     UsageService.log_usage(db, user_id, "search", filters_for_log)
 
+    is_paid_user = current_user.plan == "starter"
+
     async def event_stream():
         """Generator that yields SSE events"""
         
@@ -1107,7 +1111,14 @@ async def search_profiles_stream(
             # Send initial results
             logger.info(f"✅ Sending {len(cached_dicts)} initial results")
             yield f"data: {json.dumps({'type': 'profiles', 'profiles': cached_dicts, 'count': len(cached_dicts)})}\n\n"
-            
+
+            # ===== TIERED SEARCH: Gate GitHub fetch for free users =====
+            if len(cached_profiles) < 20 and not is_paid_user:
+                logger.info(f"Free user search — returning DB results only ({len(cached_profiles)} profiles)")
+                yield f"data: {json.dumps({'type': 'upgrade_prompt', 'show': True, 'message': 'Upgrade to Starter to search live GitHub profiles and get 300+ results'})}\n\n"
+                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles)})}\n\n"
+                return
+
             # Check if we need more
             target_profiles = 200  # ✅ OPTIMIZATION #2: Reduced from 350
             if len(cached_profiles) >= target_profiles:
@@ -1287,6 +1298,7 @@ async def search_profiles_stream(
             total_profiles = len(cached_profiles) + new_profiles_count
             logger.info(f"✅ Search complete! Total: {total_profiles}")
             await set_cached_search(filter_hash, all_profile_usernames)
+            yield f"data: {json.dumps({'type': 'upgrade_prompt', 'show': False})}\n\n"
             yield f"data: {json.dumps({'type': 'complete', 'total': total_profiles})}\n\n"
             
         except Exception as e:

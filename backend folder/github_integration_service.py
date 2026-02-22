@@ -66,7 +66,8 @@ class GitHubIntegrationService:
         db: Session,
         filters: Dict,
         max_github_results: int = 250,
-        target_profiles: int = 200  # ✅ OPTIMIZATION #2: Target 120 profiles for MVP
+        target_profiles: int = 200,  # ✅ OPTIMIZATION #2: Target 120 profiles for MVP
+        is_paid_user: bool = False
     ) -> List[Profile]:
         """
         ✅ OPTIMIZED: Cache-first architecture with aggressive early stopping
@@ -101,6 +102,11 @@ class GitHubIntegrationService:
             print(f"   ❌ Database search failed: {e}")
             cached_profiles = []
         
+        # ===== TIERED SEARCH: Gate GitHub fetch for free users =====
+        if len(cached_profiles) < 20 and not is_paid_user:
+            logger.info(f"Free user search — returning DB results only ({len(cached_profiles)} profiles)")
+            return cached_profiles
+
         # ✅ Check if we have enough cached profiles
         if len(cached_profiles) >= target_profiles:
             logger.info(f"   ✅ Cache sufficient! Returning {len(cached_profiles)} profiles")
