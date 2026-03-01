@@ -158,10 +158,11 @@ const HomePage = () => {
             <iframe
               width="100%"
               height="100%"
-              src="https://www.youtube.com/embed/zDrQ2QdaqeQ?si=UiZYqCrK8cZHzwvM"
-              title="TalentBox Product Demo"
+              src="https://www.youtube.com/embed/M84J7NWwBBY?si=HWyQpgJYHCsNxmWw"
+              title="YouTube video player"
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
               style={styles.videoIframe}
             ></iframe>
