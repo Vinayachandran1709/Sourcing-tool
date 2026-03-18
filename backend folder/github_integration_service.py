@@ -242,9 +242,8 @@ class GitHubIntegrationService:
         ).returning(Profile.__table__.c.id)
 
         result = db.execute(stmt)
+        profile_id = result.fetchone()[0]  # Fetch before commit (cursor closes after commit with NullPool)
         db.commit()
-
-        profile_id = result.fetchone()[0]
         profile = db.query(Profile).get(profile_id)
 
         profile.developer_score = profile.calculate_developer_score()

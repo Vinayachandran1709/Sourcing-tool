@@ -96,7 +96,12 @@ def get_profiles_needing_refresh(db: Session, limit: int = 500):
 
 
 async def refresh_batch(db: Session, profiles: list) -> dict:
-    """Refresh a batch of profiles using GraphQL API."""
+    """Refresh a batch of profiles using GraphQL API.
+
+    Uses a fresh session per profile to prevent cascading failures
+    when one profile's error corrupts the session state.
+    """
+    from database import SessionLocal
     from github_graphql_service import get_user_details_graphql, is_valid_user_data_graphql
     from github_integration_service import GitHubIntegrationService
 
@@ -104,22 +109,27 @@ async def refresh_batch(db: Session, profiles: list) -> dict:
     failed = 0
 
     for profile in profiles:
+        # Fresh session per profile — isolates failures
+        profile_db = SessionLocal()
         try:
             details = await get_user_details_graphql(profile.github_username)
             if details and is_valid_user_data_graphql(details):
-                GitHubIntegrationService._upsert_profile(db, details)
-                # Update category based on new data
-                db.refresh(profile)
-                profile.refresh_category = categorize_profile(profile)
-                profile.last_refreshed_at = datetime.now(timezone.utc)
-                db.commit()
+                updated_profile = GitHubIntegrationService._upsert_profile(profile_db, details)
+                # _upsert_profile already sets refresh_category and commits
+                updated_profile.last_refreshed_at = datetime.now(timezone.utc)
+                profile_db.commit()
                 refreshed += 1
             else:
                 failed += 1
         except Exception as e:
             logger.error(f"Failed to refresh {profile.github_username}: {e}")
             failed += 1
-            db.rollback()
+            try:
+                profile_db.rollback()
+            except Exception:
+                pass
+        finally:
+            profile_db.close()
 
         # Be gentle with GitHub API
         await asyncio.sleep(0.5)
