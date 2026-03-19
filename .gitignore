@@ -3,5 +3,10 @@ venv1/
 backend/venv/
 .env
 
+# Environment files
+.env*
+*.env
+**/.env*
+
 
 
