@@ -515,6 +515,48 @@ async def search_profiles(
         release_search_lock(db, user_id)
 
 
+@app.post("/api/test-search")
+async def test_search(
+    request: SearchRequest,
+    db: DbSession,
+):
+    """
+    TEMPORARY: Test search endpoint without authentication.
+    DELETE THIS BEFORE PRODUCTION DEPLOY.
+    """
+    filters = {
+        "role": request.role,
+        "location": request.location,
+        "min_score": request.min_score or 0,
+    }
+
+    # Import here to avoid circular imports
+    from archive_search_service import search_developers, count_developers, developer_to_dict
+
+    # Search archive
+    results = search_developers(
+        db=db,
+        role=filters.get("role"),
+        location=filters.get("location"),
+        limit=100,
+        min_score=filters.get("min_score", 0),
+    )
+
+    total = count_developers(
+        db=db,
+        role=filters.get("role"),
+        location=filters.get("location"),
+    )
+
+    profiles = [developer_to_dict(dev) for dev in results]
+
+    return {
+        "profiles": profiles,
+        "total_count": total,
+        "message": "TEST ENDPOINT - Delete before production",
+    }
+
+
 # ===== GET ALL PROFILES =====
 
 @app.get("/api/profiles", response_model=List[ProfileResponse])

@@ -1884,3 +1884,160 @@ razorpay.errors.BadRequestError: Authentication failed
 
 2026-02-23 00:14:22,166 - scheduler - INFO - APScheduler shut down
 2026-02-23 00:14:22,192 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2026-03-19 12:03:45,796 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-03-19 12:03:47,297 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-03-19 12:03:47,298 - main - INFO - Environment: development
+2026-03-19 12:03:47,299 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-03-19 12:03:47,416 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-03-19 12:03:47,548 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-03-19 12:03:47,549 - main - INFO - ✅ Resend API Key configured
+2026-03-19 12:03:54,112 - main - INFO - ✅ Database connection successful
+2026-03-19 12:03:59,737 - main - INFO - ✅ Payment tables verified/created
+2026-03-19 12:03:59,739 - main - INFO - ✅ JWT Secret configured
+2026-03-19 12:04:00,086 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-19 12:04:00,091 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-19 12:04:00,098 - apscheduler.scheduler - INFO - Added job "_nightly_refresh_wrapper" to job store "default"
+2026-03-19 12:04:00,099 - apscheduler.scheduler - INFO - Added job "Perpetual US Developer Indexer" to job store "default"
+2026-03-19 12:04:00,099 - apscheduler.scheduler - INFO - Scheduler started
+2026-03-19 12:04:00,100 - scheduler - INFO - APScheduler started - nightly profile refresh at 2:00 UTC
+2026-03-19 12:04:00,101 - scheduler - INFO - 📡 Perpetual indexer scheduled: every 1 hour
+2026-03-19 12:04:00,101 - main - INFO - ✅ Background scheduler initialized
+2026-03-19 12:04:00,102 - redis_service - WARNING - REDIS_URL not set - Redis caching disabled
+2026-03-19 12:04:00,103 - main - INFO - 🎯 Startup validation complete
+
+2026-03-19 12:07:40,076 - main - WARNING - HTTP 403 on /api/search-profiles: Not authenticated
+2026-03-19 12:07:50,769 - main - WARNING - HTTP 403 on /api/search-profiles: Not authenticated
+2026-03-19 12:09:00,107 - apscheduler.executors.default - INFO - Running job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 06:39:00 UTC)" (scheduled at 2026-03-19 06:39:00.087441+00:00)
+2026-03-19 12:09:00,111 - perpetual_indexer - INFO - 🔄 Starting perpetual indexer run...
+2026-03-19 12:09:00,118 - perpetual_indexer - INFO -    Cities: ['san francisco', 'new york', 'seattle']
+2026-03-19 12:09:00,118 - perpetual_indexer - INFO -    Strategies: ['high_followers', 'many_repos']
+2026-03-19 12:09:00,119 - perpetual_indexer - INFO -    Searching san francisco with high_followers...
+2026-03-19 12:16:54,511 - perpetual_indexer - INFO -    Processed 100, new: 100
+2026-03-19 12:21:00,052 - main - WARNING - HTTP 403 on /api/search-profiles: Not authenticated
+2026-03-19 12:23:34,750 - scheduler - INFO - APScheduler shut down
+2026-03-19 12:23:34,752 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2026-03-19 12:23:34,755 - apscheduler.executors.default - ERROR - Error running job perpetual_us_indexer
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\apscheduler\executors\asyncio.py", line 38, in callback
+    events = f.result()
+             ^^^^^^^^^^
+asyncio.exceptions.CancelledError
+2026-03-19 12:24:58,975 - perpetual_indexer - INFO -    Processed 200, new: 200
+2026-03-19 12:32:44,390 - perpetual_indexer - INFO -    Processed 300, new: 300
+2026-03-19 14:12:09,465 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-03-19 14:12:11,227 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-03-19 14:12:11,228 - main - INFO - Environment: development
+2026-03-19 14:12:11,230 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-03-19 14:12:11,375 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-03-19 14:12:11,478 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-03-19 14:12:11,479 - main - INFO - ✅ Resend API Key configured
+2026-03-19 14:12:18,955 - main - INFO - ✅ Database connection successful
+2026-03-19 14:12:24,543 - main - INFO - ✅ Payment tables verified/created
+2026-03-19 14:12:24,545 - main - INFO - ✅ JWT Secret configured
+2026-03-19 14:12:24,784 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-19 14:12:24,789 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-19 14:12:24,799 - apscheduler.scheduler - INFO - Added job "_nightly_refresh_wrapper" to job store "default"
+2026-03-19 14:12:24,800 - apscheduler.scheduler - INFO - Added job "Perpetual US Developer Indexer" to job store "default"
+2026-03-19 14:12:24,800 - apscheduler.scheduler - INFO - Scheduler started
+2026-03-19 14:12:24,801 - scheduler - INFO - APScheduler started - nightly profile refresh at 2:00 UTC
+2026-03-19 14:12:24,801 - scheduler - INFO - 📡 Perpetual indexer scheduled: every 1 hour
+2026-03-19 14:12:24,802 - main - INFO - ✅ Background scheduler initialized
+2026-03-19 14:12:24,803 - redis_service - WARNING - REDIS_URL not set - Redis caching disabled
+2026-03-19 14:12:24,804 - main - INFO - 🎯 Startup validation complete
+
+2026-03-19 14:17:24,794 - apscheduler.executors.default - INFO - Running job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 08:47:24 UTC)" (scheduled at 2026-03-19 08:47:24.785090+00:00)
+2026-03-19 14:17:24,796 - perpetual_indexer - INFO - 🔄 Starting perpetual indexer run...
+2026-03-19 14:17:24,797 - perpetual_indexer - INFO -    Cities: ['san francisco', 'new york', 'seattle']
+2026-03-19 14:17:24,798 - perpetual_indexer - INFO -    Strategies: ['high_followers', 'many_repos']
+2026-03-19 14:17:24,798 - perpetual_indexer - INFO -    Searching san francisco with high_followers...
+2026-03-19 14:25:18,438 - perpetual_indexer - INFO -    Processed 100, new: 100
+2026-03-19 14:33:19,112 - perpetual_indexer - INFO -    Processed 200, new: 200
+2026-03-19 14:41:15,179 - perpetual_indexer - INFO -    Processed 300, new: 300
+2026-03-19 14:49:20,152 - perpetual_indexer - INFO -    Processed 400, new: 400
+2026-03-19 14:57:25,643 - perpetual_indexer - INFO -    Processed 500, new: 500
+2026-03-19 14:57:25,644 - perpetual_indexer - INFO -    Searching san francisco with many_repos...
+2026-03-19 15:03:22,084 - perpetual_indexer - INFO -    Processed 600, new: 572
+2026-03-19 15:08:40,062 - perpetual_indexer - INFO -    Processed 700, new: 637
+2026-03-19 15:15:13,426 - perpetual_indexer - INFO -    Processed 800, new: 715
+2026-03-19 15:17:24,802 - apscheduler.scheduler - WARNING - Execution of job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 09:47:24 UTC)" skipped: maximum number of running instances reached (1)
+2026-03-19 15:21:54,518 - perpetual_indexer - INFO -    Processed 900, new: 796
+2026-03-19 15:29:26,190 - perpetual_indexer - INFO -    Processed 1000, new: 884
+2026-03-19 15:29:26,192 - perpetual_indexer - INFO -    Searching new york with high_followers...
+2026-03-19 15:38:02,808 - perpetual_indexer - INFO -    Processed 1100, new: 984
+2026-03-19 15:46:23,648 - perpetual_indexer - INFO -    Processed 1200, new: 1083
+2026-03-19 15:54:33,483 - perpetual_indexer - INFO -    Processed 1300, new: 1183
+2026-03-19 16:02:48,969 - perpetual_indexer - INFO -    Processed 1400, new: 1282
+2026-03-19 16:10:59,981 - perpetual_indexer - INFO -    Processed 1500, new: 1382
+2026-03-19 16:10:59,983 - perpetual_indexer - INFO -    Searching new york with many_repos...
+2026-03-19 16:17:24,805 - apscheduler.scheduler - WARNING - Execution of job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 10:47:24 UTC)" skipped: maximum number of running instances reached (1)
+2026-03-19 16:18:23,959 - perpetual_indexer - INFO -    Processed 1600, new: 1468
+2026-03-19 16:25:46,274 - perpetual_indexer - INFO -    Processed 1700, new: 1555
+2026-03-19 16:31:57,796 - perpetual_indexer - INFO -    Processed 1800, new: 1631
+2026-03-19 16:37:59,062 - perpetual_indexer - INFO -    Processed 1900, new: 1704
+2026-03-19 16:44:12,653 - perpetual_indexer - INFO -    Processed 2000, new: 1781
+2026-03-19 16:44:15,659 - perpetual_indexer - INFO - ✅ Perpetual indexer complete
+2026-03-19 16:44:15,660 - perpetual_indexer - INFO -    Processed: 2000
+2026-03-19 16:44:15,663 - perpetual_indexer - INFO -    New profiles: 1781
+2026-03-19 16:44:15,664 - perpetual_indexer - INFO -    Total in DB: 1781
+2026-03-19 16:44:15,667 - perpetual_indexer - INFO -    Time: 8807.9s
+2026-03-19 16:44:15,672 - apscheduler.executors.default - INFO - Job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 11:47:24 UTC)" executed successfully
+2026-03-19 17:17:24,817 - apscheduler.executors.default - INFO - Running job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 12:47:24 UTC)" (scheduled at 2026-03-19 11:47:24.785090+00:00)
+2026-03-19 17:17:24,827 - perpetual_indexer - INFO - 🔄 Starting perpetual indexer run...
+2026-03-19 17:17:24,841 - perpetual_indexer - INFO -    Cities: ['austin', 'los angeles', 'boston']
+2026-03-19 17:17:24,843 - perpetual_indexer - INFO -    Strategies: ['recently_active', 'python_devs']
+2026-03-19 17:17:24,845 - perpetual_indexer - INFO -    Searching austin with recently_active...
+2026-03-19 17:17:27,048 - perpetual_indexer - INFO -    Searching austin with python_devs...
+2026-03-19 17:25:34,937 - perpetual_indexer - INFO -    Processed 100, new: 100
+2026-03-19 17:37:21,972 - perpetual_indexer - INFO -    Processed 200, new: 200
+2026-03-19 22:42:52,910 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-03-19 22:43:01,495 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-03-19 22:43:01,497 - main - INFO - Environment: development
+2026-03-19 22:43:01,498 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-03-19 22:43:01,567 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-03-19 22:43:02,409 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-03-19 22:43:02,410 - main - INFO - ✅ Resend API Key configured
+2026-03-19 22:43:09,376 - main - INFO - ✅ Database connection successful
+2026-03-19 22:43:14,814 - main - INFO - ✅ Payment tables verified/created
+2026-03-19 22:43:14,815 - main - INFO - ✅ JWT Secret configured
+2026-03-19 22:43:15,794 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-19 22:43:15,821 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-19 22:43:15,877 - apscheduler.scheduler - INFO - Added job "_nightly_refresh_wrapper" to job store "default"
+2026-03-19 22:43:15,878 - apscheduler.scheduler - INFO - Added job "Perpetual US Developer Indexer" to job store "default"
+2026-03-19 22:43:15,878 - apscheduler.scheduler - INFO - Scheduler started
+2026-03-19 22:43:15,879 - scheduler - INFO - APScheduler started - nightly profile refresh at 2:00 UTC
+2026-03-19 22:43:15,879 - scheduler - INFO - 📡 Perpetual indexer scheduled: every 1 hour
+2026-03-19 22:43:15,879 - main - INFO - ✅ Background scheduler initialized
+2026-03-19 22:43:15,879 - redis_service - WARNING - REDIS_URL not set - Redis caching disabled
+2026-03-19 22:43:15,880 - main - INFO - 🎯 Startup validation complete
+
+2026-03-19 22:48:15,818 - apscheduler.executors.default - INFO - Running job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 17:18:15 UTC)" (scheduled at 2026-03-19 17:18:15.794726+00:00)
+2026-03-19 22:48:15,820 - perpetual_indexer - INFO - 🔄 Starting perpetual indexer run...
+2026-03-19 22:48:15,821 - perpetual_indexer - INFO -    Cities: ['san francisco', 'new york', 'seattle']
+2026-03-19 22:48:15,822 - perpetual_indexer - INFO -    Strategies: ['high_followers', 'many_repos']
+2026-03-19 22:48:15,822 - perpetual_indexer - INFO -    Searching san francisco with high_followers...
+2026-03-19 22:56:34,977 - perpetual_indexer - INFO -    Processed 100, new: 100
+2026-03-19 23:04:46,193 - perpetual_indexer - INFO -    Processed 200, new: 200
+2026-03-19 23:13:01,698 - perpetual_indexer - INFO -    Processed 300, new: 300
+2026-03-19 23:21:29,038 - perpetual_indexer - INFO -    Processed 400, new: 400
+2026-03-19 23:29:58,053 - perpetual_indexer - INFO -    Processed 500, new: 500
+2026-03-19 23:29:58,058 - perpetual_indexer - INFO -    Searching san francisco with many_repos...
+2026-03-19 23:36:30,258 - perpetual_indexer - INFO -    Processed 600, new: 572
+2026-03-19 23:42:00,144 - perpetual_indexer - INFO -    Processed 700, new: 637
+2026-03-19 23:48:15,838 - apscheduler.scheduler - WARNING - Execution of job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-19 18:18:15 UTC)" skipped: maximum number of running instances reached (1)
+2026-03-19 23:48:44,169 - perpetual_indexer - INFO -    Processed 800, new: 715
+2026-03-19 23:56:02,011 - perpetual_indexer - INFO -    Processed 900, new: 796
+2026-03-20 00:03:51,811 - perpetual_indexer - INFO -    Processed 1000, new: 884
+2026-03-20 00:03:51,812 - perpetual_indexer - INFO -    Searching new york with high_followers...
+2026-03-20 00:12:36,272 - perpetual_indexer - INFO -    Processed 1100, new: 984
+2026-03-20 00:21:00,265 - perpetual_indexer - INFO -    Processed 1200, new: 1083
+2026-03-20 00:27:53,975 - scheduler - INFO - APScheduler shut down
+2026-03-20 00:27:53,993 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2026-03-20 00:27:54,029 - apscheduler.executors.default - ERROR - Error running job perpetual_us_indexer
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\apscheduler\executors\asyncio.py", line 38, in callback
+    events = f.result()
+             ^^^^^^^^^^
+asyncio.exceptions.CancelledError
+2026-03-20 00:29:23,801 - perpetual_indexer - INFO -    Processed 1300, new: 1183
+2026-03-20 00:29:58,423 - perpetual_indexer - ERROR - GitHub API error 502
+2026-03-20 00:37:57,648 - perpetual_indexer - INFO -    Processed 1400, new: 1282

@@ -76,8 +76,14 @@ export const resetPassword = async (token, new_password) => {
 // Search & Profile APIs
 // ============================================
 
-export const searchDevelopers = async (filters) => {
-  const response = await api.post('/api/search-profiles', filters);
+export const searchDevelopers = async (filters = {}) => {
+  const response = await api.post('/api/search-profiles', {
+    role: filters.role || null,
+    location: filters.location || null,
+    min_score: filters.min_score || 0,
+    page: filters.page || 1,
+    per_page: filters.per_page || 50,
+  });
   return response.data;
 };
 

@@ -107,9 +107,7 @@ const SearchDashboard = () => {
 
       const requestBody = {
         role: filters.role || null,
-        languages: filters.languages || [],
         location: filters.location || null,
-        min_repos: filters.min_repos || 0
       };
 
       const response = await fetch(
@@ -429,6 +427,18 @@ const SearchDashboard = () => {
           }}
         />
 
+        {/* Result Count */}
+        {profiles.length > 0 && !searchProgress.isSearching && (
+          <div style={styles.resultCount}>
+            <p style={styles.resultCountTitle}>
+              Found {profiles.length.toLocaleString()} developers
+            </p>
+            <p style={styles.resultCountSubtitle}>
+              Showing page {currentPage} of {totalPages}
+            </p>
+          </div>
+        )}
+
         {/* Search Progress - Only show for first 2 minutes */}
         {searchProgress.isSearching && showSearchMessage && (
           <div style={styles.progressContainer}>
@@ -643,9 +653,9 @@ const SearchDashboard = () => {
         {!loading && profiles.length === 0 && !error && !searchProgress.isSearching && (
           <div style={styles.emptyState}>
             <Search size={48} color="#9ca3af" />
-            <h3 style={styles.emptyStateTitle}>Start Your Search</h3>
+            <h3 style={styles.emptyStateTitle}>Search US Tech Talent</h3>
             <p style={styles.emptyStateText}>
-              Use the filters above to find developers
+              Select a role and location to find developers
             </p>
           </div>
         )}
@@ -680,6 +690,27 @@ const styles = {
     maxWidth: '1400px',
     margin: '0 auto',
     padding: '2rem',
+  },
+
+  resultCount: {
+    padding: '16px 20px',
+    backgroundColor: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    borderRadius: '12px',
+    marginBottom: '24px',
+  },
+
+  resultCountTitle: {
+    fontSize: '18px',
+    fontWeight: '600',
+    color: '#166534',
+    margin: 0,
+  },
+
+  resultCountSubtitle: {
+    fontSize: '14px',
+    color: '#15803d',
+    margin: '4px 0 0 0',
   },
 
   progressContainer: {
