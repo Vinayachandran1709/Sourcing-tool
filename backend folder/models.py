@@ -1,15 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Text, ForeignKey, Index
+from sqlalchemy.dialects.postgresql import JSON, ARRAY, JSONB
 from sqlalchemy.sql import func
 from database import Base
-from sqlalchemy import (
-    Column,
-    Integer,
-    String,
-    ForeignKey,
-    DateTime,
-    ARRAY
-)
 from sqlalchemy.orm import relationship
 from datetime import datetime, timezone
 import math
@@ -162,6 +154,135 @@ class Profile(Base):
             return 25
         else:
             return 10
+
+
+# ===== GITHUB DEVELOPER INDEX MODEL =====
+
+class GithubDeveloper(Base):
+    __tablename__ = "github_developers"
+
+    # Primary Key
+    id = Column(Integer, primary_key=True, index=True)
+    github_username = Column(String(255), unique=True, nullable=False, index=True)
+
+    # Basic Info
+    name = Column(String(255), nullable=True)
+    bio = Column(Text, nullable=True)
+    email = Column(String(255), nullable=True)
+    avatar_url = Column(String(500), nullable=True)
+    profile_url = Column(String(500), nullable=True)
+
+    # Location (Normalized)
+    location_raw = Column(String(255), nullable=True)  # Original from GitHub
+    location_city = Column(String(100), nullable=True, index=True)  # Normalized: "san francisco"
+    location_state = Column(String(100), nullable=True)  # "california"
+    location_country = Column(String(100), default="United States")
+
+    # Technical Info
+    primary_languages = Column(ARRAY(String), nullable=True)  # ['Python', 'JavaScript']
+    all_languages = Column(JSONB, nullable=True)  # {"Python": 50000, "JavaScript": 30000}
+    detected_role = Column(String(100), nullable=True)  # "Frontend Developer"
+
+    # Activity Metrics
+    public_repos = Column(Integer, default=0)
+    followers = Column(Integer, default=0)
+    following = Column(Integer, default=0)
+    total_stars = Column(Integer, default=0)
+    total_forks = Column(Integer, default=0)
+    contributions_last_year = Column(Integer, default=0)
+
+    # Dates
+    github_created_at = Column(DateTime, nullable=True)
+    last_active_at = Column(DateTime, nullable=True)
+
+    # Scoring
+    developer_score = Column(Integer, default=0, index=True)
+
+    # Metadata
+    source = Column(String(50), default="search_api")  # "search_api", "bulk_seed", "user_search"
+    indexed_at = Column(DateTime, server_default=func.now())
+    updated_at = Column(DateTime, server_default=func.now(), onupdate=func.now())
+
+    def calculate_score(self):
+        """Calculate developer score based on activity metrics."""
+        score = 0
+
+        # Followers (max 25 points)
+        if self.followers:
+            if self.followers >= 1000:
+                score += 25
+            elif self.followers >= 500:
+                score += 20
+            elif self.followers >= 100:
+                score += 15
+            elif self.followers >= 50:
+                score += 10
+            elif self.followers >= 10:
+                score += 5
+
+        # Repos (max 20 points)
+        if self.public_repos:
+            if self.public_repos >= 50:
+                score += 20
+            elif self.public_repos >= 30:
+                score += 15
+            elif self.public_repos >= 15:
+                score += 10
+            elif self.public_repos >= 5:
+                score += 5
+
+        # Stars (max 25 points)
+        if self.total_stars:
+            if self.total_stars >= 500:
+                score += 25
+            elif self.total_stars >= 100:
+                score += 20
+            elif self.total_stars >= 50:
+                score += 15
+            elif self.total_stars >= 10:
+                score += 10
+            elif self.total_stars >= 1:
+                score += 5
+
+        # Recent activity (max 15 points)
+        if self.last_active_at:
+            from datetime import datetime, timezone, timedelta
+            now = datetime.now(timezone.utc)
+            if self.last_active_at.tzinfo is None:
+                last_active = self.last_active_at.replace(tzinfo=timezone.utc)
+            else:
+                last_active = self.last_active_at
+
+            days_since_active = (now - last_active).days
+            if days_since_active <= 7:
+                score += 15
+            elif days_since_active <= 30:
+                score += 12
+            elif days_since_active <= 90:
+                score += 8
+            elif days_since_active <= 180:
+                score += 4
+
+        # Bio present (5 points)
+        if self.bio and len(self.bio.strip()) > 20:
+            score += 5
+
+        # Email present (5 points)
+        if self.email:
+            score += 5
+
+        # Multiple languages (5 points)
+        if self.primary_languages and len(self.primary_languages) >= 3:
+            score += 5
+
+        self.developer_score = min(score, 100)
+        return self.developer_score
+
+    __table_args__ = (
+        Index('ix_github_developers_city_role', 'location_city', 'detected_role'),
+        Index('ix_github_developers_score_desc', developer_score.desc()),
+        Index('ix_github_developers_languages', 'primary_languages', postgresql_using='gin'),
+    )
 
 
 # ===== EXISTING MODELS (KEEP THESE) =====

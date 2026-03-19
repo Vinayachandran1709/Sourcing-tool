@@ -18,6 +18,7 @@ from redis_service import (
     get_cached_profile, set_cached_profile,
     hash_filters,
 )
+from archive_search_service import search_developers, count_developers, developer_to_dict, ROLE_TO_LANGUAGES
 
 logger = logging.getLogger(__name__)
 
@@ -66,109 +67,112 @@ class GitHubIntegrationService:
         db: Session,
         filters: Dict,
         max_github_results: int = 250,
-        target_profiles: int = 200,  # ✅ OPTIMIZATION #2: Target 120 profiles for MVP
+        target_profiles: int = 200,
         is_paid_user: bool = False
-    ) -> List[Profile]:
+    ) -> list:
         """
-        ✅ OPTIMIZED: Cache-first architecture with aggressive early stopping
-        
-        Target: Return 100-120 profiles in under 2 minutes
+        Search for developer profiles - archive database first, live API as supplement.
+
+        New Flow:
+        1. Query github_developers table (primary source)
+        2. If < 500 results AND paid user, supplement with live GitHub API
+        3. Return combined results sorted by score
         """
-        
-        logger.info(f"🔍 SEARCH STARTED (TARGET: {target_profiles} profiles)")
-        logger.info(f"   Filters: {filters}")
-        
-        # ✅ OPTIMIZATION #1: Check rate limit ONCE at start
+        role = filters.get("role")
+        location = filters.get("location")
+        min_score = filters.get("min_score", 0)
+
+        # Map language filters to role if no explicit role
+        if not role:
+            languages = filters.get("languages", [])
+            if languages:
+                primary_lang = languages[0] if languages else None
+                if primary_lang:
+                    for r, langs in ROLE_TO_LANGUAGES.items():
+                        if primary_lang in langs:
+                            role = r
+                            break
+
+        logger.info(f"🔍 Search request: role={role}, location={location}")
+
+        # STEP 1: Search archive database (fast, no rate limits)
         try:
-            await check_github_rate_limit()
+            archive_results = search_developers(
+                db=db,
+                role=role,
+                location=location,
+                limit=1500,  # Fetch extra for filtering
+                min_score=min_score,
+            )
+
+            total_count = count_developers(db, role, location, min_score)
+
+            logger.info(f"📦 Archive returned {len(archive_results)} profiles (total: {total_count})")
+            print(f"📦 Archive returned {len(archive_results)} profiles (total: {total_count})")
+
+            # Convert to dict format
+            profiles = [developer_to_dict(dev) for dev in archive_results]
         except Exception as e:
-            logger.warning(f"Rate limit check failed: {e}")
+            logger.error(f"Archive search failed: {e}", exc_info=True)
+            print(f"❌ Archive search failed: {e}")
+            profiles = []
+            total_count = 0
 
-        # ===== STEP 0: Check Redis search cache =====
-        filter_hash = hash_filters(filters)
-        cached_usernames = await get_cached_search(filter_hash)
-        if cached_usernames is not None:
-            logger.info("Redis cache hit for search")
-            return db.query(Profile).filter(Profile.github_username.in_(cached_usernames)).all()
+        # STEP 2: If we have enough from archive, return immediately
+        if len(profiles) >= 500:
+            logger.info(f"✅ Archive sufficient! Returning {len(profiles)} profiles")
+            print(f"✅ Archive sufficient! Returning {min(len(profiles), 1000)} profiles")
+            return profiles[:1000]  # Cap at 1000 for performance
 
-        # ===== STEP 1: Search database cache FIRST =====
-        logger.info("📦 Searching database cache...")
+        # STEP 3: Fall back to old Profile table search to supplement
+        logger.info(f"📦 Supplementing with Profile table cache...")
         try:
             cached_profiles = GitHubIntegrationService._search_database(db, filters)
-            logger.info(f"   ✅ Found {len(cached_profiles)} cached profiles")
-            print(f"   ✅ Found {len(cached_profiles)} cached profiles")
+            logger.info(f"   Profile table returned {len(cached_profiles)} profiles")
+            print(f"   Profile table returned {len(cached_profiles)} profiles")
         except Exception as e:
-            logger.error(f"   ❌ Database search failed: {e}", exc_info=True)
-            print(f"   ❌ Database search failed: {e}")
+            logger.error(f"   Profile table search failed: {e}", exc_info=True)
             cached_profiles = []
-        
-        # ===== TIERED SEARCH: Gate GitHub fetch for free users =====
-        if len(cached_profiles) < 20 and not is_paid_user:
-            logger.info(f"Free user search — returning DB results only ({len(cached_profiles)} profiles)")
-            return cached_profiles
 
-        # ✅ Check if we have enough cached profiles
-        if len(cached_profiles) >= target_profiles:
-            logger.info(f"   ✅ Cache sufficient! Returning {len(cached_profiles)} profiles")
-            print(f"   ✅ Cache sufficient! Returning {len(cached_profiles)} profiles (no GitHub fetch needed)")
-            return cached_profiles[:target_profiles]
-        
-        # ===== STEP 2: Fetch ONLY if cache insufficient =====
-        profiles_needed = target_profiles - len(cached_profiles)
-        logger.info(f"🌐 Need {profiles_needed} more profiles from GitHub...")
-        print(f"🌐 Need {profiles_needed} more profiles from GitHub API...")
-        
-        language = filters.get("languages", [])
-        primary_language = language[0] if language and len(language) > 0 else None
-        location = filters.get("location")
-        min_repos = filters.get("min_repos", 0)
-        
-        if not primary_language and not location:
-            logger.warning("   ⚠️ No language or location specified, cannot fetch from GitHub")
-            print("   ⚠️ No language or location specified, returning cached results only")
-            return cached_profiles
-        
-        # Fetch from GitHub
-        try:
-            from github_service import GITHUB_TOKEN
-            if not GITHUB_TOKEN:
-                logger.error("⚠️ GITHUB_TOKEN not found in .env!")
-                print("⚠️ WARNING: GITHUB_TOKEN missing - only using database cache")
-                return cached_profiles
-            
-            new_profiles = await GitHubIntegrationService._fetch_from_github(
-                db, primary_language, location, min_repos, max_github_results,
-                profiles_needed
-            )
-            logger.info(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
-            print(f"   ✅ Fetched and cached {len(new_profiles)} new profiles")
-        except Exception as e:
-            logger.error(f"   ❌ GitHub fetch failed: {e}", exc_info=True)
-            print(f"   ❌ GitHub fetch failed: {e}")
-            new_profiles = []
-        
-        # ===== STEP 3: Combine results =====
-        all_profiles = cached_profiles + new_profiles
-        
-        # Remove duplicates (prefer cached versions)
-        seen_usernames = set()
-        unique_profiles = []
-        
-        for profile in all_profiles:
+        # Merge: archive dicts + Profile objects (main.py handles both types)
+        seen_usernames = {p["github_username"] for p in profiles}
+        for profile in cached_profiles:
             if profile.github_username not in seen_usernames:
                 seen_usernames.add(profile.github_username)
-                unique_profiles.append(profile)
-        
-        logger.info(f"✅ Total unique profiles: {len(unique_profiles)}")
-        logger.info(f"   - From cache: {len(cached_profiles)}")
-        logger.info(f"   - From GitHub: {len(new_profiles)}")
-        
-        print(f"\n✅ Total unique profiles: {len(unique_profiles)}")
-        print(f"   - From cache: {len(cached_profiles)}")
-        print(f"   - From GitHub: {len(new_profiles)}")
-        
-        await set_cached_search(filter_hash, [p.github_username for p in unique_profiles])
-        return unique_profiles[:target_profiles]
+                profiles.append(profile)  # Append Profile object; main.py handles both
+
+        combined_count = len(profiles)
+        logger.info(f"✅ Combined results: {combined_count} profiles")
+        print(f"✅ Combined results: {combined_count} profiles")
+
+        # STEP 4: If still insufficient and paid user, supplement with live API
+        if combined_count < 200 and is_paid_user:
+            logger.info(f"🌐 Supplementing with live GitHub API for paid user...")
+            language = filters.get("languages", [])
+            primary_language = language[0] if language and len(language) > 0 else None
+            loc = filters.get("location")
+            min_repos = filters.get("min_repos", 0)
+
+            if primary_language or loc:
+                try:
+                    await check_github_rate_limit()
+                    new_profiles = await GitHubIntegrationService._fetch_from_github(
+                        db, primary_language, loc, min_repos, max_github_results,
+                        200 - combined_count
+                    )
+                    for p in new_profiles:
+                        if p.github_username not in seen_usernames:
+                            seen_usernames.add(p.github_username)
+                            profiles.append(p)
+                    logger.info(f"   Live API added {len(new_profiles)} profiles")
+                    print(f"   Live API added {len(new_profiles)} profiles")
+                except Exception as e:
+                    logger.error(f"   Live API supplement failed: {e}")
+                    print(f"   ❌ Live API supplement failed: {e}")
+
+        logger.info(f"✅ Final result: {len(profiles)} profiles")
+        print(f"✅ Final result: {len(profiles)} profiles")
+        return profiles[:target_profiles]
 
 
     @staticmethod

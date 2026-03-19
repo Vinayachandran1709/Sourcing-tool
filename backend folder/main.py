@@ -363,17 +363,12 @@ app.include_router(feedback_router)
 # ===== REQUEST/RESPONSE MODELS =====
 
 class SearchRequest(BaseModel):
-    """Enhanced request model for search"""
+    """Simplified search request - role and location based"""
     role: Optional[str] = None
-    languages: Optional[List[str]] = []
-    frameworks: Optional[List[str]] = []
-    tools: Optional[List[str]] = []
-    min_stars: Optional[int] = 0
-    min_contributions: Optional[int] = 0
-    recent_activity: Optional[str] = None
     location: Optional[str] = None
-    language: Optional[str] = None
-    min_repos: Optional[int] = 0
+    min_score: Optional[int] = 0
+    page: Optional[int] = 1
+    per_page: Optional[int] = 50
 
 class ProfileResponse(BaseModel):
     """Response model for profile data"""
@@ -428,14 +423,10 @@ async def search_profiles(
     current_user: CurrentUser,
     db: DbSession,
 ):
-    """
-    Enhanced search with GitHub API integration
-
-    ✅ FIX #3: Fixed empty profiles array bug - now properly converts and returns profiles
-    """
+    """Search for developer profiles with role and location filters."""
     user_id = current_user.id
 
-    logger.info(f"Search request from user {user_id}: role={search.role}, languages={search.languages}")
+    logger.info(f"Search request from user {user_id}: role={search.role}, location={search.location}")
 
     # Check usage limits
     try:
@@ -448,74 +439,25 @@ async def search_profiles(
     check_search_cooldown(db, user_id)
     if not acquire_search_lock(db, user_id):
         raise HTTPException(status_code=429, detail="A search is already in progress. Please wait.")
-    
-    print("\n" + "="*60)
-    print("SEARCH REQUEST RECEIVED")
-    print(f"   Role: {search.role or 'Any'}")
-    print(f"   Languages: {search.languages or 'Any'}")
-    print(f"   Location: {search.location or 'Any'}")
-    print("="*60)
-    
-    # Build filters
-    # ✅ FIX #1: Properly handle languages array
-    languages_list = []
-    if search.languages and len(search.languages) > 0:
-        languages_list = search.languages
-    elif search.language:
-        languages_list = [search.language]
-    
-    filters = {
-        "role": search.role,
-        "languages": languages_list,
-        "frameworks": search.frameworks or [],
-        "tools": search.tools or [],
-        "min_stars": search.min_stars or 0,
-        "min_contributions": search.min_contributions or 0,
-        "recent_activity": search.recent_activity,
-        "location": search.location,
-        "min_repos": search.min_repos or 0
-    }
-    
-    # ⭐ HYBRID SEARCH: Database + GitHub API
-    print("\nIMPORTING GitHubIntegrationService...")
-    profiles = []
-    from_cache = 0
-    from_github = 0
 
     try:
-        try:
-            from github_integration_service import GitHubIntegrationService
-            print("SUCCESS: GitHubIntegrationService imported")
+        # Build filters
+        filters = {
+            "role": search.role,
+            "location": search.location,
+            "min_score": search.min_score or 0,
+        }
 
-            is_paid_user = current_user.plan == "starter"
-            print("\nCALLING search_and_cache_profiles...")
-            profiles = await GitHubIntegrationService.search_and_cache_profiles(
-                db,
-                filters,
-                max_github_results=150,
-                target_profiles=200,
-                is_paid_user=is_paid_user
-            )
-            print(f"SUCCESS: Got {len(profiles)} profiles from hybrid search")
-            from_cache = len(profiles)
-            from_github = 0
+        # Search (archive-first)
+        from github_integration_service import GitHubIntegrationService
 
-        except Exception as e:
-            print(f"ERROR in GitHubIntegrationService: {type(e).__name__}: {str(e)}")
-            logger.error(f"Hybrid search failed: {e}", exc_info=True)
+        is_paid = current_user.subscription_status == "active"
+        profiles = await GitHubIntegrationService.search_and_cache_profiles(
+            db=db,
+            filters=filters,
+            is_paid_user=is_paid,
+        )
 
-            print("FALLBACK: Using FilterService...")
-            try:
-                profiles = FilterService.apply_filters(db, filters)
-                print(f"FilterService returned {len(profiles)} profiles")
-                from_cache = len(profiles)
-                from_github = 0
-            except Exception as filter_error:
-                print(f"ERROR in FilterService fallback: {filter_error}")
-                logger.error(f"FilterService fallback failed: {filter_error}", exc_info=True)
-                profiles = []
-
-        print(f"\nFINAL: Returning {len(profiles)} profiles\n")
         logger.info(f"Search found {len(profiles)} profiles")
 
         # Log usage
@@ -528,7 +470,7 @@ async def search_profiles(
             return None
 
         profile_dicts = []
-        for profile in profiles[:200]:
+        for profile in profiles:
             if isinstance(profile, dict):
                 profile["name"] = _first_name(profile.get("name"))
                 profile_dicts.append(profile)
@@ -553,13 +495,21 @@ async def search_profiles(
                 }
                 profile_dicts.append(profile_dict)
 
+        # Pagination
+        page = search.page or 1
+        per_page = search.per_page or 50
+        total_count = len(profile_dicts)
+        start = (page - 1) * per_page
+        end = start + per_page
+        paginated = profile_dicts[start:end]
+
         response.headers["Cache-Control"] = "public, max-age=300"
         return {
-            "success": True,
-            "total_found": len(profiles),
-            "profiles": profile_dicts,
-            "from_cache": from_cache,
-            "from_github": from_github
+            "profiles": paginated,
+            "total_count": total_count,
+            "page": page,
+            "per_page": per_page,
+            "total_pages": (total_count + per_page - 1) // per_page,
         }
     finally:
         release_search_lock(db, user_id)
@@ -985,337 +935,9 @@ async def admin_usage(
 from fastapi.responses import StreamingResponse
 import json
 
-@app.post("/api/search-profiles-stream")
-@limiter.limit("30/minute")
-async def search_profiles_stream(
-    request: Request,
-    search: SearchRequest,
-    current_user: CurrentUser,
-    db: DbSession,
-):
-    """
-    ✅ OPTIMIZED STREAMING SEARCH - Target < 2 minutes
-
-    Optimizations:
-    - Target: 120 profiles (was 350)
-    - Smooth progress (no phases)
-    - Batch size: 25 (was 12)
-    - No cooldown between batches
-    """
-
-    # ===== CHECK & LOG SEARCH USAGE BEFORE STREAMING =====
-    user_id = current_user.id
-    UsageService.check_limit(db, user_id, "search")
-
-    # Search cooldown & concurrent lock
-    from rate_limit_service import check_search_cooldown, acquire_search_lock, release_search_lock
-    check_search_cooldown(db, user_id)
-    if not acquire_search_lock(db, user_id):
-        raise HTTPException(status_code=429, detail="A search is already in progress. Please wait.")
-
-    filters_for_log = {
-        "role": search.role,
-        "languages": search.languages or ([search.language] if search.language else []),
-        "location": search.location,
-        "min_repos": search.min_repos or 0
-    }
-    UsageService.log_usage(db, user_id, "search", filters_for_log)
-
-    is_paid_user = current_user.plan == "starter"
-
-    async def event_stream():
-        """Generator that yields SSE events"""
-        
-        try:
-            # ===== PHASE 1: Start search =====
-            yield f"data: {json.dumps({'type': 'status', 'message': 'Searching for developers...', 'phase': 0})}\n\n"
-            
-            # Build filters
-            languages_list = []
-            if search.languages and len(search.languages) > 0:
-                languages_list = search.languages
-            elif search.language:
-                languages_list = [search.language]
-            
-            filters = {
-                "role": search.role,
-                "languages": languages_list,
-                "location": search.location,
-                "min_repos": search.min_repos or 0
-            }
-            
-            # ===== PHASE 2: Return Cached Profiles =====
-            from github_integration_service import GitHubIntegrationService
-            
-            logger.info("📦 Fetching cached profiles...")
-            cached_profiles = GitHubIntegrationService._search_database(db, filters)
-            
-            # Convert to dicts (first name only in search results)
-            def _first_name_stream(full_name):
-                return full_name.split()[0] if full_name else None
-
-            # ===== Redis cache check =====
-            filter_hash = hash_filters(filters)
-            cached_usernames = await get_cached_search(filter_hash)
-            if cached_usernames is not None:
-                logger.info("Redis cache hit for search")
-                from models import Profile as ProfileModel
-                redis_profiles = db.query(ProfileModel).filter(ProfileModel.github_username.in_(cached_usernames)).all()
-                redis_dicts = []
-                for profile in redis_profiles:
-                    redis_dicts.append({
-                        "id": profile.id,
-                        "github_username": profile.github_username,
-                        "name": _first_name_stream(profile.name),
-                        "email": profile.email,
-                        "location": profile.location,
-                        "bio": profile.bio,
-                        "public_repos": profile.public_repos,
-                        "primary_language": profile.primary_language,
-                        "total_stars": getattr(profile, 'total_stars', 0),
-                        "developer_score": getattr(profile, 'developer_score', 0),
-                        "avatar_url": getattr(profile, 'avatar_url', None),
-                        "contributions_last_year": getattr(profile, 'contributions_last_year', 0),
-                        "followers": getattr(profile, 'followers', 0),
-                        "languages_data": getattr(profile, 'languages_data', None),
-                        "top_repos": getattr(profile, 'top_repos', None),
-                        "selected": False
-                    })
-                yield f"data: {json.dumps({'type': 'profiles', 'profiles': redis_dicts, 'count': len(redis_dicts)})}\n\n"
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(redis_dicts)})}\n\n"
-                return
-
-            all_profile_usernames = [p.github_username for p in cached_profiles]
-            cached_dicts = []
-            for profile in cached_profiles[:120]:  # ✅ Limit to 120
-                profile_dict = {
-                    "id": profile.id,
-                    "github_username": profile.github_username,
-                    "name": _first_name_stream(profile.name),
-                    "email": profile.email,
-                    "location": profile.location,
-                    "bio": profile.bio,
-                    "public_repos": profile.public_repos,
-                    "primary_language": profile.primary_language,
-                    "total_stars": getattr(profile, 'total_stars', 0),
-                    "developer_score": getattr(profile, 'developer_score', 0),
-                    "avatar_url": getattr(profile, 'avatar_url', None),
-                    "contributions_last_year": getattr(profile, 'contributions_last_year', 0),
-                    "followers": getattr(profile, 'followers', 0),
-                    "languages_data": getattr(profile, 'languages_data', None),
-                    "top_repos": getattr(profile, 'top_repos', None),
-                    "selected": False
-                }
-                cached_dicts.append(profile_dict)
-            
-            # Send initial results
-            logger.info(f"✅ Sending {len(cached_dicts)} initial results")
-            yield f"data: {json.dumps({'type': 'profiles', 'profiles': cached_dicts, 'count': len(cached_dicts)})}\n\n"
-
-            # ===== TIERED SEARCH: Gate GitHub fetch for free users =====
-            if len(cached_profiles) < 20 and not is_paid_user:
-                logger.info(f"Free user search — returning DB results only ({len(cached_profiles)} profiles)")
-                yield f"data: {json.dumps({'type': 'upgrade_prompt', 'show': True, 'message': 'Upgrade to Starter to search live GitHub profiles and get 300+ results'})}\n\n"
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles)})}\n\n"
-                return
-
-            # Check if we need more
-            target_profiles = 200  # ✅ OPTIMIZATION #2: Reduced from 350
-            if len(cached_profiles) >= target_profiles:
-                logger.info(f"✅ Search complete")
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles)})}\n\n"
-                return
-            
-            # ===== PHASE 3: Fetch New Profiles =====
-            profiles_needed = target_profiles - len(cached_profiles)
-            logger.info(f"🔍 Searching for {profiles_needed} more profiles")
-            yield f"data: {json.dumps({'type': 'status', 'message': f'Searching for more developers...'})}\n\n"
-            
-            # Check if we have language or location
-            language = languages_list[0] if languages_list else None
-            
-            if not language and not search.location:
-                logger.warning("⚠️ No language or location, stopping")
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles)})}\n\n"
-                return
-            
-            # Import and search
-            from github_service import search_github_users_paginated
-            from github_graphql_service import get_user_details_graphql as get_user_details, is_valid_user_data_graphql as is_valid_user_data
-            from models import Profile
-            from role_detection_service import RoleDetectionService
-            
-            # Search GitHub
-            logger.info(f"🔍 Searching GitHub: language={language}, location={search.location}")
-            users = await search_github_users_paginated(
-                language=language,
-                location=search.location,
-                min_repos=search.min_repos or 0,
-                max_pages=5,  # ✅ Reduced from 10
-                target_users=150  # ✅ Reduced from 300
-            )
-            
-            if not users:
-                logger.warning("⚠️ No users found from GitHub")
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles)})}\n\n"
-                return
-            
-            usernames = [user["login"] for user in users[:150]]  # ✅ Reduced from 300
-            total_to_process = min(150, len(usernames))  # ✅ Reduced from 250
-            
-            logger.info(f"📥 Processing {total_to_process} profiles")
-            
-            new_profiles_count = 0
-            processed_count = 0
-            
-            # ✅ Filter out existing usernames
-            existing_usernames = set(
-                username[0] for username in db.query(Profile.github_username)
-                .filter(Profile.github_username.in_(usernames[:total_to_process]))
-                .all()
-            )
-            
-            usernames_to_fetch = [u for u in usernames[:total_to_process] if u not in existing_usernames]
-            
-            if existing_usernames:
-                logger.info(f"⏭️  Skipping {len(existing_usernames)} already cached profiles")
-            
-            if not usernames_to_fetch:
-                logger.info(f"✅ All profiles already cached")
-                yield f"data: {json.dumps({'type': 'complete', 'total': len(cached_profiles)})}\n\n"
-                return
-            
-            logger.info(f"📥 Fetching {len(usernames_to_fetch)} new profiles")
-            
-            # ✅ OPTIMIZATION #4: BATCH_SIZE increased to 25
-            BATCH_SIZE = 25
-            
-            for batch_start in range(0, len(usernames_to_fetch), BATCH_SIZE):
-                batch_end = min(batch_start + BATCH_SIZE, len(usernames_to_fetch))
-                batch_usernames = usernames_to_fetch[batch_start:batch_end]
-                
-                # Process batch with staggered starts
-                async def _fetch_staggered(username, index):
-                    await asyncio.sleep(index * 0.2)
-                    return await get_user_details(username)
-
-                tasks = [_fetch_staggered(u, i) for i, u in enumerate(batch_usernames)]
-                results = await asyncio.gather(*tasks, return_exceptions=True)
-                
-                # Save profiles
-                batch_new_profiles = []
-                for details in results:
-                    if isinstance(details, Exception) or not details:
-                        continue
-                    
-                    if not is_valid_user_data(details):
-                        continue
-                    
-                    try:
-                        profile = Profile(
-                            github_username=details["username"],
-                            name=details.get("name"),
-                            email=details.get("email"),
-                            location=details.get("location"),
-                            bio=details.get("bio"),
-                            public_repos=details.get("public_repos", 0),
-                            primary_language=list(details.get("languages", {}).keys())[0] if details.get("languages") else None,
-                            contributions_last_year=details.get("contributions", 0),
-                            portfolio_url=details.get("portfolio_url"),
-                            avatar_url=details.get("avatar_url"),
-                            total_stars=details.get("total_stars", 0),
-                            languages_data=details.get("languages"),
-                            top_repos=details.get("top_repos"),
-                            last_active_date=details.get("last_active_date"),
-                            cached_at=datetime.now(timezone.utc),
-                            source="github",
-                            followers=details.get("followers", 0),
-                            is_hireable=details.get("is_hireable", False),
-                        )
-                        
-                        profile.developer_score = profile.calculate_developer_score()
-                        
-                        try:
-                            profile.detected_roles = RoleDetectionService.detect_roles(profile)
-                            profile.roles_analyzed_at = datetime.now(timezone.utc)
-                        except:
-                            profile.detected_roles = []
-                        
-                        db.add(profile)
-                        db.commit()
-                        db.refresh(profile)
-                        
-                        # Convert to dict (first name only)
-                        profile_dict = {
-                            "id": profile.id,
-                            "github_username": profile.github_username,
-                            "name": _first_name_stream(profile.name),
-                            "email": profile.email,
-                            "location": profile.location,
-                            "bio": profile.bio,
-                            "public_repos": profile.public_repos,
-                            "primary_language": profile.primary_language,
-                            "total_stars": profile.total_stars,
-                            "developer_score": profile.developer_score,
-                            "avatar_url": profile.avatar_url,
-                            "contributions_last_year": profile.contributions_last_year,
-                            "followers": getattr(profile, 'followers', 0),
-                            "languages_data": profile.languages_data,
-                            "top_repos": profile.top_repos,
-                            "selected": False
-                        }
-                        
-                        batch_new_profiles.append(profile_dict)
-                        new_profiles_count += 1
-                        all_profile_usernames.append(profile.github_username)
-
-                    except Exception as e:
-                        logger.error(f"❌ Failed to save profile: {e}")
-                        db.rollback()
-                
-                processed_count += len(results)
-                
-                # Send new profiles immediately
-                if batch_new_profiles:
-                    logger.info(f"📤 Sending {len(batch_new_profiles)} new profiles")
-                    yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': batch_new_profiles})}\n\n"
-                
-                # ✅ Send smooth progress update
-                progress_percent = int((processed_count / len(usernames_to_fetch)) * 100)
-                total_profiles = len(cached_profiles) + new_profiles_count
-                
-                logger.info(f"📊 Progress: {progress_percent}% - Total: {total_profiles}")
-                yield f"data: {json.dumps({'type': 'progress', 'percent': progress_percent, 'total_found': total_profiles})}\n\n"
-                
-                # ✅ OPTIMIZATION #7: Early stop if target reached
-                if new_profiles_count >= profiles_needed:
-                    logger.info(f"✅ Target reached! Stopping.")
-                    break
-                
-                # ✅ OPTIMIZATION #5: NO COOLDOWN between batches
-            
-            # ===== Complete =====
-            total_profiles = len(cached_profiles) + new_profiles_count
-            logger.info(f"✅ Search complete! Total: {total_profiles}")
-            await set_cached_search(filter_hash, all_profile_usernames)
-            yield f"data: {json.dumps({'type': 'upgrade_prompt', 'show': False})}\n\n"
-            yield f"data: {json.dumps({'type': 'complete', 'total': total_profiles})}\n\n"
-            
-        except Exception as e:
-            logger.error(f"❌ Streaming search error: {e}", exc_info=True)
-            yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
-        finally:
-            release_search_lock(db, user_id)
-
-    return StreamingResponse(
-        event_stream(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "public, max-age=300",
-            "X-Accel-Buffering": "no",
-            "Connection": "keep-alive"
-        }
-    )
+# NOTE: Streaming endpoint deprecated - archive search is fast enough for instant results
+# @app.post("/api/search-profiles-stream")
+# Kept for reference - the /api/search-profiles endpoint now returns paginated results instantly
 
 
 # ===== RUN WITH UVICORN =====

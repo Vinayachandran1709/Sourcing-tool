@@ -6,7 +6,10 @@ Runs nightly profile refresh at 2:00 AM UTC using APScheduler.
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from datetime import datetime, timezone, timedelta
 import logging
+
+from perpetual_indexer import run_perpetual_index
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +31,21 @@ def init_scheduler():
         replace_existing=True,
         misfire_grace_time=3600,  # Allow 1 hour grace if missed
     )
+    # Perpetual US Developer Indexer - runs every 1 hour
+    scheduler.add_job(
+        run_perpetual_index,
+        'interval',
+        hours=1,
+        id='perpetual_us_indexer',
+        name='Perpetual US Developer Indexer',
+        next_run_time=datetime.now(timezone.utc) + timedelta(minutes=5),  # Start 5 min after server starts
+        replace_existing=True,
+        misfire_grace_time=3600,  # Allow 1 hour grace if missed
+    )
+
     scheduler.start()
     logger.info("APScheduler started - nightly profile refresh at 2:00 UTC")
+    logger.info("📡 Perpetual indexer scheduled: every 1 hour")
 
 
 def shutdown_scheduler():
