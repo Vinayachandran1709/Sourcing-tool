@@ -25,6 +25,8 @@ GITHUB_API_BASE = "https://api.github.com"
 HEADERS = {
     "Authorization": f"token {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json",
+    "User-Agent": "TalentBox-Indexer/1.0",
+    "X-GitHub-Api-Version": "2022-11-28",
 }
 
 REQUEST_DELAY = 0.75
@@ -121,7 +123,7 @@ def make_github_request(url: str, params: dict = None) -> Optional[dict]:
     """Make a rate-limited request to GitHub API."""
     try:
         time.sleep(REQUEST_DELAY)
-        response = requests.get(url, headers=HEADERS, params=params, timeout=30)
+        response = requests.get(url, headers=HEADERS, params=params, timeout=(8, 30))
 
         if response.status_code == 200:
             return response.json()
