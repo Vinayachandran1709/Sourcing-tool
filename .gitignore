@@ -11,3 +11,5 @@ backend/venv/
 
 
 talentbox.log 
+__pycache__/ 
+*.pyc 
