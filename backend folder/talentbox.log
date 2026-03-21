@@ -2041,3 +2041,97 @@ asyncio.exceptions.CancelledError
 2026-03-20 00:29:23,801 - perpetual_indexer - INFO -    Processed 1300, new: 1183
 2026-03-20 00:29:58,423 - perpetual_indexer - ERROR - GitHub API error 502
 2026-03-20 00:37:57,648 - perpetual_indexer - INFO -    Processed 1400, new: 1282
+2026-03-21 13:55:54,389 - database - INFO - Connecting to database: ep-odd-term-a43froyn-pooler.us-east-1.aws.neon.tech/neondb?sslmode=require
+2026-03-21 13:56:04,002 - main - INFO - TalentBox API initialized - Version 2.0.1 (Resend Integration)
+2026-03-21 13:56:04,003 - main - INFO - Environment: development
+2026-03-21 13:56:04,004 - main - INFO - CORS origins: ['http://localhost:3000', 'https://talentbox.co', 'https://www.talentbox.co']
+2026-03-21 13:56:04,072 - main - INFO - 🚀 TalentBox API Starting Up...
+2026-03-21 13:56:04,565 - main - INFO - ✅ GitHub Token found (length: 40)
+2026-03-21 13:56:04,566 - main - INFO - ✅ Resend API Key configured
+2026-03-21 13:56:13,882 - main - INFO - ✅ Database connection successful
+2026-03-21 13:56:20,578 - main - INFO - ✅ Payment tables verified/created
+2026-03-21 13:56:20,580 - main - INFO - ✅ JWT Secret configured
+2026-03-21 13:56:21,363 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-21 13:56:21,383 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2026-03-21 13:56:21,417 - apscheduler.scheduler - INFO - Added job "_nightly_refresh_wrapper" to job store "default"
+2026-03-21 13:56:21,419 - apscheduler.scheduler - INFO - Added job "Perpetual US Developer Indexer" to job store "default"
+2026-03-21 13:56:21,420 - apscheduler.scheduler - INFO - Scheduler started
+2026-03-21 13:56:21,421 - scheduler - INFO - APScheduler started - nightly profile refresh at 2:00 UTC
+2026-03-21 13:56:21,422 - scheduler - INFO - 📡 Perpetual indexer scheduled: every 1 hour
+2026-03-21 13:56:21,422 - main - INFO - ✅ Background scheduler initialized
+2026-03-21 13:56:21,423 - redis_service - WARNING - REDIS_URL not set - Redis caching disabled
+2026-03-21 13:56:21,424 - main - INFO - 🎯 Startup validation complete
+
+2026-03-21 13:57:06,012 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:07,047 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:09,090 - main - WARNING - HTTP 403 on /api/email-settings/usage: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:09,468 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:10,062 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:12,573 - main - WARNING - HTTP 403 on /api/email-settings/usage: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:12,583 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:13,123 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:15,806 - main - WARNING - HTTP 403 on /api/email-settings/usage: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:15,809 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:16,553 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:19,040 - main - WARNING - HTTP 403 on /api/email-settings/usage: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:19,071 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:19,828 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:22,146 - main - WARNING - HTTP 403 on /api/email-settings/usage: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:22,178 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:22,949 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:25,215 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:25,217 - main - WARNING - HTTP 403 on /api/email-settings/usage: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:25,227 - main - WARNING - HTTP 403 on /api/email-settings/usage: Not authenticated
+2026-03-21 13:57:25,773 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:27,629 - main - WARNING - HTTP 403 on /api/email-settings/settings: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:27,641 - main - WARNING - HTTP 403 on /api/email-settings/usage: Not authenticated
+2026-03-21 13:57:28,302 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:30,816 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:32,470 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 13:57:33,341 - main - WARNING - HTTP 403 on /api/usage-stats: {'error': 'TRIAL_EXPIRED', 'message': 'Your free trial has expired. Please upgrade your plan.', 'trial_end_date': '2026-03-08T17:11:12.181038+00:00'}
+2026-03-21 14:01:21,427 - apscheduler.executors.default - INFO - Running job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-21 08:31:21 UTC)" (scheduled at 2026-03-21 08:31:21.364494+00:00)
+2026-03-21 14:01:21,431 - perpetual_indexer - INFO - 🔄 Starting perpetual indexer run...
+2026-03-21 14:01:26,004 - perpetual_indexer - INFO -    Loaded 14364 existing usernames from DB
+2026-03-21 14:01:26,005 - perpetual_indexer - INFO -    Cities: ['san francisco', 'new york', 'seattle', 'austin', 'los angeles']
+2026-03-21 14:01:26,005 - perpetual_indexer - INFO -    Strategies: ['active_devs', 'many_repos', 'any_followers']
+2026-03-21 14:01:26,006 - perpetual_indexer - INFO -    Searching san francisco with active_devs...
+2026-03-21 14:07:24,266 - main - INFO - Search request from user 23: role=Backend Developer, location=San Francisco
+2026-03-21 14:07:31,064 - github_integration_service - INFO - 🔍 Search request: role=Backend Developer, location=San Francisco
+2026-03-21 14:07:33,784 - github_integration_service - INFO - 📦 Archive returned 1500 profiles (total: 1511)
+2026-03-21 14:07:33,814 - github_integration_service - INFO - ✅ Archive sufficient! Returning 1500 profiles
+2026-03-21 14:07:33,822 - main - INFO - Search found 1000 profiles
+2026-03-21 14:09:34,825 - perpetual_indexer - INFO -    Processed 100, new (dedup): 100, new (DB inserts): 99
+2026-03-21 14:17:29,696 - perpetual_indexer - INFO -    Processed 200, new (dedup): 200, new (DB inserts): 199
+2026-03-21 14:25:22,043 - perpetual_indexer - INFO -    Processed 300, new (dedup): 300, new (DB inserts): 293
+2026-03-21 14:33:23,332 - perpetual_indexer - INFO -    Processed 400, new (dedup): 400, new (DB inserts): 392
+2026-03-21 14:41:18,272 - perpetual_indexer - INFO -    Processed 500, new (dedup): 500, new (DB inserts): 491
+2026-03-21 14:41:18,274 - perpetual_indexer - INFO -    Searching san francisco with many_repos...
+2026-03-21 14:49:10,413 - perpetual_indexer - INFO -    Processed 600, new (dedup): 599, new (DB inserts): 518
+2026-03-21 14:57:23,002 - perpetual_indexer - INFO -    Processed 700, new (dedup): 698, new (DB inserts): 560
+2026-03-21 15:01:21,390 - apscheduler.scheduler - WARNING - Execution of job "Perpetual US Developer Indexer (trigger: interval[1:00:00], next run at: 2026-03-21 09:31:21 UTC)" skipped: maximum number of running instances reached (1)
+2026-03-21 15:05:06,574 - perpetual_indexer - INFO -    Processed 800, new (dedup): 796, new (DB inserts): 588
+2026-03-21 15:06:35,696 - main - INFO - Search request from user 23: role=AI/ML Engineer, location=San Francisco
+2026-03-21 15:06:42,423 - github_integration_service - INFO - 🔍 Search request: role=AI/ML Engineer, location=San Francisco
+2026-03-21 15:06:45,433 - github_integration_service - INFO - 📦 Archive returned 1430 profiles (total: 1430)
+2026-03-21 15:06:45,463 - github_integration_service - INFO - ✅ Archive sufficient! Returning 1430 profiles
+2026-03-21 15:06:45,473 - main - INFO - Search found 1000 profiles
+2026-03-21 15:10:41,342 - main - INFO - Search request from user 23: role=AI/ML Engineer, location=Denver
+2026-03-21 15:10:47,552 - github_integration_service - INFO - 🔍 Search request: role=AI/ML Engineer, location=Denver
+2026-03-21 15:10:49,373 - github_integration_service - INFO - 📦 Archive returned 423 profiles (total: 423)
+2026-03-21 15:10:49,383 - github_integration_service - INFO - 📦 Supplementing with Profile table cache...
+2026-03-21 15:10:49,693 - github_integration_service - INFO -    Profile table returned 3 profiles
+2026-03-21 15:10:49,695 - github_integration_service - INFO - ✅ Combined results: 425 profiles
+2026-03-21 15:10:49,698 - github_integration_service - INFO - ✅ Final result: 425 profiles
+2026-03-21 15:10:49,705 - main - INFO - Search found 200 profiles
+2026-03-21 15:11:16,190 - scheduler - INFO - APScheduler shut down
+2026-03-21 15:11:16,195 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2026-03-21 15:11:16,223 - apscheduler.executors.default - ERROR - Error running job perpetual_us_indexer
+Traceback (most recent call last):
+  File "C:\Users\vinayachandran\OneDrive\Desktop\Github folder\Sourcing-tool\venvfolder1\Lib\site-packages\apscheduler\executors\asyncio.py", line 38, in callback
+    events = f.result()
+asyncio.exceptions.CancelledError
+2026-03-21 15:13:14,454 - perpetual_indexer - INFO -    Processed 900, new (dedup): 895, new (DB inserts): 616
+2026-03-21 15:22:43,159 - perpetual_indexer - INFO -    Processed 1000, new (dedup): 995, new (DB inserts): 650
+2026-03-21 15:22:43,162 - perpetual_indexer - INFO -    Searching san francisco with any_followers...
+2026-03-21 15:29:04,357 - perpetual_indexer - INFO -    Processed 1100, new (dedup): 1071, new (DB inserts): 651
+2026-03-21 15:37:22,125 - perpetual_indexer - INFO -    Processed 1200, new (dedup): 1150, new (DB inserts): 653

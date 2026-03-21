@@ -1,325 +1,229 @@
-from typing import Dict, List, Tuple
-import re
+"""
+Improved Role Detection Service
+Detects multiple roles per developer based on bio, languages, and repo names.
+"""
 
-class RoleDetectionService:
+import re
+from typing import List, Tuple
+
+# Primary role keywords - more comprehensive
+ROLE_KEYWORDS = {
+    "Frontend Developer": [
+        "frontend", "front-end", "front end", "react", "vue", "angular", "svelte",
+        "css", "html", "ui developer", "ui engineer", "ux engineer", "web developer",
+        "javascript developer", "typescript developer", "nextjs", "next.js"
+    ],
+    "Backend Developer": [
+        "backend", "back-end", "back end", "api", "server", "microservices",
+        "django", "flask", "fastapi", "express", "rails", "spring", "laravel",
+        "node.js", "nodejs", "graphql", "rest api"
+    ],
+    "Full-Stack Developer": [
+        "fullstack", "full-stack", "full stack", "mern", "mean", "lamp",
+        "web application", "full-stack engineer", "product engineer"
+    ],
+    "Mobile Developer": [
+        "ios", "android", "mobile", "swift developer", "kotlin developer",
+        "react native", "flutter", "mobile engineer", "app developer",
+        "iphone", "ipad", "mobile app"
+    ],
+    "DevOps Engineer": [
+        "devops", "sre", "site reliability", "infrastructure", "platform engineer",
+        "kubernetes", "k8s", "docker", "aws", "azure", "gcp", "cloud engineer",
+        "ci/cd", "cicd", "terraform", "ansible", "jenkins", "gitlab ci",
+        "cloud architect", "infrastructure engineer", "platform engineering"
+    ],
+    "Data Scientist": [
+        "data science", "data scientist", "machine learning", "ml engineer",
+        "data analyst", "analytics", "statistics", "statistical", "pandas",
+        "numpy", "jupyter", "data mining", "predictive modeling", "r programmer"
+    ],
+    "AI/ML Engineer": [
+        "artificial intelligence", "ai engineer", "ai/ml", "ml engineer",
+        "deep learning", "neural network", "pytorch", "tensorflow", "keras",
+        "nlp", "natural language", "computer vision", "cv engineer",
+        "machine learning engineer", "ai researcher", "llm", "gpt", "transformer",
+        "reinforcement learning", "generative ai", "diffusion", "stable diffusion",
+        "langchain", "hugging face", "huggingface", "openai"
+    ],
+    "Data Engineer": [
+        "data engineer", "data engineering", "etl", "data pipeline", "data warehouse",
+        "spark", "kafka", "airflow", "databricks", "snowflake", "bigquery",
+        "data infrastructure", "data platform", "dbt", "data lakehouse"
+    ],
+    "Security Engineer": [
+        "security", "cybersecurity", "cyber security", "infosec", "appsec",
+        "penetration", "pentest", "devsecops", "security engineer", "soc analyst",
+        "threat", "vulnerability", "cryptography", "security researcher"
+    ],
+    "QA Engineer": [
+        "qa", "quality assurance", "test engineer", "testing", "test automation",
+        "selenium", "cypress", "playwright", "sdet", "quality engineer"
+    ],
+    "Blockchain Developer": [
+        "blockchain", "web3", "smart contract", "solidity", "ethereum", "crypto",
+        "defi", "nft", "dapp", "decentralized"
+    ],
+    "Game Developer": [
+        "game developer", "game dev", "unity", "unreal", "gamedev", "game engine",
+        "game programmer", "game designer"
+    ],
+    "Embedded Engineer": [
+        "embedded", "firmware", "iot", "arduino", "raspberry pi", "microcontroller",
+        "embedded systems", "rtos", "hardware"
+    ],
+}
+
+# Language combinations that strongly indicate specific roles
+LANGUAGE_ROLE_SIGNALS = {
+    # AI/ML indicators
+    ("Python", "Jupyter Notebook"): ["AI/ML Engineer", "Data Scientist"],
+    ("Python", "C++"): ["AI/ML Engineer"],  # Often ML with performance needs
+    ("Python", "CUDA"): ["AI/ML Engineer"],
+
+    # Data indicators
+    ("Python", "SQL"): ["Data Engineer", "Data Scientist"],
+    ("Scala", "Python"): ["Data Engineer"],
+    ("Python", "R"): ["Data Scientist"],
+
+    # Full-stack indicators
+    ("JavaScript", "Python"): ["Full-Stack Developer"],
+    ("TypeScript", "Python"): ["Full-Stack Developer"],
+    ("JavaScript", "Ruby"): ["Full-Stack Developer"],
+    ("TypeScript", "Go"): ["Full-Stack Developer"],
+
+    # Mobile indicators
+    ("Swift", "Objective-C"): ["Mobile Developer"],
+    ("Kotlin", "Java"): ["Mobile Developer"],
+    ("Dart",): ["Mobile Developer"],
+
+    # DevOps indicators
+    ("Shell", "Python"): ["DevOps Engineer"],
+    ("Go", "Shell"): ["DevOps Engineer"],
+    ("HCL", "Python"): ["DevOps Engineer"],
+    ("HCL",): ["DevOps Engineer"],
+
+    # Security indicators
+    ("Python", "C"): ["Security Engineer"],
+    ("Rust", "C"): ["Security Engineer"],
+}
+
+# Single language to role mappings (fallback)
+LANGUAGE_TO_ROLES = {
+    "JavaScript": ["Frontend Developer"],
+    "TypeScript": ["Frontend Developer"],
+    "Python": ["Backend Developer"],  # Default, but can be overridden
+    "Java": ["Backend Developer"],
+    "Go": ["Backend Developer", "DevOps Engineer"],
+    "Rust": ["Backend Developer", "Security Engineer"],
+    "Ruby": ["Backend Developer"],
+    "PHP": ["Backend Developer"],
+    "C#": ["Backend Developer"],
+    "Swift": ["Mobile Developer"],
+    "Kotlin": ["Mobile Developer"],
+    "Dart": ["Mobile Developer"],
+    "R": ["Data Scientist"],
+    "Julia": ["Data Scientist", "AI/ML Engineer"],
+    "Scala": ["Data Engineer", "Backend Developer"],
+    "Shell": ["DevOps Engineer"],
+    "HCL": ["DevOps Engineer"],
+    "Solidity": ["Blockchain Developer"],
+    "C++": ["Backend Developer"],  # Can also indicate ML
+    "C": ["Embedded Engineer", "Backend Developer"],
+}
+
+
+def detect_roles_from_bio(bio: str) -> List[str]:
+    """Detect all matching roles from bio text."""
+    if not bio:
+        return []
+
+    bio_lower = bio.lower()
+    detected = []
+
+    for role, keywords in ROLE_KEYWORDS.items():
+        for keyword in keywords:
+            if keyword in bio_lower:
+                if role not in detected:
+                    detected.append(role)
+                break  # Found one keyword for this role, move to next role
+
+    return detected
+
+
+def detect_roles_from_languages(languages: List[str]) -> List[str]:
+    """Detect roles based on language combinations."""
+    if not languages:
+        return []
+
+    detected = []
+    lang_set = set(languages)
+
+    # Check language combinations first (more specific)
+    for lang_combo, roles in LANGUAGE_ROLE_SIGNALS.items():
+        if all(lang in lang_set for lang in lang_combo):
+            for role in roles:
+                if role not in detected:
+                    detected.append(role)
+
+    # If no combinations matched, use single language mappings
+    if not detected:
+        for lang in languages[:3]:  # Top 3 languages
+            if lang in LANGUAGE_TO_ROLES:
+                for role in LANGUAGE_TO_ROLES[lang]:
+                    if role not in detected:
+                        detected.append(role)
+
+    return detected
+
+
+def detect_all_roles(bio: str, languages: List[str], repos: List[str] = None) -> Tuple[str, List[str]]:
     """
-    ✅ COMPREHENSIVE ROLE DETECTION with 10 developer roles
-    
-    Smart matching:
-    - Role matches if profile has ANY: language OR framework OR tool
-    - Multi-language selection shows all matching roles
+    Detect all applicable roles for a developer.
+
+    Returns:
+        Tuple of (primary_role, all_roles_list)
     """
-    
-    # ✅ COMPREHENSIVE ROLE DEFINITIONS (from user's spec)
-    ROLE_PATTERNS = {
-        "Frontend Engineer": {
-            "languages": ["JavaScript", "TypeScript"],
-            "frameworks": ["React", "Vue.js", "Vue", "Angular", "Next.js", "Svelte"],
-            "tools": ["Git", "REST API", "GraphQL", "Figma", "GitHub Actions"],
-            "keywords": ["frontend", "front-end", "ui", "ux", "web design", "responsive", "css", "html"],
-            "repo_keywords": ["dashboard", "landing", "portfolio", "website", "frontend", "ui"]
-        },
-        
-        "Backend Engineer": {
-            "languages": ["Java", "Python", "JavaScript", "TypeScript", "Go", "Rust", "C#", "Ruby", "PHP", "Scala", "Kotlin", "Elixir", "Clojure", "SQL"],
-            "frameworks": ["Django", "Flask", "FastAPI", "Spring Boot", "Spring", "Express.js", "Express", "Laravel", "Rails", "ASP.NET"],
-            "tools": ["Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "MongoDB", "PostgreSQL", "MySQL", "Redis", "Elasticsearch", "REST API", "GraphQL", "Git", "Jenkins", "GitLab CI", "GitHub Actions"],
-            "keywords": ["backend", "back-end", "api", "server", "database", "microservices", "rest", "graphql"],
-            "repo_keywords": ["api", "server", "backend", "service", "database", "rest"]
-        },
-        
-        "Full Stack Engineer": {
-            "languages": ["JavaScript", "TypeScript", "Python", "Java", "Ruby", "PHP", "C#", "SQL"],
-            "frameworks": ["React", "Vue.js", "Vue", "Angular", "Next.js", "Express.js", "Express", "Django", "Rails", "Laravel", "ASP.NET"],
-            "tools": ["Docker", "AWS", "Azure", "GCP", "MongoDB", "PostgreSQL", "MySQL", "Redis", "REST API", "GraphQL", "Git", "GitHub Actions", "Figma"],
-            "keywords": ["full-stack", "fullstack", "full stack", "frontend and backend", "end-to-end"],
-            "repo_keywords": ["full-stack", "fullstack", "web-app", "webapp"]
-        },
-        
-        "Mobile Engineer": {
-            "languages": ["Swift", "Kotlin", "Dart", "Java", "C#"],
-            "frameworks": ["Flutter", "React Native", "SwiftUI", "UIKit", "Jetpack Compose", "Xamarin"],
-            "tools": ["Git", "GitHub Actions", "REST API", "GraphQL", "Xcode", "Android Studio", "Firebase", "TestFlight", "App Store", "Google Play"],
-            "keywords": ["mobile", "ios", "android", "app development", "react native", "flutter"],
-            "repo_keywords": ["mobile", "ios", "android", "app", "flutter", "react-native"]
-        },
-        
-        "DevOps Engineer": {
-            "languages": ["Python", "Go", "JavaScript"],
-            "frameworks": [],  # DevOps has no frameworks in spec
-            "tools": ["Docker", "Kubernetes", "AWS", "Azure", "GCP", "Terraform", "Ansible", "Jenkins", "GitLab CI", "GitHub Actions", "Git"],
-            "keywords": ["devops", "sre", "infrastructure", "ci/cd", "deployment", "automation", "cloud"],
-            "repo_keywords": ["devops", "infrastructure", "ci-cd", "deployment", "docker", "kubernetes"]
-        },
-        
-        "Data Scientist": {
-            "languages": ["Python", "R", "Julia"],
-            "frameworks": ["Pandas", "NumPy", "Scikit-learn", "TensorFlow", "PyTorch", "Keras"],
-            "tools": ["Git", "PostgreSQL", "MySQL"],
-            "keywords": ["data science", "machine learning", "analytics", "statistics", "data analysis"],
-            "repo_keywords": ["data-science", "analysis", "ml", "statistics", "data"]
-        },
-        
-        "AI/ML Engineer": {
-            "languages": ["Python", "C++", "Java", "Julia"],
-            "frameworks": ["TensorFlow", "PyTorch", "Keras", "Scikit-learn"],
-            "tools": ["Docker", "Kubernetes", "AWS", "GCP", "Git", "PostgreSQL", "Redis"],
-            "keywords": ["machine learning", "deep learning", "ai", "artificial intelligence", "neural network", "llm", "nlp"],
-            "repo_keywords": ["ml", "ai", "deep-learning", "model", "neural", "tensorflow", "pytorch"]
-        },
-        
-        "Data Engineer": {
-            "languages": ["Python", "Java", "Scala", "Go", "SQL"],
-            "frameworks": ["Apache Spark", "Spark", "Apache Airflow", "Airflow"],
-            "tools": ["Docker", "Kubernetes", "AWS", "Azure", "GCP", "PostgreSQL", "MySQL", "Elasticsearch", "Git"],
-            "keywords": ["data engineer", "etl", "data pipeline", "big data", "data warehouse"],
-            "repo_keywords": ["etl", "pipeline", "data-engineering", "spark", "airflow"]
-        },
-        
-        "QA Engineer": {
-            "languages": ["Java", "Python", "JavaScript", "TypeScript", "Ruby", "C#"],
-            "frameworks": ["Selenium", "Cypress", "Playwright"],
-            "tools": ["Jenkins", "GitHub Actions", "Git", "REST API"],
-            "keywords": ["qa", "testing", "automation", "quality assurance", "test automation"],
-            "repo_keywords": ["test", "qa", "automation", "testing", "selenium"]
-        },
-        
-        "Security Engineer": {
-            "languages": ["Python", "C", "C++", "Rust", "Go", "Java"],
-            "frameworks": [],  # Security has no frameworks in spec
-            "tools": ["Docker", "Kubernetes", "AWS", "GCP", "Git"],
-            "keywords": ["security", "cybersecurity", "penetration", "vulnerability", "infosec", "appsec"],
-            "repo_keywords": ["security", "pentest", "vulnerability", "exploit", "infosec"]
-        }
-    }
-    
-    @staticmethod
-    def detect_roles(profile) -> List[Dict]:
-        """
-        Analyze profile and return detected roles with confidence scores.
-        
-        ✅ FLEXIBLE MATCHING: Role matches if profile has ANY:
-        - Language from role's languages
-        - Framework from role's frameworks
-        - Tool from role's tools
-        
-        Returns:
-            [
-                {"role": "Backend Engineer", "confidence": 0.85, "signals": [...]},
-                {"role": "Frontend Engineer", "confidence": 0.62, "signals": [...]}
-            ]
-        """
-        detected = []
-        
-        # Extract profile data
-        bio = (profile.bio or "").lower()
-        languages_data = profile.languages_data or {}
-        top_repos = profile.top_repos or []
-        primary_language = (profile.primary_language or "").lower()
-        
-        # Get all languages from profile
-        profile_languages = list(languages_data.keys()) if isinstance(languages_data, dict) else []
-        
-        # Build searchable text from repos
-        repo_text = " ".join([
-            str(repo.get("name", "")).lower() + " " + 
-            str(repo.get("description", "")).lower()
-            for repo in top_repos
-        ])
-        
-        # Score each role
-        for role_name, patterns in RoleDetectionService.ROLE_PATTERNS.items():
-            score, signals = RoleDetectionService._score_role(
-                role_name=role_name,
-                patterns=patterns,
-                bio=bio,
-                profile_languages=profile_languages,
-                primary_language=primary_language,
-                repo_text=repo_text
-            )
-            
-            # Only include roles with >40% confidence
-            if score >= 0.40:
-                detected.append({
-                    "role": role_name,
-                    "confidence": round(score, 2),
-                    "signals": signals
-                })
-        
-        # Sort by confidence (highest first)
-        detected.sort(key=lambda x: x["confidence"], reverse=True)
-        
-        return detected
-    
-    @staticmethod
-    def _score_role(
-        role_name: str,
-        patterns: Dict,
-        bio: str,
-        profile_languages: List[str],
-        primary_language: str,
-        repo_text: str
-    ) -> Tuple[float, List[str]]:
-        """
-        Calculate confidence score for a single role.
-        
-        Scoring weights:
-        - Explicit keyword in bio: 40%
-        - Languages match: 30%
-        - Frameworks match: 20%
-        - Repo keywords: 10%
-        """
-        signals = []
-        score = 0.0
-        
-        # 1. Check bio for explicit keywords (40% weight)
-        keyword_matches = sum(1 for kw in patterns["keywords"] if kw in bio)
-        if keyword_matches > 0:
-            keyword_score = min(keyword_matches / len(patterns["keywords"]), 1.0) * 0.40
-            score += keyword_score
-            signals.append(f"Bio mentions {keyword_matches} relevant keywords")
-        
-        # 2. Check languages (30% weight)
-        language_matches = sum(
-            1 for lang in patterns["languages"]
-            if lang.lower() in [pl.lower() for pl in profile_languages] or
-               lang.lower() in primary_language
-        )
-        if language_matches > 0:
-            language_score = min(language_matches / max(len(patterns["languages"]), 3), 1.0) * 0.30
-            score += language_score
-            signals.append(f"Uses {language_matches} relevant languages")
-        
-        # 3. Check frameworks (20% weight)
-        framework_matches = sum(
-            1 for fw in patterns["frameworks"]
-            if fw.lower() in bio or fw.lower() in repo_text
-        )
-        if framework_matches > 0:
-            framework_score = min(framework_matches / max(len(patterns["frameworks"]), 3), 1.0) * 0.20
-            score += framework_score
-            signals.append(f"Works with {framework_matches} relevant frameworks")
-        
-        # 4. Check repo keywords (10% weight)
-        repo_keyword_matches = sum(
-            1 for kw in patterns["repo_keywords"]
-            if kw in repo_text
-        )
-        if repo_keyword_matches > 0:
-            repo_score = min(repo_keyword_matches / len(patterns["repo_keywords"]), 1.0) * 0.10
-            score += repo_score
-            signals.append(f"Has {repo_keyword_matches} relevant projects")
-        
-        # Bonus: If primary language is a strong match, boost score by 10%
-        if any(lang.lower() in primary_language for lang in patterns["languages"][:2]):
-            score = min(score * 1.10, 1.0)
-            signals.append("Primary language is highly relevant")
-        
-        return score, signals
-    
-    @staticmethod
-    def matches_role_filter(profile, role_filter: str, min_confidence: float = 0.40) -> bool:
-        """
-        Check if profile matches a role filter.
-        
-        Args:
-            profile: Profile object with detected_roles
-            role_filter: Role name to filter by
-            min_confidence: Minimum confidence to consider (default 40%)
-        """
-        if not profile.detected_roles:
-            return False
-        
-        for role_data in profile.detected_roles:
-            if role_data.get("role") == role_filter:
-                return role_data.get("confidence", 0) >= min_confidence
-        
-        return False
-    
-    @staticmethod
-    def get_roles_for_tech(tech_type: str, tech_value: str) -> List[str]:
-        """
-        ✅ NEW: Get all roles that use a specific technology
-        
-        Args:
-            tech_type: "language", "framework", or "tool"
-            tech_value: e.g. "Python", "React", "Docker"
-        
-        Returns:
-            List of role names that use this technology
-        """
-        matching_roles = []
-        
-        tech_value_lower = tech_value.lower()
-        
-        for role_name, patterns in RoleDetectionService.ROLE_PATTERNS.items():
-            if tech_type == "language":
-                if any(lang.lower() == tech_value_lower for lang in patterns["languages"]):
-                    matching_roles.append(role_name)
-            elif tech_type == "framework":
-                if any(fw.lower() == tech_value_lower for fw in patterns["frameworks"]):
-                    matching_roles.append(role_name)
-            elif tech_type == "tool":
-                if any(tool.lower() == tech_value_lower for tool in patterns["tools"]):
-                    matching_roles.append(role_name)
-        
-        return matching_roles
-    
-    @staticmethod
-    def profile_matches_any_tech(profile, languages=None, frameworks=None, tools=None) -> bool:
-        """
-        ✅ NEW: Check if profile matches ANY of the selected technologies
-        
-        Flexible matching:
-        - Returns True if profile has ANY language OR framework OR tool from selections
-        
-        Args:
-            profile: Profile object
-            languages: List of language names
-            frameworks: List of framework names
-            tools: List of tool names
-        
-        Returns:
-            True if profile matches at least one selected technology
-        """
-        languages = languages or []
-        frameworks = frameworks or []
-        tools = tools or []
-        
-        # If no tech specified, match all profiles
-        if not languages and not frameworks and not tools:
-            return True
-        
-        # Get profile data
-        bio = (profile.bio or "").lower()
-        languages_data = profile.languages_data or {}
-        top_repos = profile.top_repos or []
-        primary_language = (profile.primary_language or "").lower()
-        
-        profile_languages = list(languages_data.keys()) if isinstance(languages_data, dict) else []
-        
-        repo_text = " ".join([
-            str(repo.get("name", "")).lower() + " " + 
-            str(repo.get("description", "")).lower()
-            for repo in top_repos
-        ])
-        
-        # Check languages
-        for lang in languages:
-            lang_lower = lang.lower()
-            if any(lang_lower in pl.lower() for pl in profile_languages) or lang_lower in primary_language:
-                return True
-        
-        # Check frameworks
-        for fw in frameworks:
-            fw_lower = fw.lower()
-            if fw_lower in bio or fw_lower in repo_text:
-                return True
-        
-        # Check tools (in bio or repos)
-        for tool in tools:
-            tool_lower = tool.lower()
-            if tool_lower in bio or tool_lower in repo_text:
-                return True
-        
-        return False
+    all_roles = []
+
+    # Get roles from bio (highest priority)
+    bio_roles = detect_roles_from_bio(bio)
+    all_roles.extend(bio_roles)
+
+    # Get roles from languages
+    lang_roles = detect_roles_from_languages(languages)
+    for role in lang_roles:
+        if role not in all_roles:
+            all_roles.append(role)
+
+    # Check for AI/ML signals in bio even if not caught by keywords
+    if bio:
+        bio_lower = bio.lower()
+        ai_signals = ["ml", "ai", "machine learning", "deep learning", "neural", "model", "training"]
+        if any(signal in bio_lower for signal in ai_signals):
+            if "AI/ML Engineer" not in all_roles:
+                all_roles.append("AI/ML Engineer")
+
+        # Check for data signals
+        data_signals = ["data", "analytics", "etl", "pipeline", "warehouse"]
+        if any(signal in bio_lower for signal in data_signals):
+            if "Data Scientist" not in all_roles and "Data Engineer" not in all_roles:
+                all_roles.append("Data Scientist")
+
+    # Default if nothing detected
+    if not all_roles:
+        all_roles = ["Software Developer"]
+
+    # Primary role is the first one (bio takes priority)
+    primary_role = all_roles[0]
+
+    return primary_role, all_roles
+
+
+def detect_role(bio: str, languages: List[str]) -> str:
+    """
+    Legacy function for backward compatibility.
+    Returns single primary role.
+    """
+    primary_role, _ = detect_all_roles(bio, languages)
+    return primary_role

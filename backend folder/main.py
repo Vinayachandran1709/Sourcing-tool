@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException, Depends, Request, Header, Response
+from fastapi.responses import StreamingResponse
+import json
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from slowapi import Limiter, _rate_limit_exceeded_handler
@@ -418,12 +420,11 @@ def root():
 @limiter.limit("30/minute")
 async def search_profiles(
     request: Request,
-    response: Response,
     search: SearchRequest,
     current_user: CurrentUser,
     db: DbSession,
 ):
-    """Search for developer profiles with role and location filters."""
+    """Search for developer profiles — streams results progressively via SSE."""
     user_id = current_user.id
 
     logger.info(f"Search request from user {user_id}: role={search.role}, location={search.location}")
@@ -440,79 +441,111 @@ async def search_profiles(
     if not acquire_search_lock(db, user_id):
         raise HTTPException(status_code=429, detail="A search is already in progress. Please wait.")
 
-    try:
-        # Build filters
-        filters = {
-            "role": search.role,
-            "location": search.location,
-            "min_score": search.min_score or 0,
-        }
+    role = search.role
+    location = search.location
+    min_score = search.min_score or 0
+    is_paid = current_user.subscription_status == "active"
 
-        # Search (archive-first)
-        from github_integration_service import GitHubIntegrationService
+    def _first_name(full_name):
+        if full_name:
+            return full_name.split()[0]
+        return None
 
-        is_paid = current_user.subscription_status == "active"
-        profiles = await GitHubIntegrationService.search_and_cache_profiles(
-            db=db,
-            filters=filters,
-            is_paid_user=is_paid,
-        )
-
-        logger.info(f"Search found {len(profiles)} profiles")
-
-        # Log usage
-        UsageService.log_usage(db, user_id, "search", filters)
-
-        # Convert Profile objects to dicts
-        def _first_name(full_name):
-            if full_name:
-                return full_name.split()[0]
-            return None
-
-        profile_dicts = []
-        for profile in profiles:
-            if isinstance(profile, dict):
-                profile["name"] = _first_name(profile.get("name"))
-                profile_dicts.append(profile)
-            else:
-                profile_dict = {
-                    "id": profile.id,
-                    "github_username": profile.github_username,
-                    "name": _first_name(profile.name),
-                    "email": profile.email,
-                    "location": profile.location,
-                    "bio": profile.bio,
-                    "public_repos": profile.public_repos,
-                    "primary_language": profile.primary_language,
-                    "total_stars": getattr(profile, 'total_stars', 0),
-                    "developer_score": getattr(profile, 'developer_score', 0),
-                    "avatar_url": getattr(profile, 'avatar_url', None),
-                    "total_contributions": getattr(profile, 'contributions_last_year', 0),
-                    "followers": getattr(profile, 'followers', 0),
-                    "languages_data": getattr(profile, 'languages_data', None),
-                    "top_repos": getattr(profile, 'top_repos', None),
-                    "selected": False
-                }
-                profile_dicts.append(profile_dict)
-
-        # Pagination
-        page = search.page or 1
-        per_page = search.per_page or 50
-        total_count = len(profile_dicts)
-        start = (page - 1) * per_page
-        end = start + per_page
-        paginated = profile_dicts[start:end]
-
-        response.headers["Cache-Control"] = "public, max-age=300"
+    def _profile_obj_to_dict(profile):
         return {
-            "profiles": paginated,
-            "total_count": total_count,
-            "page": page,
-            "per_page": per_page,
-            "total_pages": (total_count + per_page - 1) // per_page,
+            "id": profile.id,
+            "github_username": profile.github_username,
+            "name": _first_name(profile.name),
+            "email": profile.email,
+            "location": profile.location,
+            "bio": profile.bio,
+            "public_repos": profile.public_repos,
+            "primary_language": profile.primary_language,
+            "total_stars": getattr(profile, 'total_stars', 0),
+            "developer_score": getattr(profile, 'developer_score', 0),
+            "avatar_url": getattr(profile, 'avatar_url', None),
+            "total_contributions": getattr(profile, 'contributions_last_year', 0),
+            "followers": getattr(profile, 'followers', 0),
+            "languages_data": getattr(profile, 'languages_data', None),
+            "top_repos": getattr(profile, 'top_repos', None),
+            "selected": False,
         }
-    finally:
-        release_search_lock(db, user_id)
+
+    async def event_stream():
+        try:
+            from archive_search_service import search_developers, developer_to_dict
+            from github_integration_service import GitHubIntegrationService
+
+            seen_usernames = set()
+            total_sent = 0
+
+            # --- STEP 1: Archive search (fast DB query) ---
+            try:
+                archive_results = search_developers(
+                    db=db, role=role, location=location,
+                    limit=1500, min_score=min_score,
+                )
+                archive_dicts = [developer_to_dict(dev) for dev in archive_results]
+                for p in archive_dicts:
+                    p["name"] = _first_name(p.get("name"))
+                    seen_usernames.add(p["github_username"])
+
+                total_sent = len(archive_dicts)
+                yield f"data: {json.dumps({'type': 'profiles', 'profiles': archive_dicts})}\n\n"
+                logger.info(f"Streamed {total_sent} archive profiles")
+            except Exception as e:
+                logger.error(f"Archive search failed: {e}", exc_info=True)
+                yield f"data: {json.dumps({'type': 'profiles', 'profiles': []})}\n\n"
+
+            # --- STEP 2: Supplement from Profile table if archive was small ---
+            if total_sent < 500:
+                yield f"data: {json.dumps({'type': 'status', 'message': 'Fetching more profiles...'})}\n\n"
+                try:
+                    filters = {"role": role, "location": location, "min_score": min_score}
+                    cached_profiles = GitHubIntegrationService._search_database(db, filters)
+                    new_dicts = []
+                    for profile in cached_profiles:
+                        if profile.github_username not in seen_usernames:
+                            seen_usernames.add(profile.github_username)
+                            new_dicts.append(_profile_obj_to_dict(profile))
+
+                    if new_dicts:
+                        total_sent += len(new_dicts)
+                        yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': new_dicts})}\n\n"
+                        logger.info(f"Streamed {len(new_dicts)} supplement profiles")
+                except Exception as e:
+                    logger.error(f"Profile table supplement failed: {e}", exc_info=True)
+
+            # --- STEP 3: Live GitHub API supplement for paid users ---
+            if total_sent < 200 and is_paid:
+                yield f"data: {json.dumps({'type': 'status', 'message': 'Searching GitHub for more...'})}\n\n"
+                try:
+                    from github_integration_service import check_github_rate_limit
+                    await check_github_rate_limit()
+                    new_profiles = await GitHubIntegrationService._fetch_from_github(
+                        db, None, location, 0, 250, 200 - total_sent
+                    )
+                    api_dicts = []
+                    for profile in new_profiles:
+                        if profile.github_username not in seen_usernames:
+                            seen_usernames.add(profile.github_username)
+                            api_dicts.append(_profile_obj_to_dict(profile))
+                    if api_dicts:
+                        total_sent += len(api_dicts)
+                        yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': api_dicts})}\n\n"
+                        logger.info(f"Streamed {len(api_dicts)} GitHub API profiles")
+                except Exception as e:
+                    logger.error(f"GitHub API supplement failed: {e}", exc_info=True)
+
+            # --- DONE ---
+            UsageService.log_usage(db, user_id, "search", {"role": role, "location": location})
+            yield f"data: {json.dumps({'type': 'complete', 'total': total_sent})}\n\n"
+            logger.info(f"Search complete: {total_sent} total profiles")
+
+        finally:
+            release_search_lock(db, user_id)
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
 
 
 @app.post("/api/test-search")
@@ -970,16 +1003,6 @@ async def admin_usage(
 
     from rate_limit_service import get_admin_usage_stats
     return get_admin_usage_stats(db, days=days)
-
-
-# ===== STREAMING SEARCH ENDPOINT (POST with proper auth) =====
-
-from fastapi.responses import StreamingResponse
-import json
-
-# NOTE: Streaming endpoint deprecated - archive search is fast enough for instant results
-# @app.post("/api/search-profiles-stream")
-# Kept for reference - the /api/search-profiles endpoint now returns paginated results instantly
 
 
 # ===== RUN WITH UVICORN =====
