@@ -22,10 +22,13 @@ ROLE_TO_LANGUAGES = {
     "Mobile Developer": ["Swift", "Kotlin", "Dart", "Java", "Objective-C"],
     "DevOps Engineer": ["Python", "Go", "Shell", "HCL", "Ruby"],
     "Data Scientist": ["Python", "R", "Julia", "SQL"],
-    "AI/ML Engineer": ["Python", "C++", "Julia"],
+    "AI/ML Engineer": ["Python", "C++", "Julia", "Jupyter Notebook"],
     "Data Engineer": ["Python", "Scala", "Java", "SQL"],
     "Security Engineer": ["Python", "Go", "C", "Rust", "Shell"],
     "QA Engineer": ["Python", "Java", "JavaScript", "Ruby"],
+    "Blockchain Developer": ["Solidity", "Rust", "Go", "JavaScript"],
+    "Game Developer": ["C++", "C#", "Lua", "GDScript"],
+    "Embedded Engineer": ["C", "C++", "Rust", "Assembly"],
     "Software Developer": [],  # Matches all
 }
 
@@ -73,21 +76,22 @@ def search_developers(
                     func.lower(GithubDeveloper.location_city) == location.lower()
                 )
 
-    # Role filter (via language matching)
+    # Role filter (search in detected_roles array OR detected_role)
     if role and role in ROLE_TO_LANGUAGES:
         languages = ROLE_TO_LANGUAGES[role]
-        if languages:
-            # Match any of the role's languages
-            query = query.filter(
-                GithubDeveloper.primary_languages.overlap(languages)
-            )
-        # Also match detected_role if set
-        query = query.filter(
-            or_(
-                GithubDeveloper.detected_role == role,
-                GithubDeveloper.primary_languages.overlap(languages) if languages else True
-            )
+
+        # Match if role is in detected_roles array OR matches detected_role
+        role_condition = or_(
+            GithubDeveloper.detected_role == role,
+            GithubDeveloper.detected_roles.any(role),  # Check if role is in the array
         )
+
+        # Also match by languages
+        if languages:
+            language_condition = GithubDeveloper.primary_languages.overlap(languages)
+            query = query.filter(or_(role_condition, language_condition))
+        else:
+            query = query.filter(role_condition)
 
     # Score filter
     if min_score > 0:
@@ -122,16 +126,18 @@ def count_developers(
                     func.lower(GithubDeveloper.location_city) == location.lower()
                 )
 
-    # Role filter
+    # Role filter (search in detected_roles array OR detected_role)
     if role and role in ROLE_TO_LANGUAGES:
         languages = ROLE_TO_LANGUAGES[role]
+        role_condition = or_(
+            GithubDeveloper.detected_role == role,
+            GithubDeveloper.detected_roles.any(role),
+        )
         if languages:
-            query = query.filter(
-                or_(
-                    GithubDeveloper.detected_role == role,
-                    GithubDeveloper.primary_languages.overlap(languages)
-                )
-            )
+            language_condition = GithubDeveloper.primary_languages.overlap(languages)
+            query = query.filter(or_(role_condition, language_condition))
+        else:
+            query = query.filter(role_condition)
 
     # Score filter
     if min_score > 0:
@@ -175,6 +181,7 @@ def developer_to_dict(dev: GithubDeveloper) -> dict:
         "location_state": dev.location_state,
         "languages": dev.primary_languages or [],
         "detected_role": dev.detected_role,
+        "detected_roles": dev.detected_roles or [],
         "public_repos": dev.public_repos,
         "followers": dev.followers,
         "total_stars": dev.total_stars,

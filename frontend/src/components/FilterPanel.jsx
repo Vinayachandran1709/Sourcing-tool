@@ -14,10 +14,16 @@ const ROLE_OPTIONS = [
   { value: 'Data Engineer', label: 'Data Engineer' },
   { value: 'Security Engineer', label: 'Security Engineer' },
   { value: 'QA Engineer', label: 'QA Engineer' },
+  { value: 'Blockchain Developer', label: 'Blockchain Developer' },
+  { value: 'Game Developer', label: 'Game Developer' },
+  { value: 'Embedded Engineer', label: 'Embedded/IoT Engineer' },
+  { value: 'Software Developer', label: 'Software Developer (General)' },
 ];
 
 const LOCATION_OPTIONS = [
   { value: '', label: 'All US Locations' },
+
+  // Tier 1: Major Tech Hubs
   { value: 'San Francisco', label: '📍 San Francisco, CA' },
   { value: 'New York', label: '📍 New York, NY' },
   { value: 'Seattle', label: '📍 Seattle, WA' },
@@ -28,6 +34,50 @@ const LOCATION_OPTIONS = [
   { value: 'Denver', label: '📍 Denver, CO' },
   { value: 'Atlanta', label: '📍 Atlanta, GA' },
   { value: 'San Diego', label: '📍 San Diego, CA' },
+
+  // Tier 2: Growing Tech Cities
+  { value: 'Portland', label: '📍 Portland, OR' },
+  { value: 'Phoenix', label: '📍 Phoenix, AZ' },
+  { value: 'Dallas', label: '📍 Dallas, TX' },
+  { value: 'Houston', label: '📍 Houston, TX' },
+  { value: 'Miami', label: '📍 Miami, FL' },
+  { value: 'Washington DC', label: '📍 Washington, DC' },
+  { value: 'Philadelphia', label: '📍 Philadelphia, PA' },
+  { value: 'Minneapolis', label: '📍 Minneapolis, MN' },
+  { value: 'Detroit', label: '📍 Detroit, MI' },
+  { value: 'Charlotte', label: '📍 Charlotte, NC' },
+  { value: 'Nashville', label: '📍 Nashville, TN' },
+  { value: 'Raleigh', label: '📍 Raleigh, NC' },
+  { value: 'Salt Lake City', label: '📍 Salt Lake City, UT' },
+  { value: 'Pittsburgh', label: '📍 Pittsburgh, PA' },
+  { value: 'Columbus', label: '📍 Columbus, OH' },
+  { value: 'Indianapolis', label: '📍 Indianapolis, IN' },
+  { value: 'Kansas City', label: '📍 Kansas City, MO' },
+  { value: 'Tampa', label: '📍 Tampa, FL' },
+  { value: 'Orlando', label: '📍 Orlando, FL' },
+  { value: 'San Antonio', label: '📍 San Antonio, TX' },
+
+  // Tier 3: Secondary Markets
+  { value: 'St Louis', label: '📍 St. Louis, MO' },
+  { value: 'Baltimore', label: '📍 Baltimore, MD' },
+  { value: 'Cleveland', label: '📍 Cleveland, OH' },
+  { value: 'Cincinnati', label: '📍 Cincinnati, OH' },
+  { value: 'Milwaukee', label: '📍 Milwaukee, WI' },
+  { value: 'Sacramento', label: '📍 Sacramento, CA' },
+  { value: 'Las Vegas', label: '📍 Las Vegas, NV' },
+  { value: 'New Orleans', label: '📍 New Orleans, LA' },
+  { value: 'Jacksonville', label: '📍 Jacksonville, FL' },
+  { value: 'Richmond', label: '📍 Richmond, VA' },
+  { value: 'Hartford', label: '📍 Hartford, CT' },
+  { value: 'Providence', label: '📍 Providence, RI' },
+  { value: 'Buffalo', label: '📍 Buffalo, NY' },
+  { value: 'Rochester', label: '📍 Rochester, NY' },
+  { value: 'Madison', label: '📍 Madison, WI' },
+  { value: 'Ann Arbor', label: '📍 Ann Arbor, MI' },
+  { value: 'Boulder', label: '📍 Boulder, CO' },
+  { value: 'Provo', label: '📍 Provo, UT' },
+  { value: 'Boise', label: '📍 Boise, ID' },
+  { value: 'Albuquerque', label: '📍 Albuquerque, NM' },
 ];
 
 const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {

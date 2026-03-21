@@ -182,6 +182,7 @@ class GithubDeveloper(Base):
     primary_languages = Column(ARRAY(String), nullable=True)  # ['Python', 'JavaScript']
     all_languages = Column(JSONB, nullable=True)  # {"Python": 50000, "JavaScript": 30000}
     detected_role = Column(String(100), nullable=True)  # "Frontend Developer"
+    detected_roles = Column(ARRAY(String), nullable=True)  # All applicable roles e.g. ["Backend Developer", "AI/ML Engineer"]
 
     # Activity Metrics
     public_repos = Column(Integer, default=0)

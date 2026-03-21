@@ -17,6 +17,7 @@ from database import SessionLocal
 from models import GithubDeveloper
 from config import GITHUB_TOKEN
 from location_parser import US_TARGET_CITIES, US_CITY_TO_STATE, parse_us_location
+from role_detection_service import detect_all_roles
 
 logger = logging.getLogger(__name__)
 
@@ -30,63 +31,76 @@ HEADERS = {
 }
 
 REQUEST_DELAY = 0.75
-MAX_PROFILES_PER_RUN = 2000  # Stay well under 5000/hour limit
+MAX_PROFILES_PER_RUN = 3000  # Increased from 2000
 
 # Search strategies - rotates through these
 SEARCH_STRATEGIES = [
-    # High-quality developers
-    {"query_suffix": "repos:>10 followers:>50", "sort": "followers", "name": "high_followers"},
-    {"query_suffix": "repos:>20 followers:>20", "sort": "repositories", "name": "many_repos"},
+    # === GENERAL STRATEGIES (Catch everyone) ===
+    {"query_suffix": "repos:>5", "sort": "joined", "name": "active_devs"},
+    {"query_suffix": "repos:>3", "sort": "repositories", "name": "many_repos"},
+    {"query_suffix": "repos:>2", "sort": "followers", "name": "any_followers"},
 
-    # Recently active
-    {"query_suffix": "repos:>5 pushed:>{recent_date}", "sort": "joined", "name": "recently_active"},
+    # === RECENTLY ACTIVE ===
+    {"query_suffix": "repos:>2 created:>{recent_date_90}", "sort": "joined", "name": "new_joiners_90d"},
+    {"query_suffix": "repos:>2 pushed:>{recent_push_date}", "sort": "joined", "name": "recently_pushed"},
 
-    # Language-specific (high demand roles)
-    {"query_suffix": "language:python repos:>5", "sort": "followers", "name": "python_devs"},
-    {"query_suffix": "language:javascript repos:>5", "sort": "followers", "name": "js_devs"},
-    {"query_suffix": "language:typescript repos:>5", "sort": "followers", "name": "ts_devs"},
-    {"query_suffix": "language:go repos:>3", "sort": "followers", "name": "go_devs"},
-    {"query_suffix": "language:rust repos:>3", "sort": "followers", "name": "rust_devs"},
-    {"query_suffix": "language:java repos:>5", "sort": "followers", "name": "java_devs"},
-    {"query_suffix": "language:swift repos:>3", "sort": "followers", "name": "swift_devs"},
-    {"query_suffix": "language:kotlin repos:>3", "sort": "followers", "name": "kotlin_devs"},
+    # === HIGH-DEMAND LANGUAGES ===
+    {"query_suffix": "language:python repos:>2", "sort": "joined", "name": "python_devs"},
+    {"query_suffix": "language:javascript repos:>2", "sort": "joined", "name": "js_devs"},
+    {"query_suffix": "language:typescript repos:>2", "sort": "joined", "name": "ts_devs"},
+    {"query_suffix": "language:java repos:>2", "sort": "joined", "name": "java_devs"},
+    {"query_suffix": "language:go repos:>2", "sort": "joined", "name": "go_devs"},
+    {"query_suffix": "language:rust repos:>2", "sort": "joined", "name": "rust_devs"},
+    {"query_suffix": "language:swift repos:>2", "sort": "joined", "name": "swift_devs"},
+    {"query_suffix": "language:kotlin repos:>2", "sort": "joined", "name": "kotlin_devs"},
+    {"query_suffix": "language:ruby repos:>2", "sort": "joined", "name": "ruby_devs"},
+    {"query_suffix": "language:php repos:>2", "sort": "joined", "name": "php_devs"},
+    {"query_suffix": "language:csharp repos:>2", "sort": "joined", "name": "csharp_devs"},
+    {"query_suffix": "language:cpp repos:>2", "sort": "joined", "name": "cpp_devs"},
+    {"query_suffix": "language:scala repos:>2", "sort": "joined", "name": "scala_devs"},
+    {"query_suffix": "language:r repos:>2", "sort": "joined", "name": "r_devs"},
+    {"query_suffix": "language:dart repos:>2", "sort": "joined", "name": "dart_devs"},
+    {"query_suffix": "language:shell repos:>3", "sort": "joined", "name": "shell_devs"},
 
-    # New developers (joined recently)
-    {"query_suffix": "repos:>3 created:>{recent_date}", "sort": "joined", "name": "new_devs"},
+    # === AI/ML SPECIFIC (Target underrepresented) ===
+    {"query_suffix": "language:jupyter+notebook repos:>1", "sort": "joined", "name": "jupyter_users"},
+    {"query_suffix": "language:python machine+learning repos:>1", "sort": "followers", "name": "ml_python"},
+    {"query_suffix": "language:python deep+learning repos:>1", "sort": "followers", "name": "dl_python"},
+    {"query_suffix": "language:python tensorflow repos:>0", "sort": "followers", "name": "tensorflow_devs"},
+    {"query_suffix": "language:python pytorch repos:>0", "sort": "followers", "name": "pytorch_devs"},
+    {"query_suffix": "language:python data+science repos:>1", "sort": "joined", "name": "data_science"},
 
-    # Star earners
-    {"query_suffix": "repos:>5", "sort": "stars", "name": "star_earners"},
+    # === DATA ENGINEER SPECIFIC ===
+    {"query_suffix": "language:python spark repos:>0", "sort": "followers", "name": "spark_devs"},
+    {"query_suffix": "language:scala repos:>2", "sort": "joined", "name": "scala_data"},
+    {"query_suffix": "language:python airflow repos:>0", "sort": "followers", "name": "airflow_devs"},
+    {"query_suffix": "language:sql repos:>2", "sort": "joined", "name": "sql_devs"},
+
+    # === DEVOPS SPECIFIC ===
+    {"query_suffix": "language:hcl repos:>1", "sort": "joined", "name": "terraform_devs"},
+    {"query_suffix": "language:shell kubernetes repos:>0", "sort": "followers", "name": "k8s_devs"},
+    {"query_suffix": "language:go docker repos:>0", "sort": "followers", "name": "docker_go"},
+    {"query_suffix": "language:python ansible repos:>0", "sort": "followers", "name": "ansible_devs"},
+
+    # === SECURITY SPECIFIC ===
+    {"query_suffix": "language:python security repos:>0", "sort": "followers", "name": "security_python"},
+    {"query_suffix": "language:go security repos:>0", "sort": "followers", "name": "security_go"},
+    {"query_suffix": "language:rust repos:>2", "sort": "joined", "name": "rust_security"},
+
+    # === MOBILE SPECIFIC ===
+    {"query_suffix": "language:swift ios repos:>1", "sort": "followers", "name": "ios_swift"},
+    {"query_suffix": "language:kotlin android repos:>1", "sort": "followers", "name": "android_kotlin"},
+    {"query_suffix": "language:dart flutter repos:>0", "sort": "followers", "name": "flutter_devs"},
+
+    # === FULL-STACK INDICATORS ===
+    {"query_suffix": "language:javascript language:python repos:>3", "sort": "joined", "name": "js_python_fullstack"},
+    {"query_suffix": "language:typescript language:go repos:>2", "sort": "joined", "name": "ts_go_fullstack"},
+
+    # === FOLLOWER RANGES (Catch mid-tier) ===
+    {"query_suffix": "repos:>3 followers:1..10", "sort": "joined", "name": "followers_1_10"},
+    {"query_suffix": "repos:>3 followers:10..50", "sort": "joined", "name": "followers_10_50"},
+    {"query_suffix": "repos:>2 followers:0", "sort": "repositories", "name": "no_followers"},
 ]
-
-# Role detection (same as seeder)
-LANGUAGE_ROLE_MAP = {
-    "JavaScript": "Frontend Developer",
-    "TypeScript": "Frontend Developer",
-    "Swift": "Mobile Developer",
-    "Kotlin": "Mobile Developer",
-    "Dart": "Mobile Developer",
-    "Python": "Backend Developer",
-    "Java": "Backend Developer",
-    "Go": "Backend Developer",
-    "Ruby": "Backend Developer",
-    "PHP": "Backend Developer",
-    "C#": "Backend Developer",
-    "Rust": "Backend Developer",
-    "Shell": "DevOps Engineer",
-    "R": "Data Scientist",
-}
-
-ROLE_KEYWORDS = {
-    "Frontend Developer": ["react", "vue", "angular", "frontend", "front-end", "css", "ui", "ux"],
-    "Backend Developer": ["backend", "back-end", "api", "server", "django", "flask", "fastapi"],
-    "Full-Stack Developer": ["fullstack", "full-stack", "full stack"],
-    "Mobile Developer": ["ios", "android", "mobile", "swift", "kotlin", "flutter"],
-    "DevOps Engineer": ["devops", "sre", "infrastructure", "kubernetes", "docker", "aws"],
-    "Data Scientist": ["data science", "machine learning", "ml", "data analyst"],
-    "AI/ML Engineer": ["artificial intelligence", "deep learning", "neural", "pytorch", "tensorflow"],
-    "Data Engineer": ["data engineer", "etl", "pipeline", "spark", "kafka"],
-    "Security Engineer": ["security", "cybersecurity", "penetration", "infosec"],
-}
 
 # Track which strategy/city was used last (persists across runs via DB)
 class IndexerState:
@@ -96,7 +110,7 @@ class IndexerState:
         self.current_strategy_index = 0
         self.current_city_index = 0
 
-    def get_next_cities(self, count: int = 3) -> list[str]:
+    def get_next_cities(self, count: int = 5) -> list[str]:
         """Get next N cities to process."""
         cities = []
         for i in range(count):
@@ -105,7 +119,7 @@ class IndexerState:
         self.current_city_index = (self.current_city_index + count) % len(US_TARGET_CITIES)
         return cities
 
-    def get_next_strategies(self, count: int = 2) -> list[dict]:
+    def get_next_strategies(self, count: int = 3) -> list[dict]:
         """Get next N strategies to use."""
         strategies = []
         for i in range(count):
@@ -143,23 +157,6 @@ def make_github_request(url: str, params: dict = None) -> Optional[dict]:
     except Exception as e:
         logger.error(f"Request error: {e}")
         return None
-
-
-def detect_role(bio: str, languages: list[str]) -> str:
-    """Detect developer role from bio and languages."""
-    bio_lower = (bio or "").lower()
-
-    for role, keywords in ROLE_KEYWORDS.items():
-        for keyword in keywords:
-            if keyword in bio_lower:
-                return role
-
-    if languages:
-        primary_lang = languages[0]
-        if primary_lang in LANGUAGE_ROLE_MAP:
-            return LANGUAGE_ROLE_MAP[primary_lang]
-
-    return "Software Developer"
 
 
 def fetch_user_details(username: str) -> Optional[dict]:
@@ -200,8 +197,11 @@ def search_users(city: str, strategy: dict, page: int = 1) -> list[dict]:
     query_suffix = strategy["query_suffix"]
 
     # Replace date placeholders
-    recent_date = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
-    query_suffix = query_suffix.replace("{recent_date}", recent_date)
+    recent_date_90 = (datetime.now() - timedelta(days=90)).strftime("%Y-%m-%d")
+    recent_push_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+    query_suffix = query_suffix.replace("{recent_date}", recent_date_90)
+    query_suffix = query_suffix.replace("{recent_date_90}", recent_date_90)
+    query_suffix = query_suffix.replace("{recent_push_date}", recent_push_date)
 
     query = f"location:{city.replace(' ', '+')} {query_suffix}"
 
@@ -237,8 +237,8 @@ def process_and_upsert_user(username: str, city: str, db: Session, existing_user
     location_raw = details.get("location", "")
     location_info = parse_us_location(location_raw) or {}
 
-    # Detect role
-    role = detect_role(details.get("bio", ""), languages)
+    # Detect roles (multi-role detection)
+    primary_role, all_roles = detect_all_roles(details.get("bio", ""), languages)
 
     # Parse dates
     created_at = None
@@ -311,7 +311,8 @@ def process_and_upsert_user(username: str, city: str, db: Session, existing_user
         location_country="United States",
         primary_languages=languages,
         all_languages={lang: 1 for lang in languages},
-        detected_role=role,
+        detected_role=primary_role,
+        detected_roles=all_roles,
         public_repos=public_repos,
         followers=followers,
         following=details.get("following", 0),
@@ -332,6 +333,8 @@ def process_and_upsert_user(username: str, city: str, db: Session, existing_user
             "public_repos": stmt.excluded.public_repos,
             "followers": stmt.excluded.followers,
             "total_stars": stmt.excluded.total_stars,
+            "detected_role": stmt.excluded.detected_role,
+            "detected_roles": stmt.excluded.detected_roles,
             "developer_score": stmt.excluded.developer_score,
             "last_active_at": stmt.excluded.last_active_at,
             "updated_at": datetime.now(timezone.utc),
@@ -353,15 +356,22 @@ def run_perpetual_index():
 
     db = SessionLocal()
     processed = 0
-    new_profiles = 0
+    new_profiles = 0  # In-memory dedup count (profiles not seen this run)
+    db_inserts = 0    # Actual new rows inserted into DB
 
     try:
-        # Get existing usernames to track what we've seen
+        # Pre-load existing usernames from DB to detect true new inserts
+        db_existing = set(
+            row[0] for row in db.query(GithubDeveloper.github_username).all()
+        )
+        logger.info(f"   Loaded {len(db_existing)} existing usernames from DB")
+
+        # Track what we've seen this run (for in-run dedup)
         existing_usernames = set()
 
         # Get cities and strategies for this run
-        cities = indexer_state.get_next_cities(3)  # Process 3 cities per run
-        strategies = indexer_state.get_next_strategies(2)  # Use 2 strategies per run
+        cities = indexer_state.get_next_cities(5)  # Process 5 cities per run
+        strategies = indexer_state.get_next_strategies(3)  # Use 3 strategies per run
 
         logger.info(f"   Cities: {cities}")
         logger.info(f"   Strategies: {[s['name'] for s in strategies]}")
@@ -395,10 +405,12 @@ def run_perpetual_index():
                             processed += 1
                             if is_new:
                                 new_profiles += 1
+                                if username not in db_existing:
+                                    db_inserts += 1
 
                             if processed % 100 == 0:
                                 db.commit()
-                                logger.info(f"   Processed {processed}, new: {new_profiles}")
+                                logger.info(f"   Processed {processed}, new (dedup): {new_profiles}, new (DB inserts): {db_inserts}")
                         except Exception as e:
                             logger.error(f"Error processing {username}: {e}")
                             continue
@@ -422,7 +434,9 @@ def run_perpetual_index():
 
     logger.info(f"✅ Perpetual indexer complete")
     logger.info(f"   Processed: {processed}")
-    logger.info(f"   New profiles: {new_profiles}")
+    logger.info(f"   New (in-memory dedup): {new_profiles}")
+    logger.info(f"   New (actual DB inserts): {db_inserts}")
+    logger.info(f"   Updated (existing): {new_profiles - db_inserts}")
     logger.info(f"   Total in DB: {total}")
     logger.info(f"   Time: {elapsed:.1f}s")
 

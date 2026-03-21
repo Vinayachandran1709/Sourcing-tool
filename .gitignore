@@ -2,14 +2,10 @@ venvfolder1/
 venv1/
 backend/venv/
 .env
-
 # Environment files
 .env*
 *.env
 **/.env*
-
-
-
-talentbox.log 
-__pycache__/ 
-*.pyc 
+talentbox.log
+__pycache__/
+*.pyc

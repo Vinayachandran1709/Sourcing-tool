@@ -36,16 +36,8 @@ const SearchDashboard = () => {
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [searchProgress, setSearchProgress] = useState({
-    isSearching: false,
-    message: '',
-    totalFound: 0
-  });
-
-  const [showSearchMessage, setShowSearchMessage] = useState(true);
-  const searchMessageTimerRef = React.useRef(null);
-
   const [currentPage, setCurrentPage] = useState(1);
+  const [fetchingMore, setFetchingMore] = useState(false);
   const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
     const saved = sessionStorage.getItem('scoreFilterRanges');
     return saved ? JSON.parse(saved) : [];
@@ -73,54 +65,32 @@ const SearchDashboard = () => {
     localStorage.setItem('unlockedProfileIds', JSON.stringify(unlockedProfileIds));
   }, [unlockedProfileIds]);
 
-  const handleSearch = async (filters) => {
+  const handleSearch = async (searchFilters) => {
     setLoading(true);
+    setFetchingMore(false);
     setError(null);
     setProfiles([]);
-    setCurrentFilters(filters);
+    setCurrentFilters(searchFilters);
     setCurrentPage(1);
     setScoreFilterRanges([]);
-    setShowSearchMessage(true);
 
-    // Clear any existing timer
-    if (searchMessageTimerRef.current) {
-      clearTimeout(searchMessageTimerRef.current);
-    }
-
-    // Hide the search message after 2 minutes (120000ms)
-    searchMessageTimerRef.current = setTimeout(() => {
-      setShowSearchMessage(false);
-    }, 120000);
-
-    setSearchProgress({
-      isSearching: true,
-      message: 'Searching for developers...',
-      totalFound: 0
-    });
-
-    // Track search started
-    trackSearchStarted(filters);
+    trackSearchStarted(searchFilters);
 
     try {
-      const token = localStorage.getItem('token');
       const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
-      const requestBody = {
-        role: filters.role || null,
-        location: filters.location || null,
-      };
-
-      const response = await fetch(
-        `${API_URL}/api/search-profiles-stream`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify(requestBody)
-        }
-      );
+      const response = await fetch(`${API_URL}/api/search-profiles`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({
+          role: searchFilters.role || null,
+          location: searchFilters.location || null,
+          min_score: 0,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -129,6 +99,7 @@ const SearchDashboard = () => {
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
+      let totalProfiles = 0;
 
       while (true) {
         const { done, value } = await reader.read();
@@ -139,76 +110,45 @@ const SearchDashboard = () => {
 
         for (const message of messages) {
           if (!message.trim() || !message.startsWith('data: ')) continue;
-
           try {
-            const jsonStr = message.replace(/^data: /, '');
-            const data = JSON.parse(jsonStr);
+            const data = JSON.parse(message.replace(/^data: /, ''));
 
             switch (data.type) {
-              case 'status':
-                setSearchProgress(prev => ({ ...prev, message: data.message }));
-                break;
               case 'profiles':
-                setProfiles(data.profiles);
-                setSearchProgress(prev => ({
-                  ...prev,
-                  totalFound: data.count,
-                  message: 'Loading developer profiles...'
-                }));
+                // First batch — show immediately, stop main spinner
+                setProfiles(data.profiles || []);
+                totalProfiles = (data.profiles || []).length;
+                setLoading(false);
                 break;
-              case 'progress':
-                setSearchProgress(prev => ({
-                  ...prev,
-                  totalFound: data.total_found,
-                  message: 'Finding more developers...'
-                }));
+              case 'status':
+                // Backend is fetching more
+                setFetchingMore(true);
                 break;
               case 'new_profiles':
-                setProfiles(prev => [...prev, ...data.profiles]);
+                // Append additional profiles
+                setProfiles(prev => [...prev, ...(data.profiles || [])]);
+                totalProfiles += (data.profiles || []).length;
                 break;
               case 'complete':
-                // Clear the timer when search completes
-                if (searchMessageTimerRef.current) {
-                  clearTimeout(searchMessageTimerRef.current);
-                }
-                setSearchProgress({
-                  isSearching: false,
-                  message: 'Search complete!',
-                  totalFound: data.total
-                });
-                setLoading(false);
-                // Increment search usage count
+                setFetchingMore(false);
                 incrementUsage('search', 1);
-                // Track search completed with results
-                trackSearchPerformed(filters, data.total);
-                break;
-              case 'error':
-                // Clear the timer on error
-                if (searchMessageTimerRef.current) {
-                  clearTimeout(searchMessageTimerRef.current);
-                }
-                setError({ message: data.message });
-                setLoading(false);
-                setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
+                trackSearchPerformed(searchFilters, data.total || totalProfiles);
                 break;
               default:
                 break;
             }
           } catch (e) {
-            console.error('Failed to parse SSE data:', e);
+            console.error('Failed to parse SSE:', e);
           }
         }
       }
 
-    } catch (error) {
-      console.error('Search failed:', error);
-      // Clear the timer on error
-      if (searchMessageTimerRef.current) {
-        clearTimeout(searchMessageTimerRef.current);
-      }
-      setError({ message: error.message || 'Failed to start search. Please try again.' });
+    } catch (err) {
+      console.error('Search failed:', err);
+      setError({ message: err.message || 'Search failed' });
+    } finally {
       setLoading(false);
-      setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
+      setFetchingMore(false);
     }
   };
 
@@ -218,14 +158,6 @@ const SearchDashboard = () => {
     return () => trackPageExit('search_dashboard');
   }, []);
 
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (searchMessageTimerRef.current) {
-        clearTimeout(searchMessageTimerRef.current);
-      }
-    };
-  }, []);
 
   const handleProfileSelect = useCallback(async (profileId) => {
     setProfiles(prevProfiles =>
@@ -419,7 +351,7 @@ const SearchDashboard = () => {
           initialFilters={currentFilters}
           onReset={() => {
             setProfiles([]);
-            setSearchProgress({ isSearching: false, message: '', totalFound: 0 });
+            setFetchingMore(false);
             setCurrentFilters({});
             sessionStorage.removeItem('searchResults');
             sessionStorage.removeItem('currentFilters');
@@ -428,23 +360,31 @@ const SearchDashboard = () => {
         />
 
         {/* Result Count */}
-        {profiles.length > 0 && !searchProgress.isSearching && (
+        {profiles.length > 0 && !loading && (
           <div style={styles.resultCount}>
             <p style={styles.resultCountTitle}>
-              Found {profiles.length.toLocaleString()} developers
+              🎯 Found {profiles.length.toLocaleString()} developers
             </p>
             <p style={styles.resultCountSubtitle}>
-              Showing page {currentPage} of {totalPages}
+              Sorted by developer score
+              {fetchingMore && ' • Fetching more profiles...'}
             </p>
           </div>
         )}
 
-        {/* Search Progress - Only show for first 2 minutes */}
-        {searchProgress.isSearching && showSearchMessage && (
+        {/* Loading indicator — only before first batch arrives */}
+        {loading && profiles.length === 0 && (
           <div style={styles.progressContainer}>
             <div style={styles.progressHeader}>
-              <span style={styles.progressStatus}>{searchProgress.message}</span>
+              <span style={styles.progressStatus}>Searching for developers...</span>
             </div>
+          </div>
+        )}
+
+        {/* Fetching more indicator — after first batch, below result count */}
+        {fetchingMore && profiles.length > 0 && (
+          <div style={styles.fetchingMoreBar}>
+            <span style={styles.fetchingMoreText}>⏳ Fetching more profiles...</span>
           </div>
         )}
 
@@ -650,7 +590,7 @@ const SearchDashboard = () => {
         )}
 
         {/* Empty State */}
-        {!loading && profiles.length === 0 && !error && !searchProgress.isSearching && (
+        {!loading && profiles.length === 0 && !error && (
           <div style={styles.emptyState}>
             <Search size={48} color="#9ca3af" />
             <h3 style={styles.emptyStateTitle}>Search US Tech Talent</h3>
@@ -694,15 +634,15 @@ const styles = {
 
   resultCount: {
     padding: '16px 20px',
-    backgroundColor: '#f0fdf4',
+    background: 'linear-gradient(to right, #f0fdf4, #ecfdf5)',
     border: '1px solid #bbf7d0',
     borderRadius: '12px',
     marginBottom: '24px',
   },
 
   resultCountTitle: {
-    fontSize: '18px',
-    fontWeight: '600',
+    fontSize: '20px',
+    fontWeight: '700',
     color: '#166534',
     margin: 0,
   },
@@ -731,6 +671,21 @@ const styles = {
     fontSize: '14px',
     fontWeight: '600',
     color: '#1a1a1a',
+  },
+
+  fetchingMoreBar: {
+    padding: '10px 20px',
+    backgroundColor: '#fffbeb',
+    border: '1px solid #fde68a',
+    borderRadius: '8px',
+    marginBottom: '16px',
+    textAlign: 'center',
+  },
+
+  fetchingMoreText: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#92400e',
   },
 
   errorBox: {
