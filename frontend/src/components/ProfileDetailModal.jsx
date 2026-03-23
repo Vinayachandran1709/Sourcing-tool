@@ -183,17 +183,17 @@ const ProfileDetailModal = ({ profile, isOpen, onClose }) => {
                 </div>
               )}
 
-              {profile.portfolio_url && (
+              {profile.portfolio_url && /^https?:\/\//i.test(profile.portfolio_url) && (
                 <div style={styles.contactItem}>
                   <div style={styles.contactIcon}>
                     <LinkIcon size={18} color="#8b5cf6" />
                   </div>
                   <div style={styles.contactDetails}>
                     <span style={styles.contactLabel}>Website</span>
-                    <a 
-                      href={profile.portfolio_url} 
-                      target="_blank" 
-                      rel="noopener noreferrer" 
+                    <a
+                      href={profile.portfolio_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       style={styles.contactValue}
                     >
                       {profile.portfolio_url}

@@ -77,21 +77,21 @@ const SavedProfilesPage = () => {
     localStorage.setItem('unlockedProfileIds', JSON.stringify(unlockedProfileIds));
   }, [unlockedProfileIds]);
 
-  const handleViewProfile = (profile) => {
+  const handleViewProfile = async (profile) => {
     const isNewUnlock = !unlockedProfileIds.includes(profile.id);
     if (isNewUnlock) {
       setUnlockedProfileIds(prev => [...prev, profile.id]);
-      // Log unlock on backend (tracks usage_profile_views)
-      logProfileUnlock(profile.id).catch(err => {
+      try {
+        await logProfileUnlock(profile.id);
+        incrementUsage('profile_unlock', 1);
+      } catch (err) {
         console.error('Failed to log profile unlock:', err);
+        setUnlockedProfileIds(prev => prev.filter(id => id !== profile.id));
         if (err.response?.status === 429) {
-          setUnlockedProfileIds(prev => prev.filter(id => id !== profile.id));
           alert(err.response?.data?.detail?.message || 'Profile unlock limit reached. Please upgrade.');
           return;
         }
-      });
-      // Optimistic UI update
-      incrementUsage('profile_unlock', 1);
+      }
     }
     setSelectedProfile(profile);
     setShowDetailModal(true);

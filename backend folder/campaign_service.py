@@ -71,13 +71,11 @@ class CampaignService:
             server.send_message(msg)
             server.quit()
             
-            logger.info(f"✅ Email sent to {recipient_email}")
-            print(f"✅ Email sent to {recipient_email}")
+            logger.info(f"Email sent to {recipient_email}")
             return True
-            
+
         except Exception as e:
-            logger.error(f"❌ Failed to send email to {recipient_email}: {e}")
-            print(f"❌ Failed to send email to {recipient_email}: {e}")
+            logger.error(f"Failed to send email to {recipient_email}: {e}")
             return False
     
     @staticmethod
@@ -190,8 +188,7 @@ class CampaignService:
                 savepoint.rollback()
                 results["failed"] += 1
                 results["errors"].append(f"Profile {profile_id}: {str(e)}")
-                logger.error(f"❌ Failed to send to profile {profile_id}: {e}")
-                print(f"❌ Failed to send to profile {profile_id}: {e}")
+                logger.error(f"Failed to send to profile {profile_id}: {e}")
         
         # ⭐ COMMIT all successful campaigns
         db.commit()

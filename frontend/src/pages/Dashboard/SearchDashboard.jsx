@@ -7,7 +7,7 @@ import EmailModal from '../../components/EmailModal';
 import FilterPanel from '../../components/FilterPanel';
 import { useAuth } from '../../contexts/AuthContext';
 
-import {toggleProfileSelection, logProfileUnlock} from '../../services/api';
+import {toggleProfileSelection, logProfileUnlock, API_BASE_URL} from '../../services/api';
 import { trackSearchStarted, trackSearchPerformed, trackProfileViewed, trackProfileUnlocked, trackProfileSaved, trackEmailModalOpened, trackScoreFilterUsed, trackPageEntry, trackPageExit } from '../../services/analytics';
 
 const SearchDashboard = () => {
@@ -38,6 +38,8 @@ const SearchDashboard = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [fetchingMore, setFetchingMore] = useState(false);
+  const [loadedCount, setLoadedCount] = useState(0);
+  const [totalExpected, setTotalExpected] = useState(0);
   const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
     const saved = sessionStorage.getItem('scoreFilterRanges');
     return saved ? JSON.parse(saved) : [];
@@ -50,7 +52,13 @@ const SearchDashboard = () => {
 
   useEffect(() => {
     if (profiles.length > 0) {
-      sessionStorage.setItem('searchResults', JSON.stringify(profiles));
+      try {
+        // Cap sessionStorage at 2000 profiles to avoid quota overflow
+        const toStore = profiles.length > 2000 ? profiles.slice(0, 2000) : profiles;
+        sessionStorage.setItem('searchResults', JSON.stringify(toStore));
+      } catch (e) {
+        // sessionStorage full — silently skip
+      }
     }
   }, [profiles]);
 
@@ -73,13 +81,13 @@ const SearchDashboard = () => {
     setCurrentFilters(searchFilters);
     setCurrentPage(1);
     setScoreFilterRanges([]);
+    setLoadedCount(0);
+    setTotalExpected(0);
 
     trackSearchStarted(searchFilters);
 
     try {
-      const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
-
-      const response = await fetch(`${API_URL}/api/search-profiles`, {
+      const response = await fetch(`${API_BASE_URL}/api/search-profiles`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -114,11 +122,18 @@ const SearchDashboard = () => {
             const data = JSON.parse(message.replace(/^data: /, ''));
 
             switch (data.type) {
+              case 'count':
+                setTotalExpected(data.total_matching || 0);
+                break;
               case 'profiles':
                 // First batch — show immediately, stop main spinner
                 setProfiles(data.profiles || []);
                 totalProfiles = (data.profiles || []).length;
+                setLoadedCount(totalProfiles);
                 setLoading(false);
+                if (data.profiles && data.profiles.length > 0) {
+                  setFetchingMore(true);
+                }
                 break;
               case 'status':
                 // Backend is fetching more
@@ -129,8 +144,12 @@ const SearchDashboard = () => {
                 setProfiles(prev => [...prev, ...(data.profiles || [])]);
                 totalProfiles += (data.profiles || []).length;
                 break;
+              case 'progress':
+                setLoadedCount(data.loaded || totalProfiles);
+                break;
               case 'complete':
                 setFetchingMore(false);
+                setLoadedCount(0);
                 incrementUsage('search', 1);
                 trackSearchPerformed(searchFilters, data.total || totalProfiles);
                 break;
@@ -367,7 +386,10 @@ const SearchDashboard = () => {
             </p>
             <p style={styles.resultCountSubtitle}>
               Sorted by developer score
-              {fetchingMore && ' • Fetching more profiles...'}
+              {fetchingMore && loadedCount > 0 && totalExpected > 0 &&
+                ` • Loading ${loadedCount.toLocaleString()} of ${totalExpected.toLocaleString()}...`}
+              {fetchingMore && loadedCount > 0 && !totalExpected &&
+                ` • Loaded ${loadedCount.toLocaleString()} so far...`}
             </p>
           </div>
         )}
@@ -376,7 +398,11 @@ const SearchDashboard = () => {
         {loading && profiles.length === 0 && (
           <div style={styles.progressContainer}>
             <div style={styles.progressHeader}>
-              <span style={styles.progressStatus}>Searching for developers...</span>
+              <span style={styles.progressStatus}>
+                {totalExpected > 0
+                  ? `Found ${totalExpected.toLocaleString()} developers, loading...`
+                  : 'Searching for developers...'}
+              </span>
             </div>
           </div>
         )}
@@ -384,7 +410,10 @@ const SearchDashboard = () => {
         {/* Fetching more indicator — after first batch, below result count */}
         {fetchingMore && profiles.length > 0 && (
           <div style={styles.fetchingMoreBar}>
-            <span style={styles.fetchingMoreText}>⏳ Fetching more profiles...</span>
+            <span style={styles.fetchingMoreText}>
+              ⏳ Loading profiles... {loadedCount > 0 && totalExpected > 0 &&
+                `(${loadedCount.toLocaleString()} / ${totalExpected.toLocaleString()})`}
+            </span>
           </div>
         )}
 

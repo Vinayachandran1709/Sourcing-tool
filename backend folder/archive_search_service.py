@@ -5,7 +5,7 @@ Primary search source - fast, no rate limits.
 """
 
 import logging
-from typing import Optional
+from typing import Optional, Generator
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func
 
@@ -104,6 +104,62 @@ def search_developers(
     query = query.offset(offset).limit(limit)
 
     return query.all()
+
+
+def search_developers_batched(
+    db: Session,
+    role: Optional[str] = None,
+    location: Optional[str] = None,
+    batch_size: int = 500,
+    min_score: int = 0,
+) -> Generator[list, None, None]:
+    """
+    Yield developers in batches for streaming. No hard cap — returns all matches.
+    """
+    query = db.query(GithubDeveloper)
+
+    # Location filter
+    if location:
+        if location.lower() in ["united states", "usa", "us", "all"]:
+            pass
+        else:
+            normalized_city = normalize_city(location)
+            if normalized_city:
+                query = query.filter(GithubDeveloper.location_city == normalized_city)
+            else:
+                query = query.filter(
+                    func.lower(GithubDeveloper.location_city) == location.lower()
+                )
+
+    # Role filter
+    if role and role in ROLE_TO_LANGUAGES:
+        languages = ROLE_TO_LANGUAGES[role]
+        role_condition = or_(
+            GithubDeveloper.detected_role == role,
+            GithubDeveloper.detected_roles.any(role),
+        )
+        if languages:
+            language_condition = GithubDeveloper.primary_languages.overlap(languages)
+            query = query.filter(or_(role_condition, language_condition))
+        else:
+            query = query.filter(role_condition)
+
+    # Score filter
+    if min_score > 0:
+        query = query.filter(GithubDeveloper.developer_score >= min_score)
+
+    # Order by score (best first)
+    query = query.order_by(GithubDeveloper.developer_score.desc())
+
+    offset = 0
+    while True:
+        batch = query.offset(offset).limit(batch_size).all()
+        if not batch:
+            break
+        yield batch
+        if len(batch) < batch_size:
+            break
+        offset += batch_size
 
 
 def count_developers(

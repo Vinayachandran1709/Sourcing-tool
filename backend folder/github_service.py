@@ -1,9 +1,12 @@
 import httpx
 import os
 import asyncio
+import logging
 from dotenv import load_dotenv
 from datetime import datetime
 from fastapi import HTTPException
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -30,7 +33,7 @@ async def check_github_rate_limit():
             if response.status_code == 200:
                 data = response.json()
                 remaining = data['resources']['core']['remaining']
-                print(f"📊 GitHub API Rate Limit: {remaining} requests remaining")
+                logger.info(f"GitHub API Rate Limit: {remaining} requests remaining")
                 
                 if remaining < RATE_LIMIT_THRESHOLD:
                     raise HTTPException(status_code=429, detail="GitHub rate limit low")
@@ -66,10 +69,10 @@ async def search_github_users_paginated(
     
     all_users = []
     
-    print(f"🔍 Fetching up to {max_pages} pages (target: {target_users} users)...")
+    logger.info(f"Fetching up to {max_pages} pages (target: {target_users} users)...")
 
     for page in range(1, max_pages + 1):
-        print(f"   Page {page}/{max_pages}...", end=" ")
+        logger.info(f"Page {page}/{max_pages}...")
         
         # Build query
         query_parts = []
@@ -98,32 +101,31 @@ async def search_github_users_paginated(
                 )
 
                 if response.status_code != 200:
-                    print(f"❌ Error {response.status_code}")
+                    logger.error(f"GitHub search error: {response.status_code}")
                     break
 
                 data = response.json()
                 users = data.get("items", [])
 
                 if not users:
-                    print("✅ No more results")
+                    logger.info("No more results")
                     break
 
                 all_users.extend(users)
-                print(f"✅ Got {len(users)} users (Total: {len(all_users)})")
+                logger.info(f"Got {len(users)} users (Total: {len(all_users)})")
 
-                # ✅ EARLY STOPPING: Stop if target reached
                 if len(all_users) >= target_users:
-                    print(f"✅ Target reached! Stopping early.")
+                    logger.info("Target reached! Stopping early.")
                     break
 
                 # Cooldown between pages (rate limiter adds 0.2s, this adds extra spacing)
                 await asyncio.sleep(0.2)
 
             except Exception as e:
-                print(f"❌ Error: {e}")
+                logger.error(f"Search page error: {e}")
                 break
-    
-    print(f"\n📊 Total users fetched: {len(all_users)}")
+
+    logger.info(f"Total users fetched: {len(all_users)}")
     return all_users
 
 
@@ -268,7 +270,7 @@ async def get_user_details(username: str):
         # ✅ SKIP ORGANIZATIONS
         account_type = user_data.get("type", "User")
         if account_type == "Organization":
-            print(f"⏭️  Skipped {username} (Organization)")
+            logger.info(f"Skipped {username} (Organization)")
             return None
         
         # ✅ OPTIMIZATION #6: Get only 30 repos (was 100)
@@ -311,26 +313,24 @@ async def get_multiple_user_details(usernames: list):
     all_details = []
     total = len(usernames)
     
-    print(f"\n📥 Fetching details for {total} users...")
-    
+    logger.info(f"Fetching details for {total} users...")
+
     for i, username in enumerate(usernames, 1):
-        print(f"   [{i}/{total}] {username}...", end=" ")
-        
         try:
             details = await get_user_details(username)
             if details:
                 all_details.append(details)
-                print("✅")
+                logger.debug(f"[{i}/{total}] {username} OK")
             else:
-                print("⏭️  (Org/Failed)")
+                logger.debug(f"[{i}/{total}] {username} skipped (Org/Failed)")
         except Exception as e:
-            print(f"❌ {e}")
-        
+            logger.error(f"[{i}/{total}] {username} error: {e}")
+
         # Rate limit protection
         if i % 10 == 0:
-            print(f"   💤 Cooling down...")
+            logger.info(f"Cooling down after {i} profiles...")
             await asyncio.sleep(2)
-    
-    print(f"\n✅ Fetched {len(all_details)}/{total} valid profiles\n")
+
+    logger.info(f"Fetched {len(all_details)}/{total} valid profiles")
     
     return all_details

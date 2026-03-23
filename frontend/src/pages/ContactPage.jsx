@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Mail, Send, CheckCircle } from 'lucide-react';
 import { trackContactFormSubmitted, trackPageEntry, trackPageExit } from '../services/analytics';
+import { API_BASE_URL } from '../services/api';
 
 const ContactPage = () => {
   const [formData, setFormData] = useState({
@@ -25,7 +26,6 @@ const ContactPage = () => {
     setLoading(true);
 
     try {
-      const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
       const response = await fetch(`${API_BASE_URL}/api/public/contact/send`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

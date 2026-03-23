@@ -107,29 +107,25 @@ class GitHubIntegrationService:
 
             total_count = count_developers(db, role, location, min_score)
 
-            logger.info(f"📦 Archive returned {len(archive_results)} profiles (total: {total_count})")
-            print(f"📦 Archive returned {len(archive_results)} profiles (total: {total_count})")
+            logger.info(f"Archive returned {len(archive_results)} profiles (total: {total_count})")
 
             # Convert to dict format
             profiles = [developer_to_dict(dev) for dev in archive_results]
         except Exception as e:
             logger.error(f"Archive search failed: {e}", exc_info=True)
-            print(f"❌ Archive search failed: {e}")
             profiles = []
             total_count = 0
 
         # STEP 2: If we have enough from archive, return immediately
         if len(profiles) >= 500:
-            logger.info(f"✅ Archive sufficient! Returning {len(profiles)} profiles")
-            print(f"✅ Archive sufficient! Returning {min(len(profiles), 1000)} profiles")
+            logger.info(f"Archive sufficient! Returning {len(profiles)} profiles")
             return profiles[:1000]  # Cap at 1000 for performance
 
         # STEP 3: Fall back to old Profile table search to supplement
         logger.info(f"📦 Supplementing with Profile table cache...")
         try:
             cached_profiles = GitHubIntegrationService._search_database(db, filters)
-            logger.info(f"   Profile table returned {len(cached_profiles)} profiles")
-            print(f"   Profile table returned {len(cached_profiles)} profiles")
+            logger.info(f"Profile table returned {len(cached_profiles)} profiles")
         except Exception as e:
             logger.error(f"   Profile table search failed: {e}", exc_info=True)
             cached_profiles = []
@@ -142,8 +138,7 @@ class GitHubIntegrationService:
                 profiles.append(profile)  # Append Profile object; main.py handles both
 
         combined_count = len(profiles)
-        logger.info(f"✅ Combined results: {combined_count} profiles")
-        print(f"✅ Combined results: {combined_count} profiles")
+        logger.info(f"Combined results: {combined_count} profiles")
 
         # STEP 4: If still insufficient and paid user, supplement with live API
         if combined_count < 200 and is_paid_user:
@@ -164,14 +159,11 @@ class GitHubIntegrationService:
                         if p.github_username not in seen_usernames:
                             seen_usernames.add(p.github_username)
                             profiles.append(p)
-                    logger.info(f"   Live API added {len(new_profiles)} profiles")
-                    print(f"   Live API added {len(new_profiles)} profiles")
+                    logger.info(f"Live API added {len(new_profiles)} profiles")
                 except Exception as e:
-                    logger.error(f"   Live API supplement failed: {e}")
-                    print(f"   ❌ Live API supplement failed: {e}")
+                    logger.error(f"Live API supplement failed: {e}")
 
-        logger.info(f"✅ Final result: {len(profiles)} profiles")
-        print(f"✅ Final result: {len(profiles)} profiles")
+        logger.info(f"Final result: {len(profiles)} profiles")
         return profiles[:target_profiles]
 
 
@@ -279,7 +271,7 @@ class GitHubIntegrationService:
                 profile = GitHubIntegrationService._upsert_profile(db, details)
                 new_profiles.append(profile)
                 await set_cached_profile(details['username'], details, details.get('contributions', 0))
-                print(f"   ✅ {details['username']}: Score {profile.developer_score}")
+                logger.info(f"Upserted {details['username']}: Score {profile.developer_score}")
             except Exception as e:
                 logger.error(f"❌ Failed to upsert {details.get('username', 'unknown')}: {e}")
                 db.rollback()
@@ -295,7 +287,7 @@ class GitHubIntegrationService:
         existing_usernames = {row[0] for row in existing_rows}
 
         if existing_usernames:
-            print(f"   ⏭️  Skipping {len(existing_usernames)} already cached profiles")
+            logger.info(f"Skipping {len(existing_usernames)} already cached profiles")
 
         return [u for u in usernames[:process_limit] if u not in existing_usernames]
 
@@ -314,7 +306,7 @@ class GitHubIntegrationService:
         BATCH_SIZE = 25
 
         try:
-            print(f"   Searching GitHub: language={language}, location={location}")
+            logger.info(f"Searching GitHub: language={language}, location={location}")
             users = await search_github_users_paginated(
                 language=language,
                 location=location,
@@ -324,29 +316,29 @@ class GitHubIntegrationService:
             )
 
             if not users:
-                print("   ⚠️ No users found from GitHub")
+                logger.info("No users found from GitHub")
                 return []
 
             usernames = [user["login"] for user in users[:max_results]]
-            print(f"   Found {len(usernames)} GitHub users")
+            logger.info(f"Found {len(usernames)} GitHub users")
 
             process_limit = min(250, len(usernames))
-            print(f"   Processing up to {process_limit} profiles...")
+            logger.info(f"Processing up to {process_limit} profiles...")
 
             usernames_to_fetch = GitHubIntegrationService._filter_uncached_usernames(
                 db, usernames, process_limit
             )
 
             if not usernames_to_fetch:
-                print(f"   ✅ All profiles already in cache!")
+                logger.info("All profiles already in cache")
                 return []
 
-            print(f"   📥 Fetching {len(usernames_to_fetch)} new profiles...")
+            logger.info(f"Fetching {len(usernames_to_fetch)} new profiles...")
             new_profiles = []
 
             for batch_start in range(0, len(usernames_to_fetch), BATCH_SIZE):
                 batch_usernames = usernames_to_fetch[batch_start:batch_start + BATCH_SIZE]
-                print(f"\n   🔄 Batch {batch_start//BATCH_SIZE + 1} ({len(batch_usernames)} profiles)...")
+                logger.info(f"Batch {batch_start//BATCH_SIZE + 1} ({len(batch_usernames)} profiles)...")
 
                 async def _fetch_staggered(username, index):
                     """Stagger request starts by 0.2s to avoid burst."""
@@ -365,12 +357,12 @@ class GitHubIntegrationService:
                 await GitHubIntegrationService._save_batch_results(db, batch_results, new_profiles)
 
                 if len(new_profiles) >= profiles_needed:
-                    print(f"\n   ✅ Target reached! Stopping at {len(new_profiles)} profiles.")
+                    logger.info(f"Target reached! Stopping at {len(new_profiles)} profiles.")
                     break
 
             return new_profiles
 
         except Exception as e:
             logger.error(f"❌ GitHub fetch failed: {e}", exc_info=True)
-            print(f"❌ GitHub API Error: {e}")
+            logger.error(f"GitHub API Error: {e}")
             return []

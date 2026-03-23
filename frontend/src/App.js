@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 import { SpeedInsights } from '@vercel/speed-insights/react';
 import './App.css';
 
@@ -25,6 +26,7 @@ import SubscriptionPage from './pages/Dashboard/SubscriptionPage';
 
 function App() {
   return (
+    <ErrorBoundary>
     <Router>
       <AuthProvider>
         <div className="App">
@@ -65,6 +67,7 @@ function App() {
         <SpeedInsights />
       </AuthProvider>
     </Router>
+    </ErrorBoundary>
   );
 }
 

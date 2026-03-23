@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 from models import SavedList, SavedListProfile, Profile, User
 from fastapi import HTTPException
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class ListsService:
@@ -203,7 +203,7 @@ class ListsService:
         db.add(list_profile)
         
         # Update list's updated_at
-        saved_list.updated_at = datetime.utcnow()
+        saved_list.updated_at = datetime.now(timezone.utc)
         
         db.commit()
         
@@ -225,7 +225,7 @@ class ListsService:
         # Update list's updated_at
         saved_list = db.query(SavedList).filter(SavedList.id == list_id).first()
         if saved_list:
-            saved_list.updated_at = datetime.utcnow()
+            saved_list.updated_at = datetime.now(timezone.utc)
         
         db.commit()
         
@@ -248,7 +248,7 @@ class ListsService:
         if description is not None:  # Allow empty string
             saved_list.description = description
         
-        saved_list.updated_at = datetime.utcnow()
+        saved_list.updated_at = datetime.now(timezone.utc)
         db.commit()
         db.refresh(saved_list)
         

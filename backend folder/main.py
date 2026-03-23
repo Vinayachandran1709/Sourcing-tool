@@ -94,7 +94,7 @@ async def startup_event():
         logger.error("   → GitHub API searches will fail")
         logger.error("   → Only database cache will work")
     else:
-        logger.info(f"✅ GitHub Token found (length: {len(GITHUB_TOKEN)})")
+        logger.info("✅ GitHub Token found")
     
     # Validate Resend API Key
     resend_key = os.getenv("RESEND_API_KEY")
@@ -473,26 +473,39 @@ async def search_profiles(
 
     async def event_stream():
         try:
-            from archive_search_service import search_developers, developer_to_dict
+            from archive_search_service import search_developers, search_developers_batched, count_developers, developer_to_dict
             from github_integration_service import GitHubIntegrationService
 
             seen_usernames = set()
             total_sent = 0
 
-            # --- STEP 1: Archive search (fast DB query) ---
+            # --- STEP 1: Archive search (fast DB query, batched) ---
             try:
-                archive_results = search_developers(
-                    db=db, role=role, location=location,
-                    limit=1500, min_score=min_score,
-                )
-                archive_dicts = [developer_to_dict(dev) for dev in archive_results]
-                for p in archive_dicts:
-                    p["name"] = _first_name(p.get("name"))
-                    seen_usernames.add(p["github_username"])
+                # Send total count first so frontend can show progress
+                total_matching = count_developers(db, role=role, location=location, min_score=min_score)
+                yield f"data: {json.dumps({'type': 'count', 'total_matching': total_matching})}\n\n"
 
-                total_sent = len(archive_dicts)
-                yield f"data: {json.dumps({'type': 'profiles', 'profiles': archive_dicts})}\n\n"
-                logger.info(f"Streamed {total_sent} archive profiles")
+                batch_index = 0
+                for batch in search_developers_batched(
+                    db=db, role=role, location=location,
+                    batch_size=500, min_score=min_score,
+                ):
+                    batch_dicts = [developer_to_dict(dev) for dev in batch]
+                    for p in batch_dicts:
+                        p["name"] = _first_name(p.get("name"))
+                        seen_usernames.add(p["github_username"])
+
+                    total_sent += len(batch_dicts)
+
+                    if batch_index == 0:
+                        yield f"data: {json.dumps({'type': 'profiles', 'profiles': batch_dicts})}\n\n"
+                    else:
+                        yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': batch_dicts})}\n\n"
+
+                    yield f"data: {json.dumps({'type': 'progress', 'loaded': total_sent, 'total': total_matching})}\n\n"
+                    batch_index += 1
+
+                logger.info(f"Streamed {total_sent} archive profiles in {batch_index} batches")
             except Exception as e:
                 logger.error(f"Archive search failed: {e}", exc_info=True)
                 yield f"data: {json.dumps({'type': 'profiles', 'profiles': []})}\n\n"
@@ -546,48 +559,6 @@ async def search_profiles(
             release_search_lock(db, user_id)
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
-
-
-@app.post("/api/test-search")
-async def test_search(
-    request: SearchRequest,
-    db: DbSession,
-):
-    """
-    TEMPORARY: Test search endpoint without authentication.
-    DELETE THIS BEFORE PRODUCTION DEPLOY.
-    """
-    filters = {
-        "role": request.role,
-        "location": request.location,
-        "min_score": request.min_score or 0,
-    }
-
-    # Import here to avoid circular imports
-    from archive_search_service import search_developers, count_developers, developer_to_dict
-
-    # Search archive
-    results = search_developers(
-        db=db,
-        role=filters.get("role"),
-        location=filters.get("location"),
-        limit=100,
-        min_score=filters.get("min_score", 0),
-    )
-
-    total = count_developers(
-        db=db,
-        role=filters.get("role"),
-        location=filters.get("location"),
-    )
-
-    profiles = [developer_to_dict(dev) for dev in results]
-
-    return {
-        "profiles": profiles,
-        "total_count": total,
-        "message": "TEST ENDPOINT - Delete before production",
-    }
 
 
 # ===== GET ALL PROFILES =====

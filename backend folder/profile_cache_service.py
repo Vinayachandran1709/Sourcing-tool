@@ -134,27 +134,3 @@ class ProfileCacheService:
         logger.info(f"Merged result: {len(result)} unique profiles")
         return result
     
-    #@staticmethod
-    #def log_search(db: Session, filters: dict, profiles_found: int):
-     #   """Log search history"""
-      #  search_log = SearchHistory(
-       #     filters=filters,
-        #    profiles_found=profiles_found
-         #   # ✅ REMOVED: Don't manually set searched_at, let database handle it
-        #)
-        #db.add(search_log)
-        #db.commit()
-    
-   # @staticmethod
-    #def log_profile_views(db: Session, profile_ids: list):
-     #   """Log that profiles were viewed in search results"""
-      #  for profile_id in profile_ids:
-       #     view = ProfileView(
-        #        profile_id=profile_id
-         #       # ✅ REMOVED: Don't manually set viewed_at, let database handle it
-          #  )
-           # db.add(view)
-        #try:
-         #   db.commit()
-        #except:
-         #   db.rollback()  # Ignore duplicate view logs

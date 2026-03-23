@@ -33,7 +33,7 @@ RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
 RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 
 if not RAZORPAY_KEY_ID or not RAZORPAY_KEY_SECRET:
-    print("WARNING: Razorpay credentials not configured!")
+    logger.warning("Razorpay credentials not configured!")
     razorpay_client = None
 else:
     razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
@@ -65,7 +65,7 @@ PLANS = {
 
 # USD to INR conversion (Razorpay requires INR for Indian merchants)
 # Update this periodically or use a live rate API
-USD_TO_INR_RATE = 83.0  # Approximate rate, adjust as needed
+USD_TO_INR_RATE = float(os.getenv("USD_TO_INR_RATE", "85.0"))
 
 # ============================================
 # Pydantic Models
@@ -138,27 +138,11 @@ def log_subscription_event(conn, user_id: int, event_type: str, old_plan: str, n
                   triggered_by, json.dumps(metadata) if metadata else None))
             conn.commit()
     except Exception as e:
-        print(f"Failed to log subscription event: {e}")
+        logger.error(f"Failed to log subscription event: {e}")
 
 # ============================================
 # API Endpoints
 # ============================================
-@router.get("/debug-config")
-async def debug_razorpay_config():
-    """Debug endpoint to check Razorpay configuration - REMOVE IN PRODUCTION"""
-    return {
-        "key_id_set": bool(RAZORPAY_KEY_ID),
-        "key_id_prefix": RAZORPAY_KEY_ID[:15] + "..." if RAZORPAY_KEY_ID and len(RAZORPAY_KEY_ID) > 15 else "NOT SET",
-        "key_id_length": len(RAZORPAY_KEY_ID) if RAZORPAY_KEY_ID else 0,
-        "key_secret_set": bool(RAZORPAY_KEY_SECRET),
-        "key_secret_length": len(RAZORPAY_KEY_SECRET) if RAZORPAY_KEY_SECRET else 0,
-        "webhook_secret_set": bool(RAZORPAY_WEBHOOK_SECRET),
-        "client_initialized": razorpay_client is not None,
-        "expected_key_id_length": "20-25 characters",
-        "expected_secret_length": "20-30 characters"
-    }
-
-
 @router.post("/create-order")
 async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
     """
@@ -302,7 +286,7 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUse
     try:
         payment = razorpay_client.payment.fetch(request.razorpay_payment_id)
     except Exception as e:
-        print(f"Failed to fetch payment details: {e}")
+        logger.error(f"Failed to fetch payment details: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch payment details")
     
     # Update database
@@ -379,7 +363,7 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUse
             
     except Exception as e:
         conn.rollback()
-        print(f"Database error updating subscription: {e}")
+        logger.error(f"Database error updating subscription: {e}")
         raise HTTPException(status_code=500, detail="Failed to activate subscription")
     finally:
         conn.close()
@@ -419,7 +403,7 @@ async def razorpay_webhook(request: Request):
         ).hexdigest()
         
         if not hmac.compare_digest(signature, expected_signature):
-            print("Webhook signature verification failed")
+            logger.warning("Webhook signature verification failed")
             raise HTTPException(status_code=400, detail="Invalid signature")
     
     # Parse event
@@ -431,7 +415,7 @@ async def razorpay_webhook(request: Request):
     event_type = event.get("event")
     payload = event.get("payload", {})
     
-    print(f"Received webhook event: {event_type}")
+    logger.info(f"Received webhook event: {event_type}")
     
     conn = get_db_connection()
     try:
@@ -481,7 +465,7 @@ async def razorpay_webhook(request: Request):
                 conn.commit()
                 
     except Exception as e:
-        print(f"Webhook processing error: {e}")
+        logger.error(f"Webhook processing error: {e}")
         conn.rollback()
     finally:
         conn.close()
@@ -679,7 +663,7 @@ async def cancel_subscription(
         raise
     except Exception as e:
         conn.rollback()
-        print(f"Cancellation error: {e}")
+        logger.error(f"Cancellation error: {e}")
         raise HTTPException(status_code=500, detail="Failed to cancel subscription")
     finally:
         conn.close()

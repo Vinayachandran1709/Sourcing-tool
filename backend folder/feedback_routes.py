@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from pydantic import BaseModel, field_validator
 from datetime import datetime, timezone
 import logging
+import os
 
 from database import get_db
 from models import User, Feedback
@@ -171,7 +172,7 @@ def _send_admin_notification(user: User, request: FeedbackRequest, timestamp):
 
     try:
         result = EmailService.send_single_email(
-            to_email="vinay@talentbox.co",
+            to_email=os.getenv("ADMIN_EMAIL", "vinay@talentbox.co"),
             subject=subject,
             body_html=body_html,
             sender_email="noreply@talentbox.co",

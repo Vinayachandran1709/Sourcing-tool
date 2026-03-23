@@ -7,5 +7,7 @@ backend/venv/
 *.env
 **/.env*
 talentbox.log
+*.log
+test_payment.py
 __pycache__/
 *.pyc

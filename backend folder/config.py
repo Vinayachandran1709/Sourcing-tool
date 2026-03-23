@@ -24,4 +24,9 @@ COMPANY_EMAIL_PASSWORD = os.getenv("COMPANY_EMAIL_PASSWORD")
 # Environment
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 
-print(f"✅ Config loaded: GitHub token = {GITHUB_TOKEN[:10]}..." if GITHUB_TOKEN else "❌ GitHub token missing!")
+import logging
+_logger = logging.getLogger(__name__)
+if GITHUB_TOKEN:
+    _logger.info("Config loaded: GitHub token found")
+else:
+    _logger.warning("Config loaded: GitHub token missing!")
