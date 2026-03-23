@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, Mail, Loader, AlertCircle, Settings } from 'lucide-react';
+import { X, Mail, Loader, AlertCircle, Settings, CheckCircle } from 'lucide-react';
 import { sendBulkEmails, getEmailUsage } from '../services/api';
 import EmailSettingsModal from './EmailSettingsModal';
 import { useAuth } from '../contexts/AuthContext';
@@ -10,6 +10,7 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
   const [sending, setSending] = useState(false);
   const [error, setError] = useState(null);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   // Support both prop naming patterns
   const activeProfiles = selectedProfiles || profiles || [];
@@ -100,6 +101,13 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
             </div>
           )}
 
+          {settingsSaved && (
+            <div style={styles.savedBanner}>
+              <CheckCircle size={18} />
+              <span>Email settings saved! You're ready to send.</span>
+            </div>
+          )}
+
           {!hasSettings && (
             <div style={styles.setupBox}>
               <div style={styles.setupIcon}>
@@ -178,7 +186,8 @@ const EmailModal = ({ onClose, selectedProfiles, profiles, onSend, onSuccess }) 
         onClose={() => setShowSettingsModal(false)}
         onSuccess={() => {
           setShowSettingsModal(false);
-          window.location.reload(); // Reload to refresh cache
+          setSettingsSaved(true);
+          setTimeout(() => setSettingsSaved(false), 3000);
         }}
       />
     </>
@@ -256,6 +265,17 @@ const styles = {
     fontSize: '0.875rem',
     color: '#991b1b',
     fontWeight: '500',
+  },
+  savedBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.5rem',
+    padding: '1rem 1.5rem',
+    backgroundColor: '#f0fdf4',
+    borderBottom: '1px solid #bbf7d0',
+    color: '#15803d',
+    fontSize: '0.875rem',
+    fontWeight: '600',
   },
   setupBox: {
     padding: '2rem 1.5rem',
