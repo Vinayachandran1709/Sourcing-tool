@@ -909,6 +909,19 @@ def log_csv_export(
     UsageService.log_csv_export(db, current_user.id)
     return {"success": True}
 
+# ===== GREENHOUSE OAUTH CALLBACK (placeholder) =====
+
+@app.get("/greenhouse/callback")
+def greenhouse_callback(code: Optional[str] = None, error: Optional[str] = None):
+    """Placeholder Greenhouse OAuth callback endpoint."""
+    if error:
+        return {"status": "error", "message": error}
+    if code:
+        logger.info(f"Greenhouse OAuth callback received code: {code}")
+        return {"status": "success", "code": code}
+    return {"status": "error", "message": "no code received"}
+
+
 # ===== HEALTH CHECK =====
 
 @app.get("/api/health")
