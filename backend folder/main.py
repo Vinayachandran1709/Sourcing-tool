@@ -368,6 +368,7 @@ class SearchRequest(BaseModel):
     """Simplified search request - role and location based"""
     role: Optional[str] = None
     location: Optional[str] = None
+    languages: Optional[List[str]] = None
     min_score: Optional[int] = 0
     page: Optional[int] = 1
     per_page: Optional[int] = 50
@@ -443,6 +444,7 @@ async def search_profiles(
 
     role = search.role
     location = search.location
+    languages = search.languages
     min_score = search.min_score or 0
     is_paid = current_user.subscription_status == "active"
 
@@ -481,13 +483,12 @@ async def search_profiles(
 
             # --- STEP 1: Archive search (fast DB query, batched) ---
             try:
-                # Send total count first so frontend can show progress
-                total_matching = count_developers(db, role=role, location=location, min_score=min_score)
+                total_matching = count_developers(db, role=role, location=location, languages=languages, min_score=min_score)
                 yield f"data: {json.dumps({'type': 'count', 'total_matching': total_matching})}\n\n"
 
                 batch_index = 0
                 for batch in search_developers_batched(
-                    db=db, role=role, location=location,
+                    db=db, role=role, location=location, languages=languages,
                     batch_size=500, min_score=min_score,
                 ):
                     batch_dicts = [developer_to_dict(dev) for dev in batch]

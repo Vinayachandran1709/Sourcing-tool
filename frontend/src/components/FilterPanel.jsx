@@ -80,25 +80,74 @@ const LOCATION_OPTIONS = [
   { value: 'Albuquerque', label: '📍 Albuquerque, NM' },
 ];
 
+const LANGUAGE_OPTIONS = [
+  // Tier 1: Most Popular
+  { value: 'Python', label: 'Python', tier: 1 },
+  { value: 'JavaScript', label: 'JavaScript', tier: 1 },
+  { value: 'TypeScript', label: 'TypeScript', tier: 1 },
+  { value: 'Java', label: 'Java', tier: 1 },
+  { value: 'Go', label: 'Go', tier: 1 },
+  { value: 'Rust', label: 'Rust', tier: 1 },
+  { value: 'C++', label: 'C++', tier: 1 },
+  { value: 'C#', label: 'C#', tier: 1 },
+  { value: 'C', label: 'C', tier: 1 },
+  { value: 'Ruby', label: 'Ruby', tier: 1 },
+  { value: 'PHP', label: 'PHP', tier: 1 },
+  { value: 'Swift', label: 'Swift', tier: 1 },
+  { value: 'Kotlin', label: 'Kotlin', tier: 1 },
+
+  // Tier 2: Common
+  { value: 'Scala', label: 'Scala', tier: 2 },
+  { value: 'R', label: 'R', tier: 2 },
+  { value: 'Dart', label: 'Dart', tier: 2 },
+  { value: 'Shell', label: 'Shell/Bash', tier: 2 },
+  { value: 'Objective-C', label: 'Objective-C', tier: 2 },
+  { value: 'Perl', label: 'Perl', tier: 2 },
+  { value: 'Lua', label: 'Lua', tier: 2 },
+
+  // Tier 3: Specialized
+  { value: 'Elixir', label: 'Elixir', tier: 3 },
+  { value: 'Clojure', label: 'Clojure', tier: 3 },
+  { value: 'Haskell', label: 'Haskell', tier: 3 },
+  { value: 'F#', label: 'F#', tier: 3 },
+  { value: 'Julia', label: 'Julia', tier: 3 },
+  { value: 'MATLAB', label: 'MATLAB', tier: 3 },
+  { value: 'Groovy', label: 'Groovy', tier: 3 },
+  { value: 'PowerShell', label: 'PowerShell', tier: 3 },
+];
+
 const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState({
     role: initialFilters.role || '',
     location: initialFilters.location || '',
+    languages: initialFilters.languages || [],
   });
+  const toggleLanguage = (langValue) => {
+    setFilters(prev => ({
+      ...prev,
+      languages: prev.languages.includes(langValue)
+        ? prev.languages.filter(l => l !== langValue)
+        : [...prev.languages, langValue]
+    }));
+  };
 
   const handleReset = () => {
-    setFilters({ role: '', location: '' });
+    setFilters({ role: '', location: '', languages: [] });
     if (onReset) {
       onReset();
     }
   };
 
   const handleApply = () => {
-    onApplyFilters({ role: filters.role, location: filters.location });
+    onApplyFilters({
+      role: filters.role || null,
+      location: filters.location || null,
+      languages: filters.languages.length > 0 ? filters.languages : null,
+    });
   };
 
-  const activeFilterCount = [filters.role, filters.location].filter(Boolean).length;
+  const activeFilterCount = [filters.role, filters.location, filters.languages.length > 0].filter(Boolean).length;
 
   return (
     <div style={styles.container}>
@@ -142,6 +191,41 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
+          </div>
+
+          {/* Languages Filter */}
+          <div style={styles.filterGroup}>
+            <label style={styles.label}>
+              Programming Languages
+              {filters.languages.length > 0 && (
+                <span style={styles.langCount}>
+                  ({filters.languages.length} selected)
+                </span>
+              )}
+            </label>
+
+            <div style={styles.langGrid}>
+              {LANGUAGE_OPTIONS.map((lang) => (
+                <button
+                  key={lang.value}
+                  type="button"
+                  onClick={() => toggleLanguage(lang.value)}
+                  style={{
+                    ...styles.langChip,
+                    ...(filters.languages.includes(lang.value) ? styles.langChipSelected : {}),
+                  }}
+                >
+                  {lang.label}
+                </button>
+              ))}
+            </div>
+
+            {/* Selected Languages Display */}
+            {filters.languages.length > 0 && (
+              <p style={styles.selectedLangs}>
+                Selected: {filters.languages.join(', ')}
+              </p>
+            )}
           </div>
 
           {/* Actions */}
@@ -268,6 +352,51 @@ const styles = {
     color: '#9ca3af',
     marginTop: '12px',
     textAlign: 'center',
+  },
+  langCount: {
+    marginLeft: '8px',
+    color: '#FF6B35',
+    fontWeight: 400,
+    fontSize: '14px',
+  },
+  langGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  langChip: {
+    padding: '8px 14px',
+    borderRadius: '20px',
+    fontSize: '14px',
+    fontWeight: 500,
+    border: '1px solid #d1d5db',
+    backgroundColor: '#ffffff',
+    color: '#374151',
+    cursor: 'pointer',
+    transition: 'all 0.15s',
+    fontFamily: 'Outfit, sans-serif',
+  },
+  langChipSelected: {
+    backgroundColor: '#FF6B35',
+    color: '#ffffff',
+    borderColor: '#FF6B35',
+    boxShadow: '0 1px 3px rgba(255, 107, 53, 0.3)',
+  },
+  showMoreBtn: {
+    marginTop: '10px',
+    fontSize: '14px',
+    color: '#FF6B35',
+    fontWeight: 500,
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: 0,
+    fontFamily: 'Outfit, sans-serif',
+  },
+  selectedLangs: {
+    fontSize: '13px',
+    color: '#9ca3af',
+    marginTop: '8px',
   },
 };
 

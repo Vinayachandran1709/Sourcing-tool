@@ -83,7 +83,6 @@ const SearchDashboard = () => {
     setScoreFilterRanges([]);
     setLoadedCount(0);
     setTotalExpected(0);
-
     trackSearchStarted(searchFilters);
 
     try {
@@ -96,6 +95,7 @@ const SearchDashboard = () => {
         body: JSON.stringify({
           role: searchFilters.role || null,
           location: searchFilters.location || null,
+          languages: searchFilters.languages || null,
           min_score: 0,
         }),
       });

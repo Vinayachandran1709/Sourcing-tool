@@ -5,7 +5,7 @@ Primary search source - fast, no rate limits.
 """
 
 import logging
-from typing import Optional, Generator
+from typing import List, Optional, Generator
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func
 
@@ -35,11 +35,48 @@ ROLE_TO_LANGUAGES = {
 # All available roles
 AVAILABLE_ROLES = list(ROLE_TO_LANGUAGES.keys())
 
+AVAILABLE_LANGUAGES = [
+    # Tier 1: Most Popular (Always visible)
+    "Python",
+    "JavaScript",
+    "TypeScript",
+    "Java",
+    "Go",
+    "Rust",
+    "C++",
+    "C#",
+    "C",
+    "Ruby",
+    "PHP",
+    "Swift",
+    "Kotlin",
+
+    # Tier 2: Common
+    "Scala",
+    "R",
+    "Dart",
+    "Shell",
+    "Objective-C",
+    "Perl",
+    "Lua",
+
+    # Tier 3: Specialized
+    "Elixir",
+    "Clojure",
+    "Haskell",
+    "F#",
+    "Julia",
+    "MATLAB",
+    "Groovy",
+    "PowerShell",
+]
+
 
 def search_developers(
     db: Session,
     role: Optional[str] = None,
     location: Optional[str] = None,
+    languages: Optional[List[str]] = None,
     limit: int = 1000,
     offset: int = 0,
     min_score: int = 0,
@@ -93,6 +130,12 @@ def search_developers(
         else:
             query = query.filter(role_condition)
 
+    # Language filter - match if any selected language is in primary_languages
+    if languages and len(languages) > 0:
+        query = query.filter(
+            GithubDeveloper.primary_languages.overlap(languages)
+        )
+
     # Score filter
     if min_score > 0:
         query = query.filter(GithubDeveloper.developer_score >= min_score)
@@ -110,6 +153,7 @@ def search_developers_batched(
     db: Session,
     role: Optional[str] = None,
     location: Optional[str] = None,
+    languages: Optional[List[str]] = None,
     batch_size: int = 500,
     min_score: int = 0,
 ) -> Generator[list, None, None]:
@@ -133,16 +177,22 @@ def search_developers_batched(
 
     # Role filter
     if role and role in ROLE_TO_LANGUAGES:
-        languages = ROLE_TO_LANGUAGES[role]
+        role_languages = ROLE_TO_LANGUAGES[role]
         role_condition = or_(
             GithubDeveloper.detected_role == role,
             GithubDeveloper.detected_roles.any(role),
         )
-        if languages:
-            language_condition = GithubDeveloper.primary_languages.overlap(languages)
+        if role_languages:
+            language_condition = GithubDeveloper.primary_languages.overlap(role_languages)
             query = query.filter(or_(role_condition, language_condition))
         else:
             query = query.filter(role_condition)
+
+    # Language filter - match if any selected language is in primary_languages
+    if languages and len(languages) > 0:
+        query = query.filter(
+            GithubDeveloper.primary_languages.overlap(languages)
+        )
 
     # Score filter
     if min_score > 0:
@@ -166,6 +216,7 @@ def count_developers(
     db: Session,
     role: Optional[str] = None,
     location: Optional[str] = None,
+    languages: Optional[List[str]] = None,
     min_score: int = 0,
 ) -> int:
     """Count developers matching filters."""
@@ -184,16 +235,22 @@ def count_developers(
 
     # Role filter (search in detected_roles array OR detected_role)
     if role and role in ROLE_TO_LANGUAGES:
-        languages = ROLE_TO_LANGUAGES[role]
+        role_languages = ROLE_TO_LANGUAGES[role]
         role_condition = or_(
             GithubDeveloper.detected_role == role,
             GithubDeveloper.detected_roles.any(role),
         )
-        if languages:
-            language_condition = GithubDeveloper.primary_languages.overlap(languages)
+        if role_languages:
+            language_condition = GithubDeveloper.primary_languages.overlap(role_languages)
             query = query.filter(or_(role_condition, language_condition))
         else:
             query = query.filter(role_condition)
+
+    # Language filter - match if any selected language is in primary_languages
+    if languages and len(languages) > 0:
+        query = query.filter(
+            GithubDeveloper.primary_languages.overlap(languages)
+        )
 
     # Score filter
     if min_score > 0:
