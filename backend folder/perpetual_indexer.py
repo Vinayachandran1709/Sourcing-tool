@@ -23,6 +23,20 @@ from location_parser import (
 )
 from role_detection_service import detect_all_roles
 
+# Priority cities get indexed 3x more often (appear 3 times in rotation)
+INDIA_PRIORITY_CITIES = [
+    "bangalore", "mumbai", "hyderabad", "delhi",
+    "pune", "chennai", "gurgaon", "noida", "kochi", "kolkata",
+]
+
+# Build a weighted city list: priority cities appear 3x, others appear 1x
+INDIA_WEIGHTED_CITIES = []
+for city in INDIA_TARGET_CITIES:
+    if city in INDIA_PRIORITY_CITIES:
+        INDIA_WEIGHTED_CITIES.extend([city, city, city])
+    else:
+        INDIA_WEIGHTED_CITIES.append(city)
+
 logger = logging.getLogger(__name__)
 
 # GitHub API Config
@@ -134,13 +148,21 @@ class IndexerState:
         return country
 
     def get_next_cities(self, country: str, count: int = 8) -> list[str]:  # Increased from 5 to 8
-        """Get next N cities for the specified country."""
+        """Get next N cities for the specified country.
+        India uses a weighted list where priority cities appear 3x more often.
+        Deduplicates within a single batch so the same city isn't searched twice per run.
+        """
         if country == "India":
             cities = []
-            for i in range(count):
-                idx = (self.india_city_index + i) % len(INDIA_TARGET_CITIES)
-                cities.append(INDIA_TARGET_CITIES[idx])
-            self.india_city_index = (self.india_city_index + count) % len(INDIA_TARGET_CITIES)
+            seen = set()
+            idx = self.india_city_index
+            while len(cities) < count:
+                city = INDIA_WEIGHTED_CITIES[idx % len(INDIA_WEIGHTED_CITIES)]
+                if city not in seen:
+                    cities.append(city)
+                    seen.add(city)
+                idx += 1
+            self.india_city_index = idx % len(INDIA_WEIGHTED_CITIES)
             return cities
         else:
             cities = []
