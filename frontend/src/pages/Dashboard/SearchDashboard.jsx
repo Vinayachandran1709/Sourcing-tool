@@ -622,7 +622,7 @@ const SearchDashboard = () => {
         {!loading && profiles.length === 0 && !error && (
           <div style={styles.emptyState}>
             <Search size={48} color="#9ca3af" />
-            <h3 style={styles.emptyStateTitle}>Search US Tech Talent</h3>
+            <h3 style={styles.emptyStateTitle}>Find the best Tech Talent</h3>
             <p style={styles.emptyStateText}>
               Select a role and location to find developers
             </p>

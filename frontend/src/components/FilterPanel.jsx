@@ -20,81 +20,67 @@ const ROLE_OPTIONS = [
   { value: 'Software Developer', label: 'Software Developer (General)' },
 ];
 
-const LOCATION_OPTIONS = [
-  { value: '', label: 'All Locations' },
+const US_CITIES = [
+  { value: 'San Francisco', label: 'San Francisco, CA' },
+  { value: 'New York', label: 'New York, NY' },
+  { value: 'Seattle', label: 'Seattle, WA' },
+  { value: 'Austin', label: 'Austin, TX' },
+  { value: 'Los Angeles', label: 'Los Angeles, CA' },
+  { value: 'Boston', label: 'Boston, MA' },
+  { value: 'Chicago', label: 'Chicago, IL' },
+  { value: 'Denver', label: 'Denver, CO' },
+  { value: 'Atlanta', label: 'Atlanta, GA' },
+  { value: 'San Diego', label: 'San Diego, CA' },
+  { value: 'Portland', label: 'Portland, OR' },
+  { value: 'Phoenix', label: 'Phoenix, AZ' },
+  { value: 'Dallas', label: 'Dallas, TX' },
+  { value: 'Houston', label: 'Houston, TX' },
+  { value: 'Miami', label: 'Miami, FL' },
+  { value: 'Washington DC', label: 'Washington, DC' },
+  { value: 'Philadelphia', label: 'Philadelphia, PA' },
+  { value: 'Minneapolis', label: 'Minneapolis, MN' },
+  { value: 'Detroit', label: 'Detroit, MI' },
+  { value: 'Charlotte', label: 'Charlotte, NC' },
+  { value: 'Nashville', label: 'Nashville, TN' },
+  { value: 'Raleigh', label: 'Raleigh, NC' },
+  { value: 'Salt Lake City', label: 'Salt Lake City, UT' },
+  { value: 'Pittsburgh', label: 'Pittsburgh, PA' },
+  { value: 'Columbus', label: 'Columbus, OH' },
+];
 
-  // === UNITED STATES ===
-  { value: 'US_DIVIDER', label: '── United States ──', disabled: true },
-
-  // Tier 1: Major US Tech Hubs
-  { value: 'San Francisco', label: '\u{1F1FA}\u{1F1F8} San Francisco, CA' },
-  { value: 'New York', label: '\u{1F1FA}\u{1F1F8} New York, NY' },
-  { value: 'Seattle', label: '\u{1F1FA}\u{1F1F8} Seattle, WA' },
-  { value: 'Austin', label: '\u{1F1FA}\u{1F1F8} Austin, TX' },
-  { value: 'Los Angeles', label: '\u{1F1FA}\u{1F1F8} Los Angeles, CA' },
-  { value: 'Boston', label: '\u{1F1FA}\u{1F1F8} Boston, MA' },
-  { value: 'Chicago', label: '\u{1F1FA}\u{1F1F8} Chicago, IL' },
-  { value: 'Denver', label: '\u{1F1FA}\u{1F1F8} Denver, CO' },
-  { value: 'Atlanta', label: '\u{1F1FA}\u{1F1F8} Atlanta, GA' },
-  { value: 'San Diego', label: '\u{1F1FA}\u{1F1F8} San Diego, CA' },
-
-  // Tier 2: Growing US Tech Cities
-  { value: 'Portland', label: '\u{1F1FA}\u{1F1F8} Portland, OR' },
-  { value: 'Phoenix', label: '\u{1F1FA}\u{1F1F8} Phoenix, AZ' },
-  { value: 'Dallas', label: '\u{1F1FA}\u{1F1F8} Dallas, TX' },
-  { value: 'Houston', label: '\u{1F1FA}\u{1F1F8} Houston, TX' },
-  { value: 'Miami', label: '\u{1F1FA}\u{1F1F8} Miami, FL' },
-  { value: 'Washington DC', label: '\u{1F1FA}\u{1F1F8} Washington, DC' },
-  { value: 'Philadelphia', label: '\u{1F1FA}\u{1F1F8} Philadelphia, PA' },
-  { value: 'Minneapolis', label: '\u{1F1FA}\u{1F1F8} Minneapolis, MN' },
-  { value: 'Detroit', label: '\u{1F1FA}\u{1F1F8} Detroit, MI' },
-  { value: 'Charlotte', label: '\u{1F1FA}\u{1F1F8} Charlotte, NC' },
-  { value: 'Nashville', label: '\u{1F1FA}\u{1F1F8} Nashville, TN' },
-  { value: 'Raleigh', label: '\u{1F1FA}\u{1F1F8} Raleigh, NC' },
-  { value: 'Salt Lake City', label: '\u{1F1FA}\u{1F1F8} Salt Lake City, UT' },
-  { value: 'Pittsburgh', label: '\u{1F1FA}\u{1F1F8} Pittsburgh, PA' },
-  { value: 'Columbus', label: '\u{1F1FA}\u{1F1F8} Columbus, OH' },
-
-  // === INDIA ===
-  { value: 'INDIA_DIVIDER', label: '── India ──', disabled: true },
-
-  // Tier 1: Major India Tech Hubs
-  { value: 'Bangalore', label: '\u{1F1EE}\u{1F1F3} Bangalore, Karnataka' },
-  { value: 'Mumbai', label: '\u{1F1EE}\u{1F1F3} Mumbai, Maharashtra' },
-  { value: 'Hyderabad', label: '\u{1F1EE}\u{1F1F3} Hyderabad, Telangana' },
-  { value: 'Delhi', label: '\u{1F1EE}\u{1F1F3} Delhi, NCR' },
-  { value: 'Pune', label: '\u{1F1EE}\u{1F1F3} Pune, Maharashtra' },
-  { value: 'Chennai', label: '\u{1F1EE}\u{1F1F3} Chennai, Tamil Nadu' },
-  { value: 'Gurgaon', label: '\u{1F1EE}\u{1F1F3} Gurgaon, Haryana' },
-  { value: 'Noida', label: '\u{1F1EE}\u{1F1F3} Noida, UP' },
-  { value: 'Kolkata', label: '\u{1F1EE}\u{1F1F3} Kolkata, West Bengal' },
-  { value: 'Ahmedabad', label: '\u{1F1EE}\u{1F1F3} Ahmedabad, Gujarat' },
-
-  // Tier 2: Growing India Tech Cities
-  { value: 'Jaipur', label: '\u{1F1EE}\u{1F1F3} Jaipur, Rajasthan' },
-  { value: 'Lucknow', label: '\u{1F1EE}\u{1F1F3} Lucknow, UP' },
-  { value: 'Chandigarh', label: '\u{1F1EE}\u{1F1F3} Chandigarh' },
-  { value: 'Kochi', label: '\u{1F1EE}\u{1F1F3} Kochi, Kerala' },
-  { value: 'Coimbatore', label: '\u{1F1EE}\u{1F1F3} Coimbatore, Tamil Nadu' },
-  { value: 'Indore', label: '\u{1F1EE}\u{1F1F3} Indore, MP' },
-  { value: 'Nagpur', label: '\u{1F1EE}\u{1F1F3} Nagpur, Maharashtra' },
-  { value: 'Trivandrum', label: '\u{1F1EE}\u{1F1F3} Trivandrum, Kerala' },
-  { value: 'Visakhapatnam', label: '\u{1F1EE}\u{1F1F3} Visakhapatnam, AP' },
-  { value: 'Bhopal', label: '\u{1F1EE}\u{1F1F3} Bhopal, MP' },
-  { value: 'Surat', label: '\u{1F1EE}\u{1F1F3} Surat, Gujarat' },
-  { value: 'Vadodara', label: '\u{1F1EE}\u{1F1F3} Vadodara, Gujarat' },
-  { value: 'Mysore', label: '\u{1F1EE}\u{1F1F3} Mysore, Karnataka' },
-  { value: 'Mangalore', label: '\u{1F1EE}\u{1F1F3} Mangalore, Karnataka' },
-
-  // Tier 3: Emerging India Tech Cities
-  { value: 'Bhubaneswar', label: '\u{1F1EE}\u{1F1F3} Bhubaneswar, Odisha' },
-  { value: 'Dehradun', label: '\u{1F1EE}\u{1F1F3} Dehradun, Uttarakhand' },
-  { value: 'Guwahati', label: '\u{1F1EE}\u{1F1F3} Guwahati, Assam' },
-  { value: 'Patna', label: '\u{1F1EE}\u{1F1F3} Patna, Bihar' },
-  { value: 'Ranchi', label: '\u{1F1EE}\u{1F1F3} Ranchi, Jharkhand' },
-  { value: 'Madurai', label: '\u{1F1EE}\u{1F1F3} Madurai, Tamil Nadu' },
-  { value: 'Nashik', label: '\u{1F1EE}\u{1F1F3} Nashik, Maharashtra' },
-  { value: 'Rajkot', label: '\u{1F1EE}\u{1F1F3} Rajkot, Gujarat' },
+const INDIA_CITIES = [
+  { value: 'Bangalore', label: 'Bangalore, Karnataka' },
+  { value: 'Mumbai', label: 'Mumbai, Maharashtra' },
+  { value: 'Hyderabad', label: 'Hyderabad, Telangana' },
+  { value: 'Delhi', label: 'Delhi, NCR' },
+  { value: 'Pune', label: 'Pune, Maharashtra' },
+  { value: 'Chennai', label: 'Chennai, Tamil Nadu' },
+  { value: 'Gurgaon', label: 'Gurgaon, Haryana' },
+  { value: 'Noida', label: 'Noida, UP' },
+  { value: 'Kolkata', label: 'Kolkata, West Bengal' },
+  { value: 'Ahmedabad', label: 'Ahmedabad, Gujarat' },
+  { value: 'Jaipur', label: 'Jaipur, Rajasthan' },
+  { value: 'Lucknow', label: 'Lucknow, UP' },
+  { value: 'Chandigarh', label: 'Chandigarh' },
+  { value: 'Kochi', label: 'Kochi, Kerala' },
+  { value: 'Coimbatore', label: 'Coimbatore, Tamil Nadu' },
+  { value: 'Indore', label: 'Indore, MP' },
+  { value: 'Nagpur', label: 'Nagpur, Maharashtra' },
+  { value: 'Trivandrum', label: 'Trivandrum, Kerala' },
+  { value: 'Visakhapatnam', label: 'Visakhapatnam, AP' },
+  { value: 'Bhopal', label: 'Bhopal, MP' },
+  { value: 'Surat', label: 'Surat, Gujarat' },
+  { value: 'Vadodara', label: 'Vadodara, Gujarat' },
+  { value: 'Mysore', label: 'Mysore, Karnataka' },
+  { value: 'Mangalore', label: 'Mangalore, Karnataka' },
+  { value: 'Bhubaneswar', label: 'Bhubaneswar, Odisha' },
+  { value: 'Dehradun', label: 'Dehradun, Uttarakhand' },
+  { value: 'Guwahati', label: 'Guwahati, Assam' },
+  { value: 'Patna', label: 'Patna, Bihar' },
+  { value: 'Ranchi', label: 'Ranchi, Jharkhand' },
+  { value: 'Madurai', label: 'Madurai, Tamil Nadu' },
+  { value: 'Nashik', label: 'Nashik, Maharashtra' },
+  { value: 'Rajkot', label: 'Rajkot, Gujarat' },
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -133,14 +119,105 @@ const LANGUAGE_OPTIONS = [
   { value: 'PowerShell', label: 'PowerShell', tier: 3 },
 ];
 
+// Specialization presets per role — maps to language filters only, no backend changes
+const ROLE_SPECIALIZATIONS = {
+  'Mobile Developer': [
+    { label: 'All Mobile', languages: [] },
+    { label: 'iOS (Swift)', languages: ['Swift', 'Objective-C'] },
+    { label: 'Android (Kotlin)', languages: ['Kotlin', 'Java'] },
+    { label: 'Flutter (Dart)', languages: ['Dart'] },
+    { label: 'React Native', languages: ['JavaScript', 'TypeScript'] },
+  ],
+  'Frontend Developer': [
+    { label: 'All Frontend', languages: [] },
+    { label: 'React', languages: ['JavaScript', 'TypeScript'] },
+    { label: 'Angular', languages: ['TypeScript'] },
+    { label: 'Vue', languages: ['JavaScript', 'TypeScript'] },
+  ],
+  'Backend Developer': [
+    { label: 'All Backend', languages: [] },
+    { label: 'Python', languages: ['Python'] },
+    { label: 'Node.js', languages: ['JavaScript', 'TypeScript'] },
+    { label: 'Java', languages: ['Java'] },
+    { label: 'Go', languages: ['Go'] },
+    { label: 'Rust', languages: ['Rust'] },
+    { label: 'Ruby', languages: ['Ruby'] },
+    { label: 'PHP', languages: ['PHP'] },
+    { label: 'C# / .NET', languages: ['C#'] },
+  ],
+  'Full-Stack Developer': [
+    { label: 'All Full-Stack', languages: [] },
+    { label: 'MERN / MEAN', languages: ['JavaScript', 'TypeScript'] },
+    { label: 'Python + JS', languages: ['Python', 'JavaScript'] },
+    { label: 'Go + TS', languages: ['Go', 'TypeScript'] },
+    { label: 'Ruby + JS', languages: ['Ruby', 'JavaScript'] },
+    { label: 'Java + JS', languages: ['Java', 'JavaScript'] },
+  ],
+  'DevOps Engineer': [
+    { label: 'All DevOps', languages: [] },
+    { label: 'Python DevOps', languages: ['Python'] },
+    { label: 'Go DevOps', languages: ['Go'] },
+    { label: 'Shell / Bash', languages: ['Shell'] },
+  ],
+  'AI/ML Engineer': [
+    { label: 'All AI/ML', languages: [] },
+    { label: 'Python ML', languages: ['Python'] },
+    { label: 'R + Python', languages: ['R', 'Python'] },
+    { label: 'Julia', languages: ['Julia'] },
+  ],
+  'Data Scientist': [
+    { label: 'All Data Science', languages: [] },
+    { label: 'Python', languages: ['Python'] },
+    { label: 'R', languages: ['R'] },
+    { label: 'Python + R', languages: ['Python', 'R'] },
+  ],
+  'Data Engineer': [
+    { label: 'All Data Eng', languages: [] },
+    { label: 'Python', languages: ['Python'] },
+    { label: 'Scala / Spark', languages: ['Scala'] },
+    { label: 'Java', languages: ['Java'] },
+    { label: 'SQL + Python', languages: ['Python'] },
+  ],
+  'Security Engineer': [
+    { label: 'All Security', languages: [] },
+    { label: 'Python', languages: ['Python'] },
+    { label: 'Go', languages: ['Go'] },
+    { label: 'Rust', languages: ['Rust'] },
+    { label: 'C / C++', languages: ['C', 'C++'] },
+  ],
+  'Game Developer': [
+    { label: 'All Game Dev', languages: [] },
+    { label: 'Unity (C#)', languages: ['C#'] },
+    { label: 'Unreal (C++)', languages: ['C++'] },
+    { label: 'Lua', languages: ['Lua'] },
+  ],
+  'Blockchain Developer': [
+    { label: 'All Blockchain', languages: [] },
+    { label: 'Solidity / JS', languages: ['JavaScript', 'TypeScript'] },
+    { label: 'Rust', languages: ['Rust'] },
+    { label: 'Go', languages: ['Go'] },
+  ],
+  'Embedded Engineer': [
+    { label: 'All Embedded', languages: [] },
+    { label: 'C / C++', languages: ['C', 'C++'] },
+    { label: 'Rust', languages: ['Rust'] },
+    { label: 'Python', languages: ['Python'] },
+  ],
+};
+
 const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   const [filters, setFilters] = useState({
     role: initialFilters.role || '',
     location: initialFilters.location || '',
     languages: initialFilters.languages || [],
   });
+  const [activeSpecLabel, setActiveSpecLabel] = useState(null);
+  const [showAllLanguages, setShowAllLanguages] = useState(false);
+
+  const specializations = ROLE_SPECIALIZATIONS[filters.role] || null;
 
   const toggleLanguage = (langValue) => {
+    setActiveSpecLabel(null);
     setFilters(prev => ({
       ...prev,
       languages: prev.languages.includes(langValue)
@@ -149,8 +226,21 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     }));
   };
 
+  const applySpecialization = (spec) => {
+    setActiveSpecLabel(spec.label);
+    setFilters(prev => ({ ...prev, languages: spec.languages }));
+  };
+
+  const handleRoleChange = (newRole) => {
+    setActiveSpecLabel(null);
+    setShowAllLanguages(false);
+    setFilters(prev => ({ ...prev, role: newRole, languages: [] }));
+  };
+
   const handleReset = () => {
     setFilters({ role: '', location: '', languages: [] });
+    setActiveSpecLabel(null);
+    setShowAllLanguages(false);
     if (onReset) {
       onReset();
     }
@@ -173,7 +263,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
         <div style={styles.headerRow}>
           <h3 style={styles.heading}>Search Filters</h3>
           {activeFilterCount > 0 && (
-            <span style={styles.activebadge}>{activeFilterCount} active</span>
+            <span style={styles.activeBadge}>{activeFilterCount} active</span>
           )}
         </div>
         <p style={styles.subtitle}>Find developers across 150,000+ profiles in US & India</p>
@@ -187,7 +277,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             <label style={styles.fieldLabel}>Role</label>
             <select
               value={filters.role}
-              onChange={(e) => setFilters({ ...filters, role: e.target.value })}
+              onChange={(e) => handleRoleChange(e.target.value)}
               style={styles.select}
             >
               {ROLE_OPTIONS.map(opt => (
@@ -198,24 +288,65 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
 
           <div style={styles.dropdownCol}>
             <label style={styles.fieldLabel}>Location</label>
+            <style>{`
+              .location-select optgroup {
+                color: #EA580C;
+                font-weight: 700;
+                font-size: 14px;
+                padding: 8px 0 4px;
+                font-style: normal;
+              }
+              .location-select option {
+                color: #1f2937;
+                font-weight: 400;
+                padding: 4px 8px;
+              }
+            `}</style>
             <select
+              className="location-select"
               value={filters.location}
               onChange={(e) => setFilters({ ...filters, location: e.target.value })}
               style={styles.select}
             >
-              {LOCATION_OPTIONS.map((option) => (
-                <option
-                  key={option.value}
-                  value={option.value}
-                  disabled={option.disabled}
-                  style={option.disabled ? { fontWeight: 700, color: '#6b7280' } : {}}
-                >
-                  {option.label}
-                </option>
-              ))}
+              <option value="">All Locations</option>
+              <optgroup label="United States">
+                {US_CITIES.map((city) => (
+                  <option key={city.value} value={city.value}>{city.label}</option>
+                ))}
+              </optgroup>
+              <optgroup label="India">
+                {INDIA_CITIES.map((city) => (
+                  <option key={city.value} value={city.value}>{city.label}</option>
+                ))}
+              </optgroup>
             </select>
           </div>
         </div>
+
+        {/* Specialization chips — appears when a role is selected */}
+        {specializations && (
+          <div style={styles.specSection}>
+            <label style={styles.specLabel}>Specialization</label>
+            <div style={styles.specGrid}>
+              {specializations.map((spec) => {
+                const isActive = activeSpecLabel === spec.label;
+                return (
+                  <button
+                    key={spec.label}
+                    type="button"
+                    onClick={() => applySpecialization(spec)}
+                    style={{
+                      ...styles.specChip,
+                      ...(isActive ? styles.specChipActive : {}),
+                    }}
+                  >
+                    {spec.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* Divider */}
         <div style={styles.divider} />
@@ -223,30 +354,44 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
         {/* Languages */}
         <div>
           <div style={styles.langHeader}>
-            <label style={styles.fieldLabel}>Programming Languages</label>
+            <label style={styles.fieldLabel}>
+              {specializations ? 'Additional Languages' : 'Programming Languages'}
+            </label>
             {filters.languages.length > 0 && (
               <span style={styles.langBadge}>{filters.languages.length} selected</span>
             )}
           </div>
-          <div style={styles.chipGrid}>
-            {LANGUAGE_OPTIONS.map((lang) => {
-              const isSelected = filters.languages.includes(lang.value);
-              return (
-                <button
-                  key={lang.value}
-                  type="button"
-                  onClick={() => toggleLanguage(lang.value)}
-                  style={{
-                    ...styles.chip,
-                    ...(isSelected ? styles.chipSelected : {}),
-                  }}
-                >
-                  {isSelected && <span style={styles.checkmark}>&#10003; </span>}
-                  {lang.label}
-                </button>
-              );
-            })}
-          </div>
+
+          {/* If specializations are shown, collapse languages by default */}
+          {specializations && !showAllLanguages ? (
+            <button
+              type="button"
+              onClick={() => setShowAllLanguages(true)}
+              style={styles.showLangsBtn}
+            >
+              Show all languages to refine further
+            </button>
+          ) : (
+            <div style={styles.chipGrid}>
+              {LANGUAGE_OPTIONS.map((lang) => {
+                const isSelected = filters.languages.includes(lang.value);
+                return (
+                  <button
+                    key={lang.value}
+                    type="button"
+                    onClick={() => toggleLanguage(lang.value)}
+                    style={{
+                      ...styles.chip,
+                      ...(isSelected ? styles.chipSelected : {}),
+                    }}
+                  >
+                    {isSelected && <span style={styles.checkmark}>&#10003; </span>}
+                    {lang.label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
@@ -342,6 +487,50 @@ const styles = {
     appearance: 'auto',
     boxSizing: 'border-box',
   },
+  specSection: {
+    marginTop: '24px',
+    padding: '20px',
+    backgroundColor: '#f9fafb',
+    borderRadius: '12px',
+    border: '1px solid #f3f4f6',
+  },
+  specLabel: {
+    display: 'block',
+    marginBottom: '12px',
+    fontSize: '13px',
+    fontWeight: 600,
+    color: '#374151',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+  },
+  specGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '8px',
+  },
+  specChip: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '8px 18px',
+    borderRadius: '100px',
+    fontSize: '13px',
+    fontWeight: 500,
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    border: '1px solid #e5e7eb',
+    backgroundColor: '#ffffff',
+    color: '#374151',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+  },
+  specChipActive: {
+    backgroundColor: '#FF6B35',
+    color: '#ffffff',
+    borderColor: '#FF6B35',
+    boxShadow: '0 2px 6px rgba(255,107,53,0.25)',
+    fontWeight: 600,
+  },
   divider: {
     height: '1px',
     backgroundColor: '#f3f4f6',
@@ -360,6 +549,20 @@ const styles = {
     backgroundColor: '#FFF7ED',
     padding: '4px 10px',
     borderRadius: '100px',
+  },
+  showLangsBtn: {
+    padding: '10px 0',
+    fontSize: '13px',
+    fontWeight: 500,
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    color: '#6b7280',
+    backgroundColor: 'transparent',
+    border: '1px dashed #d1d5db',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    width: '100%',
+    textAlign: 'center',
+    transition: 'all 0.15s ease',
   },
   chipGrid: {
     display: 'flex',

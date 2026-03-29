@@ -14,7 +14,8 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "Bash(python:*)",
-      "Bash(python -c:*)"
+      "Bash(python -c:*)",
+      "Bash(git -C '/c/Users/vinayachandran/OneDrive/Desktop/Github folder/Sourcing-tool' log --all --source --full-history -S RoleDetectionService.detect_roles -- *.py)"
     ]
   }
 }
