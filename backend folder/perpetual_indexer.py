@@ -117,12 +117,23 @@ class IndexerState:
         self.current_country = "US"  # Alternate between "US" and "India"
 
     def get_next_country(self) -> str:
-        """Alternate between US and India each run."""
+        """
+        Returns which country to index.
+
+        TEMPORARY: India-only mode until we have enough Indian profiles.
+        Set INDIA_ONLY_MODE = False to resume alternating between US and India.
+        """
+        INDIA_ONLY_MODE = True  # Set to False after 2 weeks to resume US + India alternating
+
+        if INDIA_ONLY_MODE:
+            return "India"
+
+        # Normal alternating mode
         country = self.current_country
         self.current_country = "India" if self.current_country == "US" else "US"
         return country
 
-    def get_next_cities(self, country: str, count: int = 5) -> list[str]:
+    def get_next_cities(self, country: str, count: int = 8) -> list[str]:  # Increased from 5 to 8
         """Get next N cities for the specified country."""
         if country == "India":
             cities = []
@@ -139,7 +150,7 @@ class IndexerState:
             self.us_city_index = (self.us_city_index + count) % len(US_TARGET_CITIES)
             return cities
 
-    def get_next_strategies(self, count: int = 3) -> list[dict]:
+    def get_next_strategies(self, count: int = 5) -> list[dict]:  # Increased from 3 to 5
         """Get next N strategies to use."""
         strategies = []
         for i in range(count):
@@ -401,8 +412,8 @@ def run_perpetual_index():
         country = indexer_state.get_next_country()
         country_full = "United States" if country == "US" else "India"
 
-        cities = indexer_state.get_next_cities(country, 5)
-        strategies = indexer_state.get_next_strategies(3)
+        cities = indexer_state.get_next_cities(country, 8)  # 8 cities per run
+        strategies = indexer_state.get_next_strategies(5)   # 5 strategies per run
 
         logger.info(f"   Country: {country}")
         logger.info(f"   Cities: {cities}")

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronDown, ChevronUp, Search } from 'lucide-react';
+import { Search, RotateCcw } from 'lucide-react';
 
 // ===== CONSTANTS =====
 const ROLE_OPTIONS = [
@@ -134,12 +134,12 @@ const LANGUAGE_OPTIONS = [
 ];
 
 const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
-  const [isExpanded, setIsExpanded] = useState(true);
   const [filters, setFilters] = useState({
     role: initialFilters.role || '',
     location: initialFilters.location || '',
     languages: initialFilters.languages || [],
   });
+
   const toggleLanguage = (langValue) => {
     setFilters(prev => ({
       ...prev,
@@ -167,24 +167,24 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   const activeFilterCount = [filters.role, filters.location, filters.languages.length > 0].filter(Boolean).length;
 
   return (
-    <div style={styles.container}>
-      {/* Header */}
-      <div style={styles.header} onClick={() => setIsExpanded(!isExpanded)}>
-        <div style={styles.headerLeft}>
-          <h3 style={styles.title}>Search Filters</h3>
+    <div style={styles.card}>
+      {/* Card Header */}
+      <div style={styles.cardHeader}>
+        <div style={styles.headerRow}>
+          <h3 style={styles.heading}>Search Filters</h3>
           {activeFilterCount > 0 && (
-            <span style={styles.badge}>{activeFilterCount} active</span>
+            <span style={styles.activebadge}>{activeFilterCount} active</span>
           )}
         </div>
-        {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+        <p style={styles.subtitle}>Find developers across 150,000+ profiles in US & India</p>
       </div>
 
-      {/* Filters */}
-      {isExpanded && (
-        <div style={styles.content}>
-          {/* Role Filter */}
-          <div style={styles.filterGroup}>
-            <label style={styles.label}>Role</label>
+      {/* Card Body */}
+      <div style={styles.cardBody}>
+        {/* Role & Location — side by side */}
+        <div style={styles.dropdownRow}>
+          <div style={styles.dropdownCol}>
+            <label style={styles.fieldLabel}>Role</label>
             <select
               value={filters.role}
               onChange={(e) => setFilters({ ...filters, role: e.target.value })}
@@ -196,9 +196,8 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </select>
           </div>
 
-          {/* Location Filter */}
-          <div style={styles.filterGroup}>
-            <label style={styles.label}>Location</label>
+          <div style={styles.dropdownCol}>
+            <label style={styles.fieldLabel}>Location</label>
             <select
               value={filters.location}
               onChange={(e) => setFilters({ ...filters, location: e.target.value })}
@@ -209,218 +208,231 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                   key={option.value}
                   value={option.value}
                   disabled={option.disabled}
-                  className={option.disabled ? 'font-bold text-gray-500 bg-gray-100' : ''}
+                  style={option.disabled ? { fontWeight: 700, color: '#6b7280' } : {}}
                 >
                   {option.label}
                 </option>
               ))}
             </select>
           </div>
+        </div>
 
-          {/* Languages Filter */}
-          <div style={styles.filterGroup}>
-            <label style={styles.label}>
-              Programming Languages
-              {filters.languages.length > 0 && (
-                <span style={styles.langCount}>
-                  ({filters.languages.length} selected)
-                </span>
-              )}
-            </label>
+        {/* Divider */}
+        <div style={styles.divider} />
 
-            <div style={styles.langGrid}>
-              {LANGUAGE_OPTIONS.map((lang) => (
+        {/* Languages */}
+        <div>
+          <div style={styles.langHeader}>
+            <label style={styles.fieldLabel}>Programming Languages</label>
+            {filters.languages.length > 0 && (
+              <span style={styles.langBadge}>{filters.languages.length} selected</span>
+            )}
+          </div>
+          <div style={styles.chipGrid}>
+            {LANGUAGE_OPTIONS.map((lang) => {
+              const isSelected = filters.languages.includes(lang.value);
+              return (
                 <button
                   key={lang.value}
                   type="button"
                   onClick={() => toggleLanguage(lang.value)}
                   style={{
-                    ...styles.langChip,
-                    ...(filters.languages.includes(lang.value) ? styles.langChipSelected : {}),
+                    ...styles.chip,
+                    ...(isSelected ? styles.chipSelected : {}),
                   }}
                 >
+                  {isSelected && <span style={styles.checkmark}>&#10003; </span>}
                   {lang.label}
                 </button>
-              ))}
-            </div>
-
-            {/* Selected Languages Display */}
-            {filters.languages.length > 0 && (
-              <p style={styles.selectedLangs}>
-                Selected: {filters.languages.join(', ')}
-              </p>
-            )}
+              );
+            })}
           </div>
-
-          {/* Actions */}
-          <div style={styles.actions}>
-            <button onClick={handleReset} style={styles.resetButton}>
-              Reset All
-            </button>
-            <button onClick={handleApply} style={styles.applyButton}>
-              <Search size={18} style={{ marginRight: '8px' }} />
-              Search Developers
-            </button>
-          </div>
-          <p style={styles.helperText}>
-            Searches 100,000+ developers across US & India
-          </p>
         </div>
-      )}
+      </div>
+
+      {/* Card Footer */}
+      <div style={styles.cardFooter}>
+        <button onClick={handleReset} style={styles.resetBtn}>
+          <RotateCcw size={15} style={{ marginRight: '6px' }} />
+          Reset
+        </button>
+        <button onClick={handleApply} style={styles.searchBtn}>
+          <Search size={16} style={{ marginRight: '8px' }} />
+          Search Developers
+        </button>
+      </div>
     </div>
   );
 };
 
 // ===== STYLES =====
 const styles = {
-  container: {
+  card: {
     backgroundColor: '#ffffff',
-    borderRadius: '12px',
+    borderRadius: '16px',
     border: '1px solid #e5e7eb',
-    marginBottom: '24px',
-    boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+    marginBottom: '28px',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03)',
+    overflow: 'hidden',
   },
-  header: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '20px 24px',
-    cursor: 'pointer',
-    borderBottom: '1px solid #e5e7eb',
+  cardHeader: {
+    padding: '24px 28px 20px',
+    borderBottom: '1px solid #f3f4f6',
   },
-  headerLeft: {
+  headerRow: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
+    marginBottom: '4px',
   },
-  title: {
+  heading: {
     margin: 0,
     fontSize: '18px',
-    fontWeight: 600,
-    color: '#1a1a1a',
+    fontWeight: 700,
+    color: '#111827',
+    letterSpacing: '-0.01em',
   },
-  badge: {
-    backgroundColor: '#FF6B35',
-    color: '#ffffff',
-    padding: '4px 12px',
-    borderRadius: '12px',
+  activeBadge: {
+    backgroundColor: '#FFF3ED',
+    color: '#EA580C',
+    padding: '3px 10px',
+    borderRadius: '100px',
     fontSize: '12px',
     fontWeight: 600,
   },
-  content: {
-    padding: '24px',
+  subtitle: {
+    margin: 0,
+    fontSize: '13px',
+    color: '#9ca3af',
+    fontWeight: 400,
   },
-  filterGroup: {
-    marginBottom: '24px',
+  cardBody: {
+    padding: '28px',
   },
-  label: {
+  dropdownRow: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '20px',
+  },
+  dropdownCol: {
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  fieldLabel: {
     display: 'block',
-    marginBottom: '10px',
-    fontSize: '15px',
+    marginBottom: '8px',
+    fontSize: '13px',
     fontWeight: 600,
     color: '#374151',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
   },
   select: {
     width: '100%',
-    padding: '14px 16px',
-    border: '1px solid #d1d5db',
+    padding: '12px 14px',
+    border: '1px solid #e5e7eb',
     borderRadius: '10px',
-    fontSize: '16px',
-    fontFamily: 'Outfit, sans-serif',
-    color: '#374151',
-    backgroundColor: '#ffffff',
+    fontSize: '14px',
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    color: '#1f2937',
+    backgroundColor: '#fafafa',
     cursor: 'pointer',
     outline: 'none',
-    transition: 'border-color 0.2s',
+    transition: 'border-color 0.2s, box-shadow 0.2s',
     appearance: 'auto',
     boxSizing: 'border-box',
   },
-  actions: {
-    display: 'flex',
-    gap: '12px',
-    marginTop: '8px',
-    paddingTop: '24px',
-    borderTop: '1px solid #e5e7eb',
+  divider: {
+    height: '1px',
+    backgroundColor: '#f3f4f6',
+    margin: '28px 0',
   },
-  resetButton: {
-    flex: 1,
-    padding: '14px 24px',
-    border: '1px solid #d1d5db',
-    borderRadius: '10px',
-    fontSize: '15px',
+  langHeader: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '14px',
+  },
+  langBadge: {
+    fontSize: '12px',
+    fontWeight: 500,
+    color: '#EA580C',
+    backgroundColor: '#FFF7ED',
+    padding: '4px 10px',
+    borderRadius: '100px',
+  },
+  chipGrid: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '10px',
+  },
+  chip: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    padding: '8px 16px',
+    borderRadius: '100px',
+    fontSize: '13px',
+    fontWeight: 500,
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    border: '1px solid #e5e7eb',
+    backgroundColor: '#fafafa',
+    color: '#4b5563',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    userSelect: 'none',
+    whiteSpace: 'nowrap',
+  },
+  chipSelected: {
+    backgroundColor: '#FF6B35',
+    color: '#ffffff',
+    borderColor: '#FF6B35',
+    boxShadow: '0 2px 6px rgba(255,107,53,0.25)',
     fontWeight: 600,
-    color: '#374151',
+  },
+  checkmark: {
+    fontSize: '11px',
+    marginRight: '2px',
+  },
+  cardFooter: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    padding: '20px 28px',
+    borderTop: '1px solid #f3f4f6',
+    backgroundColor: '#fafbfc',
+  },
+  resetBtn: {
+    flex: 1,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '12px 24px',
+    border: '1px solid #e5e7eb',
+    borderRadius: '10px',
+    fontSize: '14px',
+    fontWeight: 600,
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    color: '#6b7280',
     backgroundColor: '#ffffff',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontFamily: 'Outfit, sans-serif',
+    transition: 'all 0.15s ease',
   },
-  applyButton: {
+  searchBtn: {
     flex: 2,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '14px 24px',
+    padding: '12px 24px',
     border: 'none',
     borderRadius: '10px',
-    fontSize: '16px',
+    fontSize: '15px',
     fontWeight: 600,
+    fontFamily: 'Outfit, system-ui, sans-serif',
     color: '#ffffff',
     backgroundColor: '#FF6B35',
     cursor: 'pointer',
-    transition: 'all 0.2s',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  helperText: {
-    fontSize: '13px',
-    color: '#9ca3af',
-    marginTop: '12px',
-    textAlign: 'center',
-  },
-  langCount: {
-    marginLeft: '8px',
-    color: '#FF6B35',
-    fontWeight: 400,
-    fontSize: '14px',
-  },
-  langGrid: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: '8px',
-  },
-  langChip: {
-    padding: '8px 14px',
-    borderRadius: '20px',
-    fontSize: '14px',
-    fontWeight: 500,
-    border: '1px solid #d1d5db',
-    backgroundColor: '#ffffff',
-    color: '#374151',
-    cursor: 'pointer',
-    transition: 'all 0.15s',
-    fontFamily: 'Outfit, sans-serif',
-  },
-  langChipSelected: {
-    backgroundColor: '#FF6B35',
-    color: '#ffffff',
-    borderColor: '#FF6B35',
-    boxShadow: '0 1px 3px rgba(255, 107, 53, 0.3)',
-  },
-  showMoreBtn: {
-    marginTop: '10px',
-    fontSize: '14px',
-    color: '#FF6B35',
-    fontWeight: 500,
-    background: 'none',
-    border: 'none',
-    cursor: 'pointer',
-    padding: 0,
-    fontFamily: 'Outfit, sans-serif',
-  },
-  selectedLangs: {
-    fontSize: '13px',
-    color: '#9ca3af',
-    marginTop: '8px',
+    transition: 'all 0.15s ease',
+    boxShadow: '0 2px 8px rgba(255,107,53,0.25)',
   },
 };
 
