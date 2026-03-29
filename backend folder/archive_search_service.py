@@ -1,6 +1,6 @@
 """
 Archive Search Service
-Searches the github_developers table for US developer profiles.
+Searches the github_developers table for developer profiles (US + India).
 Primary search source - fast, no rate limits.
 """
 
@@ -10,7 +10,10 @@ from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func
 
 from models import GithubDeveloper
-from location_parser import normalize_city, US_TARGET_CITIES
+from location_parser import (
+    normalize_city, US_TARGET_CITIES,
+    INDIA_TARGET_CITIES, INDIA_CITY_NORMALIZER
+)
 
 logger = logging.getLogger(__name__)
 
@@ -99,19 +102,30 @@ def search_developers(
 
     # Location filter
     if location:
-        if location.lower() in ["united states", "usa", "us", "all"]:
-            # All US - no city filter needed (all records are US)
-            pass
+        if location.lower() in ["united states", "usa", "us", "india", "all"]:
+            # Country-level or all - filter by country if specific
+            if location.lower() in ["united states", "usa", "us"]:
+                query = query.filter(GithubDeveloper.location_country == "United States")
+            elif location.lower() == "india":
+                query = query.filter(GithubDeveloper.location_country == "India")
+            # "all" = no filter
         else:
-            # Specific city
+            # Specific city - try US normalization first
             normalized_city = normalize_city(location)
             if normalized_city:
                 query = query.filter(GithubDeveloper.location_city == normalized_city)
             else:
-                # Try direct match
-                query = query.filter(
-                    func.lower(GithubDeveloper.location_city) == location.lower()
-                )
+                # Try India normalization
+                india_normalized = INDIA_CITY_NORMALIZER.get(location.lower().strip())
+                if india_normalized:
+                    query = query.filter(
+                        func.lower(GithubDeveloper.location_city) == india_normalized
+                    )
+                else:
+                    # Try direct match
+                    query = query.filter(
+                        func.lower(GithubDeveloper.location_city) == location.lower()
+                    )
 
     # Role filter (search in detected_roles array OR detected_role)
     if role and role in ROLE_TO_LANGUAGES:
@@ -164,16 +178,25 @@ def search_developers_batched(
 
     # Location filter
     if location:
-        if location.lower() in ["united states", "usa", "us", "all"]:
-            pass
+        if location.lower() in ["united states", "usa", "us", "india", "all"]:
+            if location.lower() in ["united states", "usa", "us"]:
+                query = query.filter(GithubDeveloper.location_country == "United States")
+            elif location.lower() == "india":
+                query = query.filter(GithubDeveloper.location_country == "India")
         else:
             normalized_city = normalize_city(location)
             if normalized_city:
                 query = query.filter(GithubDeveloper.location_city == normalized_city)
             else:
-                query = query.filter(
-                    func.lower(GithubDeveloper.location_city) == location.lower()
-                )
+                india_normalized = INDIA_CITY_NORMALIZER.get(location.lower().strip())
+                if india_normalized:
+                    query = query.filter(
+                        func.lower(GithubDeveloper.location_city) == india_normalized
+                    )
+                else:
+                    query = query.filter(
+                        func.lower(GithubDeveloper.location_city) == location.lower()
+                    )
 
     # Role filter
     if role and role in ROLE_TO_LANGUAGES:
@@ -224,14 +247,25 @@ def count_developers(
 
     # Location filter
     if location:
-        if location.lower() not in ["united states", "usa", "us", "all"]:
+        if location.lower() in ["united states", "usa", "us", "india", "all"]:
+            if location.lower() in ["united states", "usa", "us"]:
+                query = query.filter(GithubDeveloper.location_country == "United States")
+            elif location.lower() == "india":
+                query = query.filter(GithubDeveloper.location_country == "India")
+        else:
             normalized_city = normalize_city(location)
             if normalized_city:
                 query = query.filter(GithubDeveloper.location_city == normalized_city)
             else:
-                query = query.filter(
-                    func.lower(GithubDeveloper.location_city) == location.lower()
-                )
+                india_normalized = INDIA_CITY_NORMALIZER.get(location.lower().strip())
+                if india_normalized:
+                    query = query.filter(
+                        func.lower(GithubDeveloper.location_city) == india_normalized
+                    )
+                else:
+                    query = query.filter(
+                        func.lower(GithubDeveloper.location_city) == location.lower()
+                    )
 
     # Role filter (search in detected_roles array OR detected_role)
     if role and role in ROLE_TO_LANGUAGES:

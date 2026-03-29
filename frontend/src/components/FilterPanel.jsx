@@ -21,63 +21,80 @@ const ROLE_OPTIONS = [
 ];
 
 const LOCATION_OPTIONS = [
-  { value: '', label: 'All US Locations' },
+  { value: '', label: 'All Locations' },
 
-  // Tier 1: Major Tech Hubs
-  { value: 'San Francisco', label: '📍 San Francisco, CA' },
-  { value: 'New York', label: '📍 New York, NY' },
-  { value: 'Seattle', label: '📍 Seattle, WA' },
-  { value: 'Austin', label: '📍 Austin, TX' },
-  { value: 'Los Angeles', label: '📍 Los Angeles, CA' },
-  { value: 'Boston', label: '📍 Boston, MA' },
-  { value: 'Chicago', label: '📍 Chicago, IL' },
-  { value: 'Denver', label: '📍 Denver, CO' },
-  { value: 'Atlanta', label: '📍 Atlanta, GA' },
-  { value: 'San Diego', label: '📍 San Diego, CA' },
+  // === UNITED STATES ===
+  { value: 'US_DIVIDER', label: '── United States ──', disabled: true },
 
-  // Tier 2: Growing Tech Cities
-  { value: 'Portland', label: '📍 Portland, OR' },
-  { value: 'Phoenix', label: '📍 Phoenix, AZ' },
-  { value: 'Dallas', label: '📍 Dallas, TX' },
-  { value: 'Houston', label: '📍 Houston, TX' },
-  { value: 'Miami', label: '📍 Miami, FL' },
-  { value: 'Washington DC', label: '📍 Washington, DC' },
-  { value: 'Philadelphia', label: '📍 Philadelphia, PA' },
-  { value: 'Minneapolis', label: '📍 Minneapolis, MN' },
-  { value: 'Detroit', label: '📍 Detroit, MI' },
-  { value: 'Charlotte', label: '📍 Charlotte, NC' },
-  { value: 'Nashville', label: '📍 Nashville, TN' },
-  { value: 'Raleigh', label: '📍 Raleigh, NC' },
-  { value: 'Salt Lake City', label: '📍 Salt Lake City, UT' },
-  { value: 'Pittsburgh', label: '📍 Pittsburgh, PA' },
-  { value: 'Columbus', label: '📍 Columbus, OH' },
-  { value: 'Indianapolis', label: '📍 Indianapolis, IN' },
-  { value: 'Kansas City', label: '📍 Kansas City, MO' },
-  { value: 'Tampa', label: '📍 Tampa, FL' },
-  { value: 'Orlando', label: '📍 Orlando, FL' },
-  { value: 'San Antonio', label: '📍 San Antonio, TX' },
+  // Tier 1: Major US Tech Hubs
+  { value: 'San Francisco', label: '\u{1F1FA}\u{1F1F8} San Francisco, CA' },
+  { value: 'New York', label: '\u{1F1FA}\u{1F1F8} New York, NY' },
+  { value: 'Seattle', label: '\u{1F1FA}\u{1F1F8} Seattle, WA' },
+  { value: 'Austin', label: '\u{1F1FA}\u{1F1F8} Austin, TX' },
+  { value: 'Los Angeles', label: '\u{1F1FA}\u{1F1F8} Los Angeles, CA' },
+  { value: 'Boston', label: '\u{1F1FA}\u{1F1F8} Boston, MA' },
+  { value: 'Chicago', label: '\u{1F1FA}\u{1F1F8} Chicago, IL' },
+  { value: 'Denver', label: '\u{1F1FA}\u{1F1F8} Denver, CO' },
+  { value: 'Atlanta', label: '\u{1F1FA}\u{1F1F8} Atlanta, GA' },
+  { value: 'San Diego', label: '\u{1F1FA}\u{1F1F8} San Diego, CA' },
 
-  // Tier 3: Secondary Markets
-  { value: 'St Louis', label: '📍 St. Louis, MO' },
-  { value: 'Baltimore', label: '📍 Baltimore, MD' },
-  { value: 'Cleveland', label: '📍 Cleveland, OH' },
-  { value: 'Cincinnati', label: '📍 Cincinnati, OH' },
-  { value: 'Milwaukee', label: '📍 Milwaukee, WI' },
-  { value: 'Sacramento', label: '📍 Sacramento, CA' },
-  { value: 'Las Vegas', label: '📍 Las Vegas, NV' },
-  { value: 'New Orleans', label: '📍 New Orleans, LA' },
-  { value: 'Jacksonville', label: '📍 Jacksonville, FL' },
-  { value: 'Richmond', label: '📍 Richmond, VA' },
-  { value: 'Hartford', label: '📍 Hartford, CT' },
-  { value: 'Providence', label: '📍 Providence, RI' },
-  { value: 'Buffalo', label: '📍 Buffalo, NY' },
-  { value: 'Rochester', label: '📍 Rochester, NY' },
-  { value: 'Madison', label: '📍 Madison, WI' },
-  { value: 'Ann Arbor', label: '📍 Ann Arbor, MI' },
-  { value: 'Boulder', label: '📍 Boulder, CO' },
-  { value: 'Provo', label: '📍 Provo, UT' },
-  { value: 'Boise', label: '📍 Boise, ID' },
-  { value: 'Albuquerque', label: '📍 Albuquerque, NM' },
+  // Tier 2: Growing US Tech Cities
+  { value: 'Portland', label: '\u{1F1FA}\u{1F1F8} Portland, OR' },
+  { value: 'Phoenix', label: '\u{1F1FA}\u{1F1F8} Phoenix, AZ' },
+  { value: 'Dallas', label: '\u{1F1FA}\u{1F1F8} Dallas, TX' },
+  { value: 'Houston', label: '\u{1F1FA}\u{1F1F8} Houston, TX' },
+  { value: 'Miami', label: '\u{1F1FA}\u{1F1F8} Miami, FL' },
+  { value: 'Washington DC', label: '\u{1F1FA}\u{1F1F8} Washington, DC' },
+  { value: 'Philadelphia', label: '\u{1F1FA}\u{1F1F8} Philadelphia, PA' },
+  { value: 'Minneapolis', label: '\u{1F1FA}\u{1F1F8} Minneapolis, MN' },
+  { value: 'Detroit', label: '\u{1F1FA}\u{1F1F8} Detroit, MI' },
+  { value: 'Charlotte', label: '\u{1F1FA}\u{1F1F8} Charlotte, NC' },
+  { value: 'Nashville', label: '\u{1F1FA}\u{1F1F8} Nashville, TN' },
+  { value: 'Raleigh', label: '\u{1F1FA}\u{1F1F8} Raleigh, NC' },
+  { value: 'Salt Lake City', label: '\u{1F1FA}\u{1F1F8} Salt Lake City, UT' },
+  { value: 'Pittsburgh', label: '\u{1F1FA}\u{1F1F8} Pittsburgh, PA' },
+  { value: 'Columbus', label: '\u{1F1FA}\u{1F1F8} Columbus, OH' },
+
+  // === INDIA ===
+  { value: 'INDIA_DIVIDER', label: '── India ──', disabled: true },
+
+  // Tier 1: Major India Tech Hubs
+  { value: 'Bangalore', label: '\u{1F1EE}\u{1F1F3} Bangalore, Karnataka' },
+  { value: 'Mumbai', label: '\u{1F1EE}\u{1F1F3} Mumbai, Maharashtra' },
+  { value: 'Hyderabad', label: '\u{1F1EE}\u{1F1F3} Hyderabad, Telangana' },
+  { value: 'Delhi', label: '\u{1F1EE}\u{1F1F3} Delhi, NCR' },
+  { value: 'Pune', label: '\u{1F1EE}\u{1F1F3} Pune, Maharashtra' },
+  { value: 'Chennai', label: '\u{1F1EE}\u{1F1F3} Chennai, Tamil Nadu' },
+  { value: 'Gurgaon', label: '\u{1F1EE}\u{1F1F3} Gurgaon, Haryana' },
+  { value: 'Noida', label: '\u{1F1EE}\u{1F1F3} Noida, UP' },
+  { value: 'Kolkata', label: '\u{1F1EE}\u{1F1F3} Kolkata, West Bengal' },
+  { value: 'Ahmedabad', label: '\u{1F1EE}\u{1F1F3} Ahmedabad, Gujarat' },
+
+  // Tier 2: Growing India Tech Cities
+  { value: 'Jaipur', label: '\u{1F1EE}\u{1F1F3} Jaipur, Rajasthan' },
+  { value: 'Lucknow', label: '\u{1F1EE}\u{1F1F3} Lucknow, UP' },
+  { value: 'Chandigarh', label: '\u{1F1EE}\u{1F1F3} Chandigarh' },
+  { value: 'Kochi', label: '\u{1F1EE}\u{1F1F3} Kochi, Kerala' },
+  { value: 'Coimbatore', label: '\u{1F1EE}\u{1F1F3} Coimbatore, Tamil Nadu' },
+  { value: 'Indore', label: '\u{1F1EE}\u{1F1F3} Indore, MP' },
+  { value: 'Nagpur', label: '\u{1F1EE}\u{1F1F3} Nagpur, Maharashtra' },
+  { value: 'Trivandrum', label: '\u{1F1EE}\u{1F1F3} Trivandrum, Kerala' },
+  { value: 'Visakhapatnam', label: '\u{1F1EE}\u{1F1F3} Visakhapatnam, AP' },
+  { value: 'Bhopal', label: '\u{1F1EE}\u{1F1F3} Bhopal, MP' },
+  { value: 'Surat', label: '\u{1F1EE}\u{1F1F3} Surat, Gujarat' },
+  { value: 'Vadodara', label: '\u{1F1EE}\u{1F1F3} Vadodara, Gujarat' },
+  { value: 'Mysore', label: '\u{1F1EE}\u{1F1F3} Mysore, Karnataka' },
+  { value: 'Mangalore', label: '\u{1F1EE}\u{1F1F3} Mangalore, Karnataka' },
+
+  // Tier 3: Emerging India Tech Cities
+  { value: 'Bhubaneswar', label: '\u{1F1EE}\u{1F1F3} Bhubaneswar, Odisha' },
+  { value: 'Dehradun', label: '\u{1F1EE}\u{1F1F3} Dehradun, Uttarakhand' },
+  { value: 'Guwahati', label: '\u{1F1EE}\u{1F1F3} Guwahati, Assam' },
+  { value: 'Patna', label: '\u{1F1EE}\u{1F1F3} Patna, Bihar' },
+  { value: 'Ranchi', label: '\u{1F1EE}\u{1F1F3} Ranchi, Jharkhand' },
+  { value: 'Madurai', label: '\u{1F1EE}\u{1F1F3} Madurai, Tamil Nadu' },
+  { value: 'Nashik', label: '\u{1F1EE}\u{1F1F3} Nashik, Maharashtra' },
+  { value: 'Rajkot', label: '\u{1F1EE}\u{1F1F3} Rajkot, Gujarat' },
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -187,8 +204,15 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
               onChange={(e) => setFilters({ ...filters, location: e.target.value })}
               style={styles.select}
             >
-              {LOCATION_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              {LOCATION_OPTIONS.map((option) => (
+                <option
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                  className={option.disabled ? 'font-bold text-gray-500 bg-gray-100' : ''}
+                >
+                  {option.label}
+                </option>
               ))}
             </select>
           </div>
@@ -239,7 +263,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             </button>
           </div>
           <p style={styles.helperText}>
-            Searches 100,000+ US developers
+            Searches 100,000+ developers across US & India
           </p>
         </div>
       )}

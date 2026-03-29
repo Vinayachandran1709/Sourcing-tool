@@ -31,13 +31,13 @@ def init_scheduler():
         replace_existing=True,
         misfire_grace_time=3600,  # Allow 1 hour grace if missed
     )
-    # Perpetual US Developer Indexer - runs every 1 hour
+    # Perpetual Developer Indexer (US + India) - runs every 1 hour
     scheduler.add_job(
         run_perpetual_index,
         'interval',
         hours=1,
-        id='perpetual_us_indexer',
-        name='Perpetual US Developer Indexer',
+        id='perpetual_indexer',
+        name='Perpetual Developer Indexer (US + India)',
         next_run_time=datetime.now(timezone.utc) + timedelta(minutes=5),  # Start 5 min after server starts
         replace_existing=True,
         misfire_grace_time=3600,  # Allow 1 hour grace if missed

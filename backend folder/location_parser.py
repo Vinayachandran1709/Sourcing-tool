@@ -1,7 +1,8 @@
 """
-US Location Parser for TalentBox
-Normalizes GitHub location strings to standard US city names.
+Location Parser for TalentBox
+Normalizes GitHub location strings to standard city names (US + India).
 """
+from typing import Optional
 
 # Mapping of location variations to standard city names
 US_CITY_NORMALIZER = {
@@ -236,6 +237,197 @@ US_TARGET_CITIES = [
     "albuquerque",
 ]
 
+# ============================================
+# INDIA CITIES
+# ============================================
+
+INDIA_TARGET_CITIES = [
+    # Tier 1: Major Tech Hubs
+    "bangalore",
+    "mumbai",
+    "hyderabad",
+    "delhi",
+    "pune",
+    "chennai",
+    "gurgaon",
+    "noida",
+    "kolkata",
+    "ahmedabad",
+
+    # Tier 2: Growing Tech Cities
+    "jaipur",
+    "lucknow",
+    "chandigarh",
+    "kochi",
+    "coimbatore",
+    "indore",
+    "nagpur",
+    "thiruvananthapuram",
+    "visakhapatnam",
+    "bhopal",
+    "surat",
+    "vadodara",
+    "mysore",
+    "mangalore",
+    "trivandrum",
+
+    # Tier 3: Emerging Tech Cities
+    "dehradun",
+    "bhubaneswar",
+    "ranchi",
+    "guwahati",
+    "raipur",
+    "patna",
+    "agra",
+    "varanasi",
+    "amritsar",
+    "nashik",
+    "aurangabad",
+    "rajkot",
+    "madurai",
+    "trichy",
+    "salem",
+]
+
+INDIA_CITY_TO_STATE = {
+    # Tier 1
+    "bangalore": "Karnataka",
+    "bengaluru": "Karnataka",
+    "mumbai": "Maharashtra",
+    "hyderabad": "Telangana",
+    "delhi": "Delhi",
+    "new delhi": "Delhi",
+    "pune": "Maharashtra",
+    "chennai": "Tamil Nadu",
+    "gurgaon": "Haryana",
+    "gurugram": "Haryana",
+    "noida": "Uttar Pradesh",
+    "kolkata": "West Bengal",
+    "ahmedabad": "Gujarat",
+
+    # Tier 2
+    "jaipur": "Rajasthan",
+    "lucknow": "Uttar Pradesh",
+    "chandigarh": "Chandigarh",
+    "kochi": "Kerala",
+    "cochin": "Kerala",
+    "coimbatore": "Tamil Nadu",
+    "indore": "Madhya Pradesh",
+    "nagpur": "Maharashtra",
+    "thiruvananthapuram": "Kerala",
+    "trivandrum": "Kerala",
+    "visakhapatnam": "Andhra Pradesh",
+    "vizag": "Andhra Pradesh",
+    "bhopal": "Madhya Pradesh",
+    "surat": "Gujarat",
+    "vadodara": "Gujarat",
+    "baroda": "Gujarat",
+    "mysore": "Karnataka",
+    "mysuru": "Karnataka",
+    "mangalore": "Karnataka",
+    "mangaluru": "Karnataka",
+
+    # Tier 3
+    "dehradun": "Uttarakhand",
+    "bhubaneswar": "Odisha",
+    "ranchi": "Jharkhand",
+    "guwahati": "Assam",
+    "raipur": "Chhattisgarh",
+    "patna": "Bihar",
+    "agra": "Uttar Pradesh",
+    "varanasi": "Uttar Pradesh",
+    "amritsar": "Punjab",
+    "nashik": "Maharashtra",
+    "aurangabad": "Maharashtra",
+    "rajkot": "Gujarat",
+    "madurai": "Tamil Nadu",
+    "trichy": "Tamil Nadu",
+    "tiruchirappalli": "Tamil Nadu",
+    "salem": "Tamil Nadu",
+}
+
+INDIA_CITY_NORMALIZER = {
+    # Bangalore variations
+    "bengaluru": "bangalore",
+    "bangalore, india": "bangalore",
+    "bangalore, karnataka": "bangalore",
+    "bengaluru, india": "bangalore",
+    "bengaluru, karnataka": "bangalore",
+    "blr": "bangalore",
+
+    # Mumbai variations
+    "bombay": "mumbai",
+    "mumbai, india": "mumbai",
+    "mumbai, maharashtra": "mumbai",
+
+    # Delhi variations
+    "new delhi": "delhi",
+    "delhi, india": "delhi",
+    "new delhi, india": "delhi",
+    "ncr": "delhi",
+    "delhi ncr": "delhi",
+
+    # Hyderabad variations
+    "hyderabad, india": "hyderabad",
+    "hyderabad, telangana": "hyderabad",
+    "hyd": "hyderabad",
+
+    # Chennai variations
+    "chennai, india": "chennai",
+    "chennai, tamil nadu": "chennai",
+    "madras": "chennai",
+
+    # Pune variations
+    "pune, india": "pune",
+    "pune, maharashtra": "pune",
+
+    # Gurgaon/Gurugram variations
+    "gurugram": "gurgaon",
+    "gurgaon, india": "gurgaon",
+    "gurugram, india": "gurgaon",
+    "gurgaon, haryana": "gurgaon",
+
+    # Noida variations
+    "noida, india": "noida",
+    "noida, up": "noida",
+    "greater noida": "noida",
+
+    # Kolkata variations
+    "calcutta": "kolkata",
+    "kolkata, india": "kolkata",
+    "kolkata, west bengal": "kolkata",
+
+    # Kochi variations
+    "cochin": "kochi",
+    "kochi, india": "kochi",
+    "kochi, kerala": "kochi",
+
+    # Trivandrum variations
+    "thiruvananthapuram": "trivandrum",
+    "trivandrum, india": "trivandrum",
+    "trivandrum, kerala": "trivandrum",
+
+    # Vizag variations
+    "vizag": "visakhapatnam",
+    "visakhapatnam, india": "visakhapatnam",
+
+    # Vadodara variations
+    "baroda": "vadodara",
+    "vadodara, india": "vadodara",
+
+    # Mysore variations
+    "mysuru": "mysore",
+    "mysore, india": "mysore",
+
+    # Mangalore variations
+    "mangaluru": "mangalore",
+    "mangalore, india": "mangalore",
+
+    # Trichy variations
+    "tiruchirappalli": "trichy",
+    "trichy, india": "trichy",
+}
+
 # State abbreviations
 STATE_ABBREVIATIONS = {
     "ca": "California",
@@ -376,6 +568,73 @@ def parse_us_location(location_raw: str) -> dict | None:
 def is_us_location(location_raw: str) -> bool:
     """Check if a location string appears to be in the United States."""
     return parse_us_location(location_raw) is not None
+
+
+def parse_india_location(location_raw: str) -> Optional[dict]:
+    """Parse location string and extract India city/state if valid."""
+    if not location_raw:
+        return None
+
+    location_lower = location_raw.lower().strip()
+
+    # Check if it mentions India
+    is_india = any(term in location_lower for term in ["india", "in", "\u092d\u093e\u0930\u0924"])
+
+    # Try direct city match
+    for city in INDIA_TARGET_CITIES:
+        if city in location_lower:
+            return {
+                "city": city.title(),
+                "state": INDIA_CITY_TO_STATE.get(city),
+                "country": "India",
+            }
+
+    # Try normalized match
+    normalized = INDIA_CITY_NORMALIZER.get(location_lower)
+    if normalized:
+        return {
+            "city": normalized.title(),
+            "state": INDIA_CITY_TO_STATE.get(normalized),
+            "country": "India",
+        }
+
+    # Check each word
+    words = location_lower.replace(",", " ").split()
+    for word in words:
+        if word in INDIA_TARGET_CITIES:
+            return {
+                "city": word.title(),
+                "state": INDIA_CITY_TO_STATE.get(word),
+                "country": "India",
+            }
+        normalized = INDIA_CITY_NORMALIZER.get(word)
+        if normalized:
+            return {
+                "city": normalized.title(),
+                "state": INDIA_CITY_TO_STATE.get(normalized),
+                "country": "India",
+            }
+
+    return None
+
+
+def parse_location(location_raw: str) -> Optional[dict]:
+    """Parse location string and extract city/state/country if valid (US or India)."""
+    if not location_raw:
+        return None
+
+    # Try US first
+    us_result = parse_us_location(location_raw)
+    if us_result:
+        us_result["country"] = "United States"
+        return us_result
+
+    # Try India
+    india_result = parse_india_location(location_raw)
+    if india_result:
+        return india_result
+
+    return None
 
 
 def get_search_query_for_city(city: str) -> str:

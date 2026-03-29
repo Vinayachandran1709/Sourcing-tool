@@ -1,6 +1,7 @@
 """
-Perpetual US Developer Indexer
-Runs every 1 hour via scheduler to continuously discover and update US developer profiles.
+Perpetual Developer Indexer (US + India)
+Runs every 1 hour via scheduler to continuously discover and update developer profiles.
+Alternates between US and India each run.
 """
 
 import logging
@@ -16,7 +17,10 @@ from sqlalchemy import func
 from database import SessionLocal
 from models import GithubDeveloper
 from config import GITHUB_TOKEN
-from location_parser import US_TARGET_CITIES, US_CITY_TO_STATE, parse_us_location
+from location_parser import (
+    US_TARGET_CITIES, US_CITY_TO_STATE, parse_us_location,
+    INDIA_TARGET_CITIES, INDIA_CITY_TO_STATE, parse_india_location, parse_location
+)
 from role_detection_service import detect_all_roles
 
 logger = logging.getLogger(__name__)
@@ -104,20 +108,36 @@ SEARCH_STRATEGIES = [
 
 # Track which strategy/city was used last (persists across runs via DB)
 class IndexerState:
-    """Track indexer state to rotate through strategies and cities."""
+    """Track indexer state to rotate through strategies, cities, and countries."""
 
     def __init__(self):
         self.current_strategy_index = 0
-        self.current_city_index = 0
+        self.us_city_index = 0
+        self.india_city_index = 0
+        self.current_country = "US"  # Alternate between "US" and "India"
 
-    def get_next_cities(self, count: int = 5) -> list[str]:
-        """Get next N cities to process."""
-        cities = []
-        for i in range(count):
-            idx = (self.current_city_index + i) % len(US_TARGET_CITIES)
-            cities.append(US_TARGET_CITIES[idx])
-        self.current_city_index = (self.current_city_index + count) % len(US_TARGET_CITIES)
-        return cities
+    def get_next_country(self) -> str:
+        """Alternate between US and India each run."""
+        country = self.current_country
+        self.current_country = "India" if self.current_country == "US" else "US"
+        return country
+
+    def get_next_cities(self, country: str, count: int = 5) -> list[str]:
+        """Get next N cities for the specified country."""
+        if country == "India":
+            cities = []
+            for i in range(count):
+                idx = (self.india_city_index + i) % len(INDIA_TARGET_CITIES)
+                cities.append(INDIA_TARGET_CITIES[idx])
+            self.india_city_index = (self.india_city_index + count) % len(INDIA_TARGET_CITIES)
+            return cities
+        else:
+            cities = []
+            for i in range(count):
+                idx = (self.us_city_index + i) % len(US_TARGET_CITIES)
+                cities.append(US_TARGET_CITIES[idx])
+            self.us_city_index = (self.us_city_index + count) % len(US_TARGET_CITIES)
+            return cities
 
     def get_next_strategies(self, count: int = 3) -> list[dict]:
         """Get next N strategies to use."""
@@ -218,7 +238,7 @@ def search_users(city: str, strategy: dict, page: int = 1) -> list[dict]:
     return []
 
 
-def process_and_upsert_user(username: str, city: str, db: Session, existing_usernames: set) -> bool:
+def process_and_upsert_user(username: str, city: str, country_hint: str, db: Session, existing_usernames: set) -> bool:
     """Process a user and upsert to database. Returns True if new profile added."""
 
     # Skip if already processed this run
@@ -233,9 +253,19 @@ def process_and_upsert_user(username: str, city: str, db: Session, existing_user
     # Fetch repos
     languages, total_stars, total_forks = fetch_user_repos(username)
 
-    # Parse location
+    # Parse location - handles both US and India
     location_raw = details.get("location", "")
-    location_info = parse_us_location(location_raw) or {}
+    location_info = parse_location(location_raw) or {}
+
+    # Determine country
+    if location_info:
+        location_country = location_info.get("country", country_hint)
+        location_city = location_info.get("city", city)
+        location_state = location_info.get("state")
+    else:
+        location_country = country_hint  # Use the hint from search
+        location_city = city
+        location_state = US_CITY_TO_STATE.get(city) if country_hint == "United States" else INDIA_CITY_TO_STATE.get(city)
 
     # Detect roles (multi-role detection)
     primary_role, all_roles = detect_all_roles(details.get("bio", ""), languages)
@@ -306,9 +336,9 @@ def process_and_upsert_user(username: str, city: str, db: Session, existing_user
         avatar_url=details.get("avatar_url"),
         profile_url=details.get("html_url"),
         location_raw=location_raw,
-        location_city=location_info.get("city", city),
-        location_state=location_info.get("state") or US_CITY_TO_STATE.get(city),
-        location_country="United States",
+        location_city=location_city,
+        location_state=location_state,
+        location_country=location_country,
         primary_languages=languages,
         all_languages={lang: 1 for lang in languages},
         detected_role=primary_role,
@@ -349,30 +379,32 @@ def process_and_upsert_user(username: str, city: str, db: Session, existing_user
 def run_perpetual_index():
     """
     Main function called by scheduler every 1 hour.
-    Discovers new developers and updates existing ones.
+    Alternates between US and India, discovers new developers and updates existing ones.
     """
     start_time = time.time()
     logger.info("🔄 Starting perpetual indexer run...")
 
     db = SessionLocal()
     processed = 0
-    new_profiles = 0  # In-memory dedup count (profiles not seen this run)
-    db_inserts = 0    # Actual new rows inserted into DB
+    new_profiles = 0
+    db_inserts = 0
 
     try:
-        # Pre-load existing usernames from DB to detect true new inserts
         db_existing = set(
             row[0] for row in db.query(GithubDeveloper.github_username).all()
         )
         logger.info(f"   Loaded {len(db_existing)} existing usernames from DB")
 
-        # Track what we've seen this run (for in-run dedup)
         existing_usernames = set()
 
-        # Get cities and strategies for this run
-        cities = indexer_state.get_next_cities(5)  # Process 5 cities per run
-        strategies = indexer_state.get_next_strategies(3)  # Use 3 strategies per run
+        # Get country for this run (alternates between US and India)
+        country = indexer_state.get_next_country()
+        country_full = "United States" if country == "US" else "India"
 
+        cities = indexer_state.get_next_cities(country, 5)
+        strategies = indexer_state.get_next_strategies(3)
+
+        logger.info(f"   Country: {country}")
         logger.info(f"   Cities: {cities}")
         logger.info(f"   Strategies: {[s['name'] for s in strategies]}")
 
@@ -381,9 +413,8 @@ def run_perpetual_index():
                 if processed >= MAX_PROFILES_PER_RUN:
                     break
 
-                logger.info(f"   Searching {city} with {strategy['name']}...")
+                logger.info(f"   Searching {city} ({country}) with {strategy['name']}...")
 
-                # Search pages 1-5 (max 500 per city/strategy)
                 for page in range(1, 6):
                     if processed >= MAX_PROFILES_PER_RUN:
                         break
@@ -401,7 +432,7 @@ def run_perpetual_index():
                             continue
 
                         try:
-                            is_new = process_and_upsert_user(username, city, db, existing_usernames)
+                            is_new = process_and_upsert_user(username, city, country_full, db, existing_usernames)
                             processed += 1
                             if is_new:
                                 new_profiles += 1
@@ -425,7 +456,6 @@ def run_perpetual_index():
 
     elapsed = time.time() - start_time
 
-    # Get total count
     db = SessionLocal()
     try:
         total = db.query(func.count(GithubDeveloper.id)).scalar()
@@ -433,6 +463,7 @@ def run_perpetual_index():
         db.close()
 
     logger.info(f"✅ Perpetual indexer complete")
+    logger.info(f"   Country: {country}")
     logger.info(f"   Processed: {processed}")
     logger.info(f"   New (in-memory dedup): {new_profiles}")
     logger.info(f"   New (actual DB inserts): {db_inserts}")
