@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { useAuth } from '../contexts/AuthContext';
 import { createPaymentOrder, verifyPayment, openRazorpayCheckout } from '../services/api';
+import { getDisplayPrices, formatPrice, isIndianUser } from '../utils/currencyUtils';
 
 const PricingPage = () => {
   const [isAnnual, setIsAnnual] = useState(false);
@@ -22,21 +23,20 @@ const PricingPage = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  const starterMonthly = 79;
-  const starterAnnual = Math.round(starterMonthly * 12 * 0.83);
+  // Currency toggle — default USD, Indian users see a toggle to view INR
+  const isIndia = isIndianUser();
+  const [showINR, setShowINR] = useState(false);
+  const displayPrices = getDisplayPrices(showINR ? 'INR' : 'USD');
+  const currency = displayPrices.currency;
 
-  const handleEarlyAccess = () => {
-    const subject = encodeURIComponent('Professional Plan Early Access');
-    const body = encodeURIComponent(`Hi TalentBox Team,
+  const starterMonthly = displayPrices.starter_monthly;
+  const starterAnnual = displayPrices.starter_annual;
+  const growthMonthly = displayPrices.growth_monthly;
+  const growthAnnual = displayPrices.growth_annual;
 
-I'm interested in getting early access to the Professional plan.
-
-Company: 
-Team Size: 
-Current Hiring Needs: 
-
-Looking forward to hearing from you!`);
-    window.location.href = `mailto:vinay@talentbox.co?subject=${subject}&body=${body}`;
+  const planPrices = {
+    starter: { name: 'Starter', price_monthly: starterMonthly, price_annual: starterAnnual },
+    growth: { name: 'Growth', price_monthly: growthMonthly, price_annual: growthAnnual },
   };
 
   const handleSelectPlan = (planId, cycle) => {
@@ -46,8 +46,8 @@ Looking forward to hearing from you!`);
     }
 
     if (isAuthenticated) {
-      // Open payment modal inline - stay on pricing page
-      setPaymentPlan({ id: planId, name: planId === 'starter' ? 'Starter' : planId, price_monthly: 79, price_annual: 790 });
+      const plan = planPrices[planId] || planPrices.starter;
+      setPaymentPlan({ id: planId, ...plan });
       setPaymentCycle(cycle);
       setPaymentStatus('idle');
       setPaymentError(null);
@@ -118,7 +118,7 @@ Looking forward to hearing from you!`);
           <h1 style={styles.title}>Simple, Transparent Pricing</h1>
           <p style={styles.subtitle}>Start free, upgrade when you're ready. No hidden fees.</p>
 
-          {/* Toggle */}
+          {/* Billing Toggle */}
           <div style={styles.toggleWrapper}>
             <span style={{ ...styles.toggleLabel, color: !isAnnual ? '#1a1a1a' : '#9ca3af' }}>Monthly</span>
             <button style={styles.toggle} onClick={() => setIsAnnual(!isAnnual)}>
@@ -127,6 +127,19 @@ Looking forward to hearing from you!`);
             <span style={{ ...styles.toggleLabel, color: isAnnual ? '#1a1a1a' : '#9ca3af' }}>Annual</span>
             <span style={styles.saveBadge}>Save 17%</span>
           </div>
+          {/* Currency Toggle — only shown for Indian users */}
+          {isIndia && (
+            <div style={styles.currencyToggleWrapper}>
+              <span style={{ ...styles.currencyToggleLabel, color: !showINR ? '#1a1a1a' : '#9ca3af' }}>USD ($)</span>
+              <button style={styles.currencyToggle} onClick={() => setShowINR(!showINR)}>
+                <div style={{ ...styles.currencyToggleKnob, transform: showINR ? 'translateX(20px)' : 'translateX(3px)' }} />
+              </button>
+              <span style={{ ...styles.currencyToggleLabel, color: showINR ? '#1a1a1a' : '#9ca3af' }}>INR (&#8377;)</span>
+            </div>
+          )}
+          {showINR && (
+            <p style={styles.inrNote}>Approximate INR prices shown for reference. Actual payment is processed in INR at the current exchange rate via Razorpay.</p>
+          )}
         </div>
       </section>
 
@@ -145,24 +158,26 @@ Looking forward to hearing from you!`);
               <div style={styles.cardHeader}>
                 <div style={styles.planIcon}><Clock size={24} color="#FF6B35" /></div>
                 <h3 style={styles.planName}>Free Trial</h3>
-                <p style={styles.planDesc}>Try TalentBox risk-free</p>
+                <p style={styles.planDesc}>Try TalentBox free for 14 days</p>
               </div>
               <div style={styles.priceWrapper}>
-                <span style={styles.price}>$0</span>
+                <span style={styles.price}>{currency}0</span>
                 <span style={styles.period}>/ 14 days</span>
               </div>
               <ul style={styles.featureList}>
                 <li style={styles.featureItem}><Check size={18} color="#10b981" /> 25 searches</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 40 profile unlocks</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 15 emails</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by programming languages</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Basic developer scoring</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Names & scores visible</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 50 profile unlocks</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 50 emails</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 5 CSV exports</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 50 saved profiles</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Access to 200,000+ developers</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Quality scores</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Quick filters</li>
               </ul>
               {isCurrentPlan('free_trial') || isCurrentPlan('free') ? (
                 <button style={styles.currentPlanBtn} disabled>Current Plan</button>
               ) : (
-                <button 
+                <button
                   onClick={() => handleSelectPlan('free_trial', 'monthly')}
                   style={styles.trialBtn}
                 >
@@ -174,7 +189,7 @@ Looking forward to hearing from you!`);
 
             {/* Starter */}
             <div style={{
-              ...styles.pricingCard, 
+              ...styles.pricingCard,
               ...styles.popularCard,
               ...(isCurrentPlan('starter') ? styles.currentPlanCard : {})
             }}>
@@ -186,29 +201,28 @@ Looking forward to hearing from you!`);
               <div style={styles.cardHeader}>
                 <div style={styles.planIcon}><Zap size={24} color="#FF6B35" /></div>
                 <h3 style={styles.planName}>Starter</h3>
-                <p style={styles.planDesc}>For growing teams</p>
+                <p style={styles.planDesc}>For individual recruiters</p>
               </div>
               <div style={styles.priceWrapper}>
-                <span style={styles.price}>${isAnnual ? Math.round(starterAnnual / 12) : starterMonthly}</span>
+                <span style={styles.price}>{formatPrice(isAnnual ? Math.round(starterAnnual / 12) : starterMonthly, currency)}</span>
                 <span style={styles.period}>/ month</span>
               </div>
-              {isAnnual && <p style={styles.billedAnnually}>Billed ${starterAnnual}/year</p>}
+              {isAnnual && <p style={styles.billedAnnually}>Billed {formatPrice(starterAnnual, currency)}/year</p>}
               <ul style={styles.featureList}>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 100 smart searches/month</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 profile unlocks/month</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 300 emails/month</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Filter by roles & expertise</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Advanced developer scoring</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Full GitHub profile access + links</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Save profiles to shortlist</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> One-click outreach</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email from your domain</li>
-                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Export candidates</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 500 searches/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 1,000 profile unlocks/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 1,000 emails/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 50 CSV exports/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Unlimited saved profiles</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Access to 200,000+ developers</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> All filters & quick filters</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Quality scores</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Email support</li>
               </ul>
               {isCurrentPlan('starter') ? (
                 <button style={styles.currentPlanBtn} disabled>Current Plan</button>
               ) : (
-                <button 
+                <button
                   onClick={() => handleSelectPlan('starter', isAnnual ? 'annual' : 'monthly')}
                   style={styles.primaryBtn}
                 >
@@ -217,29 +231,45 @@ Looking forward to hearing from you!`);
               )}
             </div>
 
-            {/* Professional - Coming Soon */}
-            <div style={{ ...styles.pricingCard, ...styles.comingSoonCard }}>
-              <div style={styles.comingSoonBadge}>Coming Soon</div>
+            {/* Growth */}
+            <div style={{
+              ...styles.pricingCard,
+              ...(isCurrentPlan('growth') ? styles.currentPlanCard : {})
+            }}>
+              {isCurrentPlan('growth') && (
+                <div style={styles.currentBadge}>Current Plan</div>
+              )}
               <div style={styles.cardHeader}>
-                <div style={styles.planIcon}><Sparkles size={24} color="#6366f1" /></div>
-                <h3 style={styles.planName}>Professional</h3>
-                <p style={styles.planDesc}>For scaling companies</p>
+                <div style={styles.planIcon}><Sparkles size={24} color="#FF6B35" /></div>
+                <h3 style={styles.planName}>Growth</h3>
+                <p style={styles.planDesc}>For teams & agencies</p>
               </div>
               <div style={styles.priceWrapper}>
-                <span style={styles.comingSoonPrice}>Coming Soon</span>
+                <span style={styles.price}>{formatPrice(isAnnual ? Math.round(growthAnnual / 12) : growthMonthly, currency)}</span>
+                <span style={styles.period}>/ month</span>
               </div>
+              {isAnnual && <p style={styles.billedAnnually}>Billed {formatPrice(growthAnnual, currency)}/year</p>}
               <ul style={styles.featureList}>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Unlimited profile views</li>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Unlimited searches</li>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> 500+ emails/month</li>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Advanced AI scoring</li>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Priority 24/7 support</li>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Team collaboration</li>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> Analytics dashboard</li>
-                <li style={styles.featureItemMuted}><Check size={18} color="#9ca3af" /> API access</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Unlimited searches</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 3,000 profile unlocks/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> 3,000 emails/month</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Unlimited CSV exports</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Unlimited saved profiles</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Access to 200,000+ developers</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> All filters & quick filters</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Advanced quality scores</li>
+                <li style={styles.featureItem}><Check size={18} color="#10b981" /> Priority support</li>
               </ul>
-              <button onClick={handleEarlyAccess} style={styles.earlyAccessBtn}>Get Early Access</button>
-              <p style={styles.earlyAccessNote}>Be first to know when we launch</p>
+              {isCurrentPlan('growth') ? (
+                <button style={styles.currentPlanBtn} disabled>Current Plan</button>
+              ) : (
+                <button
+                  onClick={() => handleSelectPlan('growth', isAnnual ? 'annual' : 'monthly')}
+                  style={styles.primaryBtn}
+                >
+                  {isAuthenticated ? 'Upgrade Now' : 'Get Growth'}
+                </button>
+              )}
             </div>
 
           </div>
@@ -324,7 +354,7 @@ Looking forward to hearing from you!`);
                   <div style={styles.summaryRow}>
                     <span style={{ fontWeight: '600' }}>Total</span>
                     <span style={styles.summaryTotal}>
-                      ${paymentCycle === 'annual' ? paymentPlan.price_annual : paymentPlan.price_monthly} {paymentCycle === 'annual' ? '/year' : '/month'}
+                      {formatPrice(paymentCycle === 'annual' ? paymentPlan.price_annual : paymentPlan.price_monthly, currency)} {paymentCycle === 'annual' ? '/year' : '/month'}
                     </span>
                   </div>
                 </div>
@@ -344,7 +374,7 @@ Looking forward to hearing from you!`);
                   {paymentStatus === 'loading' ? (
                     <><Loader size={20} style={{ animation: 'spin 1s linear infinite' }} /> Processing...</>
                   ) : (
-                    <><CreditCard size={20} /> Pay ${paymentCycle === 'annual' ? paymentPlan.price_annual : paymentPlan.price_monthly} Now</>
+                    <><CreditCard size={20} /> Pay {formatPrice(paymentCycle === 'annual' ? paymentPlan.price_annual : paymentPlan.price_monthly, currency)} Now</>
                   )}
                 </button>
                 <p style={styles.secureNote}>Secured by Razorpay. We don't store your card details.</p>
@@ -371,6 +401,11 @@ const styles = {
   toggle: { width: '60px', height: '32px', background: '#FF6B35', borderRadius: '16px', border: 'none', cursor: 'pointer', position: 'relative' },
   toggleKnob: { width: '24px', height: '24px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '4px', transition: 'transform 0.2s' },
   saveBadge: { background: '#dcfce7', color: '#166534', padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8125rem', fontWeight: '600' },
+  currencyToggleWrapper: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginTop: '1rem' },
+  currencyToggleLabel: { fontSize: '0.875rem', fontWeight: '600', transition: 'color 0.2s' },
+  currencyToggle: { width: '44px', height: '24px', background: '#d1d5db', borderRadius: '12px', border: 'none', cursor: 'pointer', position: 'relative' },
+  currencyToggleKnob: { width: '18px', height: '18px', background: '#fff', borderRadius: '50%', position: 'absolute', top: '3px', transition: 'transform 0.2s' },
+  inrNote: { fontSize: '0.8125rem', color: '#6b7280', textAlign: 'center', marginTop: '0.75rem', maxWidth: '500px', margin: '0.75rem auto 0' },
 
   pricingSection: { padding: '3rem 2rem 5rem' },
   pricingGrid: { display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', alignItems: 'start' },

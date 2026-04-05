@@ -16,12 +16,13 @@ import {
   getPaymentHistory
 } from '../../services/api';
 import { trackUpgradeClicked, trackPaymentStarted, trackPaymentCompleted, trackPaymentFailed, trackSubscriptionCancelled, trackPageEntry, trackPageExit } from '../../services/analytics';
+import { getDisplayPrices, formatPrice, isIndianUser } from '../../utils/currencyUtils';
 
 // ============================================
 // Plan Card Components
 // ============================================
 
-const PlanCardPrice = ({ plan, isAnnual }) => {
+const PlanCardPrice = ({ plan, isAnnual, currency }) => {
   if (plan.comingSoon) {
     return (
       <div style={styles.cardPrice}>
@@ -35,12 +36,12 @@ const PlanCardPrice = ({ plan, isAnnual }) => {
   return (
     <>
       <div style={styles.cardPrice}>
-        <span style={styles.cardPriceAmount}>${price}</span>
+        <span style={styles.cardPriceAmount}>{formatPrice(price, currency)}</span>
         <span style={styles.cardPriceLabel}>/month</span>
       </div>
       {plan.price_annual > 0 && isAnnual && (
         <div style={styles.annualPrice}>
-          Billed ${plan.price_annual}/year (save 17%)
+          Billed {formatPrice(plan.price_annual, currency)}/year (save 17%)
         </div>
       )}
       {plan.period && (
@@ -85,7 +86,7 @@ const PlanCardButton = ({ plan, currentPlanName, isAnnual, onUpgrade, loading })
   );
 };
 
-const PlanCard = ({ plan, currentPlanName, isAnnual, onUpgrade, loading }) => {
+const PlanCard = ({ plan, currentPlanName, isAnnual, onUpgrade, loading, currency }) => {
   const cardStyle = {
     ...styles.planCard,
     ...(plan.popular ? styles.planCardPopular : {}),
@@ -98,7 +99,7 @@ const PlanCard = ({ plan, currentPlanName, isAnnual, onUpgrade, loading }) => {
       {plan.popular && <div style={styles.popularBadge}>Most Popular</div>}
       {plan.comingSoon && <div style={styles.comingSoonBadge}>Coming Soon</div>}
       <h4 style={styles.cardPlanName}>{plan.name}</h4>
-      <PlanCardPrice plan={plan} isAnnual={isAnnual} />
+      <PlanCardPrice plan={plan} isAnnual={isAnnual} currency={currency} />
       <div style={styles.featuresList}>
         {plan.features.map((feature, index) => (
           <div key={index} style={{...styles.feature, ...(plan.comingSoon ? {color: '#9ca3af'} : {})}}>
@@ -122,7 +123,7 @@ const PlanCard = ({ plan, currentPlanName, isAnnual, onUpgrade, loading }) => {
 // Payment Modal Component
 // ============================================
 
-const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess }) => {
+const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess, currency }) => {
   const [status, setStatus] = useState('idle'); // idle, loading, success, error
   const [error, setError] = useState(null);
   const { refreshSubscription } = useAuth();
@@ -233,12 +234,12 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess }) => {
               <div style={styles.summaryRow}>
                 <span style={styles.summaryTotal}>Total</span>
                 <span style={styles.summaryTotalValue}>
-                  ${price} {billingCycle === 'annual' ? '/year' : '/month'}
+                  {formatPrice(price, currency)} {billingCycle === 'annual' ? '/year' : '/month'}
                 </span>
               </div>
               {billingCycle === 'annual' && (
                 <div style={styles.savingsNote}>
-                  You save ${(plan.price_monthly * 12) - plan.price_annual} compared to monthly billing
+                  You save {formatPrice((plan.price_monthly * 12) - plan.price_annual, currency)} compared to monthly billing
                 </div>
               )}
             </div>
@@ -276,7 +277,7 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess }) => {
               ) : (
                 <>
                   <CreditCard size={20} />
-                  Pay ${price} Now
+                  Pay {formatPrice(price, currency)} Now
                 </>
               )}
             </button>
@@ -295,8 +296,8 @@ const PaymentModal = ({ isOpen, onClose, plan, billingCycle, onSuccess }) => {
 // Main Subscription Page Component
 // ============================================
 
-// Plan definitions (static, no component state dependency)
-const plans = [
+// Plan definitions — prices are injected dynamically based on currency preference
+const getPlans = (dp) => [
   {
     id: 'free_trial',
     name: 'Free Trial',
@@ -305,52 +306,47 @@ const plans = [
     period: '14 days',
     features: [
       '25 searches',
-      '40 profile unlocks',
-      '15 emails',
-      'Filter by programming languages',
-      'Basic developer scoring',
-      'Names & scores visible'
+      '50 profile unlocks',
+      '50 emails',
+      '5 CSV exports',
+      '50 saved profiles',
+      '200,000+ developers',
+      'Quality scores',
+      'Quick filters',
     ]
   },
   {
     id: 'starter',
     name: 'Starter',
-    price_monthly: 79,
-    price_annual: 790,
+    price_monthly: dp.starter_monthly,
+    price_annual: dp.starter_annual,
     features: [
-      '100 smart searches/month',
-      '300 profile unlocks/month',
-      '300 emails/month',
-      'Filter by roles & expertise',
-      'Advanced developer scoring',
-      'Full GitHub profile access + links',
-      'Save profiles to shortlist',
-      'One-click outreach',
-      'Email from your domain'
+      '500 searches/month',
+      '1,000 profile unlocks/month',
+      '1,000 emails/month',
+      '50 CSV exports/month',
+      'Unlimited saved profiles',
+      '200,000+ developers',
+      'All filters',
+      'Email support',
     ],
     popular: true
   },
   {
-    id: 'professional',
-    name: 'Professional',
-    price_monthly: null,
-    price_annual: null,
-    comingSoon: true,
+    id: 'growth',
+    name: 'Growth',
+    price_monthly: dp.growth_monthly,
+    price_annual: dp.growth_annual,
     features: [
-      'Unlimited profile views',
       'Unlimited searches',
-      '500+ emails/month',
-      'Advanced AI scoring',
-      'Priority 24/7 support',
-      'Team collaboration',
-      'Analytics dashboard',
-      'API access'
-    ],
-    onEarlyAccess: () => {
-      const subject = encodeURIComponent('Professional Plan Early Access');
-      const body = encodeURIComponent(`Hi TalentBox Team,\n\nI'm interested in getting early access to the Professional plan.\n\nCompany:\nTeam Size:\nCurrent Hiring Needs:\n\nLooking forward to hearing from you!`);
-      window.location.href = `mailto:vinay@talentbox.co?subject=${subject}&body=${body}`;
-    }
+      '3,000 profile unlocks/month',
+      '3,000 emails/month',
+      'Unlimited CSV exports',
+      'Unlimited saved profiles',
+      '200,000+ developers',
+      'All filters',
+      'Priority support',
+    ]
   }
 ];
 
@@ -358,6 +354,12 @@ const SubscriptionPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { refreshSubscription, usageStats, fetchUsageStats } = useAuth();
+
+  const isIndia = isIndianUser();
+  const [showINR, setShowINR] = useState(false);
+  const _dp = getDisplayPrices(showINR ? 'INR' : 'USD');
+  const currency = _dp.currency;
+  const plans = getPlans(_dp);
 
   // State
   const [userData, setUserData] = useState({
@@ -370,8 +372,8 @@ const SubscriptionPage = () => {
     next_billing_date: null,
     usage: {
       searches: { used: 0, limit: 25 },
-      profile_unlocks: { used: 0, limit: 40 },
-      emails: { used: 0, limit: 15 },
+      profile_unlocks: { used: 0, limit: 50 },
+      emails: { used: 0, limit: 50 },
     }
   });
   const [fetchError, setFetchError] = useState(null);
@@ -410,8 +412,8 @@ const SubscriptionPage = () => {
 
     try {
       const planId = usageStats.plan || 'free_trial';
-      const planName = (planId === 'free' || planId === 'free_trial') ? 'Free Trial' :
-                       planId === 'starter' ? 'Starter' : planId;
+      const planNameMap = { free: 'Free Trial', free_trial: 'Free Trial', starter: 'Starter', growth: 'Growth' };
+      const planName = planNameMap[planId] || planId;
       const matchedPlan = plans.find(p => p.id === planId || p.name === planName);
 
       setUserData({
@@ -429,11 +431,11 @@ const SubscriptionPage = () => {
           },
           profile_unlocks: {
             used: usageStats.profile_unlocks?.used || 0,
-            limit: usageStats.profile_unlocks?.limit || 40
+            limit: usageStats.profile_unlocks?.limit || 50
           },
           emails: {
             used: usageStats.emails?.used || 0,
-            limit: usageStats.emails?.limit || 15
+            limit: usageStats.emails?.limit || 50
           },
         }
       });
@@ -577,7 +579,7 @@ const SubscriptionPage = () => {
               </p>
             </div>
             <div style={styles.priceBox}>
-              <div style={styles.price}>${userData.price}</div>
+              <div style={styles.price}>{formatPrice(userData.price, currency)}</div>
               <div style={styles.priceLabel}>per month</div>
             </div>
           </div>
@@ -768,7 +770,7 @@ const SubscriptionPage = () => {
                         }}>
                           {payment.status}
                         </span>
-                        <span>${payment.amount}</span>
+                        <span>{formatPrice(payment.amount, currency)}</span>
                       </div>
                     </div>
                   ))}
@@ -797,13 +799,13 @@ const SubscriptionPage = () => {
               <span style={{ ...styles.toggleLabel, color: !isAnnual ? '#1a1a1a' : '#9ca3af' }}>
                 Monthly
               </span>
-              <button 
-                style={styles.toggle} 
+              <button
+                style={styles.toggle}
                 onClick={() => setIsAnnual(!isAnnual)}
               >
-                <div style={{ 
-                  ...styles.toggleKnob, 
-                  transform: isAnnual ? 'translateX(28px)' : 'translateX(4px)' 
+                <div style={{
+                  ...styles.toggleKnob,
+                  transform: isAnnual ? 'translateX(28px)' : 'translateX(4px)'
                 }} />
               </button>
               <span style={{ ...styles.toggleLabel, color: isAnnual ? '#1a1a1a' : '#9ca3af' }}>
@@ -812,6 +814,20 @@ const SubscriptionPage = () => {
               <span style={styles.saveBadge}>Save 17%</span>
             </div>
           </div>
+
+          {/* Currency Toggle — only for Indian users */}
+          {isIndia && (
+            <div style={styles.currencyToggleWrapper}>
+              <span style={{ ...styles.currencyToggleLabel, color: !showINR ? '#1a1a1a' : '#9ca3af' }}>USD ($)</span>
+              <button style={styles.currencyToggle} onClick={() => setShowINR(!showINR)}>
+                <div style={{ ...styles.currencyToggleKnob, transform: showINR ? 'translateX(20px)' : 'translateX(3px)' }} />
+              </button>
+              <span style={{ ...styles.currencyToggleLabel, color: showINR ? '#1a1a1a' : '#9ca3af' }}>INR (&#8377;)</span>
+            </div>
+          )}
+          {showINR && (
+            <p style={styles.inrNote}>Approximate INR prices for reference. Actual payment is processed in INR at the current exchange rate via Razorpay.</p>
+          )}
 
           <div style={styles.plansGrid}>
             {plans.map((plan) => (
@@ -822,6 +838,7 @@ const SubscriptionPage = () => {
                 isAnnual={isAnnual}
                 onUpgrade={handleUpgrade}
                 loading={processingPlan === plan.id}
+                currency={currency}
               />
             ))}
           </div>
@@ -835,6 +852,7 @@ const SubscriptionPage = () => {
         plan={selectedPlan}
         billingCycle={selectedCycle}
         onSuccess={handlePaymentSuccess}
+        currency={currency}
       />
 
       {/* Cancel Confirmation Modal */}
@@ -884,6 +902,45 @@ const styles = {
     maxWidth: '1400px',
     margin: '0 auto',
     padding: '2rem',
+  },
+
+  currencyToggleWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '0.5rem',
+    marginBottom: '1rem',
+  },
+  currencyToggleLabel: {
+    fontSize: '0.875rem',
+    fontWeight: '600',
+    transition: 'color 0.2s',
+  },
+  currencyToggle: {
+    width: '44px',
+    height: '24px',
+    background: '#d1d5db',
+    borderRadius: '12px',
+    border: 'none',
+    cursor: 'pointer',
+    position: 'relative',
+  },
+  currencyToggleKnob: {
+    width: '18px',
+    height: '18px',
+    background: '#fff',
+    borderRadius: '50%',
+    position: 'absolute',
+    top: '3px',
+    transition: 'transform 0.2s',
+  },
+  inrNote: {
+    fontSize: '0.8125rem',
+    color: '#6b7280',
+    textAlign: 'center',
+    marginBottom: '1rem',
+    maxWidth: '500px',
+    margin: '0 auto 1rem',
   },
 
   currentPlanCard: {

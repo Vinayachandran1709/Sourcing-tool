@@ -105,6 +105,48 @@ def get_current_user(
     return user
 
 
+def get_current_user_no_subscription_check(
+    credentials: HTTPAuthorizationCredentials = Depends(security),
+    db: Session = Depends(get_db)
+) -> User:
+    """
+    Extract and validate user from JWT token WITHOUT checking subscription status.
+    Use this for payment endpoints so expired-trial users can still upgrade.
+    """
+    token = credentials.credentials
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        user_id: int = payload.get("user_id")
+        if user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid authentication token",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired. Please log in again.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid authentication token",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="User not found",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return user
+
+
 def get_current_active_user(
     current_user: User = Depends(get_current_user)
 ) -> User:

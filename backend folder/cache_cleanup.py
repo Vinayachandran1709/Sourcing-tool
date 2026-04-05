@@ -4,12 +4,11 @@ Run this daily via cron or scheduler.
 """
 
 import logging
-from sqlalchemy import create_engine, text
-from database import DATABASE_URL
+from sqlalchemy import text
+from database import engine
 from datetime import datetime, timedelta, timezone
 
 logger = logging.getLogger(__name__)
-engine = create_engine(DATABASE_URL)
 
 def cleanup_stale_cache(days_threshold=30):
     """

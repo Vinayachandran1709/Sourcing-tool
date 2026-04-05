@@ -4,7 +4,8 @@
     "module": "commonjs",
     "target": "es6",
     "checkJs": false,
-    "baseUrl": "src"
+    "baseUrl": "src",
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "src/**/*"

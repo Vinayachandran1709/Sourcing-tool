@@ -303,14 +303,14 @@ export const AuthProvider = ({ children }) => {
           can_use: data.usage?.searches?.can_use !== false
         },
         profile_unlocks: {
-          used: data.usage?.profile_views?.used || 0,
-          limit: data.usage?.profile_views?.limit || 40,
-          can_use: data.usage?.profile_views?.can_use !== false
+          used: data.usage?.profile_unlocks?.used || 0,
+          limit: data.usage?.profile_unlocks?.limit || 50,
+          can_use: data.usage?.profile_unlocks?.can_use !== false
         },
         emails: {
-          used: data.usage?.emails_sent?.used || 0,
-          limit: data.usage?.emails_sent?.limit || 15,
-          can_use: data.usage?.emails_sent?.can_use !== false
+          used: data.usage?.emails?.used || 0,
+          limit: data.usage?.emails?.limit || 50,
+          can_use: data.usage?.emails?.can_use !== false
         },
         plan: data.plan || 'free_trial',
         billing_cycle: data.billing_cycle || 'monthly',

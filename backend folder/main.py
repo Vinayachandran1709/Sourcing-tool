@@ -115,134 +115,128 @@ async def startup_event():
 
     # Auto-run payment migration (safe - uses IF NOT EXISTS)
     try:
-        from database import get_db_connection
-        conn = get_db_connection()
-        try:
-            with conn.cursor() as cur:
-                # Add payment columns to users table
-                cur.execute("""
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_customer_id VARCHAR(50);
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(50);
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN DEFAULT TRUE;
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method VARCHAR(20);
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_payment_date TIMESTAMP WITH TIME ZONE;
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_amount DECIMAL(10, 2) DEFAULT 0;
-                    ALTER TABLE users ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'USD';
-                """)
+        from sqlalchemy import text as sa_text
+        from database import engine as db_engine
+        with db_engine.connect() as conn:
+            # Add payment columns to users table
+            conn.execute(sa_text("""
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_customer_id VARCHAR(50);
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(50);
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN DEFAULT TRUE;
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method VARCHAR(20);
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS last_payment_date TIMESTAMP WITH TIME ZONE;
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_amount DECIMAL(10, 2) DEFAULT 0;
+                ALTER TABLE users ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'USD';
+            """))
 
-                # Create payment_history table
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS payment_history (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                        razorpay_order_id VARCHAR(50) NOT NULL,
-                        razorpay_payment_id VARCHAR(50),
-                        razorpay_signature VARCHAR(255),
-                        amount DECIMAL(10, 2) NOT NULL,
-                        currency VARCHAR(3) DEFAULT 'USD',
-                        amount_inr DECIMAL(10, 2),
-                        plan_name VARCHAR(50) NOT NULL,
-                        billing_cycle VARCHAR(20) NOT NULL,
-                        status VARCHAR(20) DEFAULT 'created',
-                        payment_method VARCHAR(50),
-                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                        paid_at TIMESTAMP WITH TIME ZONE,
-                        receipt VARCHAR(100),
-                        notes JSONB,
-                        error_message TEXT,
-                        CONSTRAINT unique_razorpay_order UNIQUE (razorpay_order_id)
-                    );
-                    CREATE INDEX IF NOT EXISTS idx_payment_history_user_id ON payment_history(user_id);
-                    CREATE INDEX IF NOT EXISTS idx_payment_history_status ON payment_history(status);
-                """)
+            # Create payment_history table
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS payment_history (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    razorpay_order_id VARCHAR(50) NOT NULL,
+                    razorpay_payment_id VARCHAR(50),
+                    razorpay_signature VARCHAR(255),
+                    amount DECIMAL(10, 2) NOT NULL,
+                    currency VARCHAR(3) DEFAULT 'USD',
+                    amount_inr DECIMAL(10, 2),
+                    plan_name VARCHAR(50) NOT NULL,
+                    billing_cycle VARCHAR(20) NOT NULL,
+                    status VARCHAR(20) DEFAULT 'created',
+                    payment_method VARCHAR(50),
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    paid_at TIMESTAMP WITH TIME ZONE,
+                    receipt VARCHAR(100),
+                    notes JSONB,
+                    error_message TEXT,
+                    CONSTRAINT unique_razorpay_order UNIQUE (razorpay_order_id)
+                );
+                CREATE INDEX IF NOT EXISTS idx_payment_history_user_id ON payment_history(user_id);
+                CREATE INDEX IF NOT EXISTS idx_payment_history_status ON payment_history(status);
+            """))
 
-                # Create subscription_events table
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS subscription_events (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                        event_type VARCHAR(50) NOT NULL,
-                        old_plan VARCHAR(50),
-                        new_plan VARCHAR(50),
-                        old_status VARCHAR(20),
-                        new_status VARCHAR(20),
-                        triggered_by VARCHAR(50),
-                        metadata JSONB,
-                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                    );
-                    CREATE INDEX IF NOT EXISTS idx_subscription_events_user_id ON subscription_events(user_id);
-                """)
+            # Create subscription_events table
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS subscription_events (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    event_type VARCHAR(50) NOT NULL,
+                    old_plan VARCHAR(50),
+                    new_plan VARCHAR(50),
+                    old_status VARCHAR(20),
+                    new_status VARCHAR(20),
+                    triggered_by VARCHAR(50),
+                    metadata JSONB,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE INDEX IF NOT EXISTS idx_subscription_events_user_id ON subscription_events(user_id);
+            """))
 
-                # Add GraphQL + rate limiting + smart refresh columns and tables
-                cur.execute("""
-                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS followers INTEGER DEFAULT 0;
-                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_hireable BOOLEAN DEFAULT FALSE;
-                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS refresh_category VARCHAR(20) DEFAULT 'dormant';
-                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_refreshed_at TIMESTAMP WITH TIME ZONE;
-                """)
+            # Add GraphQL + rate limiting + smart refresh columns and tables
+            conn.execute(sa_text("""
+                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS followers INTEGER DEFAULT 0;
+                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_hireable BOOLEAN DEFAULT FALSE;
+                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS refresh_category VARCHAR(20) DEFAULT 'dormant';
+                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_refreshed_at TIMESTAMP WITH TIME ZONE;
+            """))
 
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS search_locks (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                        locked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-                        search_completed BOOLEAN DEFAULT FALSE,
-                        CONSTRAINT unique_user_lock UNIQUE (user_id)
-                    );
-                """)
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS search_locks (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    locked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                    search_completed BOOLEAN DEFAULT FALSE,
+                    CONSTRAINT unique_user_lock UNIQUE (user_id)
+                );
+            """))
 
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS rate_limit_events (
-                        id SERIAL PRIMARY KEY,
-                        event_type VARCHAR(20) NOT NULL,
-                        status_code INTEGER NOT NULL,
-                        retry_after INTEGER,
-                        rate_limit_remaining INTEGER,
-                        rate_limit_resource VARCHAR(50),
-                        endpoint VARCHAR(200),
-                        occurred_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                    );
-                    CREATE INDEX IF NOT EXISTS idx_rate_limit_events_time ON rate_limit_events(occurred_at);
-                """)
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS rate_limit_events (
+                    id SERIAL PRIMARY KEY,
+                    event_type VARCHAR(20) NOT NULL,
+                    status_code INTEGER NOT NULL,
+                    retry_after INTEGER,
+                    rate_limit_remaining INTEGER,
+                    rate_limit_resource VARCHAR(50),
+                    endpoint VARCHAR(200),
+                    occurred_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE INDEX IF NOT EXISTS idx_rate_limit_events_time ON rate_limit_events(occurred_at);
+            """))
 
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS profile_unlocks (
-                        id SERIAL PRIMARY KEY,
-                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                        profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-                        unlocked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                    );
-                    CREATE INDEX IF NOT EXISTS idx_profile_unlocks_profile ON profile_unlocks(profile_id);
-                    CREATE INDEX IF NOT EXISTS idx_profile_unlocks_time ON profile_unlocks(unlocked_at);
-                """)
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS profile_unlocks (
+                    id SERIAL PRIMARY KEY,
+                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                    profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+                    unlocked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE INDEX IF NOT EXISTS idx_profile_unlocks_profile ON profile_unlocks(profile_id);
+                CREATE INDEX IF NOT EXISTS idx_profile_unlocks_time ON profile_unlocks(unlocked_at);
+            """))
 
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS refresh_job_log (
-                        id SERIAL PRIMARY KEY,
-                        started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                        completed_at TIMESTAMP WITH TIME ZONE,
-                        profiles_refreshed INTEGER DEFAULT 0,
-                        profiles_failed INTEGER DEFAULT 0,
-                        status VARCHAR(20) DEFAULT 'running'
-                    );
-                """)
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS refresh_job_log (
+                    id SERIAL PRIMARY KEY,
+                    started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                    completed_at TIMESTAMP WITH TIME ZONE,
+                    profiles_refreshed INTEGER DEFAULT 0,
+                    profiles_failed INTEGER DEFAULT 0,
+                    status VARCHAR(20) DEFAULT 'running'
+                );
+            """))
 
-                # Backfill refresh categories for existing profiles
-                cur.execute("""
-                    UPDATE profiles SET refresh_category = 'active' WHERE contributions_last_year >= 300 AND refresh_category = 'dormant';
-                    UPDATE profiles SET refresh_category = 'moderate' WHERE contributions_last_year >= 100 AND contributions_last_year < 300 AND refresh_category = 'dormant';
-                """)
+            # Backfill refresh categories for existing profiles
+            conn.execute(sa_text("""
+                UPDATE profiles SET refresh_category = 'active' WHERE contributions_last_year >= 300 AND refresh_category = 'dormant';
+                UPDATE profiles SET refresh_category = 'moderate' WHERE contributions_last_year >= 100 AND contributions_last_year < 300 AND refresh_category = 'dormant';
+            """))
 
-                conn.commit()
-            logger.info("✅ Payment tables verified/created")
-        except Exception as e:
-            conn.rollback()
-            logger.error(f"⚠️ Payment migration error: {e}")
-        finally:
-            conn.close()
+            conn.commit()
+        logger.info("✅ Payment tables verified/created")
     except Exception as e:
-        logger.error(f"⚠️ Could not verify payment tables: {e}")
+        logger.error(f"⚠️ Payment migration error: {e}")
 
     # Validate JWT Secret
     from auth_middleware import SECRET_KEY

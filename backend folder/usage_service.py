@@ -10,30 +10,31 @@ class UsageService:
     PLAN_LIMITS = {
         "free_trial": {
             "searches": 25,
-            "profile_views": 40,
-            "emails_sent": 15,
-            "csv_exports": 10,
-            "lists": 1,
-            "profiles_per_list": 25,
+            "profile_unlocks": 50,
+            "emails": 50,
+            "csv_exports": 5,
             "saved_profiles": 50,
-            "trial_days": 14
         },
         "starter": {
-            "searches": 100,
-            "profile_views": 300,
-            "emails_sent": 300,
-            "csv_exports": -1,
-            "lists": -1,  # unlimited
-            "profiles_per_list": -1,  # unlimited
+            "searches": 500,
+            "profile_unlocks": 1000,
+            "emails": 1000,
+            "csv_exports": 50,
+            "saved_profiles": -1,  # -1 means unlimited
+        },
+        "growth": {
+            "searches": -1,  # unlimited
+            "profile_unlocks": 3000,
+            "emails": 3000,
+            "csv_exports": -1,  # unlimited
             "saved_profiles": -1,  # unlimited
-            "trial_days": 0
-        }
+        },
     }
 
     @staticmethod
     def _maybe_reset_billing_cycle(db: Session, user: User):
-        """Reset usage counters when a new billing cycle starts (starter plan)."""
-        if user.plan != "starter" or user.subscription_status != "active":
+        """Reset usage counters when a new billing cycle starts (paid plans)."""
+        if user.plan not in ("starter", "growth") or user.subscription_status != "active":
             return
         if not user.next_billing_date:
             return
@@ -55,8 +56,8 @@ class UsageService:
     # Maps action_type to the DB column and limit key
     _ACTION_MAP = {
         "search": {"column": "usage_searches", "limit_key": "searches", "label": "searches", "usage_type": "searches"},
-        "profile_view": {"column": "usage_profile_views", "limit_key": "profile_views", "label": "views", "usage_type": "profile_views"},
-        "email_sent": {"column": "usage_emails_sent", "limit_key": "emails_sent", "label": "emails", "usage_type": "email_credits"},
+        "profile_view": {"column": "usage_profile_views", "limit_key": "profile_unlocks", "label": "profile unlocks", "usage_type": "profile_unlocks"},
+        "email_sent": {"column": "usage_emails_sent", "limit_key": "emails", "label": "emails", "usage_type": "email_credits"},
     }
 
     @staticmethod
@@ -170,8 +171,9 @@ class UsageService:
     def check_email_limit(db: Session, user_id: int) -> dict:
         """
         Check if user can send more emails.
-        - Free trial: 25 emails total (lifetime)
-        - Starter: 300 emails per billing cycle
+        - Free trial: 50 emails total (lifetime)
+        - Starter: 1,000 emails per billing cycle
+        - Growth: 3,000 emails per billing cycle
         Returns usage stats with limit, used, remaining, can_send.
         """
         user = db.query(User).filter(User.id == user_id).first()
@@ -200,11 +202,11 @@ class UsageService:
         # Get plan limit
         plan_key = user.plan if user.plan in UsageService.PLAN_LIMITS else "free_trial"
         limits = UsageService.PLAN_LIMITS[plan_key]
-        limit = limits["emails_sent"]
+        limit = limits["emails"]
 
         from models import EmailOutreach
 
-        if user.plan == "starter" and user.next_billing_date:
+        if user.plan in ("starter", "growth") and user.next_billing_date:
             # Starter: count emails since billing cycle start (billing_date - 30 days)
             if user.billing_cycle == "annual":
                 cycle_start = user.next_billing_date - timedelta(days=365)
@@ -231,8 +233,9 @@ class UsageService:
     def check_csv_limit(db: Session, user_id: int) -> dict:
         """
         Check if user can export more CSVs.
-        Free trial: 10 total (lifetime, not monthly)
-        Paid plans: Unlimited
+        Free trial: 5 total (lifetime, not monthly)
+        Starter: 50 per billing cycle
+        Growth: Unlimited
         """
         user = db.query(User).filter(User.id == user_id).first()
         if not user:
@@ -337,15 +340,15 @@ class UsageService:
                     "limit": limits["searches"],
                     "unlimited": limits["searches"] == -1
                 },
-                "profile_views": {
+                "profile_unlocks": {
                     "used": user.usage_profile_views,
-                    "limit": limits["profile_views"],
-                    "unlimited": limits["profile_views"] == -1
+                    "limit": limits["profile_unlocks"],
+                    "unlimited": limits["profile_unlocks"] == -1
                 },
-                "emails_sent": {
+                "emails": {
                     "used": user.usage_emails_sent,
-                    "limit": limits["emails_sent"],
-                    "unlimited": limits["emails_sent"] == -1
+                    "limit": limits["emails"],
+                    "unlimited": limits["emails"] == -1
                 },
                 "csv_exports": {
                     "used": getattr(user, 'usage_csv_exports', 0),

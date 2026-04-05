@@ -10,6 +10,8 @@ from decimal import Decimal
 from fastapi import APIRouter, HTTPException, Request, Depends, Header
 from pydantic import BaseModel
 from typing import Annotated, Optional
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 import razorpay
 
 logger = logging.getLogger(__name__)
@@ -17,10 +19,13 @@ logger = logging.getLogger(__name__)
 # Add parent directory to path so we can import root-level modules
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from auth_middleware import get_current_user
-from database import get_db_connection
+from auth_middleware import get_current_user, get_current_user_no_subscription_check
+from database import get_db
 
 CurrentUser = Annotated[object, Depends(get_current_user)]
+# For payment endpoints — allows expired-trial users to still upgrade
+CurrentUserAnyStatus = Annotated[object, Depends(get_current_user_no_subscription_check)]
+DbSession = Annotated[Session, Depends(get_db)]
 
 router = APIRouter(prefix="/api/payments", tags=["payments"])
 
@@ -45,22 +50,37 @@ else:
 PLANS = {
     "starter": {
         "name": "Starter",
+        "price_monthly_usd": 39,
+        "price_annual_usd": 390,
+        "features": [
+            "500 searches per month",
+            "1,000 profile unlocks per month",
+            "Send up to 1,000 emails per month",
+            "50 CSV exports per month",
+            "Unlimited saved profiles",
+            "Access to 200,000+ developers",
+            "Role, location & language filters",
+            "Quality scores (0-100)",
+            "Quick filters (iOS, Android, React, etc.)",
+            "Email support",
+        ],
+    },
+    "growth": {
+        "name": "Growth",
         "price_monthly_usd": 79,
         "price_annual_usd": 790,
-        "searches": 100,
-        "profile_unlocks": 300,
-        "emails": 300,
         "features": [
-            "100 searches/month",
-            "300 profile unlocks/month", 
-            "300 emails/month",
-            "Advanced developer scoring",
-            "Full GitHub profile access",
-            "Save profiles to shortlist",
-            "One-click outreach",
-            "Email from your domain"
-        ]
-    }
+            "Unlimited searches",
+            "3,000 profile unlocks per month",
+            "Send up to 3,000 emails per month",
+            "Unlimited CSV exports",
+            "Unlimited saved profiles",
+            "Access to 200,000+ developers",
+            "All filters & quick filters",
+            "Advanced quality scores",
+            "Priority support (same-day response)",
+        ],
+    },
 }
 
 # USD to INR conversion (Razorpay requires INR for Indian merchants)
@@ -95,16 +115,16 @@ def get_plan_price(plan_name: str, billing_cycle: str) -> dict:
     plan = PLANS.get(plan_name.lower())
     if not plan:
         raise HTTPException(status_code=400, detail=f"Invalid plan: {plan_name}")
-    
+
     if billing_cycle == "monthly":
         price_usd = plan["price_monthly_usd"]
     elif billing_cycle == "annual":
         price_usd = plan["price_annual_usd"]
     else:
         raise HTTPException(status_code=400, detail=f"Invalid billing cycle: {billing_cycle}")
-    
+
     price_inr = int(price_usd * USD_TO_INR_RATE * 100)  # Razorpay expects paise
-    
+
     return {
         "price_usd": price_usd,
         "price_inr": price_inr,
@@ -125,18 +145,25 @@ def generate_receipt_id(user_id: int) -> str:
     timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
     return f"TB-{user_id}-{timestamp}"
 
-def log_subscription_event(conn, user_id: int, event_type: str, old_plan: str, new_plan: str, 
+def log_subscription_event(db: Session, user_id: int, event_type: str, old_plan: str, new_plan: str,
                            old_status: str, new_status: str, triggered_by: str, metadata: dict = None):
     """Log subscription changes for audit trail"""
     try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                INSERT INTO subscription_events 
-                (user_id, event_type, old_plan, new_plan, old_status, new_status, triggered_by, metadata)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-            """, (user_id, event_type, old_plan, new_plan, old_status, new_status, 
-                  triggered_by, json.dumps(metadata) if metadata else None))
-            conn.commit()
+        db.execute(text("""
+            INSERT INTO subscription_events
+            (user_id, event_type, old_plan, new_plan, old_status, new_status, triggered_by, metadata)
+            VALUES (:user_id, :event_type, :old_plan, :new_plan, :old_status, :new_status, :triggered_by, :metadata)
+        """), {
+            "user_id": user_id,
+            "event_type": event_type,
+            "old_plan": old_plan,
+            "new_plan": new_plan,
+            "old_status": old_status,
+            "new_status": new_status,
+            "triggered_by": triggered_by,
+            "metadata": json.dumps(metadata) if metadata else None,
+        })
+        db.commit()
     except Exception as e:
         logger.error(f"Failed to log subscription event: {e}")
 
@@ -144,7 +171,7 @@ def log_subscription_event(conn, user_id: int, event_type: str, old_plan: str, n
 # API Endpoints
 # ============================================
 @router.post("/create-order")
-async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
+async def create_order(request: CreateOrderRequest, current_user: CurrentUserAnyStatus, db: DbSession):
     """
     Create a Razorpay order for payment
     Returns order details to initialize Razorpay checkout on frontend
@@ -189,39 +216,33 @@ async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
             raise HTTPException(status_code=500, detail=f"Failed to create payment order: {str(e)}")
 
         # Store order in database
-        conn = get_db_connection()
         try:
-            with conn.cursor() as cur:
-                # Store order in payment_history
-                cur.execute("""
-                    INSERT INTO payment_history
-                    (user_id, razorpay_order_id, amount, currency, amount_inr, plan_name, billing_cycle, status, receipt)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
-                """, (
-                    user_id,
-                    order["id"],
-                    pricing["price_usd"],
-                    "USD",
-                    pricing["price_inr_display"],
-                    request.plan,
-                    request.billing_cycle,
-                    "created",
-                    receipt_id
-                ))
+            db.execute(text("""
+                INSERT INTO payment_history
+                (user_id, razorpay_order_id, amount, currency, amount_inr, plan_name, billing_cycle, status, receipt)
+                VALUES (:user_id, :order_id, :amount, :currency, :amount_inr, :plan_name, :billing_cycle, :status, :receipt)
+            """), {
+                "user_id": user_id,
+                "order_id": order["id"],
+                "amount": pricing["price_usd"],
+                "currency": "USD",
+                "amount_inr": pricing["price_inr_display"],
+                "plan_name": request.plan,
+                "billing_cycle": request.billing_cycle,
+                "status": "created",
+                "receipt": receipt_id,
+            })
 
-                # Update user's pending order
-                cur.execute("""
-                    UPDATE users SET razorpay_order_id = %s WHERE id = %s
-                """, (order["id"], user_id))
+            db.execute(text("""
+                UPDATE users SET razorpay_order_id = :order_id WHERE id = :user_id
+            """), {"order_id": order["id"], "user_id": user_id})
 
-                conn.commit()
+            db.commit()
 
         except Exception as e:
-            conn.rollback()
+            db.rollback()
             logger.error(f"Database error storing order: {e}\n{traceback.format_exc()}")
             raise HTTPException(status_code=500, detail=f"Failed to store order in database: {str(e)}")
-        finally:
-            conn.close()
 
         # Return order details for frontend
         return {
@@ -249,7 +270,7 @@ async def create_order(request: CreateOrderRequest, current_user: CurrentUser):
         raise HTTPException(status_code=500, detail=f"Unexpected payment error: {str(e)}")
 
 @router.post("/verify")
-async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUser):
+async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUserAnyStatus, db: DbSession):
     """
     Verify Razorpay payment signature and activate subscription
     Called after successful payment on frontend
@@ -269,105 +290,99 @@ async def verify_payment(request: VerifyPaymentRequest, current_user: CurrentUse
         razorpay_client.utility.verify_payment_signature(params_dict)
     except razorpay.errors.SignatureVerificationError:
         # Update payment status to failed
-        conn = get_db_connection()
         try:
-            with conn.cursor() as cur:
-                cur.execute("""
-                    UPDATE payment_history 
-                    SET status = 'signature_failed', error_message = 'Invalid payment signature'
-                    WHERE razorpay_order_id = %s
-                """, (request.razorpay_order_id,))
-                conn.commit()
-        finally:
-            conn.close()
+            db.execute(text("""
+                UPDATE payment_history
+                SET status = 'signature_failed', error_message = 'Invalid payment signature'
+                WHERE razorpay_order_id = :order_id
+            """), {"order_id": request.razorpay_order_id})
+            db.commit()
+        except Exception:
+            db.rollback()
         raise HTTPException(status_code=400, detail="Payment verification failed")
-    
+
     # Get payment details from Razorpay
     try:
         payment = razorpay_client.payment.fetch(request.razorpay_payment_id)
     except Exception as e:
         logger.error(f"Failed to fetch payment details: {e}")
         raise HTTPException(status_code=500, detail="Failed to fetch payment details")
-    
+
     # Update database
-    conn = get_db_connection()
     try:
-        with conn.cursor() as cur:
-            # Get current user data for event logging
-            cur.execute("SELECT plan, subscription_status FROM users WHERE id = %s", (user_id,))
-            old_user = cur.fetchone()
-            old_plan = old_user[0] if old_user else "free_trial"
-            old_status = old_user[1] if old_user else "active"
-            
-            # Calculate dates
-            now = datetime.now(timezone.utc)
-            next_billing = calculate_next_billing_date(request.billing_cycle)
-            
-            # Get plan details
-            plan_config = PLANS.get(request.plan.lower(), PLANS["starter"])
-            price_usd = plan_config["price_monthly_usd"] if request.billing_cycle == "monthly" else plan_config["price_annual_usd"]
-            
-            # Update payment_history
-            cur.execute("""
-                UPDATE payment_history 
-                SET status = 'captured',
-                    razorpay_payment_id = %s,
-                    razorpay_signature = %s,
-                    payment_method = %s,
-                    paid_at = %s
-                WHERE razorpay_order_id = %s
-            """, (
-                request.razorpay_payment_id,
-                request.razorpay_signature,
-                payment.get("method", "unknown"),
-                now,
-                request.razorpay_order_id
-            ))
-            
-            # Update user subscription
-            cur.execute("""
-                UPDATE users SET
-                    plan = %s,
-                    subscription_status = 'active',
-                    billing_cycle = %s,
-                    subscription_amount = %s,
-                    next_billing_date = %s,
-                    last_payment_date = %s,
-                    trial_end_date = NULL,
-                    usage_searches = 0,
-                    usage_profile_views = 0,
-                    usage_emails_sent = 0,
-                    auto_renew = TRUE,
-                    razorpay_order_id = NULL
-                WHERE id = %s
-            """, (
-                request.plan.lower(),
-                request.billing_cycle,
-                price_usd,
-                next_billing,
-                now,
-                user_id
-            ))
-            
-            conn.commit()
-            
-            # Log subscription event
-            log_subscription_event(
-                conn, user_id, 
-                "subscription_activated",
-                old_plan, request.plan.lower(),
-                old_status, "active",
-                "payment_verified",
-                {"payment_id": request.razorpay_payment_id, "amount_usd": price_usd}
-            )
-            
+        # Get current user data for event logging
+        result = db.execute(text("SELECT plan, subscription_status FROM users WHERE id = :user_id"), {"user_id": user_id})
+        old_user = result.fetchone()
+        old_plan = old_user[0] if old_user else "free_trial"
+        old_status = old_user[1] if old_user else "active"
+
+        # Calculate dates
+        now = datetime.now(timezone.utc)
+        next_billing = calculate_next_billing_date(request.billing_cycle)
+
+        # Get plan details
+        plan_config = PLANS.get(request.plan.lower(), PLANS["starter"])
+        price_usd = plan_config["price_monthly_usd"] if request.billing_cycle == "monthly" else plan_config["price_annual_usd"]
+
+        # Update payment_history
+        db.execute(text("""
+            UPDATE payment_history
+            SET status = 'captured',
+                razorpay_payment_id = :payment_id,
+                razorpay_signature = :signature,
+                payment_method = :method,
+                paid_at = :paid_at
+            WHERE razorpay_order_id = :order_id
+        """), {
+            "payment_id": request.razorpay_payment_id,
+            "signature": request.razorpay_signature,
+            "method": payment.get("method", "unknown"),
+            "paid_at": now,
+            "order_id": request.razorpay_order_id,
+        })
+
+        # Update user subscription
+        db.execute(text("""
+            UPDATE users SET
+                plan = :plan,
+                subscription_status = 'active',
+                billing_cycle = :billing_cycle,
+                subscription_amount = :amount,
+                next_billing_date = :next_billing,
+                last_payment_date = :last_payment,
+                trial_end_date = NULL,
+                usage_searches = 0,
+                usage_profile_views = 0,
+                usage_emails_sent = 0,
+                auto_renew = TRUE,
+                razorpay_order_id = NULL
+            WHERE id = :user_id
+        """), {
+            "plan": request.plan.lower(),
+            "billing_cycle": request.billing_cycle,
+            "amount": price_usd,
+            "next_billing": next_billing,
+            "last_payment": now,
+            "user_id": user_id,
+        })
+
+        db.commit()
+
+        # Log subscription event
+        log_subscription_event(
+            db, user_id,
+            "subscription_activated",
+            old_plan, request.plan.lower(),
+            old_status, "active",
+            "payment_verified",
+            {"payment_id": request.razorpay_payment_id, "amount_usd": price_usd}
+        )
+
     except Exception as e:
-        conn.rollback()
+        db.rollback()
         logger.error(f"Database error updating subscription: {e}")
         raise HTTPException(status_code=500, detail="Failed to activate subscription")
-    finally:
-        conn.close()
-    
+
     return {
         "success": True,
         "message": "Payment verified and subscription activated",
@@ -388,12 +403,12 @@ async def razorpay_webhook(request: Request):
     # Get raw body for signature verification
     body = await request.body()
     body_str = body.decode('utf-8')
-    
+
     # Get signature from headers
     signature = request.headers.get("X-Razorpay-Signature")
     if not signature:
         raise HTTPException(status_code=400, detail="Missing signature")
-    
+
     # Verify webhook signature
     if RAZORPAY_WEBHOOK_SECRET:
         expected_signature = hmac.new(
@@ -401,280 +416,259 @@ async def razorpay_webhook(request: Request):
             body,
             hashlib.sha256
         ).hexdigest()
-        
+
         if not hmac.compare_digest(signature, expected_signature):
             logger.warning("Webhook signature verification failed")
             raise HTTPException(status_code=400, detail="Invalid signature")
-    
+
     # Parse event
     try:
         event = json.loads(body_str)
     except json.JSONDecodeError:
         raise HTTPException(status_code=400, detail="Invalid JSON")
-    
+
     event_type = event.get("event")
     payload = event.get("payload", {})
-    
+
     logger.info(f"Received webhook event: {event_type}")
-    
-    conn = get_db_connection()
+
+    # Webhook doesn't have access to FastAPI DI, so we create a session manually
+    from database import SessionLocal
+    db = SessionLocal()
     try:
         if event_type == "payment.captured":
-            payment = payload.get("payment", {}).get("entity", {})
-            order_id = payment.get("order_id")
-            payment_id = payment.get("id")
-            
-            with conn.cursor() as cur:
-                # Update payment status
-                cur.execute("""
-                    UPDATE payment_history 
-                    SET status = 'captured', 
-                        razorpay_payment_id = %s,
-                        payment_method = %s,
-                        paid_at = NOW()
-                    WHERE razorpay_order_id = %s AND status != 'captured'
-                """, (payment_id, payment.get("method"), order_id))
-                conn.commit()
-                
+            payment_entity = payload.get("payment", {}).get("entity", {})
+            order_id = payment_entity.get("order_id")
+            payment_id = payment_entity.get("id")
+
+            db.execute(text("""
+                UPDATE payment_history
+                SET status = 'captured',
+                    razorpay_payment_id = :payment_id,
+                    payment_method = :method,
+                    paid_at = NOW()
+                WHERE razorpay_order_id = :order_id AND status != 'captured'
+            """), {
+                "payment_id": payment_id,
+                "method": payment_entity.get("method"),
+                "order_id": order_id,
+            })
+            db.commit()
+
         elif event_type == "payment.failed":
-            payment = payload.get("payment", {}).get("entity", {})
-            order_id = payment.get("order_id")
-            error_desc = payment.get("error_description", "Payment failed")
-            
-            with conn.cursor() as cur:
-                cur.execute("""
-                    UPDATE payment_history 
-                    SET status = 'failed', 
-                        error_message = %s
-                    WHERE razorpay_order_id = %s
-                """, (error_desc, order_id))
-                conn.commit()
-                
+            payment_entity = payload.get("payment", {}).get("entity", {})
+            order_id = payment_entity.get("order_id")
+            error_desc = payment_entity.get("error_description", "Payment failed")
+
+            db.execute(text("""
+                UPDATE payment_history
+                SET status = 'failed',
+                    error_message = :error_desc
+                WHERE razorpay_order_id = :order_id
+            """), {"error_desc": error_desc, "order_id": order_id})
+            db.commit()
+
         elif event_type == "order.paid":
-            order = payload.get("order", {}).get("entity", {})
-            order_id = order.get("id")
-            
-            # Order paid is usually followed by payment.captured
-            # This is a backup to ensure status is updated
-            with conn.cursor() as cur:
-                cur.execute("""
-                    UPDATE payment_history 
-                    SET status = 'captured'
-                    WHERE razorpay_order_id = %s AND status = 'created'
-                """, (order_id,))
-                conn.commit()
-                
+            order_entity = payload.get("order", {}).get("entity", {})
+            order_id = order_entity.get("id")
+
+            db.execute(text("""
+                UPDATE payment_history
+                SET status = 'captured'
+                WHERE razorpay_order_id = :order_id AND status = 'created'
+            """), {"order_id": order_id})
+            db.commit()
+
     except Exception as e:
         logger.error(f"Webhook processing error: {e}")
-        conn.rollback()
+        db.rollback()
     finally:
-        conn.close()
-    
+        db.close()
+
     return {"status": "ok"}
 
 @router.get("/status")
-async def get_subscription_status(current_user: CurrentUser):
+async def get_subscription_status(current_user: CurrentUserAnyStatus, db: DbSession):
     """
     Get current subscription status for the user
     Used by frontend to refresh subscription data
     """
     user_id = current_user.id
-    
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("""
-                SELECT 
-                    plan,
-                    subscription_status,
-                    billing_cycle,
-                    subscription_amount,
-                    next_billing_date,
-                    trial_end_date,
-                    auto_renew,
-                    last_payment_date,
-                    usage_searches,
-                    usage_profile_views,
-                    usage_emails_sent
-                FROM users WHERE id = %s
-            """, (user_id,))
-            
-            user = cur.fetchone()
-            if not user:
-                raise HTTPException(status_code=404, detail="User not found")
-            
-            plan = user[0] or "free_trial"
-            plan_config = PLANS.get(plan, {
-                "searches": 25,
-                "profile_unlocks": 40,
-                "emails": 15
-            })
 
-            # Determine limits based on plan
-            if plan == "free_trial" or plan == "free":
-                limits = {"searches": 25, "profile_unlocks": 40, "emails": 15}
-            else:
-                limits = {
-                    "searches": plan_config.get("searches", 100),
-                    "profile_unlocks": plan_config.get("profile_unlocks", 300),
-                    "emails": plan_config.get("emails", 300)
-                }
-            
-            return {
-                "success": True,
-                "subscription": {
-                    "plan": plan,
-                    "plan_display": "Free Trial" if plan in ["free_trial", "free"] else plan.capitalize(),
-                    "status": user[1] or "active",
-                    "billing_cycle": user[2] or "monthly",
-                    "amount": float(user[3]) if user[3] else 0,
-                    "next_billing_date": user[4].isoformat() if user[4] else None,
-                    "trial_end_date": user[5].isoformat() if user[5] else None,
-                    "auto_renew": user[6] if user[6] is not None else True,
-                    "last_payment_date": user[7].isoformat() if user[7] else None
-                },
-                "usage": {
-                    "searches": {"used": user[8] or 0, "limit": limits["searches"]},
-                    "profile_unlocks": {"used": user[9] or 0, "limit": limits["profile_unlocks"]},
-                    "emails": {"used": user[10] or 0, "limit": limits["emails"]}
-                }
-            }
-            
-    finally:
-        conn.close()
+    result = db.execute(text("""
+        SELECT
+            plan,
+            subscription_status,
+            billing_cycle,
+            subscription_amount,
+            next_billing_date,
+            trial_end_date,
+            auto_renew,
+            last_payment_date,
+            usage_searches,
+            usage_profile_views,
+            usage_emails_sent
+        FROM users WHERE id = :user_id
+    """), {"user_id": user_id})
+
+    user = result.fetchone()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    plan = user[0] or "free_trial"
+
+    # Import PLAN_LIMITS from usage_service for consistent limit lookups
+    from usage_service import UsageService
+    plan_limits = UsageService.PLAN_LIMITS.get(plan, UsageService.PLAN_LIMITS["free_trial"])
+    limits = {
+        "searches": plan_limits.get("searches", 25),
+        "profile_unlocks": plan_limits.get("profile_unlocks", 50),
+        "emails": plan_limits.get("emails", 50)
+    }
+
+    return {
+        "success": True,
+        "subscription": {
+            "plan": plan,
+            "plan_display": "Free Trial" if plan in ["free_trial", "free"] else PLANS.get(plan, {}).get("name", plan.capitalize()),
+            "status": user[1] or "active",
+            "billing_cycle": user[2] or "monthly",
+            "amount": float(user[3]) if user[3] else 0,
+            "next_billing_date": user[4].isoformat() if user[4] else None,
+            "trial_end_date": user[5].isoformat() if user[5] else None,
+            "auto_renew": user[6] if user[6] is not None else True,
+            "last_payment_date": user[7].isoformat() if user[7] else None
+        },
+        "usage": {
+            "searches": {"used": user[8] or 0, "limit": limits["searches"]},
+            "profile_unlocks": {"used": user[9] or 0, "limit": limits["profile_unlocks"]},
+            "emails": {"used": user[10] or 0, "limit": limits["emails"]}
+        }
+    }
 
 @router.get("/history")
-async def get_payment_history(current_user: CurrentUser):
+async def get_payment_history(current_user: CurrentUserAnyStatus, db: DbSession):
     """
     Get payment history for the user (only successful payments)
     """
     user_id = current_user.id
 
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            # Only show captured (successful) payments that hit the bank
-            cur.execute("""
-                SELECT
-                    razorpay_order_id,
-                    razorpay_payment_id,
-                    amount,
-                    currency,
-                    plan_name,
-                    billing_cycle,
-                    status,
-                    payment_method,
-                    created_at,
-                    paid_at,
-                    receipt
-                FROM payment_history
-                WHERE user_id = %s AND status = 'captured'
-                ORDER BY paid_at DESC
-                LIMIT 20
-            """, (user_id,))
-            
-            payments = cur.fetchall()
-            
-            history = []
-            for p in payments:
-                history.append({
-                    "order_id": p[0],
-                    "payment_id": p[1],
-                    "amount": float(p[2]) if p[2] else 0,
-                    "currency": p[3],
-                    "plan": p[4],
-                    "billing_cycle": p[5],
-                    "status": p[6],
-                    "payment_method": p[7],
-                    "created_at": p[8].isoformat() if p[8] else None,
-                    "paid_at": p[9].isoformat() if p[9] else None,
-                    "receipt": p[10]
-                })
-            
-            return {
-                "success": True,
-                "payments": history
-            }
-            
-    finally:
-        conn.close()
+    result = db.execute(text("""
+        SELECT
+            razorpay_order_id,
+            razorpay_payment_id,
+            amount,
+            currency,
+            plan_name,
+            billing_cycle,
+            status,
+            payment_method,
+            created_at,
+            paid_at,
+            receipt
+        FROM payment_history
+        WHERE user_id = :user_id AND status = 'captured'
+        ORDER BY paid_at DESC
+        LIMIT 20
+    """), {"user_id": user_id})
+
+    payments = result.fetchall()
+
+    history = []
+    for p in payments:
+        history.append({
+            "order_id": p[0],
+            "payment_id": p[1],
+            "amount": float(p[2]) if p[2] else 0,
+            "currency": p[3],
+            "plan": p[4],
+            "billing_cycle": p[5],
+            "status": p[6],
+            "payment_method": p[7],
+            "created_at": p[8].isoformat() if p[8] else None,
+            "paid_at": p[9].isoformat() if p[9] else None,
+            "receipt": p[10]
+        })
+
+    return {
+        "success": True,
+        "payments": history
+    }
 
 @router.post("/cancel")
 async def cancel_subscription(
     request: CancelSubscriptionRequest,
-    current_user: CurrentUser
+    current_user: CurrentUser,
+    db: DbSession
 ):
     """
     Cancel user's subscription
     User retains access until end of billing period
     """
     user_id = current_user.id
-    
-    conn = get_db_connection()
+
+    result = db.execute(text("""
+        SELECT plan, subscription_status, next_billing_date
+        FROM users WHERE id = :user_id
+    """), {"user_id": user_id})
+
+    user = result.fetchone()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    current_plan = user[0]
+    current_status = user[1]
+    next_billing = user[2]
+
+    if current_plan in ["free_trial", "free"]:
+        raise HTTPException(status_code=400, detail="No active subscription to cancel")
+
+    if current_status == "cancelled":
+        raise HTTPException(status_code=400, detail="Subscription already cancelled")
+
     try:
-        with conn.cursor() as cur:
-            # Get current subscription
-            cur.execute("""
-                SELECT plan, subscription_status, next_billing_date
-                FROM users WHERE id = %s
-            """, (user_id,))
-            
-            user = cur.fetchone()
-            if not user:
-                raise HTTPException(status_code=404, detail="User not found")
-            
-            current_plan = user[0]
-            current_status = user[1]
-            next_billing = user[2]
-            
-            if current_plan in ["free_trial", "free"]:
-                raise HTTPException(status_code=400, detail="No active subscription to cancel")
-            
-            if current_status == "cancelled":
-                raise HTTPException(status_code=400, detail="Subscription already cancelled")
-            
-            # Mark as cancelled (but don't remove access until billing period ends)
-            cur.execute("""
-                UPDATE users SET
-                    subscription_status = 'cancelled',
-                    auto_renew = FALSE
-                WHERE id = %s
-            """, (user_id,))
-            
-            conn.commit()
-            
-            # Log cancellation
-            log_subscription_event(
-                conn, user_id,
-                "subscription_cancelled",
-                current_plan, current_plan,
-                current_status, "cancelled",
-                "user_requested",
-                {"reason": request.reason, "access_until": next_billing.isoformat() if next_billing else None}
-            )
-            
-            return {
-                "success": True,
-                "message": "Subscription cancelled",
-                "access_until": next_billing.isoformat() if next_billing else None
-            }
-            
+        # Mark as cancelled (but don't remove access until billing period ends)
+        db.execute(text("""
+            UPDATE users SET
+                subscription_status = 'cancelled',
+                auto_renew = FALSE
+            WHERE id = :user_id
+        """), {"user_id": user_id})
+
+        db.commit()
+
+        # Log cancellation
+        log_subscription_event(
+            db, user_id,
+            "subscription_cancelled",
+            current_plan, current_plan,
+            current_status, "cancelled",
+            "user_requested",
+            {"reason": request.reason, "access_until": next_billing.isoformat() if next_billing else None}
+        )
+
+        return {
+            "success": True,
+            "message": "Subscription cancelled",
+            "access_until": next_billing.isoformat() if next_billing else None
+        }
+
     except HTTPException:
         raise
     except Exception as e:
-        conn.rollback()
+        db.rollback()
         logger.error(f"Cancellation error: {e}")
         raise HTTPException(status_code=500, detail="Failed to cancel subscription")
-    finally:
-        conn.close()
 
 @router.get("/plans")
 async def get_available_plans():
     """
     Get available subscription plans (public endpoint)
     """
+    from usage_service import UsageService
     plans_response = []
     for key, plan in PLANS.items():
+        plan_limits = UsageService.PLAN_LIMITS.get(key, {})
         plans_response.append({
             "id": key,
             "name": plan["name"],
@@ -682,12 +676,12 @@ async def get_available_plans():
             "price_annual": plan["price_annual_usd"],
             "features": plan["features"],
             "limits": {
-                "searches": plan["searches"],
-                "profile_unlocks": plan["profile_unlocks"],
-                "emails": plan["emails"]
+                "searches": plan_limits.get("searches", 0),
+                "profile_unlocks": plan_limits.get("profile_unlocks", 0),
+                "emails": plan_limits.get("emails", 0)
             }
         })
-    
+
     return {
         "success": True,
         "plans": plans_response,
@@ -710,40 +704,39 @@ async def payment_health_check():
         "users_payment_columns": False,
     }
 
+    from database import SessionLocal
+    db = SessionLocal()
     try:
-        conn = get_db_connection()
-        try:
-            with conn.cursor() as cur:
-                # Check payment_history table
-                cur.execute("""
-                    SELECT EXISTS (
-                        SELECT FROM information_schema.tables
-                        WHERE table_name = 'payment_history'
-                    )
-                """)
-                checks["payment_history_table"] = cur.fetchone()[0]
+        # Check payment_history table
+        result = db.execute(text("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_name = 'payment_history'
+            )
+        """))
+        checks["payment_history_table"] = result.scalar()
 
-                # Check subscription_events table
-                cur.execute("""
-                    SELECT EXISTS (
-                        SELECT FROM information_schema.tables
-                        WHERE table_name = 'subscription_events'
-                    )
-                """)
-                checks["subscription_events_table"] = cur.fetchone()[0]
+        # Check subscription_events table
+        result = db.execute(text("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables
+                WHERE table_name = 'subscription_events'
+            )
+        """))
+        checks["subscription_events_table"] = result.scalar()
 
-                # Check users table has payment columns
-                cur.execute("""
-                    SELECT EXISTS (
-                        SELECT FROM information_schema.columns
-                        WHERE table_name = 'users' AND column_name = 'razorpay_order_id'
-                    )
-                """)
-                checks["users_payment_columns"] = cur.fetchone()[0]
-        finally:
-            conn.close()
+        # Check users table has payment columns
+        result = db.execute(text("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.columns
+                WHERE table_name = 'users' AND column_name = 'razorpay_order_id'
+            )
+        """))
+        checks["users_payment_columns"] = result.scalar()
     except Exception as e:
         checks["db_error"] = str(e)
+    finally:
+        db.close()
 
     all_ok = all(v for k, v in checks.items() if k != "db_error")
     return {

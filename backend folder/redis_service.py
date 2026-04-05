@@ -22,7 +22,7 @@ async def init_redis():
 
         pool = aioredis.ConnectionPool.from_url(
             redis_url,
-            max_connections=10,
+            max_connections=20,
             decode_responses=True,
         )
         client = aioredis.Redis(connection_pool=pool)
