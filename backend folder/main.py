@@ -328,7 +328,7 @@ async def general_exception_handler(request: Request, exc: Exception):
 
 
 # ===== ADMIN ENDPOINTS =====
-
+#just for reference
 @app.get("/admin/cache-stats")
 async def cache_stats(x_admin_key: str = Header(..., alias="X-Admin-Key")):
     """Return Redis cache statistics. Requires X-Admin-Key header."""
