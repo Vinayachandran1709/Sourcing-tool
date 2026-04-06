@@ -412,7 +412,6 @@ def root():
 # ===== SEARCH ENDPOINT =====
 
 @app.post("/api/search-profiles")
-@limiter.limit("30/minute")
 async def search_profiles(
     request: Request,
     search: SearchRequest,
@@ -429,12 +428,6 @@ async def search_profiles(
         UsageService.check_limit(db, user_id, "search")
     except HTTPException as e:
         return {"error": e.detail, "limit_reached": True}
-
-    # Search cooldown & concurrent lock
-    from rate_limit_service import check_search_cooldown, acquire_search_lock, release_search_lock
-    check_search_cooldown(db, user_id)
-    if not acquire_search_lock(db, user_id):
-        raise HTTPException(status_code=429, detail="A search is already in progress. Please wait.")
 
     role = search.role
     location = search.location
@@ -468,90 +461,86 @@ async def search_profiles(
         }
 
     async def event_stream():
+        from archive_search_service import search_developers, search_developers_batched, count_developers, developer_to_dict
+        from github_integration_service import GitHubIntegrationService
+
+        seen_usernames = set()
+        total_sent = 0
+
+        # --- STEP 1: Archive search (fast DB query, batched) ---
         try:
-            from archive_search_service import search_developers, search_developers_batched, count_developers, developer_to_dict
-            from github_integration_service import GitHubIntegrationService
+            total_matching = count_developers(db, role=role, location=location, languages=languages, min_score=min_score)
+            yield f"data: {json.dumps({'type': 'count', 'total_matching': total_matching})}\n\n"
 
-            seen_usernames = set()
-            total_sent = 0
+            batch_index = 0
+            for batch in search_developers_batched(
+                db=db, role=role, location=location, languages=languages,
+                batch_size=500, min_score=min_score,
+            ):
+                batch_dicts = [developer_to_dict(dev) for dev in batch]
+                for p in batch_dicts:
+                    p["name"] = _first_name(p.get("name"))
+                    seen_usernames.add(p["github_username"])
 
-            # --- STEP 1: Archive search (fast DB query, batched) ---
+                total_sent += len(batch_dicts)
+
+                if batch_index == 0:
+                    yield f"data: {json.dumps({'type': 'profiles', 'profiles': batch_dicts})}\n\n"
+                else:
+                    yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': batch_dicts})}\n\n"
+
+                yield f"data: {json.dumps({'type': 'progress', 'loaded': total_sent, 'total': total_matching})}\n\n"
+                batch_index += 1
+
+            logger.info(f"Streamed {total_sent} archive profiles in {batch_index} batches")
+        except Exception as e:
+            logger.error(f"Archive search failed: {e}", exc_info=True)
+            yield f"data: {json.dumps({'type': 'profiles', 'profiles': []})}\n\n"
+
+        # --- STEP 2: Supplement from Profile table if archive was small ---
+        if total_sent < 500:
+            yield f"data: {json.dumps({'type': 'status', 'message': 'Fetching more profiles...'})}\n\n"
             try:
-                total_matching = count_developers(db, role=role, location=location, languages=languages, min_score=min_score)
-                yield f"data: {json.dumps({'type': 'count', 'total_matching': total_matching})}\n\n"
+                filters = {"role": role, "location": location, "min_score": min_score}
+                cached_profiles = GitHubIntegrationService._search_database(db, filters)
+                new_dicts = []
+                for profile in cached_profiles:
+                    if profile.github_username not in seen_usernames:
+                        seen_usernames.add(profile.github_username)
+                        new_dicts.append(_profile_obj_to_dict(profile))
 
-                batch_index = 0
-                for batch in search_developers_batched(
-                    db=db, role=role, location=location, languages=languages,
-                    batch_size=500, min_score=min_score,
-                ):
-                    batch_dicts = [developer_to_dict(dev) for dev in batch]
-                    for p in batch_dicts:
-                        p["name"] = _first_name(p.get("name"))
-                        seen_usernames.add(p["github_username"])
-
-                    total_sent += len(batch_dicts)
-
-                    if batch_index == 0:
-                        yield f"data: {json.dumps({'type': 'profiles', 'profiles': batch_dicts})}\n\n"
-                    else:
-                        yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': batch_dicts})}\n\n"
-
-                    yield f"data: {json.dumps({'type': 'progress', 'loaded': total_sent, 'total': total_matching})}\n\n"
-                    batch_index += 1
-
-                logger.info(f"Streamed {total_sent} archive profiles in {batch_index} batches")
+                if new_dicts:
+                    total_sent += len(new_dicts)
+                    yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': new_dicts})}\n\n"
+                    logger.info(f"Streamed {len(new_dicts)} supplement profiles")
             except Exception as e:
-                logger.error(f"Archive search failed: {e}", exc_info=True)
-                yield f"data: {json.dumps({'type': 'profiles', 'profiles': []})}\n\n"
+                logger.error(f"Profile table supplement failed: {e}", exc_info=True)
 
-            # --- STEP 2: Supplement from Profile table if archive was small ---
-            if total_sent < 500:
-                yield f"data: {json.dumps({'type': 'status', 'message': 'Fetching more profiles...'})}\n\n"
-                try:
-                    filters = {"role": role, "location": location, "min_score": min_score}
-                    cached_profiles = GitHubIntegrationService._search_database(db, filters)
-                    new_dicts = []
-                    for profile in cached_profiles:
-                        if profile.github_username not in seen_usernames:
-                            seen_usernames.add(profile.github_username)
-                            new_dicts.append(_profile_obj_to_dict(profile))
+        # --- STEP 3: Live GitHub API supplement for paid users ---
+        if total_sent < 200 and is_paid:
+            yield f"data: {json.dumps({'type': 'status', 'message': 'Searching GitHub for more...'})}\n\n"
+            try:
+                from github_integration_service import check_github_rate_limit
+                await check_github_rate_limit()
+                new_profiles = await GitHubIntegrationService._fetch_from_github(
+                    db, None, location, 0, 250, 200 - total_sent
+                )
+                api_dicts = []
+                for profile in new_profiles:
+                    if profile.github_username not in seen_usernames:
+                        seen_usernames.add(profile.github_username)
+                        api_dicts.append(_profile_obj_to_dict(profile))
+                if api_dicts:
+                    total_sent += len(api_dicts)
+                    yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': api_dicts})}\n\n"
+                    logger.info(f"Streamed {len(api_dicts)} GitHub API profiles")
+            except Exception as e:
+                logger.error(f"GitHub API supplement failed: {e}", exc_info=True)
 
-                    if new_dicts:
-                        total_sent += len(new_dicts)
-                        yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': new_dicts})}\n\n"
-                        logger.info(f"Streamed {len(new_dicts)} supplement profiles")
-                except Exception as e:
-                    logger.error(f"Profile table supplement failed: {e}", exc_info=True)
-
-            # --- STEP 3: Live GitHub API supplement for paid users ---
-            if total_sent < 200 and is_paid:
-                yield f"data: {json.dumps({'type': 'status', 'message': 'Searching GitHub for more...'})}\n\n"
-                try:
-                    from github_integration_service import check_github_rate_limit
-                    await check_github_rate_limit()
-                    new_profiles = await GitHubIntegrationService._fetch_from_github(
-                        db, None, location, 0, 250, 200 - total_sent
-                    )
-                    api_dicts = []
-                    for profile in new_profiles:
-                        if profile.github_username not in seen_usernames:
-                            seen_usernames.add(profile.github_username)
-                            api_dicts.append(_profile_obj_to_dict(profile))
-                    if api_dicts:
-                        total_sent += len(api_dicts)
-                        yield f"data: {json.dumps({'type': 'new_profiles', 'profiles': api_dicts})}\n\n"
-                        logger.info(f"Streamed {len(api_dicts)} GitHub API profiles")
-                except Exception as e:
-                    logger.error(f"GitHub API supplement failed: {e}", exc_info=True)
-
-            # --- DONE ---
-            UsageService.log_usage(db, user_id, "search", {"role": role, "location": location})
-            yield f"data: {json.dumps({'type': 'complete', 'total': total_sent})}\n\n"
-            logger.info(f"Search complete: {total_sent} total profiles")
-
-        finally:
-            release_search_lock(db, user_id)
+        # --- DONE ---
+        UsageService.log_usage(db, user_id, "search", {"role": role, "location": location})
+        yield f"data: {json.dumps({'type': 'complete', 'total': total_sent})}\n\n"
+        logger.info(f"Search complete: {total_sent} total profiles")
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 

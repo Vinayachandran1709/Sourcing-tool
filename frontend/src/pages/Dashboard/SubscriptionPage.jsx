@@ -4,9 +4,9 @@ import DashboardHeader from '../../components/dashboard/DashboardHeader';
 import EmailSettingsCard from '../../components/EmailSettingsCard';
 
 import { useAuth } from '../../contexts/AuthContext';
-import { 
+import {
   Mail, Search, Eye, CheckCircle, Loader, AlertCircle, RefreshCw,
-  CreditCard, X, History
+  CreditCard, X, History, FileText
 } from 'lucide-react';
 import {
   createPaymentOrder,
@@ -327,7 +327,8 @@ const getPlans = (dp) => [
       '50 CSV exports/month',
       'Unlimited saved profiles',
       '200,000+ developers',
-      'All filters',
+      'All filters & quick filters',
+      'Quality scores',
       'Email support',
     ],
     popular: true
@@ -344,7 +345,8 @@ const getPlans = (dp) => [
       'Unlimited CSV exports',
       'Unlimited saved profiles',
       '200,000+ developers',
-      'All filters',
+      'All filters & quick filters',
+      'Advanced quality scores',
       'Priority support',
     ]
   }
@@ -374,6 +376,7 @@ const SubscriptionPage = () => {
       searches: { used: 0, limit: 25 },
       profile_unlocks: { used: 0, limit: 50 },
       emails: { used: 0, limit: 50 },
+      csv_exports: { used: 0, limit: 5 },
     }
   });
   const [fetchError, setFetchError] = useState(null);
@@ -436,6 +439,10 @@ const SubscriptionPage = () => {
           emails: {
             used: usageStats.emails?.used || 0,
             limit: usageStats.emails?.limit || 50
+          },
+          csv_exports: {
+            used: usageStats.csv_exports?.used || 0,
+            limit: usageStats.csv_exports?.limit || 5
           },
         }
       });
@@ -723,6 +730,43 @@ const SubscriptionPage = () => {
                       ? ` Resets on ${new Date(userData.next_billing_date).toLocaleDateString()}.`
                       : isTrial
                         ? ` Upgrade to get more emails.`
+                        : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+
+            {/* CSV Exports */}
+            <div style={styles.usageItem}>
+              <div style={styles.usageItemHeader}>
+                <div style={styles.usageLabel}>
+                  <FileText size={18} color="#6b7280" />
+                  <span>CSV Exports</span>
+                </div>
+                <div style={styles.usageNumbers}>
+                  {userData.usage.csv_exports.limit === -1
+                    ? `${userData.usage.csv_exports.used} / Unlimited`
+                    : `${userData.usage.csv_exports.used} / ${userData.usage.csv_exports.limit}`}
+                </div>
+              </div>
+              <div style={styles.progressBar}>
+                <div
+                  style={{
+                    ...styles.progressFill,
+                    width: `${getUsagePercentage(userData.usage.csv_exports.used, userData.usage.csv_exports.limit)}%`,
+                    background: getUsageColor(getUsagePercentage(userData.usage.csv_exports.used, userData.usage.csv_exports.limit))
+                  }}
+                ></div>
+              </div>
+              {userData.usage.csv_exports.limit !== -1 && userData.usage.csv_exports.used >= userData.usage.csv_exports.limit && (
+                <div style={styles.limitReachedMsg}>
+                  <AlertCircle size={16} color="#ef4444" />
+                  <span>
+                    CSV export limit reached ({userData.usage.csv_exports.used}/{userData.usage.csv_exports.limit}).
+                    {userData.next_billing_date
+                      ? ` Resets on ${new Date(userData.next_billing_date).toLocaleDateString()}.`
+                      : isTrial
+                        ? ` Upgrade to get more exports.`
                         : ''}
                   </span>
                 </div>

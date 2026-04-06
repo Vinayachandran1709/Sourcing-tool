@@ -312,6 +312,11 @@ export const AuthProvider = ({ children }) => {
           limit: data.usage?.emails?.limit || 50,
           can_use: data.usage?.emails?.can_use !== false
         },
+        csv_exports: {
+          used: data.usage?.csv_exports?.used || 0,
+          limit: data.usage?.csv_exports?.limit || 5,
+          can_use: data.usage?.csv_exports?.can_use !== false
+        },
         plan: data.plan || 'free_trial',
         billing_cycle: data.billing_cycle || 'monthly',
         subscription_status: data.subscription_status || 'active',

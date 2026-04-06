@@ -101,7 +101,12 @@ const SearchDashboard = () => {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        let errorMsg = `HTTP ${response.status}`;
+        try {
+          const errBody = await response.json();
+          errorMsg = errBody?.detail || errBody?.message || errorMsg;
+        } catch (_) {}
+        throw new Error(errorMsg);
       }
 
       const reader = response.body.getReader();
