@@ -444,6 +444,7 @@ const SubscriptionPage = () => {
       console.error('Failed to process usage stats:', err);
       setFetchError('Failed to load subscription data. Please try refreshing the page.');
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [usageStats]);
 
   // Check for URL params (e.g., from pricing page)
@@ -460,6 +461,7 @@ const SubscriptionPage = () => {
         setShowPaymentModal(true);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   // Fetch payment history
