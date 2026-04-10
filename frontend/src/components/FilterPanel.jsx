@@ -20,7 +20,11 @@ const ROLE_OPTIONS = [
   { value: 'Software Developer', label: 'Software Developer (General)' },
 ];
 
-const US_CITIES = [
+const LOCATION_OPTIONS = [
+  { value: '', label: 'All Locations' },
+
+  // === UNITED STATES ===
+  { value: 'US_DIVIDER', label: '── 🇺🇸 United States ──', disabled: true },
   { value: 'San Francisco', label: 'San Francisco, CA' },
   { value: 'New York', label: 'New York, NY' },
   { value: 'Seattle', label: 'Seattle, WA' },
@@ -31,56 +35,64 @@ const US_CITIES = [
   { value: 'Denver', label: 'Denver, CO' },
   { value: 'Atlanta', label: 'Atlanta, GA' },
   { value: 'San Diego', label: 'San Diego, CA' },
-  { value: 'Portland', label: 'Portland, OR' },
-  { value: 'Phoenix', label: 'Phoenix, AZ' },
-  { value: 'Dallas', label: 'Dallas, TX' },
-  { value: 'Houston', label: 'Houston, TX' },
-  { value: 'Miami', label: 'Miami, FL' },
-  { value: 'Washington DC', label: 'Washington, DC' },
-  { value: 'Philadelphia', label: 'Philadelphia, PA' },
-  { value: 'Minneapolis', label: 'Minneapolis, MN' },
-  { value: 'Detroit', label: 'Detroit, MI' },
-  { value: 'Charlotte', label: 'Charlotte, NC' },
-  { value: 'Nashville', label: 'Nashville, TN' },
-  { value: 'Raleigh', label: 'Raleigh, NC' },
-  { value: 'Salt Lake City', label: 'Salt Lake City, UT' },
-  { value: 'Pittsburgh', label: 'Pittsburgh, PA' },
-  { value: 'Columbus', label: 'Columbus, OH' },
-];
 
-const INDIA_CITIES = [
-  { value: 'Bangalore', label: 'Bangalore, Karnataka' },
-  { value: 'Mumbai', label: 'Mumbai, Maharashtra' },
-  { value: 'Hyderabad', label: 'Hyderabad, Telangana' },
-  { value: 'Delhi', label: 'Delhi, NCR' },
-  { value: 'Pune', label: 'Pune, Maharashtra' },
-  { value: 'Chennai', label: 'Chennai, Tamil Nadu' },
-  { value: 'Gurgaon', label: 'Gurgaon, Haryana' },
-  { value: 'Noida', label: 'Noida, UP' },
-  { value: 'Kolkata', label: 'Kolkata, West Bengal' },
-  { value: 'Ahmedabad', label: 'Ahmedabad, Gujarat' },
-  { value: 'Jaipur', label: 'Jaipur, Rajasthan' },
-  { value: 'Lucknow', label: 'Lucknow, UP' },
-  { value: 'Chandigarh', label: 'Chandigarh' },
-  { value: 'Kochi', label: 'Kochi, Kerala' },
-  { value: 'Coimbatore', label: 'Coimbatore, Tamil Nadu' },
-  { value: 'Indore', label: 'Indore, MP' },
-  { value: 'Nagpur', label: 'Nagpur, Maharashtra' },
-  { value: 'Trivandrum', label: 'Trivandrum, Kerala' },
-  { value: 'Visakhapatnam', label: 'Visakhapatnam, AP' },
-  { value: 'Bhopal', label: 'Bhopal, MP' },
-  { value: 'Surat', label: 'Surat, Gujarat' },
-  { value: 'Vadodara', label: 'Vadodara, Gujarat' },
-  { value: 'Mysore', label: 'Mysore, Karnataka' },
-  { value: 'Mangalore', label: 'Mangalore, Karnataka' },
-  { value: 'Bhubaneswar', label: 'Bhubaneswar, Odisha' },
-  { value: 'Dehradun', label: 'Dehradun, Uttarakhand' },
-  { value: 'Guwahati', label: 'Guwahati, Assam' },
-  { value: 'Patna', label: 'Patna, Bihar' },
-  { value: 'Ranchi', label: 'Ranchi, Jharkhand' },
-  { value: 'Madurai', label: 'Madurai, Tamil Nadu' },
-  { value: 'Nashik', label: 'Nashik, Maharashtra' },
-  { value: 'Rajkot', label: 'Rajkot, Gujarat' },
+  // === INDIA ===
+  { value: 'INDIA_DIVIDER', label: '── 🇮🇳 India ──', disabled: true },
+  { value: 'Bangalore', label: 'Bangalore' },
+  { value: 'Mumbai', label: 'Mumbai' },
+  { value: 'Hyderabad', label: 'Hyderabad' },
+  { value: 'Delhi', label: 'Delhi' },
+  { value: 'Pune', label: 'Pune' },
+  { value: 'Chennai', label: 'Chennai' },
+  { value: 'Gurgaon', label: 'Gurgaon' },
+  { value: 'Noida', label: 'Noida' },
+  { value: 'Kolkata', label: 'Kolkata' },
+
+  // === EUROPE ===
+  { value: 'EUROPE_DIVIDER', label: '── 🇪🇺 Europe ──', disabled: true },
+  { value: 'London', label: '🇬🇧 London' },
+  { value: 'Berlin', label: '🇩🇪 Berlin' },
+  { value: 'Amsterdam', label: '🇳🇱 Amsterdam' },
+  { value: 'Paris', label: '🇫🇷 Paris' },
+  { value: 'Dublin', label: '🇮🇪 Dublin' },
+  { value: 'Zurich', label: '🇨🇭 Zurich' },
+  { value: 'Munich', label: '🇩🇪 Munich' },
+  { value: 'Stockholm', label: '🇸🇪 Stockholm' },
+  { value: 'Barcelona', label: '🇪🇸 Barcelona' },
+  { value: 'Copenhagen', label: '🇩🇰 Copenhagen' },
+  { value: 'Vienna', label: '🇦🇹 Vienna' },
+  { value: 'Milan', label: '🇮🇹 Milan' },
+  { value: 'Madrid', label: '🇪🇸 Madrid' },
+  { value: 'Lisbon', label: '🇵🇹 Lisbon' },
+  { value: 'Prague', label: '🇨🇿 Prague' },
+  { value: 'Warsaw', label: '🇵🇱 Warsaw' },
+
+  // === MIDDLE EAST ===
+  { value: 'ME_DIVIDER', label: '── 🌍 Middle East ──', disabled: true },
+  { value: 'Dubai', label: '🇦🇪 Dubai' },
+  { value: 'Tel Aviv', label: '🇮🇱 Tel Aviv' },
+  { value: 'Abu Dhabi', label: '🇦🇪 Abu Dhabi' },
+  { value: 'Riyadh', label: '🇸🇦 Riyadh' },
+  { value: 'Doha', label: '🇶🇦 Doha' },
+
+  // === ASIA ===
+  { value: 'ASIA_DIVIDER', label: '── 🌏 Asia ──', disabled: true },
+  { value: 'Singapore', label: '🇸🇬 Singapore' },
+  { value: 'Tokyo', label: '🇯🇵 Tokyo' },
+  { value: 'Hong Kong', label: '🇭🇰 Hong Kong' },
+  { value: 'Seoul', label: '🇰🇷 Seoul' },
+  { value: 'Shanghai', label: '🇨🇳 Shanghai' },
+  { value: 'Beijing', label: '🇨🇳 Beijing' },
+  { value: 'Taipei', label: '🇹🇼 Taipei' },
+  { value: 'Bangkok', label: '🇹🇭 Bangkok' },
+  { value: 'Kuala Lumpur', label: '🇲🇾 Kuala Lumpur' },
+
+  // === AUSTRALIA ===
+  { value: 'AUS_DIVIDER', label: '── 🇦🇺 Australia & NZ ──', disabled: true },
+  { value: 'Sydney', label: '🇦🇺 Sydney' },
+  { value: 'Melbourne', label: '🇦🇺 Melbourne' },
+  { value: 'Brisbane', label: '🇦🇺 Brisbane' },
+  { value: 'Auckland', label: '🇳🇿 Auckland' },
 ];
 
 const LANGUAGE_OPTIONS = [
@@ -266,7 +278,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             <span style={styles.activeBadge}>{activeFilterCount} active</span>
           )}
         </div>
-        <p style={styles.subtitle}>Find developers across 150,000+ profiles in US & India</p>
+        <p style={styles.subtitle}>Find developers across 150,000+ profiles globally</p>
       </div>
 
       {/* Card Body */}
@@ -288,37 +300,19 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
 
           <div style={styles.dropdownCol}>
             <label style={styles.fieldLabel}>Location</label>
-            <style>{`
-              .location-select optgroup {
-                color: #EA580C;
-                font-weight: 700;
-                font-size: 14px;
-                padding: 8px 0 4px;
-                font-style: normal;
-              }
-              .location-select option {
-                color: #1f2937;
-                font-weight: 400;
-                padding: 4px 8px;
-              }
-            `}</style>
             <select
-              className="location-select"
               value={filters.location}
-              onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+              onChange={(e) => {
+                const opt = LOCATION_OPTIONS.find(o => o.value === e.target.value);
+                if (!opt?.disabled) setFilters({ ...filters, location: e.target.value });
+              }}
               style={styles.select}
             >
-              <option value="">All Locations</option>
-              <optgroup label="United States">
-                {US_CITIES.map((city) => (
-                  <option key={city.value} value={city.value}>{city.label}</option>
-                ))}
-              </optgroup>
-              <optgroup label="India">
-                {INDIA_CITIES.map((city) => (
-                  <option key={city.value} value={city.value}>{city.label}</option>
-                ))}
-              </optgroup>
+              {LOCATION_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value} disabled={opt.disabled}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </div>
         </div>

@@ -428,6 +428,459 @@ INDIA_CITY_NORMALIZER = {
     "trichy, india": "trichy",
 }
 
+
+# ============================================
+# EUROPE CITIES (PRIORITY REGION)
+# ============================================
+
+EUROPE_TARGET_CITIES = [
+    # Tier 1: Top Tech Hubs (HIGHEST PRIORITY)
+    "london",
+    "berlin",
+    "amsterdam",
+    "paris",
+    "dublin",
+    "zurich",
+    "munich",
+    "stockholm",
+    "barcelona",
+    "copenhagen",
+
+    # Tier 2: Major Tech Cities
+    "vienna",
+    "milan",
+    "madrid",
+    "brussels",
+    "lisbon",
+    "prague",
+    "warsaw",
+    "helsinki",
+    "oslo",
+    "edinburgh",
+
+    # Tier 3: Growing Tech Cities
+    "manchester",
+    "hamburg",
+    "frankfurt",
+    "lyon",
+    "rotterdam",
+    "tallinn",
+    "budapest",
+    "bucharest",
+    "krakow",
+    "birmingham",
+    "bristol",
+    "cambridge",
+    "oxford",
+    "stuttgart",
+    "cologne",
+    "dusseldorf",
+    "utrecht",
+    "eindhoven",
+    "malmo",
+    "gothenburg",
+]
+
+EUROPE_CITY_TO_COUNTRY = {
+    # UK
+    "london": "United Kingdom",
+    "manchester": "United Kingdom",
+    "edinburgh": "United Kingdom",
+    "birmingham": "United Kingdom",
+    "bristol": "United Kingdom",
+    "cambridge": "United Kingdom",
+    "oxford": "United Kingdom",
+
+    # Germany
+    "berlin": "Germany",
+    "munich": "Germany",
+    "hamburg": "Germany",
+    "frankfurt": "Germany",
+    "stuttgart": "Germany",
+    "cologne": "Germany",
+    "dusseldorf": "Germany",
+
+    # Netherlands
+    "amsterdam": "Netherlands",
+    "rotterdam": "Netherlands",
+    "utrecht": "Netherlands",
+    "eindhoven": "Netherlands",
+
+    # France
+    "paris": "France",
+    "lyon": "France",
+
+    # Ireland
+    "dublin": "Ireland",
+
+    # Switzerland
+    "zurich": "Switzerland",
+
+    # Sweden
+    "stockholm": "Sweden",
+    "malmo": "Sweden",
+    "gothenburg": "Sweden",
+
+    # Spain
+    "barcelona": "Spain",
+    "madrid": "Spain",
+
+    # Denmark
+    "copenhagen": "Denmark",
+
+    # Austria
+    "vienna": "Austria",
+
+    # Italy
+    "milan": "Italy",
+
+    # Belgium
+    "brussels": "Belgium",
+
+    # Portugal
+    "lisbon": "Portugal",
+
+    # Czech Republic
+    "prague": "Czech Republic",
+
+    # Poland
+    "warsaw": "Poland",
+    "krakow": "Poland",
+
+    # Finland
+    "helsinki": "Finland",
+
+    # Norway
+    "oslo": "Norway",
+
+    # Estonia
+    "tallinn": "Estonia",
+
+    # Hungary
+    "budapest": "Hungary",
+
+    # Romania
+    "bucharest": "Romania",
+}
+
+EUROPE_CITY_NORMALIZER = {
+    # London variations
+    "london, uk": "london",
+    "london, united kingdom": "london",
+    "london, england": "london",
+
+    # Berlin variations
+    "berlin, germany": "berlin",
+    "berlin, de": "berlin",
+
+    # Amsterdam variations
+    "amsterdam, netherlands": "amsterdam",
+    "amsterdam, nl": "amsterdam",
+
+    # Paris variations
+    "paris, france": "paris",
+    "paris, fr": "paris",
+
+    # Dublin variations
+    "dublin, ireland": "dublin",
+    "dublin, ie": "dublin",
+
+    # Zurich variations
+    "zürich": "zurich",
+    "zurich, switzerland": "zurich",
+    "zürich, switzerland": "zurich",
+
+    # Munich variations
+    "münchen": "munich",
+    "munich, germany": "munich",
+    "münchen, germany": "munich",
+
+    # Stockholm variations
+    "stockholm, sweden": "stockholm",
+
+    # Barcelona variations
+    "barcelona, spain": "barcelona",
+
+    # Copenhagen variations
+    "copenhagen, denmark": "copenhagen",
+    "københavn": "copenhagen",
+}
+
+
+# ============================================
+# MIDDLE EAST CITIES
+# ============================================
+
+MIDDLE_EAST_TARGET_CITIES = [
+    # Top Tech Hubs
+    "dubai",
+    "tel aviv",
+    "abu dhabi",
+    "riyadh",
+    "doha",
+
+    # Other Tech Cities
+    "amman",
+    "cairo",
+    "beirut",
+    "muscat",
+    "kuwait city",
+    "manama",
+]
+
+MIDDLE_EAST_CITY_TO_COUNTRY = {
+    "dubai": "United Arab Emirates",
+    "abu dhabi": "United Arab Emirates",
+    "tel aviv": "Israel",
+    "riyadh": "Saudi Arabia",
+    "doha": "Qatar",
+    "amman": "Jordan",
+    "cairo": "Egypt",
+    "beirut": "Lebanon",
+    "muscat": "Oman",
+    "kuwait city": "Kuwait",
+    "manama": "Bahrain",
+}
+
+MIDDLE_EAST_CITY_NORMALIZER = {
+    "dubai, uae": "dubai",
+    "dubai, united arab emirates": "dubai",
+    "tel aviv, israel": "tel aviv",
+    "tel-aviv": "tel aviv",
+    "telaviv": "tel aviv",
+    "abu dhabi, uae": "abu dhabi",
+    "riyadh, saudi arabia": "riyadh",
+    "doha, qatar": "doha",
+    "cairo, egypt": "cairo",
+}
+
+
+# ============================================
+# ASIA CITIES (EXCLUDING INDIA)
+# ============================================
+
+ASIA_TARGET_CITIES = [
+    # Top Tech Hubs
+    "singapore",
+    "tokyo",
+    "hong kong",
+    "seoul",
+    "shenzhen",
+    "shanghai",
+    "beijing",
+
+    # Growing Tech Cities
+    "taipei",
+    "jakarta",
+    "kuala lumpur",
+    "bangkok",
+    "ho chi minh city",
+    "manila",
+    "hanoi",
+    "osaka",
+    "kyoto",
+    "busan",
+    "guangzhou",
+    "hangzhou",
+]
+
+ASIA_CITY_TO_COUNTRY = {
+    "singapore": "Singapore",
+    "tokyo": "Japan",
+    "osaka": "Japan",
+    "kyoto": "Japan",
+    "hong kong": "Hong Kong",
+    "seoul": "South Korea",
+    "busan": "South Korea",
+    "shenzhen": "China",
+    "shanghai": "China",
+    "beijing": "China",
+    "guangzhou": "China",
+    "hangzhou": "China",
+    "taipei": "Taiwan",
+    "jakarta": "Indonesia",
+    "kuala lumpur": "Malaysia",
+    "bangkok": "Thailand",
+    "ho chi minh city": "Vietnam",
+    "hanoi": "Vietnam",
+    "manila": "Philippines",
+}
+
+ASIA_CITY_NORMALIZER = {
+    "singapore, singapore": "singapore",
+    "tokyo, japan": "tokyo",
+    "hong kong, china": "hong kong",
+    "hongkong": "hong kong",
+    "seoul, south korea": "seoul",
+    "seoul, korea": "seoul",
+    "shenzhen, china": "shenzhen",
+    "shanghai, china": "shanghai",
+    "beijing, china": "beijing",
+    "taipei, taiwan": "taipei",
+    "kuala lumpur, malaysia": "kuala lumpur",
+    "kl": "kuala lumpur",
+    "bangkok, thailand": "bangkok",
+    "ho chi minh city, vietnam": "ho chi minh city",
+    "saigon": "ho chi minh city",
+    "hcmc": "ho chi minh city",
+}
+
+
+# ============================================
+# AUSTRALIA CITIES
+# ============================================
+
+AUSTRALIA_TARGET_CITIES = [
+    "sydney",
+    "melbourne",
+    "brisbane",
+    "perth",
+    "adelaide",
+    "canberra",
+    "auckland",  # New Zealand - grouped with Australia
+    "wellington",
+]
+
+AUSTRALIA_CITY_TO_COUNTRY = {
+    "sydney": "Australia",
+    "melbourne": "Australia",
+    "brisbane": "Australia",
+    "perth": "Australia",
+    "adelaide": "Australia",
+    "canberra": "Australia",
+    "auckland": "New Zealand",
+    "wellington": "New Zealand",
+}
+
+AUSTRALIA_CITY_NORMALIZER = {
+    "sydney, australia": "sydney",
+    "melbourne, australia": "melbourne",
+    "brisbane, australia": "brisbane",
+    "perth, australia": "perth",
+    "auckland, new zealand": "auckland",
+    "wellington, new zealand": "wellington",
+}
+
+
+# ============================================
+# UNIFIED LOCATION PARSER
+# ============================================
+
+def get_city_country(city: str) -> tuple:
+    """Get country for a city from any region."""
+    city_lower = city.lower().strip()
+
+    if city_lower in US_CITY_TO_STATE:
+        return city_lower, "United States"
+    if city_lower in INDIA_CITY_TO_STATE:
+        return city_lower, "India"
+    if city_lower in EUROPE_CITY_TO_COUNTRY:
+        return city_lower, EUROPE_CITY_TO_COUNTRY[city_lower]
+    if city_lower in MIDDLE_EAST_CITY_TO_COUNTRY:
+        return city_lower, MIDDLE_EAST_CITY_TO_COUNTRY[city_lower]
+    if city_lower in ASIA_CITY_TO_COUNTRY:
+        return city_lower, ASIA_CITY_TO_COUNTRY[city_lower]
+    if city_lower in AUSTRALIA_CITY_TO_COUNTRY:
+        return city_lower, AUSTRALIA_CITY_TO_COUNTRY[city_lower]
+
+    return city_lower, None
+
+
+def parse_europe_location(location_raw: str) -> Optional[dict]:
+    """Parse location string and extract Europe city/country if valid."""
+    if not location_raw:
+        return None
+
+    location_lower = location_raw.lower().strip()
+
+    for city in EUROPE_TARGET_CITIES:
+        if city in location_lower:
+            return {
+                "city": city.title(),
+                "country": EUROPE_CITY_TO_COUNTRY.get(city),
+            }
+
+    normalized = EUROPE_CITY_NORMALIZER.get(location_lower)
+    if normalized:
+        return {
+            "city": normalized.title(),
+            "country": EUROPE_CITY_TO_COUNTRY.get(normalized),
+        }
+
+    return None
+
+
+def parse_middle_east_location(location_raw: str) -> Optional[dict]:
+    """Parse location string and extract Middle East city/country if valid."""
+    if not location_raw:
+        return None
+
+    location_lower = location_raw.lower().strip()
+
+    for city in MIDDLE_EAST_TARGET_CITIES:
+        if city in location_lower:
+            return {
+                "city": city.title(),
+                "country": MIDDLE_EAST_CITY_TO_COUNTRY.get(city),
+            }
+
+    normalized = MIDDLE_EAST_CITY_NORMALIZER.get(location_lower)
+    if normalized:
+        return {
+            "city": normalized.title(),
+            "country": MIDDLE_EAST_CITY_TO_COUNTRY.get(normalized),
+        }
+
+    return None
+
+
+def parse_asia_location(location_raw: str) -> Optional[dict]:
+    """Parse location string and extract Asia city/country if valid."""
+    if not location_raw:
+        return None
+
+    location_lower = location_raw.lower().strip()
+
+    for city in ASIA_TARGET_CITIES:
+        if city in location_lower:
+            return {
+                "city": city.title(),
+                "country": ASIA_CITY_TO_COUNTRY.get(city),
+            }
+
+    normalized = ASIA_CITY_NORMALIZER.get(location_lower)
+    if normalized:
+        return {
+            "city": normalized.title(),
+            "country": ASIA_CITY_TO_COUNTRY.get(normalized),
+        }
+
+    return None
+
+
+def parse_australia_location(location_raw: str) -> Optional[dict]:
+    """Parse location string and extract Australia/NZ city/country if valid."""
+    if not location_raw:
+        return None
+
+    location_lower = location_raw.lower().strip()
+
+    for city in AUSTRALIA_TARGET_CITIES:
+        if city in location_lower:
+            return {
+                "city": city.title(),
+                "country": AUSTRALIA_CITY_TO_COUNTRY.get(city),
+            }
+
+    normalized = AUSTRALIA_CITY_NORMALIZER.get(location_lower)
+    if normalized:
+        return {
+            "city": normalized.title(),
+            "country": AUSTRALIA_CITY_TO_COUNTRY.get(normalized),
+        }
+
+    return None
+
 # State abbreviations
 STATE_ABBREVIATIONS = {
     "ca": "California",
@@ -619,7 +1072,7 @@ def parse_india_location(location_raw: str) -> Optional[dict]:
 
 
 def parse_location(location_raw: str) -> Optional[dict]:
-    """Parse location string and extract city/state/country if valid (US or India)."""
+    """Parse location string and extract city/state/country if valid (all regions)."""
     if not location_raw:
         return None
 
@@ -633,6 +1086,26 @@ def parse_location(location_raw: str) -> Optional[dict]:
     india_result = parse_india_location(location_raw)
     if india_result:
         return india_result
+
+    # Try Europe
+    europe_result = parse_europe_location(location_raw)
+    if europe_result:
+        return europe_result
+
+    # Try Middle East
+    me_result = parse_middle_east_location(location_raw)
+    if me_result:
+        return me_result
+
+    # Try Asia
+    asia_result = parse_asia_location(location_raw)
+    if asia_result:
+        return asia_result
+
+    # Try Australia/NZ
+    aus_result = parse_australia_location(location_raw)
+    if aus_result:
+        return aus_result
 
     return None
 

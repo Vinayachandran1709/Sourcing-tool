@@ -19,23 +19,14 @@ from models import GithubDeveloper
 from config import GITHUB_TOKEN
 from location_parser import (
     US_TARGET_CITIES, US_CITY_TO_STATE, parse_us_location,
-    INDIA_TARGET_CITIES, INDIA_CITY_TO_STATE, parse_india_location, parse_location
+    INDIA_TARGET_CITIES, INDIA_CITY_TO_STATE, parse_india_location,
+    EUROPE_TARGET_CITIES, EUROPE_CITY_TO_COUNTRY,
+    MIDDLE_EAST_TARGET_CITIES, MIDDLE_EAST_CITY_TO_COUNTRY,
+    ASIA_TARGET_CITIES, ASIA_CITY_TO_COUNTRY,
+    AUSTRALIA_TARGET_CITIES, AUSTRALIA_CITY_TO_COUNTRY,
+    parse_location, get_city_country
 )
 from role_detection_service import detect_all_roles
-
-# Priority cities get indexed 3x more often (appear 3 times in rotation)
-INDIA_PRIORITY_CITIES = [
-    "bangalore", "mumbai", "hyderabad", "delhi",
-    "pune", "chennai", "gurgaon", "noida", "kochi", "kolkata",
-]
-
-# Build a weighted city list: priority cities appear 3x, others appear 1x
-INDIA_WEIGHTED_CITIES = []
-for city in INDIA_TARGET_CITIES:
-    if city in INDIA_PRIORITY_CITIES:
-        INDIA_WEIGHTED_CITIES.extend([city, city, city])
-    else:
-        INDIA_WEIGHTED_CITIES.append(city)
 
 logger = logging.getLogger(__name__)
 
@@ -122,57 +113,123 @@ SEARCH_STRATEGIES = [
 
 # Track which strategy/city was used last (persists across runs via DB)
 class IndexerState:
-    """Track indexer state to rotate through strategies, cities, and countries."""
+    """
+    Track indexer state to rotate through strategies, cities, and regions.
+
+    PRIORITY ORDER:
+    1. Europe (40% of runs) - TOP PRIORITY
+    2. India (30% of runs) - Building India database
+    3. Asia + Middle East + Australia (20% of runs)
+    4. US (10% of runs) - Already have 65k profiles
+    """
 
     def __init__(self):
         self.current_strategy_index = 0
+
+        # City indices for each region
         self.us_city_index = 0
         self.india_city_index = 0
-        self.current_country = "US"  # Alternate between "US" and "India"
+        self.europe_city_index = 0
+        self.middle_east_city_index = 0
+        self.asia_city_index = 0
+        self.australia_city_index = 0
 
-    def get_next_country(self) -> str:
+        # Region rotation counter
+        self.run_counter = 0
+
+        # Region configuration
+        self.regions = {
+            "Europe": {
+                "cities": EUROPE_TARGET_CITIES,
+                "city_to_country": EUROPE_CITY_TO_COUNTRY,
+                "priority": 1,
+            },
+            "India": {
+                "cities": INDIA_TARGET_CITIES,
+                "city_to_country": {c: "India" for c in INDIA_TARGET_CITIES},
+                "priority": 2,
+            },
+            "Asia": {
+                "cities": ASIA_TARGET_CITIES,
+                "city_to_country": ASIA_CITY_TO_COUNTRY,
+                "priority": 3,
+            },
+            "Middle East": {
+                "cities": MIDDLE_EAST_TARGET_CITIES,
+                "city_to_country": MIDDLE_EAST_CITY_TO_COUNTRY,
+                "priority": 3,
+            },
+            "Australia": {
+                "cities": AUSTRALIA_TARGET_CITIES,
+                "city_to_country": AUSTRALIA_CITY_TO_COUNTRY,
+                "priority": 3,
+            },
+            "United States": {
+                "cities": US_TARGET_CITIES,
+                "city_to_country": {c: "United States" for c in US_TARGET_CITIES},
+                "priority": 4,
+            },
+        }
+
+    def get_next_region(self) -> str:
         """
-        Returns which country to index.
+        Get next region based on priority distribution.
 
-        TEMPORARY: India-only mode until we have enough Indian profiles.
-        Set INDIA_ONLY_MODE = False to resume alternating between US and India.
+        Distribution per 10 runs:
+        - Europe: 4 runs (40%)
+        - India: 3 runs (30%)
+        - Asia/Middle East/Australia: 2 runs (20%)
+        - US: 1 run (10%)
         """
-        INDIA_ONLY_MODE = True  # Set to False after 2 weeks to resume US + India alternating
+        self.run_counter += 1
+        cycle_position = self.run_counter % 10
 
-        if INDIA_ONLY_MODE:
+        if cycle_position in [1, 2, 3, 4]:
+            return "Europe"
+        elif cycle_position in [5, 6, 7]:
             return "India"
+        elif cycle_position in [8, 9]:
+            # Rotate between Asia, Middle East, Australia
+            sub_regions = ["Asia", "Middle East", "Australia"]
+            return sub_regions[(self.run_counter // 10) % 3]
+        else:  # cycle_position == 0
+            return "United States"
 
-        # Normal alternating mode
-        country = self.current_country
-        self.current_country = "India" if self.current_country == "US" else "US"
-        return country
+    def get_next_cities(self, region: str, count: int = 8) -> list[str]:
+        """Get next N cities for the specified region."""
+        if region == "Europe":
+            cities_list = EUROPE_TARGET_CITIES
+            start_idx = self.europe_city_index
+            self.europe_city_index = (self.europe_city_index + count) % len(cities_list)
+        elif region == "India":
+            cities_list = INDIA_TARGET_CITIES
+            start_idx = self.india_city_index
+            self.india_city_index = (self.india_city_index + count) % len(cities_list)
+        elif region == "Asia":
+            cities_list = ASIA_TARGET_CITIES
+            start_idx = self.asia_city_index
+            self.asia_city_index = (self.asia_city_index + count) % len(cities_list)
+        elif region == "Middle East":
+            cities_list = MIDDLE_EAST_TARGET_CITIES
+            start_idx = self.middle_east_city_index
+            self.middle_east_city_index = (self.middle_east_city_index + count) % len(cities_list)
+        elif region == "Australia":
+            cities_list = AUSTRALIA_TARGET_CITIES
+            start_idx = self.australia_city_index
+            self.australia_city_index = (self.australia_city_index + count) % len(cities_list)
+        else:  # United States
+            cities_list = US_TARGET_CITIES
+            start_idx = self.us_city_index
+            self.us_city_index = (self.us_city_index + count) % len(cities_list)
 
-    def get_next_cities(self, country: str, count: int = 8) -> list[str]:  # Increased from 5 to 8
-        """Get next N cities for the specified country.
-        India uses a weighted list where priority cities appear 3x more often.
-        Deduplicates within a single batch so the same city isn't searched twice per run.
-        """
-        if country == "India":
-            cities = []
-            seen = set()
-            idx = self.india_city_index
-            while len(cities) < count:
-                city = INDIA_WEIGHTED_CITIES[idx % len(INDIA_WEIGHTED_CITIES)]
-                if city not in seen:
-                    cities.append(city)
-                    seen.add(city)
-                idx += 1
-            self.india_city_index = idx % len(INDIA_WEIGHTED_CITIES)
-            return cities
-        else:
-            cities = []
-            for i in range(count):
-                idx = (self.us_city_index + i) % len(US_TARGET_CITIES)
-                cities.append(US_TARGET_CITIES[idx])
-            self.us_city_index = (self.us_city_index + count) % len(US_TARGET_CITIES)
-            return cities
+        cities = []
+        for i in range(count):
+            idx = (start_idx + i) % len(cities_list)
+            cities.append(cities_list[idx])
 
-    def get_next_strategies(self, count: int = 5) -> list[dict]:  # Increased from 3 to 5
+        return cities
+
+    def get_next_strategies(self, count: int = 5) -> list[dict]:
         """Get next N strategies to use."""
         strategies = []
         for i in range(count):
@@ -180,6 +237,13 @@ class IndexerState:
             strategies.append(SEARCH_STRATEGIES[idx])
         self.current_strategy_index = (self.current_strategy_index + count) % len(SEARCH_STRATEGIES)
         return strategies
+
+    def get_country_for_city(self, city: str, region: str) -> str:
+        """Get country name for a city in a region."""
+        city_lower = city.lower()
+        region_config = self.regions.get(region, {})
+        city_to_country = region_config.get("city_to_country", {})
+        return city_to_country.get(city_lower, region)
 
 
 # Global state (resets on server restart, but that's fine)
@@ -286,19 +350,20 @@ def process_and_upsert_user(username: str, city: str, country_hint: str, db: Ses
     # Fetch repos
     languages, total_stars, total_forks = fetch_user_repos(username)
 
-    # Parse location - handles both US and India
+    # Parse location - handles all regions
     location_raw = details.get("location", "")
     location_info = parse_location(location_raw) or {}
 
-    # Determine country
-    if location_info:
-        location_country = location_info.get("country", country_hint)
+    # Determine country from location or use hint
+    if location_info and location_info.get("country"):
+        location_country = location_info.get("country")
         location_city = location_info.get("city", city)
-        location_state = location_info.get("state")
+        location_state = location_info.get("state")  # May be None for non-US
     else:
-        location_country = country_hint  # Use the hint from search
-        location_city = city
-        location_state = US_CITY_TO_STATE.get(city) if country_hint == "United States" else INDIA_CITY_TO_STATE.get(city)
+        # Use the hint from search
+        location_country = country_hint
+        location_city = city.title()
+        location_state = None
 
     # Detect roles (multi-role detection)
     primary_role, all_roles = detect_all_roles(details.get("bio", ""), languages)
@@ -412,7 +477,7 @@ def process_and_upsert_user(username: str, city: str, country_hint: str, db: Ses
 def run_perpetual_index():
     """
     Main function called by scheduler every 1 hour.
-    Alternates between US and India, discovers new developers and updates existing ones.
+    Rotates through regions with Europe as priority.
     """
     start_time = time.time()
     logger.info("🔄 Starting perpetual indexer run...")
@@ -430,14 +495,13 @@ def run_perpetual_index():
 
         existing_usernames = set()
 
-        # Get country for this run (alternates between US and India)
-        country = indexer_state.get_next_country()
-        country_full = "United States" if country == "US" else "India"
+        # Get region for this run (priority-based rotation)
+        region = indexer_state.get_next_region()
 
-        cities = indexer_state.get_next_cities(country, 8)  # 8 cities per run
-        strategies = indexer_state.get_next_strategies(5)   # 5 strategies per run
+        cities = indexer_state.get_next_cities(region, 8)
+        strategies = indexer_state.get_next_strategies(5)
 
-        logger.info(f"   Country: {country}")
+        logger.info(f"   🌍 Region: {region}")
         logger.info(f"   Cities: {cities}")
         logger.info(f"   Strategies: {[s['name'] for s in strategies]}")
 
@@ -446,7 +510,10 @@ def run_perpetual_index():
                 if processed >= MAX_PROFILES_PER_RUN:
                     break
 
-                logger.info(f"   Searching {city} ({country}) with {strategy['name']}...")
+                # Get country for this city
+                country_for_city = indexer_state.get_country_for_city(city, region)
+
+                logger.info(f"   Searching {city} ({country_for_city}) with {strategy['name']}...")
 
                 for page in range(1, 6):
                     if processed >= MAX_PROFILES_PER_RUN:
@@ -465,7 +532,7 @@ def run_perpetual_index():
                             continue
 
                         try:
-                            is_new = process_and_upsert_user(username, city, country_full, db, existing_usernames)
+                            is_new = process_and_upsert_user(username, city, country_for_city, db, existing_usernames)
                             processed += 1
                             if is_new:
                                 new_profiles += 1
@@ -496,7 +563,7 @@ def run_perpetual_index():
         db.close()
 
     logger.info(f"✅ Perpetual indexer complete")
-    logger.info(f"   Country: {country}")
+    logger.info(f"   🌍 Region: {region}")
     logger.info(f"   Processed: {processed}")
     logger.info(f"   New (in-memory dedup): {new_profiles}")
     logger.info(f"   New (actual DB inserts): {db_inserts}")
