@@ -1,4 +1,5 @@
 import resend
+import html as html_module
 from typing import List, Dict
 import os
 from datetime import datetime
@@ -14,7 +15,9 @@ class EmailService:
         # Get first name only
         full_name = profile.get('name', '') or profile.get('github_username', 'there')
         first_name = full_name.split()[0] if full_name else 'there'
-        
+        # Escape to prevent XSS when inserted into HTML email body
+        first_name = html_module.escape(first_name)
+
         return template.replace('{{name}}', first_name)
     
     @staticmethod

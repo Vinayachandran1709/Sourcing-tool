@@ -222,6 +222,9 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     role: initialFilters.role || '',
     location: initialFilters.location || '',
     languages: initialFilters.languages || [],
+    minScore: initialFilters.minScore || 0,
+    hasEmail: initialFilters.hasEmail || false,
+    minExperience: initialFilters.minExperience || 0,
   });
   const [activeSpecLabel, setActiveSpecLabel] = useState(null);
   const [showAllLanguages, setShowAllLanguages] = useState(false);
@@ -250,7 +253,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   };
 
   const handleReset = () => {
-    setFilters({ role: '', location: '', languages: [] });
+    setFilters({ role: '', location: '', languages: [], minScore: 0, hasEmail: false, minExperience: 0 });
     setActiveSpecLabel(null);
     setShowAllLanguages(false);
     if (onReset) {
@@ -263,10 +266,20 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
       role: filters.role || null,
       location: filters.location || null,
       languages: filters.languages.length > 0 ? filters.languages : null,
+      minScore: filters.minScore || 0,
+      hasEmail: filters.hasEmail || false,
+      minExperience: filters.minExperience || 0,
     });
   };
 
-  const activeFilterCount = [filters.role, filters.location, filters.languages.length > 0].filter(Boolean).length;
+  const activeFilterCount = [
+    filters.role,
+    filters.location,
+    filters.languages.length > 0,
+    filters.minScore > 0,
+    filters.hasEmail,
+    filters.minExperience > 0,
+  ].filter(Boolean).length;
 
   return (
     <div style={styles.card}>
@@ -314,6 +327,59 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
                 </option>
               ))}
             </select>
+          </div>
+        </div>
+
+        {/* Score, Experience, Email filters — second row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '20px', marginTop: '20px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={styles.fieldLabel}>Min Score</label>
+            <select
+              value={filters.minScore}
+              onChange={(e) => setFilters({ ...filters, minScore: parseInt(e.target.value) })}
+              style={styles.select}
+            >
+              <option value={0}>Any Score</option>
+              <option value={30}>30+ (Junior+)</option>
+              <option value={50}>50+ (Mid-Level+)</option>
+              <option value={70}>70+ (Senior+)</option>
+              <option value={85}>85+ (Expert)</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={styles.fieldLabel}>Experience</label>
+            <select
+              value={filters.minExperience}
+              onChange={(e) => setFilters({ ...filters, minExperience: parseInt(e.target.value) })}
+              style={styles.select}
+            >
+              <option value={0}>Any Experience</option>
+              <option value={1}>1+ years</option>
+              <option value={3}>3+ years</option>
+              <option value={5}>5+ years</option>
+              <option value={8}>8+ years</option>
+              <option value={10}>10+ years</option>
+            </select>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column' }}>
+            <label style={styles.fieldLabel}>Contact</label>
+            <label style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '12px 14px', border: '1px solid #e5e7eb', borderRadius: '10px',
+              backgroundColor: filters.hasEmail ? '#FFF3ED' : '#fafafa',
+              cursor: 'pointer', fontSize: '14px', color: '#1f2937',
+              transition: 'all 0.2s',
+            }}>
+              <input
+                type="checkbox"
+                checked={filters.hasEmail}
+                onChange={(e) => setFilters({ ...filters, hasEmail: e.target.checked })}
+                style={{ accentColor: '#FF6B35', width: '16px', height: '16px' }}
+              />
+              Has email only
+            </label>
           </div>
         </div>
 

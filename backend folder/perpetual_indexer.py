@@ -347,6 +347,10 @@ def process_and_upsert_user(username: str, city: str, country_hint: str, db: Ses
     if not details:
         return False
 
+    # Skip organizations
+    if details.get("type") == "Organization":
+        return False
+
     # Fetch repos
     languages, total_stars, total_forks = fetch_user_repos(username)
 
@@ -450,6 +454,7 @@ def process_and_upsert_user(username: str, city: str, country_hint: str, db: Ses
         last_active_at=updated_at,
         developer_score=score,
         source="perpetual_indexer",
+        account_type=details.get("type", "User"),
     )
 
     stmt = stmt.on_conflict_do_update(
@@ -465,6 +470,7 @@ def process_and_upsert_user(username: str, city: str, country_hint: str, db: Ses
             "detected_roles": stmt.excluded.detected_roles,
             "developer_score": stmt.excluded.developer_score,
             "last_active_at": stmt.excluded.last_active_at,
+            "account_type": stmt.excluded.account_type,
             "updated_at": datetime.now(timezone.utc),
         }
     )
@@ -529,6 +535,10 @@ def run_perpetual_index():
 
                         username = user.get("login")
                         if not username:
+                            continue
+
+                        # Skip organization accounts
+                        if user.get("type") == "Organization":
                             continue
 
                         try:

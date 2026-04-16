@@ -18,6 +18,7 @@ from datetime import datetime, timezone, timedelta
 import logging
 import sys
 import asyncio
+import math
 
 # ⭐ CONFIGURE LOGGING (Windows-compatible, no emojis in console)
 logging.basicConfig(
@@ -233,6 +234,36 @@ async def startup_event():
                 UPDATE profiles SET refresh_category = 'moderate' WHERE contributions_last_year >= 100 AND contributions_last_year < 300 AND refresh_category = 'dormant';
             """))
 
+            # Add account_type and estimated_experience_years to github_developers
+            conn.execute(sa_text("""
+                ALTER TABLE github_developers ADD COLUMN IF NOT EXISTS account_type VARCHAR(20) DEFAULT 'User';
+                ALTER TABLE github_developers ADD COLUMN IF NOT EXISTS estimated_experience_years INTEGER DEFAULT 0;
+                CREATE INDEX IF NOT EXISTS idx_github_developers_account_type ON github_developers(account_type);
+            """))
+
+            # Backfill known org accounts using heuristics
+            conn.execute(sa_text("""
+                UPDATE github_developers SET account_type = 'Organization'
+                WHERE (account_type IS NULL OR account_type = 'User')
+                AND (
+                    bio ILIKE '%organization%'
+                    OR bio ILIKE '%open source org%'
+                    OR name ILIKE '%Inc%'
+                    OR name ILIKE '%Corp%'
+                    OR name ILIKE '%Labs%'
+                    OR name ILIKE '%Foundation%'
+                    OR name ILIKE '%Technologies%'
+                    OR (followers > 5000 AND public_repos > 100 AND email IS NULL)
+                );
+            """))
+
+            # Backfill estimated_experience_years from github_created_at
+            conn.execute(sa_text("""
+                UPDATE github_developers
+                SET estimated_experience_years = EXTRACT(YEAR FROM NOW()) - EXTRACT(YEAR FROM github_created_at)
+                WHERE github_created_at IS NOT NULL AND (estimated_experience_years IS NULL OR estimated_experience_years = 0);
+            """))
+
             conn.commit()
         logger.info("✅ Payment tables verified/created")
     except Exception as e:
@@ -365,7 +396,9 @@ class SearchRequest(BaseModel):
     languages: Optional[List[str]] = None
     min_score: Optional[int] = 0
     page: Optional[int] = 1
-    per_page: Optional[int] = 50
+    per_page: Optional[int] = 20
+    has_email: Optional[bool] = None
+    min_experience: Optional[int] = None
 
 class ProfileResponse(BaseModel):
     """Response model for profile data"""
@@ -543,6 +576,71 @@ async def search_profiles(
         logger.info(f"Search complete: {total_sent} total profiles")
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+# ===== PAGINATED SEARCH ENDPOINT =====
+
+@app.post("/api/search")
+@limiter.limit("30/minute")
+async def search_paginated(
+    request: Request,
+    search: SearchRequest,
+    current_user: CurrentUser,
+    db: DbSession,
+):
+    """Paginated search for developer profiles — returns instant results."""
+    user_id = current_user.id
+
+    # Check usage limits
+    try:
+        UsageService.check_limit(db, user_id, "search")
+    except HTTPException as e:
+        raise e
+
+    from archive_search_service import search_developers, count_developers, developer_to_dict
+
+    role = search.role
+    location = search.location
+    languages = search.languages
+    min_score = search.min_score or 0
+    page = search.page or 1
+    per_page = search.per_page or 20
+    has_email = getattr(search, 'has_email', None)
+    min_experience = getattr(search, 'min_experience', None)
+
+    # Get total count
+    total = count_developers(
+        db, role=role, location=location, languages=languages, min_score=min_score,
+        has_email=has_email, min_experience=min_experience
+    )
+
+    # Get paginated results
+    offset = (page - 1) * per_page
+    results = search_developers(
+        db, role=role, location=location, languages=languages,
+        limit=per_page, offset=offset, min_score=min_score,
+        has_email=has_email, min_experience=min_experience
+    )
+
+    # Convert to dicts
+    profiles = []
+    for dev in results:
+        d = developer_to_dict(dev)
+        # Show first name only for non-unlocked profiles
+        if d.get("name"):
+            d["name"] = d["name"].split()[0] if d["name"] else dev.github_username
+        profiles.append(d)
+
+    # Log usage
+    UsageService.log_usage(db, user_id, "search", {"role": role, "location": location})
+
+    return {
+        "profiles": profiles,
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": math.ceil(total / per_page) if total > 0 else 0,
+    }
 
 
 # ===== GET ALL PROFILES =====
@@ -833,7 +931,16 @@ async def send_bulk_emails_endpoint(
     except HTTPException:
         raise
     except Exception as e:
-        db.rollback()
+        # The quota reservation was already committed, so rollback() won't undo it.
+        # Re-fetch the user and subtract the reserved count to restore their quota.
+        try:
+            db.rollback()
+            fresh_user = db.query(User).filter(User.id == current_user.id).first()
+            if fresh_user:
+                fresh_user.usage_emails_sent = max(0, (fresh_user.usage_emails_sent or 0) - reserved_count)
+                db.commit()
+        except Exception as restore_err:
+            logger.error(f"Failed to restore email quota after bulk send error: {restore_err}")
         logger.error(f"Bulk email error: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=str(e))
 

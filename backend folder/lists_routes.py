@@ -90,7 +90,7 @@ def add_profile_to_list(
 ):
     """Add a profile to a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
-    result = ListsService.add_profile_to_list(db, list_id, request.profile_id, request.notes)
+    result = ListsService.add_profile_to_list(db, list_id, request.profile_id, user_id, request.notes)
     return result
 
 
@@ -103,7 +103,7 @@ def remove_profile_from_list(
 ):
     """Remove a profile from a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
-    result = ListsService.remove_profile_from_list(db, list_id, profile_id)
+    result = ListsService.remove_profile_from_list(db, list_id, profile_id, user_id)
     return result
 
 
@@ -150,7 +150,7 @@ def update_profile_notes(
 ):
     """Update notes for a profile in a list"""
     user_id = current_user.id  # ✅ CHANGED ["id"] to .id
-    result = ListsService.update_profile_notes(db, list_id, profile_id, request.notes)
+    result = ListsService.update_profile_notes(db, list_id, profile_id, request.notes, user_id)
     return result
 
 

@@ -6,6 +6,7 @@ Primary search source - fast, no rate limits.
 
 import logging
 from typing import List, Optional, Generator
+from datetime import datetime, timezone, timedelta
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func
 
@@ -83,6 +84,8 @@ def search_developers(
     limit: int = 1000,
     offset: int = 0,
     min_score: int = 0,
+    has_email: Optional[bool] = None,
+    min_experience: Optional[int] = None,
 ) -> list[GithubDeveloper]:
     """
     Search github_developers table with role and location filters.
@@ -94,11 +97,21 @@ def search_developers(
         limit: Max results to return
         offset: Pagination offset
         min_score: Minimum developer score filter
+        has_email: If True, only return profiles with an email
+        min_experience: Minimum years of GitHub account age
 
     Returns:
         List of GithubDeveloper objects sorted by score DESC
     """
     query = db.query(GithubDeveloper)
+
+    # Filter out organization accounts
+    query = query.filter(
+        or_(
+            GithubDeveloper.account_type == "User",
+            GithubDeveloper.account_type.is_(None)
+        )
+    )
 
     # Location filter
     if location:
@@ -154,6 +167,21 @@ def search_developers(
     if min_score > 0:
         query = query.filter(GithubDeveloper.developer_score >= min_score)
 
+    # Email availability filter
+    if has_email is True:
+        query = query.filter(
+            GithubDeveloper.email.isnot(None),
+            GithubDeveloper.email != ""
+        )
+
+    # Experience filter (based on GitHub account age)
+    if min_experience and min_experience > 0:
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=min_experience * 365)
+        query = query.filter(
+            GithubDeveloper.github_created_at.isnot(None),
+            GithubDeveloper.github_created_at <= cutoff_date
+        )
+
     # Order by score (best first)
     query = query.order_by(GithubDeveloper.developer_score.desc())
 
@@ -175,6 +203,14 @@ def search_developers_batched(
     Yield developers in batches for streaming. No hard cap — returns all matches.
     """
     query = db.query(GithubDeveloper)
+
+    # Filter out organization accounts
+    query = query.filter(
+        or_(
+            GithubDeveloper.account_type == "User",
+            GithubDeveloper.account_type.is_(None)
+        )
+    )
 
     # Location filter
     if location:
@@ -241,9 +277,19 @@ def count_developers(
     location: Optional[str] = None,
     languages: Optional[List[str]] = None,
     min_score: int = 0,
+    has_email: Optional[bool] = None,
+    min_experience: Optional[int] = None,
 ) -> int:
     """Count developers matching filters."""
     query = db.query(func.count(GithubDeveloper.id))
+
+    # Filter out organization accounts
+    query = query.filter(
+        or_(
+            GithubDeveloper.account_type == "User",
+            GithubDeveloper.account_type.is_(None)
+        )
+    )
 
     # Location filter
     if location:
@@ -290,6 +336,21 @@ def count_developers(
     if min_score > 0:
         query = query.filter(GithubDeveloper.developer_score >= min_score)
 
+    # Email availability filter
+    if has_email is True:
+        query = query.filter(
+            GithubDeveloper.email.isnot(None),
+            GithubDeveloper.email != ""
+        )
+
+    # Experience filter (based on GitHub account age)
+    if min_experience and min_experience > 0:
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=min_experience * 365)
+        query = query.filter(
+            GithubDeveloper.github_created_at.isnot(None),
+            GithubDeveloper.github_created_at <= cutoff_date
+        )
+
     return query.scalar() or 0
 
 
@@ -315,6 +376,19 @@ def get_role_stats(db: Session) -> dict:
 
 def developer_to_dict(dev: GithubDeveloper) -> dict:
     """Convert GithubDeveloper to API response dict."""
+    # Build location string safely (avoid "city, None")
+    location_parts = [p for p in [dev.location_city, dev.location_state] if p]
+    location_str = dev.location_raw or (", ".join(location_parts) if location_parts else None)
+
+    # Build languages_data dict for ProfileCard/ProfileDetailModal
+    # all_languages is stored as {"Python": 1, ...} or None
+    languages_data = dev.all_languages or {}
+    if not languages_data and dev.primary_languages:
+        # Fallback: synthesise equal-weight dict from primary_languages array
+        languages_data = {lang: 1 for lang in dev.primary_languages}
+
+    last_active_iso = dev.last_active_at.isoformat() if dev.last_active_at else None
+
     return {
         "id": dev.id,
         "github_username": dev.github_username,
@@ -323,18 +397,29 @@ def developer_to_dict(dev: GithubDeveloper) -> dict:
         "email": dev.email,
         "avatar_url": dev.avatar_url,
         "profile_url": dev.profile_url,
-        "location": dev.location_raw or f"{dev.location_city}, {dev.location_state}",
+        "location": location_str,
         "location_city": dev.location_city,
         "location_state": dev.location_state,
         "languages": dev.primary_languages or [],
+        # languages_data: dict used by ProfileCard LanguageTags + ProfileDetailModal bars
+        "languages_data": languages_data,
         "detected_role": dev.detected_role,
         "detected_roles": dev.detected_roles or [],
         "public_repos": dev.public_repos,
         "followers": dev.followers,
         "total_stars": dev.total_stars,
+        "contributions_last_year": dev.contributions_last_year or 0,
         "developer_score": dev.developer_score,
-        "last_active_at": dev.last_active_at.isoformat() if dev.last_active_at else None,
-        # For compatibility with existing frontend
+        # Both field names used across modals
+        "last_active_at": last_active_iso,
+        "last_active_date": last_active_iso,
+        "github_created_at": dev.github_created_at.isoformat() if dev.github_created_at else None,
+        "estimated_experience_years": (
+            (datetime.now(timezone.utc).year - dev.github_created_at.year)
+            if dev.github_created_at else None
+        ),
+        "top_repos": None,  # Not stored in GithubDeveloper; modal skips when None
+        # Aliases for existing frontend compatibility
         "login": dev.github_username,
         "html_url": dev.profile_url,
         "score": dev.developer_score,

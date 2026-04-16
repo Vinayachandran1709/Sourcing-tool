@@ -93,7 +93,11 @@ def get_current_user(
             )
 
     # Check if subscription is active
+    # Cancelled users retain access until their next_billing_date (paid-up period)
     if user.subscription_status not in ['active', 'trialing', 'trial']:
+        if user.subscription_status == 'cancelled' and user.next_billing_date:
+            if datetime.now(timezone.utc) <= user.next_billing_date:
+                return user  # Still within paid period
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail={

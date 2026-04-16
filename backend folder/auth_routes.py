@@ -1,5 +1,6 @@
 from typing import Annotated
 import logging
+import html as html_module
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, EmailStr, validator
@@ -225,7 +226,7 @@ def forgot_password(request: Request, data: ForgotPasswordRequest, db: DbSession
                 <div style="text-align: center; margin-bottom: 30px;">
                     <h2 style="color: #1a1a1a; margin: 0;">Reset Your Password</h2>
                 </div>
-                <p>Hi {user.name},</p>
+                <p>Hi {html_module.escape(user.name)},</p>
                 <p>We received a request to reset your TalentBox password. Click the button below to set a new password:</p>
                 <div style="text-align: center; margin: 30px 0;">
                     <a href="{reset_link}" style="display: inline-block; padding: 14px 32px; background-color: #FF6B35; color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px;">
@@ -245,7 +246,6 @@ def forgot_password(request: Request, data: ForgotPasswordRequest, db: DbSession
                 to_email=user.email,
                 subject="Reset your TalentBox password",
                 body_html=html,
-                sender_email="noreply@talentbox.co",
                 sender_name="TalentBox",
             )
 

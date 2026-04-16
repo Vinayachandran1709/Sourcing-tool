@@ -1,4 +1,5 @@
 from typing import Annotated
+import html as html_module
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, field_validator
@@ -121,6 +122,16 @@ def _send_admin_notification(user: User, request: FeedbackRequest, timestamp):
 
     subject = f"[TalentBox Feedback] {category_labels.get(request.category, request.category)} from {user.email}"
 
+    # Escape all user-supplied values before inserting into HTML
+    safe_message = html_module.escape(request.message)
+    safe_name = html_module.escape(user.name or 'N/A')
+    safe_email = html_module.escape(user.email or 'N/A')
+    safe_company = html_module.escape(user.company or 'N/A')
+    safe_plan = html_module.escape(str(user.plan or 'N/A'))
+    safe_status = html_module.escape(str(user.subscription_status or 'N/A'))
+    safe_page_url = html_module.escape(request.page_url or 'N/A')
+    safe_browser = html_module.escape(request.browser_info or 'N/A')
+
     body_html = f"""
     <!DOCTYPE html>
     <html>
@@ -138,33 +149,33 @@ def _send_admin_notification(user: User, request: FeedbackRequest, timestamp):
             </tr>
             <tr style="border-bottom: 1px solid #e5e7eb;">
                 <td style="padding: 12px 0; font-weight: 600; color: #374151;">User Email</td>
-                <td style="padding: 12px 0; color: #1a1a1a;">{user.email}</td>
+                <td style="padding: 12px 0; color: #1a1a1a;">{safe_email}</td>
             </tr>
             <tr style="border-bottom: 1px solid #e5e7eb;">
                 <td style="padding: 12px 0; font-weight: 600; color: #374151;">User Name</td>
-                <td style="padding: 12px 0; color: #1a1a1a;">{user.name or 'N/A'}</td>
+                <td style="padding: 12px 0; color: #1a1a1a;">{safe_name}</td>
             </tr>
             <tr style="border-bottom: 1px solid #e5e7eb;">
                 <td style="padding: 12px 0; font-weight: 600; color: #374151;">Company</td>
-                <td style="padding: 12px 0; color: #1a1a1a;">{user.company or 'N/A'}</td>
+                <td style="padding: 12px 0; color: #1a1a1a;">{safe_company}</td>
             </tr>
             <tr style="border-bottom: 1px solid #e5e7eb;">
                 <td style="padding: 12px 0; font-weight: 600; color: #374151;">Plan</td>
-                <td style="padding: 12px 0; color: #1a1a1a;">{user.plan} ({user.subscription_status})</td>
+                <td style="padding: 12px 0; color: #1a1a1a;">{safe_plan} ({safe_status})</td>
             </tr>
             <tr style="border-bottom: 1px solid #e5e7eb;">
                 <td style="padding: 12px 0; font-weight: 600; color: #374151;">Page URL</td>
-                <td style="padding: 12px 0; color: #1a1a1a;">{request.page_url or 'N/A'}</td>
+                <td style="padding: 12px 0; color: #1a1a1a;">{safe_page_url}</td>
             </tr>
         </table>
 
         <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
             <h3 style="margin: 0 0 8px 0; color: #374151; font-size: 14px;">Message</h3>
-            <p style="margin: 0; color: #1a1a1a; white-space: pre-wrap;">{request.message}</p>
+            <p style="margin: 0; color: #1a1a1a; white-space: pre-wrap;">{safe_message}</p>
         </div>
 
         <div style="margin-top: 24px; padding-top: 16px; border-top: 1px solid #e5e7eb; color: #9ca3af; font-size: 12px;">
-            <p>Browser: {request.browser_info or 'N/A'}</p>
+            <p>Browser: {safe_browser}</p>
         </div>
     </body>
     </html>
@@ -175,7 +186,6 @@ def _send_admin_notification(user: User, request: FeedbackRequest, timestamp):
             to_email=os.getenv("ADMIN_EMAIL", "vinay@talentbox.co"),
             subject=subject,
             body_html=body_html,
-            sender_email="noreply@talentbox.co",
             sender_name="TalentBox Feedback",
         )
         if result["success"]:

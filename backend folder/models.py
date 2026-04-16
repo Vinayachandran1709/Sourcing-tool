@@ -171,6 +171,7 @@ class GithubDeveloper(Base):
     email = Column(String(255), nullable=True)
     avatar_url = Column(String(500), nullable=True)
     profile_url = Column(String(500), nullable=True)
+    account_type = Column(String(20), default="User")  # "User" or "Organization"
 
     # Location (Normalized)
     location_raw = Column(String(255), nullable=True)  # Original from GitHub

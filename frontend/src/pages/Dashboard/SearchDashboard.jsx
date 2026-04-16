@@ -37,8 +37,6 @@ const SearchDashboard = () => {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [fetchingMore, setFetchingMore] = useState(false);
-  const [loadedCount, setLoadedCount] = useState(0);
   const [totalExpected, setTotalExpected] = useState(0);
   const [scoreFilterRanges, setScoreFilterRanges] = useState(() => {
     const saved = sessionStorage.getItem('scoreFilterRanges');
@@ -73,20 +71,19 @@ const SearchDashboard = () => {
     localStorage.setItem('unlockedProfileIds', JSON.stringify(unlockedProfileIds));
   }, [unlockedProfileIds]);
 
-  const handleSearch = async (searchFilters) => {
+  const handleSearch = async (searchFilters, page = 1) => {
     setLoading(true);
-    setFetchingMore(false);
-    setError(null);
     setProfiles([]);
-    setCurrentFilters(searchFilters);
-    setCurrentPage(1);
-    setScoreFilterRanges([]);
-    setLoadedCount(0);
-    setTotalExpected(0);
-    trackSearchStarted(searchFilters);
+    setError(null);
+    setCurrentPage(page);
+    if (page === 1) {
+      setCurrentFilters(searchFilters);
+      setScoreFilterRanges([]);
+      trackSearchStarted(searchFilters);
+    }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/search-profiles`, {
+      const response = await fetch(`${API_BASE_URL}/api/search`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +93,11 @@ const SearchDashboard = () => {
           role: searchFilters.role || null,
           location: searchFilters.location || null,
           languages: searchFilters.languages || null,
-          min_score: 0,
+          min_score: searchFilters.minScore || 0,
+          has_email: searchFilters.hasEmail || false,
+          min_experience: searchFilters.minExperience || 0,
+          page: page,
+          per_page: PROFILES_PER_PAGE,
         }),
       });
 
@@ -109,62 +110,14 @@ const SearchDashboard = () => {
         throw new Error(errorMsg);
       }
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let totalProfiles = 0;
+      const data = await response.json();
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buffer += decoder.decode(value, { stream: true });
-        const messages = buffer.split('\n\n');
-        buffer = messages.pop() || '';
+      setProfiles(data.profiles || []);
+      setTotalExpected(data.total || 0);
 
-        for (const message of messages) {
-          if (!message.trim() || !message.startsWith('data: ')) continue;
-          try {
-            const data = JSON.parse(message.replace(/^data: /, ''));
-
-            switch (data.type) {
-              case 'count':
-                setTotalExpected(data.total_matching || 0);
-                break;
-              case 'profiles':
-                // First batch — show immediately, stop main spinner
-                setProfiles(data.profiles || []);
-                totalProfiles = (data.profiles || []).length;
-                setLoadedCount(totalProfiles);
-                setLoading(false);
-                if (data.profiles && data.profiles.length > 0) {
-                  setFetchingMore(true);
-                }
-                break;
-              case 'status':
-                // Backend is fetching more
-                setFetchingMore(true);
-                break;
-              case 'new_profiles':
-                // Append additional profiles
-                setProfiles(prev => [...prev, ...(data.profiles || [])]);
-                totalProfiles += (data.profiles || []).length;
-                break;
-              case 'progress':
-                setLoadedCount(data.loaded || totalProfiles);
-                break;
-              case 'complete':
-                setFetchingMore(false);
-                setLoadedCount(0);
-                incrementUsage('search', 1);
-                trackSearchPerformed(searchFilters, data.total || totalProfiles);
-                break;
-              default:
-                break;
-            }
-          } catch (e) {
-            console.error('Failed to parse SSE:', e);
-          }
-        }
+      if (page === 1) {
+        incrementUsage('search', 1);
+        trackSearchPerformed(searchFilters, data.total || 0);
       }
 
     } catch (err) {
@@ -172,7 +125,6 @@ const SearchDashboard = () => {
       setError({ message: err.message || 'Search failed' });
     } finally {
       setLoading(false);
-      setFetchingMore(false);
     }
   };
 
@@ -334,11 +286,10 @@ const SearchDashboard = () => {
 
   const selectedFilteredCount = filteredProfiles.filter(p => p.selected).length;
 
-  const totalPages = Math.ceil(filteredProfiles.length / PROFILES_PER_PAGE);
-  const paginatedProfiles = filteredProfiles.slice(
-    (currentPage - 1) * PROFILES_PER_PAGE,
-    currentPage * PROFILES_PER_PAGE
-  );
+  const totalPages = Math.ceil(totalExpected / PROFILES_PER_PAGE);
+
+  // For paginated API, profiles ARE the current page — no client-side slicing needed
+  const paginatedProfiles = filteredProfiles;
 
   const getPageNumbers = () => {
     const pages = [];
@@ -375,7 +326,8 @@ const SearchDashboard = () => {
           initialFilters={currentFilters}
           onReset={() => {
             setProfiles([]);
-            setFetchingMore(false);
+            setTotalExpected(0);
+            setCurrentPage(1);
             setCurrentFilters({});
             sessionStorage.removeItem('searchResults');
             sessionStorage.removeItem('currentFilters');
@@ -387,38 +339,18 @@ const SearchDashboard = () => {
         {profiles.length > 0 && !loading && (
           <div style={styles.resultCount}>
             <p style={styles.resultCountTitle}>
-              🎯 Found {profiles.length.toLocaleString()} developers
+              🎯 Found {totalExpected.toLocaleString()} developers
             </p>
             <p style={styles.resultCountSubtitle}>
-              Sorted by developer score
-              {fetchingMore && loadedCount > 0 && totalExpected > 0 &&
-                ` • Loading ${loadedCount.toLocaleString()} of ${totalExpected.toLocaleString()}...`}
-              {fetchingMore && loadedCount > 0 && !totalExpected &&
-                ` • Loaded ${loadedCount.toLocaleString()} so far...`}
+              Page {currentPage} of {totalPages} • Sorted by developer score
             </p>
           </div>
         )}
 
-        {/* Loading indicator — only before first batch arrives */}
-        {loading && profiles.length === 0 && (
-          <div style={styles.progressContainer}>
-            <div style={styles.progressHeader}>
-              <span style={styles.progressStatus}>
-                {totalExpected > 0
-                  ? `Found ${totalExpected.toLocaleString()} developers, loading...`
-                  : 'Searching for developers...'}
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Fetching more indicator — after first batch, below result count */}
-        {fetchingMore && profiles.length > 0 && (
-          <div style={styles.fetchingMoreBar}>
-            <span style={styles.fetchingMoreText}>
-              ⏳ Loading profiles... {loadedCount > 0 && totalExpected > 0 &&
-                `(${loadedCount.toLocaleString()} / ${totalExpected.toLocaleString()})`}
-            </span>
+        {/* Loading indicator */}
+        {loading && (
+          <div style={{ textAlign: 'center', padding: '3rem 0', color: '#6b7280' }}>
+            Searching developers...
           </div>
         )}
 
@@ -578,7 +510,7 @@ const SearchDashboard = () => {
             {totalPages > 1 && (
               <div style={styles.pagination}>
                 <button
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => handleSearch(currentFilters, Math.max(1, currentPage - 1))}
                   disabled={currentPage === 1}
                   style={{
                     ...styles.paginationButton,
@@ -596,7 +528,7 @@ const SearchDashboard = () => {
                     return (
                       <button
                         key={page}
-                        onClick={() => setCurrentPage(page)}
+                        onClick={() => handleSearch(currentFilters, page)}
                         style={{
                           ...styles.pageNumber,
                           ...(currentPage === page ? styles.pageNumberActive : {})
@@ -609,7 +541,7 @@ const SearchDashboard = () => {
                 </div>
 
                 <button
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => handleSearch(currentFilters, Math.min(totalPages, currentPage + 1))}
                   disabled={currentPage === totalPages}
                   style={{
                     ...styles.paginationButton,

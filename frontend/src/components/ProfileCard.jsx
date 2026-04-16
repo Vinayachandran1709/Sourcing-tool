@@ -129,6 +129,11 @@ const ProfileCard = ({ profile, onSelect, onViewDetails, onToggleSave, isSaved, 
               <span>{profile.location}</span>
             </div>
           )}
+          {profile.estimated_experience_years && profile.estimated_experience_years > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#6b7280', fontSize: '0.875rem' }}>
+              <span>~{profile.estimated_experience_years} years active</span>
+            </div>
+          )}
         </div>
         <div style={{
           ...styles.scoreBadge,

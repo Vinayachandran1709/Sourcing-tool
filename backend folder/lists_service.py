@@ -168,10 +168,10 @@ class ListsService:
         return result
     
     @staticmethod
-    def add_profile_to_list(db: Session, list_id: int, profile_id: int, notes: Optional[str] = None) -> Dict:
+    def add_profile_to_list(db: Session, list_id: int, profile_id: int, user_id: int, notes: Optional[str] = None) -> Dict:
         """Add a profile to a list"""
-        # Check if list exists
-        saved_list = db.query(SavedList).filter(SavedList.id == list_id).first()
+        # Check if list exists and belongs to requesting user
+        saved_list = db.query(SavedList).filter(SavedList.id == list_id, SavedList.user_id == user_id).first()
         if not saved_list:
             raise HTTPException(status_code=404, detail="List not found")
         
@@ -210,25 +210,25 @@ class ListsService:
         return {"message": "Profile added to list", "profile_id": profile_id}
     
     @staticmethod
-    def remove_profile_from_list(db: Session, list_id: int, profile_id: int) -> Dict:
+    def remove_profile_from_list(db: Session, list_id: int, profile_id: int, user_id: int) -> Dict:
         """Remove a profile from a list"""
+        # Verify list belongs to requesting user before touching it
+        saved_list = db.query(SavedList).filter(SavedList.id == list_id, SavedList.user_id == user_id).first()
+        if not saved_list:
+            raise HTTPException(status_code=404, detail="List not found")
+
         list_profile = db.query(SavedListProfile).filter(
             SavedListProfile.list_id == list_id,
             SavedListProfile.profile_id == profile_id
         ).first()
-        
+
         if not list_profile:
             raise HTTPException(status_code=404, detail="Profile not in this list")
-        
+
         db.delete(list_profile)
-        
-        # Update list's updated_at
-        saved_list = db.query(SavedList).filter(SavedList.id == list_id).first()
-        if saved_list:
-            saved_list.updated_at = datetime.now(timezone.utc)
-        
+        saved_list.updated_at = datetime.now(timezone.utc)
         db.commit()
-        
+
         return {"message": "Profile removed from list"}
     
     @staticmethod
@@ -275,17 +275,22 @@ class ListsService:
         return {"message": "List deleted successfully"}
     
     @staticmethod
-    def update_profile_notes(db: Session, list_id: int, profile_id: int, notes: str) -> Dict:
+    def update_profile_notes(db: Session, list_id: int, profile_id: int, notes: str, user_id: int) -> Dict:
         """Update notes for a profile in a list"""
+        # Verify list belongs to requesting user
+        saved_list = db.query(SavedList).filter(SavedList.id == list_id, SavedList.user_id == user_id).first()
+        if not saved_list:
+            raise HTTPException(status_code=404, detail="List not found")
+
         list_profile = db.query(SavedListProfile).filter(
             SavedListProfile.list_id == list_id,
             SavedListProfile.profile_id == profile_id
         ).first()
-        
+
         if not list_profile:
             raise HTTPException(status_code=404, detail="Profile not in this list")
-        
+
         list_profile.notes = notes
         db.commit()
-        
+
         return {"message": "Notes updated", "notes": notes}
