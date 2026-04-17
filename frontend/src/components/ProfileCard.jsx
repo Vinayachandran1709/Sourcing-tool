@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, MapPin, Lock, Unlock, Code, GitFork, Users, Flame, Briefcase, Sparkles } from 'lucide-react';
+import { Star, MapPin, Lock, Unlock, Code, Users, Flame, Briefcase, Sparkles } from 'lucide-react';
 
 const getScoreColor = (score) => {
   if (score >= 85) return '#10b981';

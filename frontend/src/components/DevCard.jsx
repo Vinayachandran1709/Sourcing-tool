@@ -10,7 +10,6 @@ const DevCard = ({ cardData }) => {
     location = '',
     detected_role = 'Software Developer',
     seniority_level = 'Mid-Level',
-    primary_languages: _primaryLangs = [],
     language_percentages = {},
     top_projects = [],
     contribution_stats = {},
