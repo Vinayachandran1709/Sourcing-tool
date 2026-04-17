@@ -53,6 +53,7 @@ from auth_middleware import get_current_user
 from profile_cache_service import ProfileCacheService
 from email_service import EmailService
 from redis_service import init_redis, get_redis_stats, get_cached_search, set_cached_search, hash_filters
+from ai_service import generate_profile_summary, parse_job_description, check_groq_status
 
 # ===== ANNOTATED DEPENDENCY TYPES =====
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -1078,6 +1079,71 @@ async def admin_usage(
 
     from rate_limit_service import get_admin_usage_stats
     return get_admin_usage_stats(db, days=days)
+
+
+# ===== AI SERVICE ENDPOINTS =====
+
+@app.get("/api/ai-status")
+async def ai_status_endpoint():
+    """Check AI service status."""
+    return check_groq_status()
+
+
+@app.post("/api/parse-job-description")
+async def parse_jd_endpoint(
+    request: Request,
+    current_user: CurrentUser,
+    db: DbSession,
+):
+    """Parse a job description and return suggested search filters."""
+    try:
+        body = await request.json()
+        jd_text = body.get("job_description", "")
+
+        if not jd_text or len(jd_text) < 50:
+            raise HTTPException(status_code=400, detail="Job description too short (min 50 characters)")
+
+        if len(jd_text) > 10000:
+            raise HTTPException(status_code=400, detail="Job description too long (max 10,000 characters)")
+
+        result = await parse_job_description(jd_text)
+
+        if not result:
+            raise HTTPException(status_code=500, detail="Failed to parse job description. AI service may be unavailable.")
+
+        return {"success": True, "filters": result}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"JD parse error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/generate-profile-summary")
+async def generate_summary_endpoint(
+    request: Request,
+    current_user: CurrentUser,
+    db: DbSession,
+):
+    """Generate AI summary for a single profile."""
+    try:
+        body = await request.json()
+        profile_data = body.get("profile", {})
+
+        if not profile_data:
+            raise HTTPException(status_code=400, detail="Profile data required")
+
+        summary = await generate_profile_summary(profile_data)
+
+        if not summary:
+            return {"success": False, "summary": None, "message": "AI service unavailable"}
+
+        return {"success": True, "summary": summary}
+
+    except Exception as e:
+        logger.error(f"Summary generation error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ===== RUN WITH UVICORN =====

@@ -228,6 +228,10 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   });
   const [activeSpecLabel, setActiveSpecLabel] = useState(null);
   const [showAllLanguages, setShowAllLanguages] = useState(false);
+  const [jdText, setJdText] = useState('');
+  const [isParsingJd, setIsParsingJd] = useState(false);
+  const [jdError, setJdError] = useState('');
+  const [jdSuccess, setJdSuccess] = useState('');
 
   const specializations = ROLE_SPECIALIZATIONS[filters.role] || null;
 
@@ -258,6 +262,71 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     setShowAllLanguages(false);
     if (onReset) {
       onReset();
+    }
+  };
+
+  const handleJdSearch = async () => {
+    if (!jdText || jdText.length < 50) {
+      setJdError('Please enter at least 50 characters');
+      return;
+    }
+
+    setIsParsingJd(true);
+    setJdError('');
+    setJdSuccess('');
+
+    try {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/parse-job-description`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+        },
+        body: JSON.stringify({ job_description: jdText }),
+      });
+
+      const data = await response.json();
+
+      if (data.success && data.filters) {
+        const parts = [];
+        if (data.filters.role) parts.push(`Role: ${data.filters.role}`);
+        if (data.filters.languages?.length) parts.push(`Languages: ${data.filters.languages.join(', ')}`);
+        if (data.filters.location) parts.push(`Location: ${data.filters.location}`);
+        if (data.filters.min_experience) parts.push(`Experience: ${data.filters.min_experience}+ years`);
+
+        setJdSuccess(`Found: ${parts.join(' • ')}`);
+
+        const newFilters = {
+          role: data.filters.role || '',
+          location: data.filters.location || '',
+          languages: data.filters.languages || [],
+          minScore: filters.minScore || 0,
+          hasEmail: filters.hasEmail || false,
+          minExperience: data.filters.min_experience || 0,
+        };
+        setFilters(newFilters);
+
+        onApplyFilters({
+          role: newFilters.role || null,
+          location: newFilters.location || null,
+          languages: newFilters.languages.length > 0 ? newFilters.languages : null,
+          minScore: newFilters.minScore,
+          hasEmail: newFilters.hasEmail,
+          minExperience: newFilters.minExperience,
+        });
+
+        setTimeout(() => {
+          setJdText('');
+          setJdSuccess('');
+        }, 3000);
+      } else {
+        setJdError(data.detail || 'Could not parse job description. Please try again.');
+      }
+    } catch (error) {
+      console.error('JD parse error:', error);
+      setJdError('Failed to parse job description. Please try again.');
+    } finally {
+      setIsParsingJd(false);
     }
   };
 
@@ -296,6 +365,66 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
 
       {/* Card Body */}
       <div style={styles.cardBody}>
+        {/* AI Job Description Search */}
+        <div style={styles.jdSection}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '10px' }}>
+            <span style={{ fontSize: '18px' }}>🤖</span>
+            <h3 style={styles.jdTitle}>AI-Powered JD Search</h3>
+            <span style={styles.jdBadge}>NEW</span>
+          </div>
+          <p style={styles.jdSubtitle}>
+            Paste your job description and let AI find matching candidates instantly
+          </p>
+          <textarea
+            value={jdText}
+            onChange={(e) => {
+              setJdText(e.target.value);
+              setJdError('');
+              setJdSuccess('');
+            }}
+            placeholder={`Paste your job description here... (minimum 50 characters)\n\nExample: Looking for a Senior Backend Developer with 5+ years experience in Python and Go. Must have experience with microservices, REST APIs, and cloud platforms like AWS or GCP. Remote-friendly, based in Bangalore preferred.`}
+            style={styles.jdTextarea}
+          />
+
+          {jdError && (
+            <div style={styles.jdErrorBox}>
+              <span>⚠️</span>
+              <p style={{ margin: 0, fontSize: '12px', color: '#dc2626' }}>{jdError}</p>
+            </div>
+          )}
+
+          {jdSuccess && (
+            <div style={styles.jdSuccessBox}>
+              <span>✅</span>
+              <p style={{ margin: 0, fontSize: '12px', color: '#16a34a' }}>{jdSuccess}</p>
+            </div>
+          )}
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px' }}>
+            <p style={{ margin: 0, fontSize: '12px', color: '#a78bfa' }}>
+              {jdText.length}/50 characters minimum
+            </p>
+            <button
+              onClick={handleJdSearch}
+              disabled={isParsingJd || jdText.length < 50}
+              style={isParsingJd || jdText.length < 50 ? styles.jdBtnDisabled : styles.jdBtn}
+            >
+              {isParsingJd ? (
+                <>⚙️ &nbsp;Analyzing...</>
+              ) : (
+                <>✨ &nbsp;Find Candidates</>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={styles.jdDivider}>
+          <div style={styles.jdDividerLine} />
+          <span style={styles.jdDividerText}>or customize filters</span>
+          <div style={styles.jdDividerLine} />
+        </div>
+
         {/* Role & Location — side by side */}
         <div style={styles.dropdownRow}>
           <div style={styles.dropdownCol}>
@@ -513,6 +642,108 @@ const styles = {
   },
   cardBody: {
     padding: '28px',
+  },
+  jdSection: {
+    padding: '20px',
+    background: 'linear-gradient(135deg, #faf5ff 0%, #eef2ff 100%)',
+    borderRadius: '14px',
+    border: '1px solid #e9d5ff',
+    marginBottom: '0',
+  },
+  jdTitle: {
+    margin: 0,
+    fontSize: '14px',
+    fontWeight: 700,
+    color: '#6b21a8',
+  },
+  jdBadge: {
+    fontSize: '11px',
+    fontWeight: 600,
+    color: '#7e22ce',
+    backgroundColor: '#e9d5ff',
+    padding: '2px 8px',
+    borderRadius: '100px',
+  },
+  jdSubtitle: {
+    margin: '0 0 12px',
+    fontSize: '12px',
+    color: '#7c3aed',
+  },
+  jdTextarea: {
+    width: '100%',
+    height: '112px',
+    padding: '12px',
+    fontSize: '13px',
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    border: '1px solid #ddd6fe',
+    borderRadius: '10px',
+    resize: 'none',
+    outline: 'none',
+    backgroundColor: '#ffffff',
+    color: '#374151',
+    boxSizing: 'border-box',
+    lineHeight: '1.5',
+  },
+  jdErrorBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginTop: '8px',
+    padding: '8px 12px',
+    backgroundColor: '#fef2f2',
+    border: '1px solid #fecaca',
+    borderRadius: '8px',
+  },
+  jdSuccessBox: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    marginTop: '8px',
+    padding: '8px 12px',
+    backgroundColor: '#f0fdf4',
+    border: '1px solid #bbf7d0',
+    borderRadius: '8px',
+  },
+  jdBtn: {
+    padding: '10px 18px',
+    fontSize: '13px',
+    fontWeight: 600,
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    color: '#ffffff',
+    backgroundColor: '#7c3aed',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'pointer',
+    transition: 'all 0.15s ease',
+    boxShadow: '0 2px 6px rgba(124,58,237,0.25)',
+  },
+  jdBtnDisabled: {
+    padding: '10px 18px',
+    fontSize: '13px',
+    fontWeight: 600,
+    fontFamily: 'Outfit, system-ui, sans-serif',
+    color: '#9ca3af',
+    backgroundColor: '#f3f4f6',
+    border: 'none',
+    borderRadius: '10px',
+    cursor: 'not-allowed',
+  },
+  jdDivider: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    margin: '24px 0',
+  },
+  jdDividerLine: {
+    flex: 1,
+    height: '1px',
+    backgroundColor: '#e5e7eb',
+  },
+  jdDividerText: {
+    fontSize: '12px',
+    fontWeight: 500,
+    color: '#9ca3af',
+    whiteSpace: 'nowrap',
   },
   dropdownRow: {
     display: 'grid',
