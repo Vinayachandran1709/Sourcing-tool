@@ -18,7 +18,9 @@
       "Bash(git -C '/c/Users/vinayachandran/OneDrive/Desktop/Github folder/Sourcing-tool' log --all --source --full-history -S RoleDetectionService.detect_roles -- *.py)",
       "Bash(curl -s http://127.0.0.1:8000/api/payments/health)",
       "Bash(curl:*)",
-      "Bash(wc -l \"/c/Users/vinayachandran/OneDrive/Desktop/Github folder/Sourcing-tool/backend folder\"/*.py)"
+      "Bash(wc -l \"/c/Users/vinayachandran/OneDrive/Desktop/Github folder/Sourcing-tool/backend folder\"/*.py)",
+      "Bash(npm install *)",
+      "Bash(npm run *)"
     ]
   }
 }
