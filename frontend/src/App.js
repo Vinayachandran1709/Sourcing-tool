@@ -8,6 +8,11 @@ import './App.css';
 
 // Public Pages
 import HomePage from './pages/HomePage';
+import DevCardPage from './pages/DevCardPage';
+import DevProfilePage from './pages/DevProfilePage';
+import ForCompaniesPage from './pages/ForCompaniesPage';
+import ForCandidatesPage from './pages/ForCandidatesPage';
+import HireFreePage from './pages/HireFreePage';
 import PricingPage from './pages/PricingPage';
 import ContactPage from './pages/ContactPage';
 import LoginPage from './pages/LoginPage';
@@ -57,6 +62,12 @@ function App() {
               <Route path="saved-profiles" element={<SavedProfilesPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />
             </Route>
+
+            <Route path="/devcard" element={<DevCardPage />} />
+            <Route path="/dev/:username" element={<DevProfilePage />} />
+            <Route path="/for-companies" element={<ForCompaniesPage />} />
+            <Route path="/for-candidates" element={<ForCandidatesPage />} />
+            <Route path="/hire-free" element={<HireFreePage />} />
 
             {/* Catch all - redirect to home */}
             <Route path="*" element={<Navigate to="/" replace />} />

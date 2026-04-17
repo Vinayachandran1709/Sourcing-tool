@@ -28,6 +28,8 @@ const Navbar = () => {
         </a>
 
         <div style={styles.navLinks}>
+          <Link to="/for-companies" style={styles.navLink}>For Companies</Link>
+          <Link to="/for-candidates" style={styles.navLink}>For Developers</Link>
           <Link to="/pricing" style={styles.navLink}>Pricing</Link>
           <Link to="/contact" style={styles.navLink}>Contact</Link>
           {isAuthenticated ? (
@@ -47,6 +49,8 @@ const Navbar = () => {
 
       {mobileMenuOpen && (
         <div style={styles.mobileMenu}>
+          <Link to="/for-companies" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Companies</Link>
+          <Link to="/for-candidates" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Developers</Link>
           <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
           {isAuthenticated ? (
