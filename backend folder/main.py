@@ -54,6 +54,10 @@ from profile_cache_service import ProfileCacheService
 from email_service import EmailService
 from redis_service import init_redis, get_redis_stats, get_cached_search, set_cached_search, hash_filters
 from ai_service import generate_profile_summary, parse_job_description, check_groq_status
+import openai
+from config import GITHUB_TOKEN
+
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # ===== ANNOTATED DEPENDENCY TYPES =====
 CurrentUser = Annotated[User, Depends(get_current_user)]
@@ -263,6 +267,75 @@ async def startup_event():
                 UPDATE github_developers
                 SET estimated_experience_years = EXTRACT(YEAR FROM NOW()) - EXTRACT(YEAR FROM github_created_at)
                 WHERE github_created_at IS NOT NULL AND (estimated_experience_years IS NULL OR estimated_experience_years = 0);
+            """))
+
+            # DevCard profiles table
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS devcard_profiles (
+                    id SERIAL PRIMARY KEY,
+                    github_username VARCHAR(255) UNIQUE NOT NULL,
+                    display_name VARCHAR(255),
+                    avatar_url VARCHAR(500),
+                    bio TEXT,
+                    location VARCHAR(255),
+                    detected_role VARCHAR(100),
+                    seniority_level VARCHAR(50),
+                    primary_languages TEXT[],
+                    language_percentages JSONB DEFAULT '{}',
+                    top_projects JSONB DEFAULT '[]',
+                    contribution_stats JSONB DEFAULT '{}',
+                    ai_summary TEXT,
+                    experience_history JSONB DEFAULT '[]',
+                    developer_score INTEGER DEFAULT 0,
+                    estimated_experience_years INTEGER DEFAULT 0,
+                    resume_uploaded BOOLEAN DEFAULT FALSE,
+                    email VARCHAR(255),
+                    linkedin_url VARCHAR(500),
+                    phone VARCHAR(50),
+                    views_count INTEGER DEFAULT 0,
+                    is_published BOOLEAN DEFAULT TRUE,
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                );
+                CREATE INDEX IF NOT EXISTS idx_devcard_username ON devcard_profiles(github_username);
+            """))
+
+            # Candidate waitlist (lead capture from DevCard creation)
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS candidate_waitlist (
+                    id SERIAL PRIMARY KEY,
+                    email VARCHAR(255),
+                    name VARCHAR(255),
+                    github_username VARCHAR(255),
+                    linkedin_url VARCHAR(500),
+                    phone VARCHAR(50),
+                    source VARCHAR(50) DEFAULT 'devcard',
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                );
+                CREATE INDEX IF NOT EXISTS idx_waitlist_email ON candidate_waitlist(email);
+            """))
+
+            # Free hire requests (companies posting jobs for free matching)
+            conn.execute(sa_text("""
+                CREATE TABLE IF NOT EXISTS free_hire_requests (
+                    id SERIAL PRIMARY KEY,
+                    company_email VARCHAR(255) NOT NULL,
+                    company_name VARCHAR(255),
+                    contact_name VARCHAR(255),
+                    job_title VARCHAR(255) NOT NULL,
+                    job_description TEXT,
+                    required_skills TEXT[],
+                    preferred_location VARCHAR(255),
+                    experience_min INTEGER DEFAULT 0,
+                    remote_ok BOOLEAN DEFAULT FALSE,
+                    matched_profiles_count INTEGER DEFAULT 0,
+                    email_sent BOOLEAN DEFAULT FALSE,
+                    email_sent_at TIMESTAMP WITH TIME ZONE,
+                    status VARCHAR(50) DEFAULT 'pending',
+                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                );
+                CREATE INDEX IF NOT EXISTS idx_hire_requests_email ON free_hire_requests(company_email);
+                CREATE INDEX IF NOT EXISTS idx_hire_requests_status ON free_hire_requests(status);
             """))
 
             conn.commit()
@@ -1144,6 +1217,727 @@ async def generate_summary_endpoint(
     except Exception as e:
         logger.error(f"Summary generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ===== DEVCARD & HIRE-FREE MODELS =====
+
+class DevCardRequest(BaseModel):
+    github_username: str
+    email: Optional[str] = None
+    linkedin_url: Optional[str] = None
+    name: Optional[str] = None
+    phone: Optional[str] = None
+
+
+class FreeHireRequest(BaseModel):
+    company_email: str
+    company_name: Optional[str] = None
+    contact_name: Optional[str] = None
+    job_title: str
+    job_description: Optional[str] = None
+    required_skills: Optional[List[str]] = None
+    preferred_location: Optional[str] = None
+    experience_min: Optional[int] = 0
+    remote_ok: Optional[bool] = False
+
+
+# ===== DEVCARD ENDPOINTS =====
+
+def _calculate_devcard_score(followers: int, public_repos: int, total_stars: int, bio: str, email: str, primary_languages: list) -> int:
+    """Replicate GithubDeveloper.calculate_score logic for DevCard profiles."""
+    score = 0
+
+    if followers:
+        if followers >= 1000:
+            score += 25
+        elif followers >= 500:
+            score += 20
+        elif followers >= 100:
+            score += 15
+        elif followers >= 50:
+            score += 10
+        elif followers >= 10:
+            score += 5
+
+    if public_repos:
+        if public_repos >= 50:
+            score += 20
+        elif public_repos >= 30:
+            score += 15
+        elif public_repos >= 15:
+            score += 10
+        elif public_repos >= 5:
+            score += 5
+
+    if total_stars:
+        if total_stars >= 500:
+            score += 25
+        elif total_stars >= 100:
+            score += 20
+        elif total_stars >= 50:
+            score += 15
+        elif total_stars >= 10:
+            score += 10
+        elif total_stars >= 1:
+            score += 5
+
+    # Bio present (5 points)
+    if bio and len(bio.strip()) > 20:
+        score += 5
+
+    # Email present (5 points)
+    if email:
+        score += 5
+
+    # Multiple languages (5 points)
+    if primary_languages and len(primary_languages) >= 3:
+        score += 5
+
+    # Recent activity assumed (max 15 points) — cap at 10 for GitHub API data
+    score += 10
+
+    return min(score, 100)
+
+
+@app.post("/api/devcard/generate")
+async def generate_devcard(req: DevCardRequest, db: DbSession):
+    """Generate a DevCard from a GitHub username. Public endpoint — no auth required."""
+    import httpx
+    import re
+
+    try:
+        # Clean username: strip @, extract from URL
+        username = req.github_username.strip()
+        username = re.sub(r'^@', '', username)
+        url_match = re.search(r'github\.com/([^/\s]+)', username)
+        if url_match:
+            username = url_match.group(1)
+        username = username.strip('/')
+
+        if not username or not re.match(r'^[a-zA-Z0-9]([a-zA-Z0-9\-]{0,37}[a-zA-Z0-9])?$', username):
+            raise HTTPException(status_code=400, detail="Invalid GitHub username.")
+
+        from sqlalchemy import text as sql_text
+
+        # Check cache (updated within last 24 hours)
+        cache_row = db.execute(sql_text("""
+            SELECT * FROM devcard_profiles
+            WHERE github_username = :username
+              AND updated_at >= NOW() - INTERVAL '24 hours'
+              AND is_published = TRUE
+        """), {"username": username}).fetchone()
+
+        if cache_row:
+            db.execute(sql_text(
+                "UPDATE devcard_profiles SET views_count = views_count + 1 WHERE github_username = :username"
+            ), {"username": username})
+            db.commit()
+            row = dict(cache_row._mapping)
+            return {"success": True, "card": row}
+
+        # Fetch from GitHub API
+        gh_headers = {
+            "Authorization": f"token {GITHUB_TOKEN}",
+            "Accept": "application/vnd.github.v3+json",
+        }
+        async with httpx.AsyncClient() as client:
+            user_resp = await client.get(
+                f"https://api.github.com/users/{username}",
+                headers=gh_headers, timeout=10.0
+            )
+            if user_resp.status_code == 404:
+                raise HTTPException(status_code=404, detail="GitHub user not found.")
+            if user_resp.status_code != 200:
+                raise HTTPException(status_code=502, detail="GitHub API unavailable. Please try again.")
+            user_data = user_resp.json()
+
+            if user_data.get("type") == "Organization":
+                raise HTTPException(status_code=400, detail="Organization accounts are not supported.")
+
+            repos_resp = await client.get(
+                f"https://api.github.com/users/{username}/repos",
+                headers=gh_headers,
+                params={"sort": "stars", "per_page": 10},
+                timeout=10.0
+            )
+            repos = repos_resp.json() if repos_resp.status_code == 200 else []
+
+        # Language percentages from repos
+        lang_bytes: dict = {}
+        for repo in repos:
+            lang = repo.get("language")
+            if lang:
+                lang_bytes[lang] = lang_bytes.get(lang, 0) + (repo.get("size", 1) or 1)
+
+        total_bytes = sum(lang_bytes.values()) or 1
+        sorted_langs = sorted(lang_bytes.items(), key=lambda x: x[1], reverse=True)[:7]
+        language_percentages = {lang: round(b / total_bytes * 100, 1) for lang, b in sorted_langs}
+        primary_languages = list(language_percentages.keys())
+
+        # Top 3 projects by stars
+        top_projects = []
+        for repo in sorted(repos, key=lambda r: r.get("stargazers_count", 0), reverse=True)[:3]:
+            desc = repo.get("description") or ""
+            top_projects.append({
+                "name": repo.get("name"),
+                "description": desc[:80] if desc else None,
+                "stars": repo.get("stargazers_count", 0),
+                "language": repo.get("language"),
+            })
+
+        # Contribution stats
+        total_stars = sum(r.get("stargazers_count", 0) for r in repos)
+        public_repos = user_data.get("public_repos", 0)
+        followers = user_data.get("followers", 0)
+        created_at_str = user_data.get("created_at", "")
+        try:
+            account_year = int(created_at_str[:4])
+            years_active = datetime.now().year - account_year
+        except Exception:
+            years_active = 1
+        estimated_experience_years = max(1, years_active)
+
+        contribution_stats = {
+            "stars": total_stars,
+            "repos": public_repos,
+            "followers": followers,
+            "years_active": years_active,
+        }
+
+        # AI analysis via GPT-4o-mini
+        ai_summary = None
+        detected_role = "Software Developer"
+        seniority_level = "Mid-Level"
+
+        try:
+            if openai.api_key:
+                lang_str = ", ".join(primary_languages[:5]) if primary_languages else "unknown"
+                ai_prompt = f"""Analyze this GitHub developer profile and return JSON only (no markdown):
+Username: {username}
+Name: {user_data.get('name', username)}
+Bio: {user_data.get('bio', 'N/A')}
+Location: {user_data.get('location', 'N/A')}
+Languages: {lang_str}
+Public Repos: {public_repos}
+Followers: {followers}
+Stars: {total_stars}
+Years Active: {years_active}
+
+Return JSON with exactly these fields:
+{{"summary": "2-sentence recruiter brief", "role": "one of: Frontend Developer, Backend Developer, Full-Stack Developer, Mobile Developer, DevOps Engineer, Data Scientist, AI/ML Engineer, Data Engineer, Security Engineer, Software Developer", "seniority": "one of: Junior, Mid-Level, Senior, Expert"}}"""
+
+                client_ai = openai.OpenAI(api_key=openai.api_key)
+                ai_resp = client_ai.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": ai_prompt}],
+                    max_tokens=200,
+                    temperature=0.3,
+                )
+                ai_text = ai_resp.choices[0].message.content.strip()
+                # Strip markdown code fences if present
+                ai_text = re.sub(r'^```(?:json)?\s*|\s*```$', '', ai_text, flags=re.MULTILINE).strip()
+                ai_json = json.loads(ai_text)
+                ai_summary = ai_json.get("summary", "")
+                detected_role = ai_json.get("role", "Software Developer")
+                seniority_level = ai_json.get("seniority", "Mid-Level")
+        except Exception as ai_err:
+            logger.warning(f"DevCard AI analysis failed for {username}: {ai_err}")
+            # Fallback summary
+            lang_str = ", ".join(primary_languages[:3]) if primary_languages else "various languages"
+            ai_summary = (
+                f"{username} is a developer with {years_active}+ years of GitHub activity, "
+                f"specialising in {lang_str}. They have {public_repos} public repositories and {total_stars} total stars."
+            )
+            # Fallback role detection from languages
+            if "Swift" in primary_languages or "Kotlin" in primary_languages:
+                detected_role = "Mobile Developer"
+            elif "Python" in primary_languages and ("TensorFlow" in str(user_data.get("bio", "")) or "ML" in str(user_data.get("bio", ""))):
+                detected_role = "AI/ML Engineer"
+            elif any(l in primary_languages for l in ["JavaScript", "TypeScript", "HTML", "CSS"]):
+                detected_role = "Frontend Developer"
+            elif any(l in primary_languages for l in ["Python", "Go", "Java", "Ruby", "PHP", "C#", "Rust"]):
+                detected_role = "Backend Developer"
+
+            if years_active <= 2:
+                seniority_level = "Junior"
+            elif years_active <= 5:
+                seniority_level = "Mid-Level"
+            elif years_active <= 9:
+                seniority_level = "Senior"
+            else:
+                seniority_level = "Expert"
+
+        developer_score = _calculate_devcard_score(
+            followers=followers,
+            public_repos=public_repos,
+            total_stars=total_stars,
+            bio=user_data.get("bio", ""),
+            email=user_data.get("email", ""),
+            primary_languages=primary_languages,
+        )
+
+        display_name = user_data.get("name") or username
+        avatar_url = user_data.get("avatar_url", "")
+        bio = user_data.get("bio", "")
+        location = user_data.get("location", "")
+
+        # Upsert into devcard_profiles
+        db.execute(sql_text("""
+            INSERT INTO devcard_profiles (
+                github_username, display_name, avatar_url, bio, location,
+                detected_role, seniority_level, primary_languages, language_percentages,
+                top_projects, contribution_stats, ai_summary,
+                developer_score, estimated_experience_years,
+                email, linkedin_url, phone,
+                views_count, is_published, updated_at
+            ) VALUES (
+                :username, :display_name, :avatar_url, :bio, :location,
+                :detected_role, :seniority_level, :primary_languages, :language_percentages,
+                :top_projects, :contribution_stats, :ai_summary,
+                :developer_score, :estimated_experience_years,
+                :email, :linkedin_url, :phone,
+                1, TRUE, NOW()
+            )
+            ON CONFLICT (github_username) DO UPDATE SET
+                display_name = EXCLUDED.display_name,
+                avatar_url = EXCLUDED.avatar_url,
+                bio = EXCLUDED.bio,
+                location = EXCLUDED.location,
+                detected_role = EXCLUDED.detected_role,
+                seniority_level = EXCLUDED.seniority_level,
+                primary_languages = EXCLUDED.primary_languages,
+                language_percentages = EXCLUDED.language_percentages,
+                top_projects = EXCLUDED.top_projects,
+                contribution_stats = EXCLUDED.contribution_stats,
+                ai_summary = EXCLUDED.ai_summary,
+                developer_score = EXCLUDED.developer_score,
+                estimated_experience_years = EXCLUDED.estimated_experience_years,
+                email = COALESCE(EXCLUDED.email, devcard_profiles.email),
+                linkedin_url = COALESCE(EXCLUDED.linkedin_url, devcard_profiles.linkedin_url),
+                phone = COALESCE(EXCLUDED.phone, devcard_profiles.phone),
+                views_count = devcard_profiles.views_count + 1,
+                updated_at = NOW()
+        """), {
+            "username": username,
+            "display_name": display_name,
+            "avatar_url": avatar_url,
+            "bio": bio,
+            "location": location,
+            "detected_role": detected_role,
+            "seniority_level": seniority_level,
+            "primary_languages": primary_languages,
+            "language_percentages": json.dumps(language_percentages),
+            "top_projects": json.dumps(top_projects),
+            "contribution_stats": json.dumps(contribution_stats),
+            "ai_summary": ai_summary,
+            "developer_score": developer_score,
+            "estimated_experience_years": estimated_experience_years,
+            "email": req.email or user_data.get("email"),
+            "linkedin_url": req.linkedin_url,
+            "phone": req.phone,
+        })
+
+        # Insert into candidate_waitlist if email was provided
+        if req.email:
+            try:
+                db.execute(sql_text("""
+                    INSERT INTO candidate_waitlist (email, name, github_username, linkedin_url, phone, source)
+                    VALUES (:email, :name, :github_username, :linkedin_url, :phone, 'devcard')
+                """), {
+                    "email": req.email,
+                    "name": req.name or display_name,
+                    "github_username": username,
+                    "linkedin_url": req.linkedin_url,
+                    "phone": req.phone,
+                })
+            except Exception as wl_err:
+                logger.warning(f"Waitlist insert failed for {username}: {wl_err}")
+
+        db.commit()
+
+        card = {
+            "github_username": username,
+            "display_name": display_name,
+            "avatar_url": avatar_url,
+            "bio": bio,
+            "location": location,
+            "detected_role": detected_role,
+            "seniority_level": seniority_level,
+            "primary_languages": primary_languages,
+            "language_percentages": language_percentages,
+            "top_projects": top_projects,
+            "contribution_stats": contribution_stats,
+            "ai_summary": ai_summary,
+            "developer_score": developer_score,
+            "estimated_experience_years": estimated_experience_years,
+        }
+        return {"success": True, "card": card}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DevCard generation error for {req.github_username}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to generate DevCard. Please try again.")
+
+
+@app.get("/api/devcard/{username}")
+async def get_devcard(username: str, db: DbSession):
+    """Fetch a published DevCard by GitHub username. Public endpoint — no auth required."""
+    try:
+        from sqlalchemy import text as sql_text
+
+        row = db.execute(sql_text("""
+            SELECT * FROM devcard_profiles
+            WHERE github_username = :username AND is_published = TRUE
+        """), {"username": username}).fetchone()
+
+        if not row:
+            raise HTTPException(status_code=404, detail="DevCard not found.")
+
+        db.execute(sql_text(
+            "UPDATE devcard_profiles SET views_count = views_count + 1 WHERE github_username = :username"
+        ), {"username": username})
+        db.commit()
+
+        card = dict(row._mapping)
+
+        # Parse JSONB fields that may come back as strings
+        for field in ("language_percentages", "top_projects", "contribution_stats", "experience_history"):
+            val = card.get(field)
+            if isinstance(val, str):
+                try:
+                    card[field] = json.loads(val)
+                except Exception:
+                    pass
+
+        return {"success": True, "card": card}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"DevCard fetch error for {username}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to fetch DevCard.")
+
+
+# ===== HIRE FREE ENDPOINT =====
+
+def _detect_role_from_title(job_title: str) -> str:
+    """Map job title keywords to a standard role string."""
+    title_lower = job_title.lower()
+    if "frontend" in title_lower or "front-end" in title_lower or "front end" in title_lower:
+        return "Frontend Developer"
+    if "backend" in title_lower or "back-end" in title_lower or "back end" in title_lower:
+        return "Backend Developer"
+    if "full stack" in title_lower or "fullstack" in title_lower or "full-stack" in title_lower:
+        return "Full-Stack Developer"
+    if "mobile" in title_lower or "ios" in title_lower or "android" in title_lower or "flutter" in title_lower:
+        return "Mobile Developer"
+    if "devops" in title_lower or "sre" in title_lower or "platform engineer" in title_lower:
+        return "DevOps Engineer"
+    if "data scientist" in title_lower:
+        return "Data Scientist"
+    if "machine learning" in title_lower or " ml " in title_lower or "mlops" in title_lower or "ai engineer" in title_lower:
+        return "AI/ML Engineer"
+    if "data engineer" in title_lower:
+        return "Data Engineer"
+    if "security" in title_lower:
+        return "Security Engineer"
+    if "qa" in title_lower or "quality" in title_lower or "test engineer" in title_lower:
+        return "QA Engineer"
+    if "blockchain" in title_lower or "web3" in title_lower or "solidity" in title_lower:
+        return "Blockchain Developer"
+    if "embedded" in title_lower or "firmware" in title_lower or "iot" in title_lower:
+        return "Embedded Engineer"
+    return "Software Developer"
+
+
+@app.post("/api/hire-free")
+async def hire_free(req: FreeHireRequest, db: DbSession):
+    """Accept a job request, match developer profiles, and email results. Public endpoint."""
+    import httpx
+
+    try:
+        from sqlalchemy import text as sql_text
+        from archive_search_service import search_developers, developer_to_dict
+
+        # 1. Insert hire request with status='processing'
+        result = db.execute(sql_text("""
+            INSERT INTO free_hire_requests
+                (company_email, company_name, contact_name, job_title, job_description,
+                 required_skills, preferred_location, experience_min, remote_ok, status)
+            VALUES
+                (:company_email, :company_name, :contact_name, :job_title, :job_description,
+                 :required_skills, :preferred_location, :experience_min, :remote_ok, 'processing')
+            RETURNING id
+        """), {
+            "company_email": req.company_email,
+            "company_name": req.company_name,
+            "contact_name": req.contact_name,
+            "job_title": req.job_title,
+            "job_description": req.job_description,
+            "required_skills": req.required_skills or [],
+            "preferred_location": req.preferred_location,
+            "experience_min": req.experience_min or 0,
+            "remote_ok": req.remote_ok or False,
+        })
+        db.commit()
+        request_id = result.fetchone()[0]
+
+        # 2. Detect role from job title
+        detected_role = _detect_role_from_title(req.job_title)
+
+        # 3. Extract skills from JD via AI if provided
+        all_skills = list(req.required_skills or [])
+        if req.job_description and openai.api_key:
+            try:
+                client_ai = openai.OpenAI(api_key=openai.api_key)
+                skill_resp = client_ai.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": (
+                        "Extract the top 5-8 technical skills/technologies mentioned in this job description "
+                        "as a JSON array of strings. Return ONLY the JSON array, nothing else.\n\n"
+                        f"{req.job_description[:3000]}"
+                    )}],
+                    max_tokens=150,
+                    temperature=0.1,
+                )
+                ai_skills_text = skill_resp.choices[0].message.content.strip()
+                import re as _re
+                ai_skills_text = _re.sub(r'^```(?:json)?\s*|\s*```$', '', ai_skills_text, flags=_re.MULTILINE).strip()
+                ai_skills = json.loads(ai_skills_text)
+                if isinstance(ai_skills, list):
+                    for s in ai_skills:
+                        if isinstance(s, str) and s not in all_skills:
+                            all_skills.append(s)
+            except Exception as skill_err:
+                logger.warning(f"AI skill extraction failed: {skill_err}")
+
+        # 4. Search DB for matching developers
+        db_results = search_developers(
+            db,
+            role=detected_role,
+            location=req.preferred_location,
+            languages=all_skills if all_skills else None,
+            limit=20,
+            min_score=30,
+            has_email=True,
+            min_experience=req.experience_min if req.experience_min else None,
+        )
+        matched_dicts = [developer_to_dict(dev) for dev in db_results]
+
+        # 5. Supplement with live GitHub API if fewer than 15 results
+        if len(matched_dicts) < 15:
+            gh_headers = {
+                "Authorization": f"token {GITHUB_TOKEN}",
+                "Accept": "application/vnd.github.v3+json",
+            }
+            primary_skill = all_skills[0] if all_skills else ""
+            search_location = req.preferred_location or ""
+
+            queries_to_try = []
+            if primary_skill and search_location:
+                queries_to_try.append(f"location:{search_location} language:{primary_skill} repos:>3")
+            if primary_skill:
+                queries_to_try.append(f"language:{primary_skill} repos:>5 followers:>10")
+            if search_location:
+                queries_to_try.append(f"location:{search_location} repos:>5")
+
+            seen_usernames = {p.get("github_username") for p in matched_dicts}
+
+            async with httpx.AsyncClient() as client:
+                for query in queries_to_try:
+                    if len(matched_dicts) >= 15:
+                        break
+                    try:
+                        resp = await client.get(
+                            "https://api.github.com/search/users",
+                            headers=gh_headers,
+                            params={"q": query, "per_page": 20, "sort": "followers"},
+                            timeout=10.0,
+                        )
+                        if resp.status_code == 200:
+                            users = resp.json().get("items", [])
+                            for user in users:
+                                if len(matched_dicts) >= 15:
+                                    break
+                                login = user.get("login")
+                                if login in seen_usernames or user.get("type") == "Organization":
+                                    continue
+                                seen_usernames.add(login)
+                                try:
+                                    detail_resp = await client.get(
+                                        f"https://api.github.com/users/{login}",
+                                        headers=gh_headers, timeout=8.0
+                                    )
+                                    if detail_resp.status_code == 200:
+                                        detail = detail_resp.json()
+                                        try:
+                                            acct_year = int(detail.get("created_at", "2020")[:4])
+                                            exp_years = max(1, datetime.now().year - acct_year)
+                                        except Exception:
+                                            exp_years = 1
+                                        matched_dicts.append({
+                                            "id": 0,
+                                            "github_username": detail.get("login"),
+                                            "name": detail.get("name") or detail.get("login"),
+                                            "bio": detail.get("bio"),
+                                            "email": detail.get("email"),
+                                            "avatar_url": detail.get("avatar_url"),
+                                            "profile_url": detail.get("html_url"),
+                                            "location": detail.get("location", ""),
+                                            "detected_role": detected_role,
+                                            "detected_roles": [],
+                                            "languages": [],
+                                            "public_repos": detail.get("public_repos", 0),
+                                            "followers": detail.get("followers", 0),
+                                            "total_stars": 0,
+                                            "developer_score": 50,
+                                            "estimated_experience_years": exp_years,
+                                        })
+                                except Exception:
+                                    pass
+                    except Exception as gh_err:
+                        logger.error(f"GitHub API supplement failed: {gh_err}")
+                        continue
+
+        # 6. Build preview (first 5, name blurred)
+        preview_profiles = []
+        for p in matched_dicts[:5]:
+            full_name = p.get("name") or p.get("github_username") or "Developer"
+            name_preview = (full_name[0] + "***") if full_name else "D***"
+            preview_profiles.append({
+                "id": p.get("id", 0),
+                "detected_role": p.get("detected_role", detected_role),
+                "location": p.get("location", ""),
+                "developer_score": p.get("developer_score", 50),
+                "languages": (p.get("languages") or [])[:3],
+                "name_preview": name_preview,
+            })
+
+        # 7. Build HTML email
+        matched_count = len(matched_dicts)
+        profile_rows_html = ""
+        for i, p in enumerate(matched_dicts[:20], start=1):
+            full_name = p.get("name") or p.get("github_username") or "Developer"
+            username_val = p.get("github_username", "")
+            role_val = p.get("detected_role") or detected_role
+            location_val = p.get("location") or "Remote"
+            score_val = p.get("developer_score", 50)
+            langs = (p.get("languages") or [])[:3]
+            lang_str = ", ".join(langs) if langs else "Various"
+            exp_val = p.get("estimated_experience_years", 1)
+            stars_val = p.get("total_stars", 0)
+            repos_val = p.get("public_repos", 0)
+            gh_url = p.get("profile_url") or f"https://github.com/{username_val}"
+
+            score_color = "#16a34a" if score_val >= 70 else ("#ea580c" if score_val >= 50 else "#6b7280")
+            profile_rows_html += f"""
+            <div style="background:#f9fafb;border-radius:10px;padding:16px 20px;margin-bottom:12px;border:1px solid #e5e7eb;">
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                    <div>
+                        <span style="font-size:12px;color:#9ca3af;font-weight:600;">#{i}</span>
+                        <span style="font-size:15px;font-weight:700;color:#111827;margin-left:8px;">{full_name}</span>
+                        <span style="font-size:12px;color:#6b7280;margin-left:8px;">@{username_val}</span>
+                    </div>
+                    <span style="background:{score_color};color:#fff;font-size:12px;font-weight:700;padding:3px 10px;border-radius:100px;">Score {score_val}</span>
+                </div>
+                <div style="margin-top:8px;font-size:13px;color:#374151;">
+                    <strong>{role_val}</strong> &bull; {location_val}
+                </div>
+                <div style="margin-top:6px;font-size:12px;color:#6b7280;">
+                    Languages: {lang_str} &bull; {exp_val}+ yrs &bull; {stars_val} stars &bull; {repos_val} repos
+                </div>
+                <div style="margin-top:10px;">
+                    <a href="{gh_url}" style="display:inline-block;background:#FF6B35;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:8px;text-decoration:none;">View Profile →</a>
+                </div>
+            </div>"""
+
+        contact_name_str = req.contact_name or "there"
+        email_html = f"""
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+        <body style="margin:0;padding:0;font-family:'Segoe UI',Arial,sans-serif;background:#f3f4f6;">
+            <div style="max-width:640px;margin:32px auto;background:#fff;border-radius:16px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
+                <!-- Header -->
+                <div style="background:linear-gradient(135deg,#FF6B35,#e85d27);padding:32px 36px;">
+                    <div style="font-size:22px;font-weight:800;color:#fff;letter-spacing:-0.5px;">TalentBox</div>
+                    <div style="font-size:16px;color:rgba(255,255,255,0.9);margin-top:8px;font-weight:500;">Your matched developer profiles are ready</div>
+                </div>
+                <!-- Body -->
+                <div style="padding:28px 36px;">
+                    <p style="font-size:15px;color:#374151;margin:0 0 6px;">Hi {contact_name_str},</p>
+                    <p style="font-size:14px;color:#6b7280;margin:0 0 20px;">
+                        We found <strong style="color:#111827;">{matched_count} developer{'' if matched_count == 1 else 's'}</strong> matching your role: <strong style="color:#FF6B35;">{req.job_title}</strong>
+                    </p>
+                    {profile_rows_html}
+                </div>
+                <!-- Footer CTA -->
+                <div style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:24px 36px;text-align:center;">
+                    <p style="font-size:13px;color:#6b7280;margin:0 0 14px;">
+                        Want to search <strong>200,000+</strong> developers with advanced filters?
+                    </p>
+                    <a href="https://talentbox.co/signup" style="display:inline-block;background:#FF6B35;color:#fff;font-weight:700;font-size:14px;padding:12px 28px;border-radius:10px;text-decoration:none;">
+                        Start sourcing free →
+                    </a>
+                    <p style="font-size:11px;color:#9ca3af;margin:16px 0 0;">
+                        TalentBox &bull; Developer Sourcing Platform
+                    </p>
+                </div>
+            </div>
+        </body>
+        </html>"""
+
+        # 8. Send email
+        email_subject = f"TalentBox: {matched_count} developer{'s' if matched_count != 1 else ''} matched for '{req.job_title}'"
+        try:
+            EmailService.send_single_email(
+                to_email=req.company_email,
+                subject=email_subject,
+                body_html=email_html,
+            )
+            email_sent = True
+        except Exception as email_err:
+            logger.error(f"hire-free email send failed: {email_err}")
+            email_sent = False
+
+        # 9. Update hire request record
+        db.execute(sql_text("""
+            UPDATE free_hire_requests SET
+                matched_profiles_count = :count,
+                email_sent = :email_sent,
+                email_sent_at = CASE WHEN :email_sent THEN NOW() ELSE NULL END,
+                status = :status
+            WHERE id = :id
+        """), {
+            "count": matched_count,
+            "email_sent": email_sent,
+            "status": "sent" if email_sent else "matched",
+            "id": request_id,
+        })
+        db.commit()
+
+        return {
+            "success": True,
+            "request_id": request_id,
+            "matched_count": matched_count,
+            "preview_profiles": preview_profiles,
+            "message": (
+                f"We found {matched_count} matching developers! Check your inbox at {req.company_email}."
+                if email_sent
+                else f"We found {matched_count} matching developers. Email delivery is pending."
+            ),
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"hire-free error: {e}", exc_info=True)
+        try:
+            db.rollback()
+        except Exception:
+            pass
+        raise HTTPException(status_code=500, detail="Failed to process hire request. Please try again.")
 
 
 # ===== RUN WITH UVICORN =====
