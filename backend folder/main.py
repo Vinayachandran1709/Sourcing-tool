@@ -67,7 +67,12 @@ DbSession = Annotated[Session, Depends(get_db)]
 
 # ===== CONFIGURE CORS ORIGINS FIRST =====
 
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+_raw_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+CORS_ORIGINS = list({o.strip() for o in _raw_origins if o.strip()} | {
+    "https://www.talentbox.co",
+    "https://talentbox.co",
+    "http://localhost:3000",
+})
 
 
 # ===== INITIALIZE FASTAPI APP =====
