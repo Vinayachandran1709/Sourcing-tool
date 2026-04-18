@@ -28,7 +28,9 @@ const EXPERIENCE_OPTIONS = [
 const HomePage = () => {
   const [hireTab, setHireTab] = useState('quick');
   const [hireForm, setHireForm] = useState({ role: '', location: '', skills: '', experience: 0, email: '', company: '' });
-  const [jdForm, setJdForm] = useState({ jd: '', email: '', company: '' });
+  const [jdForm, setJdForm] = useState({ jd: '', email: '', company: '', filename: '' });
+  const [jdFileLoading, setJdFileLoading] = useState(false);
+  const fileInputRef = useRef(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
@@ -75,15 +77,40 @@ const HomePage = () => {
     });
   };
 
+  const handleJdFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setJdFileLoading(true);
+    setError('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const resp = await fetch(`${API_BASE_URL}/api/extract-jd-file`, { method: 'POST', body: formData });
+      const data = await resp.json();
+      if (data.success) {
+        setJdForm(p => ({ ...p, jd: data.text, filename: data.filename }));
+      } else {
+        setError(data.detail || 'Could not extract text from file.');
+      }
+    } catch {
+      setError('Failed to upload file. Please try again.');
+    } finally {
+      setJdFileLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   const handleJdSubmit = (e) => {
     e.preventDefault();
     if (!jdForm.email) { setError('Please enter your work email.'); return; }
-    if (!jdForm.jd || jdForm.jd.length < 50) { setError('Please paste a job description (min 50 characters).'); return; }
+    if (!jdForm.jd || jdForm.jd.length < 50) { setError('Please paste or upload a job description (min 50 characters).'); return; }
     submitHireFree({
       company_email: jdForm.email,
       company_name: jdForm.company || undefined,
       job_title: 'Developer',
       job_description: jdForm.jd,
+      jd_source: jdForm.filename ? 'uploaded' : 'pasted',
+      jd_filename: jdForm.filename || undefined,
     });
   };
 
@@ -250,8 +277,45 @@ const HomePage = () => {
               <form onSubmit={handleJdSubmit}>
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={labelStyle}>Job description *</label>
-                  <textarea rows={5} placeholder="Paste your job description here (minimum 50 characters)..." value={jdForm.jd} onChange={e => setJdForm(p => ({ ...p, jd: e.target.value }))}
+                  <textarea rows={5} placeholder="Paste your job description here (minimum 50 characters)..." value={jdForm.jd} onChange={e => setJdForm(p => ({ ...p, jd: e.target.value, filename: '' }))}
                     style={{ ...inputStyle, resize: 'vertical', minHeight: '120px' }} />
+                </div>
+
+                {/* File upload */}
+                <div style={{ marginBottom: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+                    <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
+                    <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: '500' }}>OR UPLOAD FILE</span>
+                    <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
+                  </div>
+
+                  {jdForm.filename ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      <span style={{ fontSize: '13px', color: '#15803d', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{jdForm.filename}</span>
+                      <button type="button" onClick={() => setJdForm(p => ({ ...p, jd: '', filename: '' }))}
+                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '0', fontSize: '16px', lineHeight: 1 }}>×</button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => !jdFileLoading && fileInputRef.current?.click()}
+                      style={{ border: '2px dashed #d1d5db', borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: jdFileLoading ? 'wait' : 'pointer', transition: 'border-color 0.15s' }}
+                      onMouseEnter={e => e.currentTarget.style.borderColor = '#FF6B35'}
+                      onMouseLeave={e => e.currentTarget.style.borderColor = '#d1d5db'}
+                    >
+                      {jdFileLoading ? (
+                        <span style={{ fontSize: '13px', color: '#6b7280' }}>Extracting text...</span>
+                      ) : (
+                        <>
+                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" style={{ marginBottom: '4px' }}>
+                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
+                          </svg>
+                          <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>Click to upload <strong>.pdf</strong>, <strong>.docx</strong>, or <strong>.txt</strong></p>
+                        </>
+                      )}
+                    </div>
+                  )}
+                  <input ref={fileInputRef} type="file" accept=".pdf,.docx,.doc,.txt" style={{ display: 'none' }} onChange={handleJdFileUpload} />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
                   <div>

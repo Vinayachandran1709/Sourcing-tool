@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Request, Header, Response
+from fastapi import FastAPI, HTTPException, Depends, Request, Header, Response, UploadFile, File
 from fastapi.responses import StreamingResponse
 import json
 from fastapi.middleware.cors import CORSMiddleware
@@ -52,7 +52,7 @@ from models import User, Profile, EmailOutreach
 from auth_middleware import get_current_user
 from profile_cache_service import ProfileCacheService
 from email_service import EmailService
-from redis_service import init_redis, get_redis_stats, get_cached_search, set_cached_search, hash_filters
+from redis_service import init_redis, get_redis_stats, get_cached_search, set_cached_search, hash_filters, get_cached_jd_parse, set_cached_jd_parse
 from ai_service import generate_profile_summary, parse_job_description, check_groq_status
 import openai
 from config import GITHUB_TOKEN
@@ -341,6 +341,19 @@ async def startup_event():
                 );
                 CREATE INDEX IF NOT EXISTS idx_hire_requests_email ON free_hire_requests(company_email);
                 CREATE INDEX IF NOT EXISTS idx_hire_requests_status ON free_hire_requests(status);
+            """))
+
+            # Extend free_hire_requests with parsed JD detail columns
+            conn.execute(sa_text("""
+                ALTER TABLE free_hire_requests
+                    ADD COLUMN IF NOT EXISTS jd_source VARCHAR(20) DEFAULT 'pasted',
+                    ADD COLUMN IF NOT EXISTS jd_filename VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS jd_parsed_role VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS jd_parsed_skills TEXT[],
+                    ADD COLUMN IF NOT EXISTS jd_parsed_location VARCHAR(255),
+                    ADD COLUMN IF NOT EXISTS jd_parsed_experience INTEGER,
+                    ADD COLUMN IF NOT EXISTS jd_word_count INTEGER,
+                    ADD COLUMN IF NOT EXISTS jd_char_count INTEGER;
             """))
 
             conn.commit()
@@ -1198,6 +1211,59 @@ async def parse_jd_endpoint(
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/api/extract-jd-file")
+async def extract_jd_file(file: UploadFile = File(...)):
+    """Extract plain text from an uploaded JD file (.pdf, .docx, .txt)."""
+    import io
+    try:
+        filename = file.filename or ""
+        ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+        if ext not in ("pdf", "docx", "doc", "txt"):
+            raise HTTPException(status_code=400, detail="Unsupported file type. Use PDF, DOCX, or TXT.")
+
+        raw = await file.read()
+        if len(raw) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large (max 5 MB).")
+
+        text = ""
+        if ext == "txt":
+            text = raw.decode("utf-8", errors="ignore")
+        elif ext == "pdf":
+            try:
+                import pypdf
+                reader = pypdf.PdfReader(io.BytesIO(raw))
+                text = "\n".join(page.extract_text() or "" for page in reader.pages)
+            except Exception as pdf_err:
+                logger.error(f"PDF extraction error: {pdf_err}")
+                raise HTTPException(status_code=422, detail="Could not extract text from PDF.")
+        elif ext in ("docx", "doc"):
+            try:
+                import docx as _docx
+                doc = _docx.Document(io.BytesIO(raw))
+                text = "\n".join(p.text for p in doc.paragraphs)
+            except Exception as docx_err:
+                logger.error(f"DOCX extraction error: {docx_err}")
+                raise HTTPException(status_code=422, detail="Could not extract text from DOCX.")
+
+        text = text.strip()
+        if len(text) < 30:
+            raise HTTPException(status_code=422, detail="File appears to be empty or unreadable.")
+
+        return {
+            "success": True,
+            "text": text,
+            "filename": filename,
+            "char_count": len(text),
+            "word_count": len(text.split()),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"JD file extract error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to extract file contents.")
+
+
 @app.post("/api/generate-profile-summary")
 async def generate_summary_endpoint(
     request: Request,
@@ -1244,6 +1310,8 @@ class FreeHireRequest(BaseModel):
     preferred_location: Optional[str] = None
     experience_min: Optional[int] = 0
     remote_ok: Optional[bool] = False
+    jd_source: Optional[str] = 'pasted'
+    jd_filename: Optional[str] = None
 
 
 # ===== DEVCARD ENDPOINTS =====
@@ -1665,25 +1733,34 @@ async def hire_free(req: FreeHireRequest, db: DbSession):
         from sqlalchemy import text as sql_text
         from archive_search_service import search_developers, developer_to_dict
 
+        import hashlib as _hashlib, re as _re
+
         # 1. Insert hire request with status='processing'
+        jd_text = req.job_description or ""
         result = db.execute(sql_text("""
             INSERT INTO free_hire_requests
                 (company_email, company_name, contact_name, job_title, job_description,
-                 required_skills, preferred_location, experience_min, remote_ok, status)
+                 required_skills, preferred_location, experience_min, remote_ok, status,
+                 jd_source, jd_filename, jd_word_count, jd_char_count)
             VALUES
                 (:company_email, :company_name, :contact_name, :job_title, :job_description,
-                 :required_skills, :preferred_location, :experience_min, :remote_ok, 'processing')
+                 :required_skills, :preferred_location, :experience_min, :remote_ok, 'processing',
+                 :jd_source, :jd_filename, :jd_word_count, :jd_char_count)
             RETURNING id
         """), {
             "company_email": req.company_email,
             "company_name": req.company_name,
             "contact_name": req.contact_name,
             "job_title": req.job_title,
-            "job_description": req.job_description,
+            "job_description": jd_text or None,
             "required_skills": req.required_skills or [],
             "preferred_location": req.preferred_location,
             "experience_min": req.experience_min or 0,
             "remote_ok": req.remote_ok or False,
+            "jd_source": req.jd_source or "pasted",
+            "jd_filename": req.jd_filename,
+            "jd_word_count": len(jd_text.split()) if jd_text else None,
+            "jd_char_count": len(jd_text) if jd_text else None,
         })
         db.commit()
         request_id = result.fetchone()[0]
@@ -1691,42 +1768,97 @@ async def hire_free(req: FreeHireRequest, db: DbSession):
         # 2. Detect role from job title
         detected_role = _detect_role_from_title(req.job_title)
 
-        # 3. Extract skills from JD via AI if provided
+        # 3. Extract skills + parse JD via AI if provided (with Redis cache)
         all_skills = list(req.required_skills or [])
-        if req.job_description and openai.api_key:
-            try:
-                client_ai = openai.OpenAI(api_key=openai.api_key)
-                skill_resp = client_ai.chat.completions.create(
-                    model="gpt-4o-mini",
-                    messages=[{"role": "user", "content": (
-                        "Extract the top 5-8 technical skills/technologies mentioned in this job description "
-                        "as a JSON array of strings. Return ONLY the JSON array, nothing else.\n\n"
-                        f"{req.job_description[:3000]}"
-                    )}],
-                    max_tokens=150,
-                    temperature=0.1,
-                )
-                ai_skills_text = skill_resp.choices[0].message.content.strip()
-                import re as _re
-                ai_skills_text = _re.sub(r'^```(?:json)?\s*|\s*```$', '', ai_skills_text, flags=_re.MULTILINE).strip()
-                ai_skills = json.loads(ai_skills_text)
-                if isinstance(ai_skills, list):
-                    for s in ai_skills:
-                        if isinstance(s, str) and s not in all_skills:
-                            all_skills.append(s)
-            except Exception as skill_err:
-                logger.warning(f"AI skill extraction failed: {skill_err}")
+        parsed_role = None
+        parsed_location = None
+        parsed_experience = None
 
-        # 4. Search DB for matching developers
+        if jd_text and openai.api_key:
+            jd_hash = _hashlib.md5(jd_text[:5000].encode()).hexdigest()
+            cached_parse = await get_cached_jd_parse(jd_hash)
+
+            if cached_parse:
+                logger.info(f"JD parse cache hit: {jd_hash}")
+                ai_skills = cached_parse.get("skills", [])
+                parsed_role = cached_parse.get("role")
+                parsed_location = cached_parse.get("location")
+                parsed_experience = cached_parse.get("experience")
+            else:
+                try:
+                    client_ai = openai.OpenAI(api_key=openai.api_key)
+                    skill_resp = client_ai.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": (
+                            "Analyze this job description and return a JSON object with:\n"
+                            "- skills: array of top 5-8 technical skills/technologies\n"
+                            "- role: primary developer role (one of: Frontend Developer, Backend Developer, "
+                            "Full-Stack Developer, Mobile Developer, DevOps Engineer, Data Scientist, "
+                            "AI/ML Engineer, Data Engineer, Security Engineer, QA Engineer, "
+                            "Blockchain Developer, Game Developer, Embedded Engineer, Software Developer)\n"
+                            "- location: preferred location string or null\n"
+                            "- experience: minimum years of experience as integer or null\n"
+                            "Return ONLY valid JSON, no markdown.\n\n"
+                            f"{jd_text[:3000]}"
+                        )}],
+                        max_tokens=250,
+                        temperature=0.1,
+                    )
+                    raw_text = skill_resp.choices[0].message.content.strip()
+                    raw_text = _re.sub(r'^```(?:json)?\s*|\s*```$', '', raw_text, flags=_re.MULTILINE).strip()
+                    parsed = json.loads(raw_text)
+                    ai_skills = parsed.get("skills", []) if isinstance(parsed.get("skills"), list) else []
+                    parsed_role = parsed.get("role")
+                    parsed_location = parsed.get("location")
+                    parsed_experience = parsed.get("experience")
+                    await set_cached_jd_parse(jd_hash, {
+                        "skills": ai_skills,
+                        "role": parsed_role,
+                        "location": parsed_location,
+                        "experience": parsed_experience,
+                    })
+                except Exception as skill_err:
+                    logger.warning(f"AI JD parse failed: {skill_err}")
+                    ai_skills = []
+
+            for s in ai_skills:
+                if isinstance(s, str) and s not in all_skills:
+                    all_skills.append(s)
+
+            # Persist parsed fields to DB
+            if any([parsed_role, parsed_location, parsed_experience, ai_skills]):
+                try:
+                    db.execute(sql_text("""
+                        UPDATE free_hire_requests SET
+                            jd_parsed_role = :role,
+                            jd_parsed_skills = :skills,
+                            jd_parsed_location = :location,
+                            jd_parsed_experience = :experience
+                        WHERE id = :id
+                    """), {
+                        "role": parsed_role,
+                        "skills": ai_skills if ai_skills else None,
+                        "location": parsed_location,
+                        "experience": parsed_experience,
+                        "id": request_id,
+                    })
+                    db.commit()
+                except Exception as db_err:
+                    logger.warning(f"Failed to persist parsed JD fields: {db_err}")
+
+        # 4. Search DB for matching developers (use AI-parsed values when available)
+        search_role = parsed_role or detected_role
+        search_location = req.preferred_location or parsed_location
+        search_experience = req.experience_min or parsed_experience
         db_results = search_developers(
             db,
-            role=detected_role,
-            location=req.preferred_location,
+            role=search_role,
+            location=search_location,
             languages=all_skills if all_skills else None,
             limit=20,
             min_score=30,
             has_email=True,
-            min_experience=req.experience_min if req.experience_min else None,
+            min_experience=search_experience if search_experience else None,
         )
         matched_dicts = [developer_to_dict(dev) for dev in db_results]
 

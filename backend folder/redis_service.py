@@ -99,6 +99,35 @@ async def set_cached_search(filter_hash: str, usernames: list):
         pass
 
 
+# ===== JD PARSE CACHE =====
+
+async def get_cached_jd_parse(jd_hash: str):
+    """Return cached JD parse result dict, or None."""
+    if redis_client is None:
+        return None
+    try:
+        raw = await redis_client.get(f"jd_parse:{jd_hash}")
+        if raw is None:
+            return None
+        return json.loads(raw)
+    except Exception:
+        return None
+
+
+async def set_cached_jd_parse(jd_hash: str, result: dict):
+    """Cache JD parse result for 24 hours."""
+    if redis_client is None:
+        return
+    try:
+        await redis_client.set(
+            f"jd_parse:{jd_hash}",
+            json.dumps(result),
+            ex=86400,  # 24 hours
+        )
+    except Exception:
+        pass
+
+
 # ===== UTILITIES =====
 
 def hash_filters(filters: dict) -> str:
