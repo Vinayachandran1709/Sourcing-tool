@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Search, RotateCcw } from 'lucide-react';
 
 // ===== CONSTANTS =====
@@ -229,9 +229,12 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
   const [activeSpecLabel, setActiveSpecLabel] = useState(null);
   const [showAllLanguages, setShowAllLanguages] = useState(false);
   const [jdText, setJdText] = useState('');
+  const [jdFilename, setJdFilename] = useState('');
   const [isParsingJd, setIsParsingJd] = useState(false);
+  const [jdFileLoading, setJdFileLoading] = useState(false);
   const [jdError, setJdError] = useState('');
   const [jdSuccess, setJdSuccess] = useState('');
+  const jdFileRef = useRef(null);
 
   const specializations = ROLE_SPECIALIZATIONS[filters.role] || null;
 
@@ -262,6 +265,36 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     setShowAllLanguages(false);
     if (onReset) {
       onReset();
+    }
+  };
+
+  const handleJdFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setJdFileLoading(true);
+    setJdError('');
+    setJdSuccess('');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      const resp = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/extract-jd-file`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
+        body: formData,
+      });
+      const data = await resp.json();
+      if (data.success) {
+        setJdText(data.text);
+        setJdFilename(data.filename);
+        setJdError('');
+      } else {
+        setJdError(data.detail || 'Could not extract text from file.');
+      }
+    } catch {
+      setJdError('Failed to upload file. Please try again.');
+    } finally {
+      setJdFileLoading(false);
+      if (jdFileRef.current) jdFileRef.current.value = '';
     }
   };
 
@@ -317,6 +350,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
 
         setTimeout(() => {
           setJdText('');
+          setJdFilename('');
           setJdSuccess('');
         }, 3000);
       } else {
@@ -379,12 +413,46 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
             value={jdText}
             onChange={(e) => {
               setJdText(e.target.value);
+              setJdFilename('');
               setJdError('');
               setJdSuccess('');
             }}
             placeholder={`Paste your job description here... (minimum 50 characters)\n\nExample: Looking for a Senior Backend Developer with 5+ years experience in Python and Go. Must have experience with microservices, REST APIs, and cloud platforms like AWS or GCP. Remote-friendly, based in Bangalore preferred.`}
             style={styles.jdTextarea}
           />
+
+          {/* File upload row */}
+          <div style={{ marginTop: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+              <div style={{ flex: 1, height: '1px', background: '#ddd6fe' }} />
+              <span style={{ fontSize: '11px', color: '#a78bfa', fontWeight: 500 }}>OR UPLOAD FILE</span>
+              <div style={{ flex: 1, height: '1px', background: '#ddd6fe' }} />
+            </div>
+            {jdFilename ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '7px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style={{ fontSize: '12px', color: '#15803d', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{jdFilename}</span>
+                <button type="button" onClick={() => { setJdText(''); setJdFilename(''); }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', fontSize: '16px', lineHeight: 1, padding: 0 }}>×</button>
+              </div>
+            ) : (
+              <div
+                onClick={() => !jdFileLoading && jdFileRef.current?.click()}
+                style={{ border: '1.5px dashed #c4b5fd', borderRadius: '8px', padding: '10px', textAlign: 'center', cursor: jdFileLoading ? 'wait' : 'pointer', background: 'rgba(255,255,255,0.6)', transition: 'border-color 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#7c3aed'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#c4b5fd'}
+              >
+                {jdFileLoading ? (
+                  <span style={{ fontSize: '12px', color: '#7c3aed' }}>Extracting text...</span>
+                ) : (
+                  <span style={{ fontSize: '12px', color: '#7c3aed' }}>
+                    📎 Upload <strong>.pdf</strong>, <strong>.docx</strong>, or <strong>.txt</strong>
+                  </span>
+                )}
+              </div>
+            )}
+            <input ref={jdFileRef} type="file" accept=".pdf,.docx,.doc,.txt" style={{ display: 'none' }} onChange={handleJdFileUpload} />
+          </div>
 
           {jdError && (
             <div style={styles.jdErrorBox}>
