@@ -11,3 +11,4 @@ talentbox.log
 test_payment.py
 __pycache__/
 *.pyc
+.claude/ 
