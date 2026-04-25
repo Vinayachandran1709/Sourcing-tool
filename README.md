@@ -173,7 +173,7 @@ JWT_SECRET_KEY=your-secret-key
 JWT_ALGORITHM=HS256
 
 # Contribution data API
-GITHUB_TOKEN=your-token
+CONTRIBUTION_API_TOKEN=your-token
 
 # AI
 GROQ_API_KEY=your-groq-api-key
