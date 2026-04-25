@@ -2,7 +2,7 @@
 
 > **Live demo:** [talentbox.co](https://talentbox.co)
 
-TalentBox is an AI-powered tech talent sourcing tool built for recruitment agencies and IT staffing firms. It gives recruiters instant access to 65,000+ pre-scored developer profiles ranked by verified contribution data — cutting screening time from days to minutes.
+TalentBox is an AI-powered tech talent sourcing tool built for recruitment agencies and IT staffing firms. It gives recruiters instant access to 2,00,000+ pre-scored developer profiles ranked by verified contribution data — cutting screening time from days to minutes.
 
 ---
 
@@ -11,7 +11,7 @@ TalentBox is an AI-powered tech talent sourcing tool built for recruitment agenc
 Recruiters search by role, location, skills, experience level, and contribution score. Each profile is scored 0–100 based on verified open-source contributions. An AI layer (Groq / Llama 3.1 70B) generates plain-English summaries of each developer's technical background, and a JD parser extracts filters automatically from a pasted job description.
 
 **Core features:**
-- Search across 65,000+ indexed developer profiles with multi-filter support
+- Search across 2,00,000+ indexed developer profiles with multi-filter support
 - Contribution score (0–100) per profile based on verified coding activity
 - AI profile summaries via Groq (Llama 3.1 70B)
 - JD-to-filter parser: paste a job description, filters auto-populate
