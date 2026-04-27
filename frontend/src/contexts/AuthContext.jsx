@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: 'Invalid response from server' };
     } catch (error) {
       console.error('Login error:', error);
-      const errorMessage = error.response?.data?.detail || 'Login failed. Please try again.';
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Login failed. Please try again.';
       return { success: false, error: errorMessage };
     }
   };
@@ -180,7 +180,7 @@ export const AuthProvider = ({ children }) => {
       return { success: false, error: 'Invalid response from server' };
     } catch (error) {
       console.error('Signup error:', error);
-      const errorMessage = error.response?.data?.detail || 'Signup failed. Please try again.';
+      const errorMessage = error.response?.data?.message || error.response?.data?.detail || 'Signup failed. Please try again.';
       return { success: false, error: errorMessage };
     }
   };

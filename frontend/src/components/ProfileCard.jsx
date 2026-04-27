@@ -98,7 +98,8 @@ const ProfileCard = ({
   isUnlocked,
   aiSummary = null,
   onRequestSummary = null,
-  isLoadingSummary = false
+  isLoadingSummary = false,
+  searchRole = null,
 }) => {
   const prevUnlockedRef = React.useRef(isUnlocked);
   const [justUnlocked, setJustUnlocked] = React.useState(false);
@@ -116,7 +117,7 @@ const ProfileCard = ({
   }, [isUnlocked]);
 
   const displayName = getDisplayName(profile, isUnlocked);
-  const primaryRole = profile.detected_role || profile.detected_roles?.[0] || 'Developer';
+  const primaryRole = searchRole || profile.detected_role || profile.detected_roles?.[0] || 'Developer';
   const allRoles = profile.detected_roles || [];
 
   const handleUnlockClick = () => {
@@ -300,8 +301,8 @@ const ProfileCard = ({
       {/* Languages */}
       <LanguageTags languages={profile.languages} languagesData={profile.languages_data} />
 
-      {/* Secondary Roles (if any) */}
-      {allRoles.length > 1 && (
+      {/* Secondary Roles (if any) — hidden when a search role is active */}
+      {!searchRole && allRoles.length > 1 && (
         <div style={styles.secondaryRoles}>
           {allRoles.slice(1, 3).map((role, idx) => (
             <span key={idx} style={styles.secondaryRoleTag}>

@@ -71,16 +71,14 @@ const SearchDashboard = () => {
     localStorage.setItem('unlockedProfileIds', JSON.stringify(unlockedProfileIds));
   }, [unlockedProfileIds]);
 
-  const handleSearch = async (searchFilters, page = 1) => {
+  const handleSearch = async (searchFilters) => {
     setLoading(true);
     setProfiles([]);
     setError(null);
-    setCurrentPage(page);
-    if (page === 1) {
-      setCurrentFilters(searchFilters);
-      setScoreFilterRanges([]);
-      trackSearchStarted(searchFilters);
-    }
+    setCurrentPage(1);
+    setCurrentFilters(searchFilters);
+    setScoreFilterRanges([]);
+    trackSearchStarted(searchFilters);
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/search`, {
@@ -96,8 +94,8 @@ const SearchDashboard = () => {
           min_score: searchFilters.minScore || 0,
           has_email: searchFilters.hasEmail || false,
           min_experience: searchFilters.minExperience || 0,
-          page: page,
-          per_page: PROFILES_PER_PAGE,
+          page: 1,
+          per_page: 1000,
         }),
       });
 
@@ -115,7 +113,7 @@ const SearchDashboard = () => {
       setProfiles(data.profiles || []);
       setTotalExpected(data.total || 0);
 
-      if (page === 1) {
+      {
         incrementUsage('search', 1);
         trackSearchPerformed(searchFilters, data.total || 0);
       }
@@ -286,10 +284,13 @@ const SearchDashboard = () => {
 
   const selectedFilteredCount = filteredProfiles.filter(p => p.selected).length;
 
-  const totalPages = Math.ceil(totalExpected / PROFILES_PER_PAGE);
+  const totalPages = Math.ceil(filteredProfiles.length / PROFILES_PER_PAGE);
 
-  // For paginated API, profiles ARE the current page — no client-side slicing needed
-  const paginatedProfiles = filteredProfiles;
+  // All profiles are pre-loaded — slice client-side for instant page navigation
+  const paginatedProfiles = filteredProfiles.slice(
+    (currentPage - 1) * PROFILES_PER_PAGE,
+    currentPage * PROFILES_PER_PAGE
+  );
 
   const getPageNumbers = () => {
     const pages = [];
@@ -342,15 +343,45 @@ const SearchDashboard = () => {
               🎯 Found {totalExpected.toLocaleString()} developers
             </p>
             <p style={styles.resultCountSubtitle}>
-              Page {currentPage} of {totalPages} • Sorted by developer score
+              Showing top {profiles.length.toLocaleString()} • Page {currentPage} of {totalPages} • Sorted by developer score
             </p>
           </div>
         )}
 
         {/* Loading indicator */}
         {loading && (
-          <div style={{ textAlign: 'center', padding: '3rem 0', color: '#6b7280' }}>
-            Searching developers...
+          <div style={{ padding: '2.5rem 0' }}>
+            <style>{`
+              @keyframes sd-spin { to { transform: rotate(360deg); } }
+              @keyframes sd-pulse { 0%,100% { opacity:1; } 50% { opacity:0.55; } }
+              .sd-spinner { animation: sd-spin 0.9s linear infinite; }
+              .sd-pulse { animation: sd-pulse 1.5s ease-in-out infinite; }
+            `}</style>
+            <div style={{
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '18px',
+              padding: '32px 28px',
+              background: 'linear-gradient(135deg, #4c1d95 0%, #3730a3 100%)',
+              borderRadius: '16px',
+              boxShadow: '0 8px 32px rgba(76,29,149,0.35)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                <div className="sd-spinner" style={{
+                  width: '32px', height: '32px',
+                  border: '4px solid rgba(255,255,255,0.2)',
+                  borderTop: '4px solid #ffffff',
+                  borderRadius: '50%',
+                  flexShrink: 0,
+                }} />
+                <div>
+                  <p className="sd-pulse" style={{ margin: 0, fontSize: '20px', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.01em' }}>
+                    Searching Tech Talent
+                  </p>
+                  <p style={{ margin: '4px 0 0', fontSize: '13px', color: 'rgba(255,255,255,0.7)' }}>
+                    Scanning 150,000+ profiles across the database...
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
@@ -503,6 +534,7 @@ const SearchDashboard = () => {
                   onToggleSave={handleToggleSave}
                   isSaved={savedProfileIds.includes(profile.id)}
                   isUnlocked={unlockedProfileIds.includes(profile.id)}
+                  searchRole={currentFilters.role || null}
                 />
               ))}
             </div>
@@ -510,7 +542,7 @@ const SearchDashboard = () => {
             {totalPages > 1 && (
               <div style={styles.pagination}>
                 <button
-                  onClick={() => handleSearch(currentFilters, Math.max(1, currentPage - 1))}
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                   style={{
                     ...styles.paginationButton,
@@ -528,7 +560,7 @@ const SearchDashboard = () => {
                     return (
                       <button
                         key={page}
-                        onClick={() => handleSearch(currentFilters, page)}
+                        onClick={() => setCurrentPage(page)}
                         style={{
                           ...styles.pageNumber,
                           ...(currentPage === page ? styles.pageNumberActive : {})
@@ -541,7 +573,7 @@ const SearchDashboard = () => {
                 </div>
 
                 <button
-                  onClick={() => handleSearch(currentFilters, Math.min(totalPages, currentPage + 1))}
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                   style={{
                     ...styles.paginationButton,

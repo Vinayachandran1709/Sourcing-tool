@@ -263,6 +263,10 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     setFilters({ role: '', location: '', languages: [], minScore: 0, hasEmail: false, minExperience: 0 });
     setActiveSpecLabel(null);
     setShowAllLanguages(false);
+    setJdText('');
+    setJdFilename('');
+    setJdSuccess('');
+    setJdError('');
     if (onReset) {
       onReset();
     }
@@ -323,38 +327,36 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
       if (data.success && data.filters) {
         const parts = [];
         if (data.filters.role) parts.push(`Role: ${data.filters.role}`);
-        if (data.filters.languages?.length) parts.push(`Languages: ${data.filters.languages.join(', ')}`);
         if (data.filters.location) parts.push(`Location: ${data.filters.location}`);
-        if (data.filters.min_experience) parts.push(`Experience: ${data.filters.min_experience}+ years`);
+        if (data.filters.languages?.length) parts.push(`Skills: ${data.filters.languages.join(', ')}`);
 
-        setJdSuccess(`Found: ${parts.join(' • ')}`);
+        setJdSuccess(`Extracted: ${parts.join(' • ')}`);
 
+        // Role + location are the primary search drivers from a JD.
+        // Languages are intentionally excluded here — the role filter already
+        // handles language matching internally, and passing extra languages
+        // would make results too narrow. Experience is also skipped (not measurable).
         const newFilters = {
           role: data.filters.role || '',
           location: data.filters.location || '',
-          languages: data.filters.languages || [],
+          languages: [],
           minScore: filters.minScore || 0,
           hasEmail: filters.hasEmail || false,
-          minExperience: data.filters.min_experience || 0,
+          minExperience: 0,
         };
         setFilters(newFilters);
 
         onApplyFilters({
           role: newFilters.role || null,
           location: newFilters.location || null,
-          languages: newFilters.languages.length > 0 ? newFilters.languages : null,
+          languages: null,
           minScore: newFilters.minScore,
           hasEmail: newFilters.hasEmail,
-          minExperience: newFilters.minExperience,
+          minExperience: 0,
         });
-
-        setTimeout(() => {
-          setJdText('');
-          setJdFilename('');
-          setJdSuccess('');
-        }, 3000);
+        // JD content intentionally kept — cleared only on Reset
       } else {
-        setJdError(data.detail || 'Could not parse job description. Please try again.');
+        setJdError(data.message || data.detail || 'Could not parse job description. Please try again.');
       }
     } catch (error) {
       console.error('JD parse error:', error);
@@ -478,12 +480,29 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
               style={isParsingJd || jdText.length < 50 ? styles.jdBtnDisabled : styles.jdBtn}
             >
               {isParsingJd ? (
-                <>⚙️ &nbsp;Analyzing...</>
+                <>⏳ &nbsp;Analyzing JD...</>
               ) : (
                 <>✨ &nbsp;Find Candidates</>
               )}
             </button>
           </div>
+
+          {/* Searching Tech Talent banner */}
+          {isParsingJd && (
+            <div style={styles.searchingBanner}>
+              <style>{`
+                @keyframes fp-spin { to { transform: rotate(360deg); } }
+                @keyframes fp-pulse { 0%,100% { opacity:1; } 50% { opacity:0.6; } }
+                .fp-spinner { animation: fp-spin 0.8s linear infinite; }
+                .fp-pulse { animation: fp-pulse 1.4s ease-in-out infinite; }
+              `}</style>
+              <div className="fp-spinner" style={styles.searchingSpinner} />
+              <div>
+                <p className="fp-pulse" style={styles.searchingTitle}>Searching Tech Talent</p>
+                <p style={styles.searchingSubtitle}>AI is scanning 150,000+ developer profiles...</p>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Divider */}
@@ -773,21 +792,22 @@ const styles = {
     borderRadius: '8px',
   },
   jdBtn: {
-    padding: '10px 18px',
-    fontSize: '13px',
-    fontWeight: 600,
+    padding: '11px 22px',
+    fontSize: '14px',
+    fontWeight: 700,
     fontFamily: 'Outfit, system-ui, sans-serif',
     color: '#ffffff',
-    backgroundColor: '#7c3aed',
+    background: 'linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)',
     border: 'none',
     borderRadius: '10px',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
-    boxShadow: '0 2px 6px rgba(124,58,237,0.25)',
+    boxShadow: '0 4px 14px rgba(124,58,237,0.45)',
+    letterSpacing: '0.01em',
   },
   jdBtnDisabled: {
-    padding: '10px 18px',
-    fontSize: '13px',
+    padding: '11px 22px',
+    fontSize: '14px',
     fontWeight: 600,
     fontFamily: 'Outfit, system-ui, sans-serif',
     color: '#9ca3af',
@@ -795,6 +815,37 @@ const styles = {
     border: 'none',
     borderRadius: '10px',
     cursor: 'not-allowed',
+    letterSpacing: '0.01em',
+  },
+  searchingBanner: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '14px',
+    marginTop: '14px',
+    padding: '14px 18px',
+    background: 'linear-gradient(135deg, #4c1d95 0%, #3730a3 100%)',
+    borderRadius: '12px',
+    boxShadow: '0 4px 20px rgba(76,29,149,0.4)',
+  },
+  searchingSpinner: {
+    width: '22px',
+    height: '22px',
+    border: '3px solid rgba(255,255,255,0.25)',
+    borderTop: '3px solid #ffffff',
+    borderRadius: '50%',
+    flexShrink: 0,
+  },
+  searchingTitle: {
+    margin: 0,
+    fontSize: '14px',
+    fontWeight: 700,
+    color: '#ffffff',
+    letterSpacing: '0.01em',
+  },
+  searchingSubtitle: {
+    margin: '3px 0 0',
+    fontSize: '12px',
+    color: 'rgba(255,255,255,0.75)',
   },
   jdDivider: {
     display: 'flex',
@@ -984,17 +1035,18 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: '12px 24px',
+    padding: '13px 24px',
     border: 'none',
     borderRadius: '10px',
     fontSize: '15px',
-    fontWeight: 600,
+    fontWeight: 700,
     fontFamily: 'Outfit, system-ui, sans-serif',
     color: '#ffffff',
-    backgroundColor: '#FF6B35',
+    background: 'linear-gradient(135deg, #FF6B35 0%, #ea4d0b 100%)',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
-    boxShadow: '0 2px 8px rgba(255,107,53,0.25)',
+    boxShadow: '0 4px 14px rgba(255,107,53,0.45)',
+    letterSpacing: '0.01em',
   },
 };
 

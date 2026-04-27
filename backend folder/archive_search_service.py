@@ -142,22 +142,21 @@ def search_developers(
 
     # Role filter (search in detected_roles array OR detected_role)
     if role and role in ROLE_TO_LANGUAGES:
-        languages = ROLE_TO_LANGUAGES[role]
+        role_langs = ROLE_TO_LANGUAGES[role]  # separate variable — don't overwrite 'languages'
 
-        # Match if role is in detected_roles array OR matches detected_role
         role_condition = or_(
             GithubDeveloper.detected_role == role,
-            GithubDeveloper.detected_roles.any(role),  # Check if role is in the array
+            GithubDeveloper.detected_roles.any(role),
         )
 
-        # Also match by languages
-        if languages:
-            language_condition = GithubDeveloper.primary_languages.overlap(languages)
+        if role_langs:
+            language_condition = GithubDeveloper.primary_languages.overlap(role_langs)
             query = query.filter(or_(role_condition, language_condition))
         else:
             query = query.filter(role_condition)
 
-    # Language filter - match if any selected language is in primary_languages
+    # Explicit language filter — only when caller passes specific languages (e.g. specialization chips).
+    # When role is provided without explicit languages, the role filter above already handles it.
     if languages and len(languages) > 0:
         query = query.filter(
             GithubDeveloper.primary_languages.overlap(languages)
