@@ -113,10 +113,8 @@ const SearchDashboard = () => {
       setProfiles(data.profiles || []);
       setTotalExpected(data.total || 0);
 
-      {
-        incrementUsage('search', 1);
-        trackSearchPerformed(searchFilters, data.total || 0);
-      }
+      incrementUsage('search', 1);
+      trackSearchPerformed(searchFilters, data.total || 0);
 
     } catch (err) {
       console.error('Search failed:', err);
