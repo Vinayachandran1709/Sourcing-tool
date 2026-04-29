@@ -29,11 +29,11 @@ except Exception:
 # This prevents connection exhaustion on Neon PostgreSQL under concurrent load.
 engine = create_engine(
     DATABASE_URL,
-    pool_size=5,              # Keep 5 connections ready in the pool
-    max_overflow=10,          # Allow up to 10 extra connections under burst load
-    pool_timeout=30,          # Wait up to 30s for a connection before erroring
+    pool_size=2,              # Keep 2 connections ready in the pool
+    max_overflow=3,           # Allow up to 3 extra connections under burst load
+    pool_timeout=10,          # Wait up to 10s for a connection before erroring
     pool_recycle=300,         # Recycle connections every 5 min (prevents stale/closed connections)
-    pool_pre_ping=True,       # Verify connections are alive before using (handles Neon idle disconnects)
+    pool_pre_ping=False,      # Avoid pre-query pings that wake autosuspended Neon compute
     connect_args={
         "connect_timeout": 10,
         "keepalives": 1,

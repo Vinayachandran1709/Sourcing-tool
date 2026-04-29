@@ -85,6 +85,21 @@ app = FastAPI(
     description="API for GitHub developer sourcing and recruitment"
 )
 
+SUSPICIOUS_PATH_FRAGMENTS = (
+    ".env", ".git", ".aws", "config.json", "config.env",
+    "settings.json", "buildmanifest", "manifest.json",
+    "wp-admin", "phpinfo", "/admin/.", "graphql",
+    ".env.local", ".env.production", ".env.development",
+    ".env.backup", ".env.bak", ".env.old", ".env.example",
+)
+
+@app.middleware("http")
+async def block_scanner_probes(request: Request, call_next):
+    path_lower = request.url.path.lower()
+    if any(frag in path_lower for frag in SUSPICIOUS_PATH_FRAGMENTS):
+        return Response(status_code=404)
+    return await call_next(request)
+
 # Log initialization
 logger.info("TalentBox API initialized - Version 2.0.1 (Resend Integration)")
 logger.info(f"Environment: {os.getenv('ENVIRONMENT', 'development')}")
@@ -113,253 +128,248 @@ async def startup_event():
         logger.warning("⚠️ RESEND_API_KEY not found - email features will not work")
     else:
         logger.info("✅ Resend API Key configured")
-    
-    # Validate Database
-    try:
-        from sqlalchemy import text
-        from database import engine
-        with engine.connect() as conn:
-            conn.execute(text("SELECT 1"))
-        logger.info("✅ Database connection successful")
-    except Exception as e:
-        logger.error(f"❌ Database connection failed: {e}")
+
+    logger.info("Skipping startup DB health check (lazy connect on first request)")
 
     # Auto-run payment migration (safe - uses IF NOT EXISTS)
-    try:
-        from sqlalchemy import text as sa_text
-        from database import engine as db_engine
-        with db_engine.connect() as conn:
-            # Add payment columns to users table
-            conn.execute(sa_text("""
-                ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_customer_id VARCHAR(50);
-                ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(50);
-                ALTER TABLE users ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN DEFAULT TRUE;
-                ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method VARCHAR(20);
-                ALTER TABLE users ADD COLUMN IF NOT EXISTS last_payment_date TIMESTAMP WITH TIME ZONE;
-                ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_amount DECIMAL(10, 2) DEFAULT 0;
-                ALTER TABLE users ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'USD';
-            """))
+    if os.getenv("RUN_MIGRATIONS_ON_STARTUP", "false").lower() == "true":
+        try:
+            from sqlalchemy import text as sa_text
+            from database import engine as db_engine
+            with db_engine.connect() as conn:
+                # Add payment columns to users table
+                conn.execute(sa_text("""
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_customer_id VARCHAR(50);
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS razorpay_order_id VARCHAR(50);
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS auto_renew BOOLEAN DEFAULT TRUE;
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS payment_method VARCHAR(20);
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS last_payment_date TIMESTAMP WITH TIME ZONE;
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS subscription_amount DECIMAL(10, 2) DEFAULT 0;
+                    ALTER TABLE users ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'USD';
+                """))
 
-            # Create payment_history table
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS payment_history (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    razorpay_order_id VARCHAR(50) NOT NULL,
-                    razorpay_payment_id VARCHAR(50),
-                    razorpay_signature VARCHAR(255),
-                    amount DECIMAL(10, 2) NOT NULL,
-                    currency VARCHAR(3) DEFAULT 'USD',
-                    amount_inr DECIMAL(10, 2),
-                    plan_name VARCHAR(50) NOT NULL,
-                    billing_cycle VARCHAR(20) NOT NULL,
-                    status VARCHAR(20) DEFAULT 'created',
-                    payment_method VARCHAR(50),
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    paid_at TIMESTAMP WITH TIME ZONE,
-                    receipt VARCHAR(100),
-                    notes JSONB,
-                    error_message TEXT,
-                    CONSTRAINT unique_razorpay_order UNIQUE (razorpay_order_id)
-                );
-                CREATE INDEX IF NOT EXISTS idx_payment_history_user_id ON payment_history(user_id);
-                CREATE INDEX IF NOT EXISTS idx_payment_history_status ON payment_history(status);
-            """))
+                # Create payment_history table
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS payment_history (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        razorpay_order_id VARCHAR(50) NOT NULL,
+                        razorpay_payment_id VARCHAR(50),
+                        razorpay_signature VARCHAR(255),
+                        amount DECIMAL(10, 2) NOT NULL,
+                        currency VARCHAR(3) DEFAULT 'USD',
+                        amount_inr DECIMAL(10, 2),
+                        plan_name VARCHAR(50) NOT NULL,
+                        billing_cycle VARCHAR(20) NOT NULL,
+                        status VARCHAR(20) DEFAULT 'created',
+                        payment_method VARCHAR(50),
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                        paid_at TIMESTAMP WITH TIME ZONE,
+                        receipt VARCHAR(100),
+                        notes JSONB,
+                        error_message TEXT,
+                        CONSTRAINT unique_razorpay_order UNIQUE (razorpay_order_id)
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_payment_history_user_id ON payment_history(user_id);
+                    CREATE INDEX IF NOT EXISTS idx_payment_history_status ON payment_history(status);
+                """))
 
-            # Create subscription_events table
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS subscription_events (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    event_type VARCHAR(50) NOT NULL,
-                    old_plan VARCHAR(50),
-                    new_plan VARCHAR(50),
-                    old_status VARCHAR(20),
-                    new_status VARCHAR(20),
-                    triggered_by VARCHAR(50),
-                    metadata JSONB,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                );
-                CREATE INDEX IF NOT EXISTS idx_subscription_events_user_id ON subscription_events(user_id);
-            """))
+                # Create subscription_events table
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS subscription_events (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        event_type VARCHAR(50) NOT NULL,
+                        old_plan VARCHAR(50),
+                        new_plan VARCHAR(50),
+                        old_status VARCHAR(20),
+                        new_status VARCHAR(20),
+                        triggered_by VARCHAR(50),
+                        metadata JSONB,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_subscription_events_user_id ON subscription_events(user_id);
+                """))
 
-            # Add GraphQL + rate limiting + smart refresh columns and tables
-            conn.execute(sa_text("""
-                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS followers INTEGER DEFAULT 0;
-                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_hireable BOOLEAN DEFAULT FALSE;
-                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS refresh_category VARCHAR(20) DEFAULT 'dormant';
-                ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_refreshed_at TIMESTAMP WITH TIME ZONE;
-            """))
+                # Add GraphQL + rate limiting + smart refresh columns and tables
+                conn.execute(sa_text("""
+                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS followers INTEGER DEFAULT 0;
+                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_hireable BOOLEAN DEFAULT FALSE;
+                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS refresh_category VARCHAR(20) DEFAULT 'dormant';
+                    ALTER TABLE profiles ADD COLUMN IF NOT EXISTS last_refreshed_at TIMESTAMP WITH TIME ZONE;
+                """))
 
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS search_locks (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    locked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
-                    search_completed BOOLEAN DEFAULT FALSE,
-                    CONSTRAINT unique_user_lock UNIQUE (user_id)
-                );
-            """))
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS search_locks (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        locked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                        expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                        search_completed BOOLEAN DEFAULT FALSE,
+                        CONSTRAINT unique_user_lock UNIQUE (user_id)
+                    );
+                """))
 
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS rate_limit_events (
-                    id SERIAL PRIMARY KEY,
-                    event_type VARCHAR(20) NOT NULL,
-                    status_code INTEGER NOT NULL,
-                    retry_after INTEGER,
-                    rate_limit_remaining INTEGER,
-                    rate_limit_resource VARCHAR(50),
-                    endpoint VARCHAR(200),
-                    occurred_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                );
-                CREATE INDEX IF NOT EXISTS idx_rate_limit_events_time ON rate_limit_events(occurred_at);
-            """))
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS rate_limit_events (
+                        id SERIAL PRIMARY KEY,
+                        event_type VARCHAR(20) NOT NULL,
+                        status_code INTEGER NOT NULL,
+                        retry_after INTEGER,
+                        rate_limit_remaining INTEGER,
+                        rate_limit_resource VARCHAR(50),
+                        endpoint VARCHAR(200),
+                        occurred_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_rate_limit_events_time ON rate_limit_events(occurred_at);
+                """))
 
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS profile_unlocks (
-                    id SERIAL PRIMARY KEY,
-                    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-                    profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
-                    unlocked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-                );
-                CREATE INDEX IF NOT EXISTS idx_profile_unlocks_profile ON profile_unlocks(profile_id);
-                CREATE INDEX IF NOT EXISTS idx_profile_unlocks_time ON profile_unlocks(unlocked_at);
-            """))
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS profile_unlocks (
+                        id SERIAL PRIMARY KEY,
+                        user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+                        profile_id INTEGER NOT NULL REFERENCES profiles(id) ON DELETE CASCADE,
+                        unlocked_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_profile_unlocks_profile ON profile_unlocks(profile_id);
+                    CREATE INDEX IF NOT EXISTS idx_profile_unlocks_time ON profile_unlocks(unlocked_at);
+                """))
 
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS refresh_job_log (
-                    id SERIAL PRIMARY KEY,
-                    started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-                    completed_at TIMESTAMP WITH TIME ZONE,
-                    profiles_refreshed INTEGER DEFAULT 0,
-                    profiles_failed INTEGER DEFAULT 0,
-                    status VARCHAR(20) DEFAULT 'running'
-                );
-            """))
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS refresh_job_log (
+                        id SERIAL PRIMARY KEY,
+                        started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+                        completed_at TIMESTAMP WITH TIME ZONE,
+                        profiles_refreshed INTEGER DEFAULT 0,
+                        profiles_failed INTEGER DEFAULT 0,
+                        status VARCHAR(20) DEFAULT 'running'
+                    );
+                """))
 
-            # Backfill refresh categories for existing profiles
-            conn.execute(sa_text("""
-                UPDATE profiles SET refresh_category = 'active' WHERE contributions_last_year >= 300 AND refresh_category = 'dormant';
-                UPDATE profiles SET refresh_category = 'moderate' WHERE contributions_last_year >= 100 AND contributions_last_year < 300 AND refresh_category = 'dormant';
-            """))
+                # Backfill refresh categories for existing profiles
+                conn.execute(sa_text("""
+                    UPDATE profiles SET refresh_category = 'active' WHERE contributions_last_year >= 300 AND refresh_category = 'dormant';
+                    UPDATE profiles SET refresh_category = 'moderate' WHERE contributions_last_year >= 100 AND contributions_last_year < 300 AND refresh_category = 'dormant';
+                """))
 
-            # Add account_type and estimated_experience_years to github_developers
-            conn.execute(sa_text("""
-                ALTER TABLE github_developers ADD COLUMN IF NOT EXISTS account_type VARCHAR(20) DEFAULT 'User';
-                ALTER TABLE github_developers ADD COLUMN IF NOT EXISTS estimated_experience_years INTEGER DEFAULT 0;
-                CREATE INDEX IF NOT EXISTS idx_github_developers_account_type ON github_developers(account_type);
-            """))
+                # Add account_type and estimated_experience_years to github_developers
+                conn.execute(sa_text("""
+                    ALTER TABLE github_developers ADD COLUMN IF NOT EXISTS account_type VARCHAR(20) DEFAULT 'User';
+                    ALTER TABLE github_developers ADD COLUMN IF NOT EXISTS estimated_experience_years INTEGER DEFAULT 0;
+                    CREATE INDEX IF NOT EXISTS idx_github_developers_account_type ON github_developers(account_type);
+                """))
 
-            # Backfill known org accounts using heuristics
-            conn.execute(sa_text("""
-                UPDATE github_developers SET account_type = 'Organization'
-                WHERE (account_type IS NULL OR account_type = 'User')
-                AND (
-                    bio ILIKE '%organization%'
-                    OR bio ILIKE '%open source org%'
-                    OR name ILIKE '%Inc%'
-                    OR name ILIKE '%Corp%'
-                    OR name ILIKE '%Labs%'
-                    OR name ILIKE '%Foundation%'
-                    OR name ILIKE '%Technologies%'
-                    OR (followers > 5000 AND public_repos > 100 AND email IS NULL)
-                );
-            """))
+                # Backfill known org accounts using heuristics
+                conn.execute(sa_text("""
+                    UPDATE github_developers SET account_type = 'Organization'
+                    WHERE (account_type IS NULL OR account_type = 'User')
+                    AND (
+                        bio ILIKE '%organization%'
+                        OR bio ILIKE '%open source org%'
+                        OR name ILIKE '%Inc%'
+                        OR name ILIKE '%Corp%'
+                        OR name ILIKE '%Labs%'
+                        OR name ILIKE '%Foundation%'
+                        OR name ILIKE '%Technologies%'
+                        OR (followers > 5000 AND public_repos > 100 AND email IS NULL)
+                    );
+                """))
 
-            # Backfill estimated_experience_years from github_created_at
-            conn.execute(sa_text("""
-                UPDATE github_developers
-                SET estimated_experience_years = EXTRACT(YEAR FROM NOW()) - EXTRACT(YEAR FROM github_created_at)
-                WHERE github_created_at IS NOT NULL AND (estimated_experience_years IS NULL OR estimated_experience_years = 0);
-            """))
+                # Backfill estimated_experience_years from github_created_at
+                conn.execute(sa_text("""
+                    UPDATE github_developers
+                    SET estimated_experience_years = EXTRACT(YEAR FROM NOW()) - EXTRACT(YEAR FROM github_created_at)
+                    WHERE github_created_at IS NOT NULL AND (estimated_experience_years IS NULL OR estimated_experience_years = 0);
+                """))
 
-            # DevCard profiles table
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS devcard_profiles (
-                    id SERIAL PRIMARY KEY,
-                    github_username VARCHAR(255) UNIQUE NOT NULL,
-                    display_name VARCHAR(255),
-                    avatar_url VARCHAR(500),
-                    bio TEXT,
-                    location VARCHAR(255),
-                    detected_role VARCHAR(100),
-                    seniority_level VARCHAR(50),
-                    primary_languages TEXT[],
-                    language_percentages JSONB DEFAULT '{}',
-                    top_projects JSONB DEFAULT '[]',
-                    contribution_stats JSONB DEFAULT '{}',
-                    ai_summary TEXT,
-                    experience_history JSONB DEFAULT '[]',
-                    developer_score INTEGER DEFAULT 0,
-                    estimated_experience_years INTEGER DEFAULT 0,
-                    resume_uploaded BOOLEAN DEFAULT FALSE,
-                    email VARCHAR(255),
-                    linkedin_url VARCHAR(500),
-                    phone VARCHAR(50),
-                    views_count INTEGER DEFAULT 0,
-                    is_published BOOLEAN DEFAULT TRUE,
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                );
-                CREATE INDEX IF NOT EXISTS idx_devcard_username ON devcard_profiles(github_username);
-            """))
+                # DevCard profiles table
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS devcard_profiles (
+                        id SERIAL PRIMARY KEY,
+                        github_username VARCHAR(255) UNIQUE NOT NULL,
+                        display_name VARCHAR(255),
+                        avatar_url VARCHAR(500),
+                        bio TEXT,
+                        location VARCHAR(255),
+                        detected_role VARCHAR(100),
+                        seniority_level VARCHAR(50),
+                        primary_languages TEXT[],
+                        language_percentages JSONB DEFAULT '{}',
+                        top_projects JSONB DEFAULT '[]',
+                        contribution_stats JSONB DEFAULT '{}',
+                        ai_summary TEXT,
+                        experience_history JSONB DEFAULT '[]',
+                        developer_score INTEGER DEFAULT 0,
+                        estimated_experience_years INTEGER DEFAULT 0,
+                        resume_uploaded BOOLEAN DEFAULT FALSE,
+                        email VARCHAR(255),
+                        linkedin_url VARCHAR(500),
+                        phone VARCHAR(50),
+                        views_count INTEGER DEFAULT 0,
+                        is_published BOOLEAN DEFAULT TRUE,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_devcard_username ON devcard_profiles(github_username);
+                """))
 
-            # Candidate waitlist (lead capture from DevCard creation)
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS candidate_waitlist (
-                    id SERIAL PRIMARY KEY,
-                    email VARCHAR(255),
-                    name VARCHAR(255),
-                    github_username VARCHAR(255),
-                    linkedin_url VARCHAR(500),
-                    phone VARCHAR(50),
-                    source VARCHAR(50) DEFAULT 'devcard',
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                );
-                CREATE INDEX IF NOT EXISTS idx_waitlist_email ON candidate_waitlist(email);
-            """))
+                # Candidate waitlist (lead capture from DevCard creation)
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS candidate_waitlist (
+                        id SERIAL PRIMARY KEY,
+                        email VARCHAR(255),
+                        name VARCHAR(255),
+                        github_username VARCHAR(255),
+                        linkedin_url VARCHAR(500),
+                        phone VARCHAR(50),
+                        source VARCHAR(50) DEFAULT 'devcard',
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_waitlist_email ON candidate_waitlist(email);
+                """))
 
-            # Free hire requests (companies posting jobs for free matching)
-            conn.execute(sa_text("""
-                CREATE TABLE IF NOT EXISTS free_hire_requests (
-                    id SERIAL PRIMARY KEY,
-                    company_email VARCHAR(255) NOT NULL,
-                    company_name VARCHAR(255),
-                    contact_name VARCHAR(255),
-                    job_title VARCHAR(255) NOT NULL,
-                    job_description TEXT,
-                    required_skills TEXT[],
-                    preferred_location VARCHAR(255),
-                    experience_min INTEGER DEFAULT 0,
-                    remote_ok BOOLEAN DEFAULT FALSE,
-                    matched_profiles_count INTEGER DEFAULT 0,
-                    email_sent BOOLEAN DEFAULT FALSE,
-                    email_sent_at TIMESTAMP WITH TIME ZONE,
-                    status VARCHAR(50) DEFAULT 'pending',
-                    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-                );
-                CREATE INDEX IF NOT EXISTS idx_hire_requests_email ON free_hire_requests(company_email);
-                CREATE INDEX IF NOT EXISTS idx_hire_requests_status ON free_hire_requests(status);
-            """))
+                # Free hire requests (companies posting jobs for free matching)
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS free_hire_requests (
+                        id SERIAL PRIMARY KEY,
+                        company_email VARCHAR(255) NOT NULL,
+                        company_name VARCHAR(255),
+                        contact_name VARCHAR(255),
+                        job_title VARCHAR(255) NOT NULL,
+                        job_description TEXT,
+                        required_skills TEXT[],
+                        preferred_location VARCHAR(255),
+                        experience_min INTEGER DEFAULT 0,
+                        remote_ok BOOLEAN DEFAULT FALSE,
+                        matched_profiles_count INTEGER DEFAULT 0,
+                        email_sent BOOLEAN DEFAULT FALSE,
+                        email_sent_at TIMESTAMP WITH TIME ZONE,
+                        status VARCHAR(50) DEFAULT 'pending',
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                    CREATE INDEX IF NOT EXISTS idx_hire_requests_email ON free_hire_requests(company_email);
+                    CREATE INDEX IF NOT EXISTS idx_hire_requests_status ON free_hire_requests(status);
+                """))
 
-            # Extend free_hire_requests with parsed JD detail columns
-            conn.execute(sa_text("""
-                ALTER TABLE free_hire_requests
-                    ADD COLUMN IF NOT EXISTS jd_source VARCHAR(20) DEFAULT 'pasted',
-                    ADD COLUMN IF NOT EXISTS jd_filename VARCHAR(255),
-                    ADD COLUMN IF NOT EXISTS jd_parsed_role VARCHAR(255),
-                    ADD COLUMN IF NOT EXISTS jd_parsed_skills TEXT[],
-                    ADD COLUMN IF NOT EXISTS jd_parsed_location VARCHAR(255),
-                    ADD COLUMN IF NOT EXISTS jd_parsed_experience INTEGER,
-                    ADD COLUMN IF NOT EXISTS jd_word_count INTEGER,
-                    ADD COLUMN IF NOT EXISTS jd_char_count INTEGER;
-            """))
+                # Extend free_hire_requests with parsed JD detail columns
+                conn.execute(sa_text("""
+                    ALTER TABLE free_hire_requests
+                        ADD COLUMN IF NOT EXISTS jd_source VARCHAR(20) DEFAULT 'pasted',
+                        ADD COLUMN IF NOT EXISTS jd_filename VARCHAR(255),
+                        ADD COLUMN IF NOT EXISTS jd_parsed_role VARCHAR(255),
+                        ADD COLUMN IF NOT EXISTS jd_parsed_skills TEXT[],
+                        ADD COLUMN IF NOT EXISTS jd_parsed_location VARCHAR(255),
+                        ADD COLUMN IF NOT EXISTS jd_parsed_experience INTEGER,
+                        ADD COLUMN IF NOT EXISTS jd_word_count INTEGER,
+                        ADD COLUMN IF NOT EXISTS jd_char_count INTEGER;
+                """))
 
-            conn.commit()
-        logger.info("✅ Payment tables verified/created")
-    except Exception as e:
-        logger.error(f"⚠️ Payment migration error: {e}")
+                conn.commit()
+            logger.info("✅ Payment tables verified/created")
+        except Exception as e:
+            logger.error(f"⚠️ Payment migration error: {e}")
+    else:
+        logger.info("Skipping startup migrations (set RUN_MIGRATIONS_ON_STARTUP=true to apply schema changes)")
 
     # Validate JWT Secret
     from auth_middleware import SECRET_KEY
@@ -1108,8 +1118,18 @@ def greenhouse_callback(code: Optional[str] = None, error: Optional[str] = None)
 # ===== HEALTH CHECK =====
 
 @app.get("/api/health")
-def health_check(db: DbSession):
+def health_check():
     """Check if API is running"""
+    return {
+        "status": "healthy",
+        "version": "2.0.1",
+        "timestamp": datetime.now(timezone.utc).isoformat()
+    }
+
+
+@app.get("/api/health/deep")
+def deep_health_check(db: DbSession):
+    """Check if API and database are running"""
     try:
         # Test database connection
         from sqlalchemy import text

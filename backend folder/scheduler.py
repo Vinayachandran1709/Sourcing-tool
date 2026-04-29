@@ -8,6 +8,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from datetime import datetime, timezone, timedelta
 import logging
+import os
 
 from perpetual_indexer import run_perpetual_index
 
@@ -24,13 +25,17 @@ async def _nightly_refresh_wrapper():
 
 def init_scheduler():
     """Initialize APScheduler with the nightly refresh job."""
-    scheduler.add_job(
-        _nightly_refresh_wrapper,
-        CronTrigger(hour=2, minute=0, timezone="UTC"),
-        id="nightly_profile_refresh",
-        replace_existing=True,
-        misfire_grace_time=3600,  # Allow 1 hour grace if missed
-    )
+    if os.getenv("ENABLE_NIGHTLY_REFRESH", "false").lower() == "true":
+        scheduler.add_job(
+            _nightly_refresh_wrapper,
+            CronTrigger(hour=2, minute=0, timezone="UTC"),
+            id="nightly_profile_refresh",
+            replace_existing=True,
+            misfire_grace_time=3600,  # Allow 1 hour grace if missed
+        )
+        logger.info("APScheduler: nightly refresh ENABLED, next run at 2:00 UTC")
+    else:
+        logger.info("APScheduler: nightly refresh DISABLED via ENABLE_NIGHTLY_REFRESH env var")
     # Perpetual Developer Indexer - DISABLED (paused to reduce compute)
     # To re-enable, uncomment the block below:
     # scheduler.add_job(
