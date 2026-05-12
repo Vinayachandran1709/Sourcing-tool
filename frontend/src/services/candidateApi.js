@@ -73,4 +73,19 @@ export const getCandidateImportStatus = async () => {
   return response.data;
 };
 
+export const startConversation = async () => {
+  const response = await candidateApi.post('/api/candidate/conversation/start');
+  return response.data;
+};
+
+export const sendConversationMessage = async (message) => {
+  const response = await candidateApi.post('/api/candidate/conversation/message', { message });
+  return response.data;
+};
+
+export const completeConversation = async () => {
+  const response = await candidateApi.post('/api/candidate/conversation/complete');
+  return response.data;
+};
+
 export default candidateApi;

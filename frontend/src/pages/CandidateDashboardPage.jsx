@@ -92,6 +92,9 @@ const CandidateDashboardPage = () => {
                     <div style={styles.roleHeader}>
                       <span style={styles.primaryRole}>{profile?.detected_role || 'Software Developer'}</span>
                       <span style={styles.seniorityBadge}>{profile?.seniority_level || 'Mid-Level'}</span>
+                      {(user?.onboarding_status === 'profile_ready' || user?.onboarding_status === 'conversation_complete') && (
+                        <span style={{...styles.seniorityBadge, background: '#D1FAE5', color: '#065F46'}}>Match Ready ✓</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -134,6 +137,63 @@ const CandidateDashboardPage = () => {
                   </div>
                 </div>
               )}
+
+              {/* Career Preferences */}
+              {(user?.onboarding_status === 'profile_ready' || user?.onboarding_status === 'conversation_complete') && profile?.career_preferences && (
+                <div style={styles.card}>
+                  <h3 style={styles.sectionTitle}>Career Preferences</h3>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                    <div>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Company Type</p>
+                      <p style={{ margin: '0 0 12px 0', color: '#1E293B', fontWeight: '500' }}>{profile.career_preferences.company_type_preference || 'Any'}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Work Style</p>
+                      <p style={{ margin: '0 0 12px 0', color: '#1E293B', fontWeight: '500' }}>{profile.career_preferences.work_style || 'Flexible'}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Availability</p>
+                      <p style={{ margin: '0 0 12px 0', color: '#1E293B', fontWeight: '500' }}>{profile.career_preferences.availability || 'Open to offers'}</p>
+                    </div>
+                    <div>
+                      <p style={{ margin: '0 0 4px 0', fontSize: '0.85rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Optimizing For</p>
+                      <p style={{ margin: '0 0 12px 0', color: '#1E293B', fontWeight: '500' }}>
+                        {profile.career_preferences.optimizing_for && Array.isArray(profile.career_preferences.optimizing_for) 
+                          ? profile.career_preferences.optimizing_for.join(', ') 
+                          : 'Not specified'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Technical Assessment */}
+              {(user?.onboarding_status === 'profile_ready' || user?.onboarding_status === 'conversation_complete') && profile?.technical_assessment && (
+                <div style={styles.card}>
+                  <h3 style={styles.sectionTitle}>Technical Assessment</h3>
+                  <div style={{ display: 'flex', gap: '24px', marginBottom: '16px' }}>
+                    <div style={{ flex: 1, background: '#F8FAFC', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Technical Depth</p>
+                      <p style={{ margin: 0, fontSize: '1.5rem', color: '#0F172A', fontWeight: '700' }}>{profile.technical_assessment.technical_depth_score || 'N/A'}/100</p>
+                    </div>
+                    <div style={{ flex: 1, background: '#F8FAFC', padding: '16px', borderRadius: '12px', textAlign: 'center', border: '1px solid #E2E8F0' }}>
+                      <p style={{ margin: '0 0 8px 0', fontSize: '0.85rem', color: '#64748B', fontWeight: '600', textTransform: 'uppercase' }}>Communication</p>
+                      <p style={{ margin: 0, fontSize: '1.5rem', color: '#0F172A', fontWeight: '700' }}>{profile.technical_assessment.communication_clarity || 'N/A'}/100</p>
+                    </div>
+                  </div>
+                  {profile.technical_assessment.strongest_areas && profile.technical_assessment.strongest_areas.length > 0 && (
+                    <div style={{ marginBottom: '12px' }}>
+                      <span style={{ fontWeight: '600', color: '#334155' }}>Strongest Areas: </span>
+                      <span style={{ color: '#475569' }}>{profile.technical_assessment.strongest_areas.join(', ')}</span>
+                    </div>
+                  )}
+                  {profile.technical_assessment.key_observations && (
+                    <div style={{ padding: '12px', background: '#F1F5F9', borderRadius: '8px', borderLeft: '4px solid #3B82F6' }}>
+                      <p style={{ margin: 0, color: '#334155', fontStyle: 'italic', fontSize: '0.95rem' }}>"{profile.technical_assessment.key_observations}"</p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Right Column: Signals & Stats */}
@@ -141,18 +201,28 @@ const CandidateDashboardPage = () => {
               <div style={styles.card}>
                 <h3 style={styles.sectionTitle}>Engineering Signals</h3>
                 <div style={styles.signalsList}>
-                  <div style={styles.signalItem}>
-                    <CheckCircle2 size={18} color="#10b981" />
-                    <span>Has automated tests</span>
-                  </div>
-                  <div style={styles.signalItem}>
-                    <CheckCircle2 size={18} color="#10b981" />
-                    <span>Uses CI/CD pipelines</span>
-                  </div>
-                  <div style={styles.signalItem}>
-                    <CheckCircle2 size={18} color="#10b981" />
-                    <span>Consistent contributor</span>
-                  </div>
+                  {(() => {
+                    const signals = profile?.github_analysis?.engineering_signals || {};
+                    const signalItems = [
+                      { key: 'has_tests', label: 'Has automated tests' },
+                      { key: 'has_ci', label: 'Uses CI/CD pipelines' },
+                      { key: 'has_docker', label: 'Uses Docker' },
+                      { key: 'has_documentation', label: 'Has documentation' },
+                      { key: 'has_license', label: 'Has open source license' },
+                      { key: 'consistent_contributor', label: 'Consistent contributor' },
+                      { key: 'multi_language', label: 'Multi-language developer' },
+                    ];
+                    return signalItems.map(item => (
+                      <div key={item.key} style={styles.signalItem}>
+                        {signals[item.key] ? (
+                          <CheckCircle2 size={18} color="#10b981" />
+                        ) : (
+                          <AlertCircle size={18} color="#9CA3AF" />
+                        )}
+                        <span style={{ color: signals[item.key] ? '#374151' : '#9CA3AF' }}>{item.label}</span>
+                      </div>
+                    ));
+                  })()}
                 </div>
               </div>
 
@@ -178,9 +248,23 @@ const CandidateDashboardPage = () => {
               <div style={styles.nextStepCard}>
                 <h3 style={styles.sectionTitle}>Ready for the next step?</h3>
                 <p style={styles.actionText}>Complete the AI screening to become "Match Ready".</p>
-                <button style={styles.disabledBtn} disabled title="Coming in Phase 3">
-                  Start AI Interview (Coming Soon)
-                </button>
+                {user?.onboarding_status === 'github_imported' ? (
+                  <button onClick={() => navigate('/candidate/conversation')} style={{...styles.actionBtn, width: '100%'}}>
+                    Start AI Interview →
+                  </button>
+                ) : user?.onboarding_status === 'conversation_started' ? (
+                  <button onClick={() => navigate('/candidate/conversation')} style={{...styles.actionBtn, width: '100%', background: '#4F46E5'}}>
+                    Continue AI Interview →
+                  </button>
+                ) : (user?.onboarding_status === 'conversation_complete' || user?.onboarding_status === 'profile_ready') ? (
+                  <button style={{...styles.disabledBtn, background: '#10B981', color: 'white', opacity: 0.9}} disabled>
+                    Interview Complete ✓
+                  </button>
+                ) : (
+                  <button style={styles.disabledBtn} disabled title="Import required">
+                    Start AI Interview (Pending)
+                  </button>
+                )}
               </div>
             </div>
           </div>

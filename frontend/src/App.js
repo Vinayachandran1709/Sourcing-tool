@@ -30,6 +30,7 @@ import CandidateSignupPage from './pages/CandidateSignupPage';
 import CandidateLoginPage from './pages/CandidateLoginPage';
 import CandidateDashboardPage from './pages/CandidateDashboardPage';
 import CandidateImportPage from './pages/CandidateImportPage';
+import CandidateConversationPage from './pages/CandidateConversationPage';
 
 // Dashboard Layout & Pages
 import DashboardLayout from './components/dashboard/DashboardLayout';
@@ -83,6 +84,11 @@ function App() {
             <Route path="/candidate/dashboard" element={
               <CandidatePrivateRoute>
                 <CandidateDashboardPage />
+              </CandidatePrivateRoute>
+            } />
+            <Route path="/candidate/conversation" element={
+              <CandidatePrivateRoute>
+                <CandidateConversationPage />
               </CandidatePrivateRoute>
             } />
 

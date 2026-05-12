@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends, Request, Header, Response, UploadFile, File
+from fastapi import FastAPI, HTTPException, Depends, Request, Header, Response, UploadFile, File, Body
 from fastapi.responses import StreamingResponse
 import json
 from fastapi.middleware.cors import CORSMiddleware
@@ -840,8 +840,10 @@ async def get_candidate_profile(
     db: DbSession,
     current_candidate = Depends(get_current_candidate),
 ):
-    """Get current candidate profile data."""
-    profile = db.query(CandidateProfile).filter(CandidateProfile.candidate_id == current_candidate.id).first()
+    """Get current candidate profile data \u2014 full response for dashboard."""
+    profile = db.query(CandidateProfile).filter(
+        CandidateProfile.candidate_id == current_candidate.id
+    ).first()
     
     return {
         "success": True,
@@ -850,13 +852,27 @@ async def get_candidate_profile(
             "name": current_candidate.name,
             "email": current_candidate.email,
             "github_username": current_candidate.github_username,
+            "phone": current_candidate.phone,
+            "location": current_candidate.location,
+            "avatar_url": current_candidate.avatar_url,
+            "linkedin_url": current_candidate.linkedin_url,
+            "portfolio_url": current_candidate.portfolio_url,
             "onboarding_status": current_candidate.onboarding_status,
             "profile": {
                 "github_analysis": profile.github_analysis if profile else {},
                 "resume_data": profile.resume_data if profile else {},
+                "portfolio_data": profile.portfolio_data if profile else {},
+                "conversation_data": profile.conversation_data if profile else {},
+                "career_preferences": profile.career_preferences if profile else {},
+                "technical_assessment": profile.technical_assessment if profile else {},
                 "ai_summary": profile.ai_summary if profile else None,
                 "detected_role": profile.detected_role if profile else None,
-                "skills": profile.skills if profile else []
+                "detected_roles": profile.detected_roles if profile else [],
+                "seniority_level": profile.seniority_level if profile else None,
+                "skills": profile.skills if profile else [],
+                "engineering_maturity_score": profile.engineering_maturity_score if profile else 0,
+                "profile_quality_score": profile.profile_quality_score if profile else 0,
+                "match_ready": profile.match_ready if profile else False,
             }
         }
     }
@@ -936,6 +952,165 @@ async def upload_candidate_resume(
     except Exception as e:
         logger.error(f"Resume upload error: {e}")
         raise HTTPException(status_code=500, detail="Failed to upload and parse resume.")
+
+@app.post("/api/candidate/conversation/start")
+async def start_candidate_conversation(
+    db: DbSession,
+    current_candidate = Depends(get_current_candidate),
+):
+    """Start the AI conversation for a candidate."""
+    from candidate_conversation_agent import start_conversation
+    
+    profile = db.query(CandidateProfile).filter(
+        CandidateProfile.candidate_id == current_candidate.id
+    ).first()
+    
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found. Complete data import first.")
+    
+    # Check if conversation already exists and is complete
+    existing_conv = profile.conversation_data or {}
+    if existing_conv.get("completed_at"):
+        raise HTTPException(status_code=400, detail="Conversation already completed.")
+    
+    # Check if candidate has at least GitHub analysis
+    if not profile.github_analysis:
+        raise HTTPException(status_code=400, detail="Please complete the GitHub profile import first.")
+    
+    result = start_conversation(profile.github_analysis, profile.resume_data or {})
+    
+    profile.conversation_data = result["conversation_data"]
+    current_candidate.onboarding_status = "conversation_started"
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": result["ai_message"],
+        "state": result["conversation_data"]["state"],
+        "stages_completed": result["conversation_data"]["stages_completed"]
+    }
+
+@app.post("/api/candidate/conversation/message")
+async def send_candidate_message(
+    db: DbSession,
+    body: dict = Body(...),
+    current_candidate = Depends(get_current_candidate),
+):
+    """Process a candidate's message in the conversation."""
+    from candidate_conversation_agent import process_candidate_message
+    
+    candidate_message = body.get("message", "").strip()
+    if not candidate_message:
+        raise HTTPException(status_code=400, detail="Message cannot be empty.")
+    if len(candidate_message) > 5000:
+        raise HTTPException(status_code=400, detail="Message too long (max 5000 characters).")
+    
+    profile = db.query(CandidateProfile).filter(
+        CandidateProfile.candidate_id == current_candidate.id
+    ).first()
+    
+    if not profile or not profile.conversation_data:
+        raise HTTPException(status_code=400, detail="No active conversation. Start one first.")
+    
+    conv_data = profile.conversation_data
+    if conv_data.get("completed_at"):
+        return {
+            "success": True,
+            "message": "Your conversation is already complete. Check your dashboard.",
+            "is_complete": True,
+            "state": "summary"
+        }
+    
+    # Get last AI message timestamp for response timing
+    last_ai_msg = None
+    for m in reversed(conv_data.get("messages", [])):
+        if m["role"] == "assistant":
+            last_ai_msg = m.get("timestamp")
+            break
+    
+    updated_conv, ai_response, is_complete = await process_candidate_message(
+        candidate_message=candidate_message,
+        conversation_data=conv_data,
+        github_analysis=profile.github_analysis or {},
+        resume_data=profile.resume_data or {},
+        last_ai_timestamp=last_ai_msg
+    )
+    
+    # Reassign the dictionary back to the SQLAlchemy object to trigger JSONB mutation tracking
+    from sqlalchemy.orm.attributes import flag_modified
+    profile.conversation_data = updated_conv
+    flag_modified(profile, "conversation_data")
+    
+    if is_complete:
+        current_candidate.onboarding_status = "conversation_complete"
+    
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": ai_response,
+        "is_complete": is_complete,
+        "state": updated_conv.get("state"),
+        "technical_questions_asked": updated_conv.get("technical_questions_asked", 0),
+        "career_questions_asked": updated_conv.get("career_questions_asked", 0),
+        "stages_completed": updated_conv.get("stages_completed", [])
+    }
+
+@app.post("/api/candidate/conversation/complete")
+async def complete_candidate_conversation(
+    db: DbSession,
+    current_candidate = Depends(get_current_candidate),
+):
+    """Finalize the conversation and extract structured profile data."""
+    from candidate_conversation_agent import extract_final_profile
+    
+    profile = db.query(CandidateProfile).filter(
+        CandidateProfile.candidate_id == current_candidate.id
+    ).first()
+    
+    if not profile or not profile.conversation_data:
+        raise HTTPException(status_code=400, detail="No conversation data found.")
+    
+    conv_data = profile.conversation_data
+    if not conv_data.get("completed_at"):
+        raise HTTPException(status_code=400, detail="Conversation not yet complete.")
+    
+    # Extract final profile
+    extracted = await extract_final_profile(
+        conv_data,
+        profile.github_analysis or {},
+        profile.resume_data or {}
+    )
+    
+    profile.career_preferences = extracted.get("career_preferences", {})
+    profile.technical_assessment = extracted.get("technical_assessment", {})
+    
+    if extracted.get("updated_summary"):
+        profile.ai_summary = extracted["updated_summary"]
+    
+    # Update seniority if the interview assessment differs from GitHub-only assessment
+    interview_seniority = extracted.get("technical_assessment", {}).get("seniority_assessment")
+    if interview_seniority:
+        profile.seniority_level = interview_seniority
+    
+    # Mark as match-ready
+    profile.match_ready = True
+    current_candidate.onboarding_status = "profile_ready"
+    
+    # Recalculate profile quality score
+    score = profile.profile_quality_score or 0
+    score = min(score + 20, 100)  # Conversation adds 20 points
+    profile.profile_quality_score = score
+    
+    db.commit()
+    
+    return {
+        "success": True,
+        "message": "Profile finalized successfully!",
+        "career_preferences": profile.career_preferences,
+        "technical_assessment": profile.technical_assessment,
+        "match_ready": True
+    }
 
 
 # ===== PAGINATED SEARCH ENDPOINT =====
