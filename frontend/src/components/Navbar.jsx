@@ -28,16 +28,22 @@ const Navbar = () => {
         </a>
 
         <div style={styles.navLinks}>
+          {/* HIDDEN: old recruiter nav
           <Link to="/for-companies" style={styles.navLink}>For Companies</Link>
           <Link to="/for-candidates" style={styles.navLink}>For Developers</Link>
           <Link to="/pricing" style={styles.navLink}>Pricing</Link>
           <Link to="/contact" style={styles.navLink}>Contact</Link>
+          */}
+          <Link to="/hire-free" style={styles.navLink}>For Companies</Link>
+          <Link to="/candidate/signup" style={styles.navLink}>For Developers</Link>
+          {/* <Link to="/pricing" style={styles.navLink}>Pricing</Link> */}
+          <Link to="/contact" style={styles.navLink}>Contact</Link>
           {isAuthenticated ? (
-            <Link to="/dashboard/search" style={styles.signupBtn}>Dashboard</Link>
+            <Link to="/dashboard/search" style={styles.signupBtn}>Recruiter Dashboard</Link>
           ) : (
             <>
-              <Link to="/login" style={styles.navLink}>Log in</Link>
-              <Link to="/signup" style={styles.signupBtn}>Start Free Trial</Link>
+              <Link to="/candidate/login" style={styles.navLink}>Candidate Login</Link>
+              <Link to="/candidate/signup" style={styles.signupBtn}>Join as Developer</Link>
             </>
           )}
         </div>
@@ -49,16 +55,22 @@ const Navbar = () => {
 
       {mobileMenuOpen && (
         <div style={styles.mobileMenu}>
+          {/* HIDDEN: old recruiter nav
           <Link to="/for-companies" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Companies</Link>
           <Link to="/for-candidates" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Developers</Link>
           <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
+          */}
+          <Link to="/hire-free" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Companies</Link>
+          <Link to="/candidate/signup" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Developers</Link>
+          {/* <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link> */}
+          <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
           {isAuthenticated ? (
-            <Link to="/dashboard/search" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Dashboard</Link>
+            <Link to="/dashboard/search" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Recruiter Dashboard</Link>
           ) : (
             <>
-              <Link to="/login" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Log in</Link>
-              <Link to="/signup" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Start Free Trial</Link>
+              <Link to="/candidate/login" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Candidate Login</Link>
+              <Link to="/candidate/signup" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Join as Developer</Link>
             </>
           )}
         </div>

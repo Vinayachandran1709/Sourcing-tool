@@ -39,6 +39,7 @@ for handler in logging.root.handlers:
 
 # Import routers
 from auth_routes import router as auth_router
+from candidate_auth_routes import router as candidate_auth_router
 from routes.payment_routes import router as payment_router
 from lists_routes import router as lists_router
 from email_settings_routes import router as email_settings_router
@@ -111,23 +112,23 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 @app.on_event("startup")
 async def startup_event():
     """Validate critical configurations on startup"""
-    logger.info("🚀 TalentBox API Starting Up...")
+    logger.info("TalentBox API starting up...")
     
     # Validate GitHub Token
     from github_service import GITHUB_TOKEN
     if not GITHUB_TOKEN:
-        logger.error("⚠️ CRITICAL: GITHUB_TOKEN not found in .env!")
-        logger.error("   → GitHub API searches will fail")
-        logger.error("   → Only database cache will work")
+        logger.error("CRITICAL: GITHUB_TOKEN not found in .env!")
+        logger.error("   GitHub API searches will fail")
+        logger.error("   Only database cache will work")
     else:
-        logger.info("✅ GitHub Token found")
+        logger.info("GitHub token found")
     
     # Validate Resend API Key
     resend_key = os.getenv("RESEND_API_KEY")
     if not resend_key:
-        logger.warning("⚠️ RESEND_API_KEY not found - email features will not work")
+        logger.warning("RESEND_API_KEY not found - email features will not work")
     else:
-        logger.info("✅ Resend API Key configured")
+        logger.info("Resend API key configured")
 
     logger.info("Skipping startup DB health check (lazy connect on first request)")
 
@@ -364,32 +365,159 @@ async def startup_event():
                         ADD COLUMN IF NOT EXISTS jd_char_count INTEGER;
                 """))
 
+                # PIVOT TABLES
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS candidates (
+                        id SERIAL PRIMARY KEY,
+                        email VARCHAR(255) UNIQUE NOT NULL,
+                        password_hash VARCHAR(255) NOT NULL,
+                        name VARCHAR(255) NOT NULL,
+                        phone VARCHAR(50),
+                        github_username VARCHAR(255),
+                        linkedin_url VARCHAR(500),
+                        portfolio_url VARCHAR(500),
+                        resume_path VARCHAR(500),
+                        avatar_url VARCHAR(500),
+                        location VARCHAR(255),
+                        onboarding_status VARCHAR(50) DEFAULT 'pending',
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                    CREATE INDEX IF NOT EXISTS ix_candidates_email ON candidates(email);
+                    CREATE INDEX IF NOT EXISTS ix_candidates_github_username ON candidates(github_username);
+                """))
+
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS candidate_profiles (
+                        id SERIAL PRIMARY KEY,
+                        candidate_id INTEGER UNIQUE NOT NULL REFERENCES candidates(id) ON DELETE CASCADE,
+                        github_analysis JSONB DEFAULT '{}',
+                        resume_data JSONB DEFAULT '{}',
+                        portfolio_data JSONB DEFAULT '{}',
+                        conversation_data JSONB DEFAULT '{}',
+                        career_preferences JSONB DEFAULT '{}',
+                        technical_assessment JSONB DEFAULT '{}',
+                        ai_summary TEXT,
+                        detected_role VARCHAR(100),
+                        detected_roles JSONB DEFAULT '[]',
+                        seniority_level VARCHAR(50),
+                        skills JSONB DEFAULT '[]',
+                        engineering_maturity_score INTEGER DEFAULT 0,
+                        profile_quality_score INTEGER DEFAULT 0,
+                        match_ready BOOLEAN DEFAULT FALSE,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                """))
+
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS discovered_startups (
+                        id SERIAL PRIMARY KEY,
+                        company_name VARCHAR(255) NOT NULL,
+                        domain VARCHAR(255) UNIQUE,
+                        description TEXT,
+                        logo_url VARCHAR(500),
+                        funding_stage VARCHAR(50),
+                        funding_amount VARCHAR(100),
+                        investors JSONB DEFAULT '[]',
+                        team_size VARCHAR(50),
+                        category VARCHAR(100),
+                        location VARCHAR(255),
+                        remote_policy VARCHAR(50),
+                        ats_provider VARCHAR(50),
+                        ats_slug VARCHAR(255),
+                        careers_url VARCHAR(500),
+                        source VARCHAR(50) DEFAULT 'manual',
+                        is_active BOOLEAN DEFAULT TRUE,
+                        last_crawled_at TIMESTAMP WITH TIME ZONE,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                    CREATE INDEX IF NOT EXISTS ix_discovered_startups_domain ON discovered_startups(domain);
+                """))
+
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS job_postings (
+                        id SERIAL PRIMARY KEY,
+                        external_id VARCHAR(255),
+                        startup_id INTEGER REFERENCES discovered_startups(id) ON DELETE SET NULL,
+                        company_name VARCHAR(255) NOT NULL,
+                        company_domain VARCHAR(255),
+                        company_logo_url VARCHAR(500),
+                        funding_stage VARCHAR(50),
+                        investors_summary VARCHAR(500),
+                        title VARCHAR(255) NOT NULL,
+                        department VARCHAR(100),
+                        description_text TEXT,
+                        description_html TEXT,
+                        location VARCHAR(255),
+                        remote_policy VARCHAR(50),
+                        seniority_level VARCHAR(50),
+                        required_stack JSONB DEFAULT '[]',
+                        salary_min INTEGER,
+                        salary_max INTEGER,
+                        salary_currency VARCHAR(10),
+                        ats_provider VARCHAR(50),
+                        ats_url VARCHAR(500),
+                        apply_url VARCHAR(500),
+                        source VARCHAR(50) DEFAULT 'manual',
+                        quality_score INTEGER DEFAULT 50,
+                        is_engineering BOOLEAN DEFAULT TRUE,
+                        is_active BOOLEAN DEFAULT TRUE,
+                        is_visible_on_homepage BOOLEAN DEFAULT TRUE,
+                        posted_by_email VARCHAR(255),
+                        posted_by_name VARCHAR(255),
+                        posted_by_phone VARCHAR(50),
+                        company_follow_up_data JSONB DEFAULT '{}',
+                        first_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        last_seen_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                        updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                    CREATE INDEX IF NOT EXISTS ix_job_postings_active_visible ON job_postings(is_active, is_visible_on_homepage);
+                    CREATE INDEX IF NOT EXISTS ix_job_postings_company_title ON job_postings(company_domain, title);
+                """))
+
+                conn.execute(sa_text("""
+                    CREATE TABLE IF NOT EXISTS job_matches (
+                        id SERIAL PRIMARY KEY,
+                        job_posting_id INTEGER NOT NULL REFERENCES job_postings(id) ON DELETE CASCADE,
+                        candidate_id INTEGER REFERENCES candidates(id) ON DELETE CASCADE,
+                        github_developer_id INTEGER REFERENCES github_developers(id) ON DELETE SET NULL,
+                        match_score INTEGER DEFAULT 0,
+                        match_reasons JSONB DEFAULT '{}',
+                        status VARCHAR(50) DEFAULT 'matched',
+                        sent_at TIMESTAMP WITH TIME ZONE,
+                        created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                    );
+                """))
+
                 conn.commit()
-            logger.info("✅ Payment tables verified/created")
+            logger.info("Payment tables verified/created")
         except Exception as e:
-            logger.error(f"⚠️ Payment migration error: {e}")
+            logger.error(f"Payment migration error: {e}")
     else:
         logger.info("Skipping startup migrations (set RUN_MIGRATIONS_ON_STARTUP=true to apply schema changes)")
 
     # Validate JWT Secret
     from auth_middleware import SECRET_KEY
     if not SECRET_KEY:
-        logger.error("⚠️ CRITICAL: JWT_SECRET_KEY not found!")
+        logger.error("CRITICAL: JWT_SECRET_KEY not found!")
     else:
-        logger.info("✅ JWT Secret configured")
+        logger.info("JWT secret configured")
     
     # Initialize background scheduler for nightly profile refresh
     try:
         from scheduler import init_scheduler
         init_scheduler()
-        logger.info("✅ Background scheduler initialized")
+        logger.info("Background scheduler initialized")
     except Exception as e:
-        logger.error(f"⚠️ Scheduler init failed: {e}")
+        logger.error(f"Scheduler init failed: {e}")
 
     # Initialize Redis cache
     await init_redis()
 
-    logger.info("🎯 Startup validation complete\n")
+    logger.info("Startup validation complete\n")
 
 
 @app.on_event("shutdown")
@@ -484,6 +612,7 @@ app.add_middleware(
 # ===== INCLUDE ROUTERS =====
 
 app.include_router(auth_router)
+app.include_router(candidate_auth_router)
 app.include_router(payment_router)
 app.include_router(lists_router)
 app.include_router(email_settings_router)
@@ -678,6 +807,135 @@ async def search_profiles(
         logger.info(f"Search complete: {total_sent} total profiles")
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+
+# ===== CANDIDATE ENDPOINTS =====
+
+from candidate_auth_middleware import get_current_candidate
+from models import CandidateProfile
+
+@app.post("/api/candidate/import-data")
+async def trigger_candidate_import(
+    db: DbSession,
+    current_candidate = Depends(get_current_candidate),
+):
+    """Trigger the background data import pipeline."""
+    from data_import_service import run_candidate_import
+    result = await run_candidate_import(db, current_candidate.id)
+    return result
+
+@app.get("/api/candidate/import-status")
+async def get_candidate_import_status(
+    db: DbSession,
+    current_candidate = Depends(get_current_candidate),
+):
+    """Get the current onboarding status."""
+    return {
+        "success": True,
+        "onboarding_status": current_candidate.onboarding_status
+    }
+
+@app.get("/api/candidate/profile")
+async def get_candidate_profile(
+    db: DbSession,
+    current_candidate = Depends(get_current_candidate),
+):
+    """Get current candidate profile data."""
+    profile = db.query(CandidateProfile).filter(CandidateProfile.candidate_id == current_candidate.id).first()
+    
+    return {
+        "success": True,
+        "candidate": {
+            "id": current_candidate.id,
+            "name": current_candidate.name,
+            "email": current_candidate.email,
+            "github_username": current_candidate.github_username,
+            "onboarding_status": current_candidate.onboarding_status,
+            "profile": {
+                "github_analysis": profile.github_analysis if profile else {},
+                "resume_data": profile.resume_data if profile else {},
+                "ai_summary": profile.ai_summary if profile else None,
+                "detected_role": profile.detected_role if profile else None,
+                "skills": profile.skills if profile else []
+            }
+        }
+    }
+
+@app.post("/api/candidate/upload-resume")
+async def upload_candidate_resume(
+    db: DbSession,
+    file: UploadFile = File(...),
+    current_candidate = Depends(get_current_candidate),
+):
+    """Upload resume and parse basic text data."""
+    import io
+    try:
+        filename = file.filename or ""
+        ext = filename.rsplit(".", 1)[-1].lower() if "." in filename else ""
+
+        if ext not in ("pdf", "docx", "doc", "txt"):
+            raise HTTPException(status_code=400, detail="Unsupported file type. Use PDF, DOCX, or TXT.")
+
+        raw = await file.read()
+        if len(raw) > 5 * 1024 * 1024:
+            raise HTTPException(status_code=400, detail="File too large (max 5 MB).")
+
+        text = ""
+        if ext == "txt":
+            text = raw.decode("utf-8", errors="ignore")
+        elif ext == "pdf":
+            try:
+                import pypdf
+                reader = pypdf.PdfReader(io.BytesIO(raw))
+                text = "\n".join(page.extract_text() or "" for page in reader.pages)
+            except Exception as pdf_err:
+                logger.error(f"PDF extraction error: {pdf_err}")
+                raise HTTPException(status_code=422, detail="Could not extract text from PDF.")
+        elif ext in ("docx", "doc"):
+            try:
+                import docx as _docx
+                doc = _docx.Document(io.BytesIO(raw))
+                text = "\n".join(p.text for p in doc.paragraphs)
+            except Exception as docx_err:
+                logger.error(f"DOCX extraction error: {docx_err}")
+                raise HTTPException(status_code=422, detail="Could not extract text from DOCX.")
+
+        text = text.strip()
+        if len(text) < 30:
+            raise HTTPException(status_code=422, detail="File appears to be empty or unreadable.")
+            
+        # Update candidate resume path
+        current_candidate.resume_path = filename
+        
+        # Update profile with resume data
+        profile = db.query(CandidateProfile).filter(CandidateProfile.candidate_id == current_candidate.id).first()
+        if not profile:
+            profile = CandidateProfile(candidate_id=current_candidate.id)
+            db.add(profile)
+            
+        resume_data = {
+            "raw_text": text[:50000],  # Limit size
+            "filename": filename,
+            "word_count": len(text.split())
+        }
+        
+        # Merge if exists
+        existing_data = profile.resume_data or {}
+        existing_data.update(resume_data)
+        profile.resume_data = existing_data
+        
+        db.commit()
+
+        return {
+            "success": True,
+            "filename": filename,
+            "word_count": resume_data["word_count"],
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Resume upload error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to upload and parse resume.")
 
 
 # ===== PAGINATED SEARCH ENDPOINT =====
@@ -1392,7 +1650,8 @@ def _calculate_devcard_score(followers: int, public_repos: int, total_stars: int
     return min(score, 100)
 
 
-@app.post("/api/devcard/generate")
+# HIDDEN: DevCard endpoints — kept for future reference
+# @app.post("/api/devcard/generate")
 async def generate_devcard(req: DevCardRequest, db: DbSession):
     """Generate a DevCard from a GitHub username. Public endpoint — no auth required."""
     import httpx
@@ -1673,7 +1932,8 @@ Return JSON with exactly these fields:
         raise HTTPException(status_code=500, detail="Failed to generate DevCard. Please try again.")
 
 
-@app.get("/api/devcard/{username}")
+# HIDDEN: DevCard endpoints — kept for future reference
+# @app.get("/api/devcard/{username}")
 async def get_devcard(username: str, db: DbSession):
     """Fetch a published DevCard by GitHub username. Public endpoint — no auth required."""
     try:

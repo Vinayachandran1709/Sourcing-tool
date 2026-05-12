@@ -15,9 +15,9 @@ GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 GROQ_MODEL = "llama-3.3-70b-versatile"
 
 if GROQ_API_KEY:
-    logger.info("✅ Groq API configured")
+    logger.info("Groq API configured")
 else:
-    logger.warning("⚠️ GROQ_API_KEY not set - AI summaries disabled")
+    logger.warning("GROQ_API_KEY not set - AI summaries disabled")
 
 # Locations the search engine can handle — used in the JD prompt
 _KNOWN_LOCATIONS = """US cities: San Francisco, New York, Seattle, Austin, Los Angeles, Boston, Chicago, Denver, Atlanta, San Diego

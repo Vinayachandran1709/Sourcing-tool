@@ -486,7 +486,7 @@ def run_perpetual_index():
     Rotates through regions with Europe as priority.
     """
     start_time = time.time()
-    logger.info("🔄 Starting perpetual indexer run...")
+    logger.info("Starting perpetual indexer run...")
 
     db = SessionLocal()
     processed = 0

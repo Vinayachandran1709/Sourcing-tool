@@ -26,3 +26,18 @@ yarn-error.log*
 .env.production
 .env.development.local
 .env.production.local
+
+venv1/
+backend/venv/
+.env
+Environment files
+.env*
+.env
+**/.env
+talentbox.log
+*.log
+test_payment.py
+pycache/
+*.pyc
+.claude/ 
+node_modules/

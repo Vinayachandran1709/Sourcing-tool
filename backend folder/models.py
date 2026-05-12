@@ -460,3 +460,172 @@ class RefreshJobLog(Base):
     profiles_refreshed = Column(Integer, default=0)
     profiles_failed = Column(Integer, default=0)
     status = Column(String(20), default="running")
+
+
+# ===== NEW MODELS FOR PIVOT (PHASE 1) =====
+
+class Candidate(Base):
+    __tablename__ = "candidates"
+
+    id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=False)
+    phone = Column(String(50), nullable=True)
+    github_username = Column(String(255), nullable=True, index=True)
+    linkedin_url = Column(String(500), nullable=True)
+    portfolio_url = Column(String(500), nullable=True)
+    resume_path = Column(String(500), nullable=True)  # Path to uploaded resume file
+    avatar_url = Column(String(500), nullable=True)
+    location = Column(String(255), nullable=True)
+
+    # Onboarding progress
+    onboarding_status = Column(String(50), default="pending")
+    # Values: pending → github_imported → conversation_started → conversation_complete → profile_ready
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationship
+    profile = relationship("CandidateProfile", back_populates="candidate", uselist=False)
+
+class CandidateProfile(Base):
+    __tablename__ = "candidate_profiles"
+
+    id = Column(Integer, primary_key=True, index=True)
+    candidate_id = Column(Integer, ForeignKey("candidates.id", ondelete="CASCADE"), unique=True, nullable=False)
+
+    # Data from automated import
+    github_analysis = Column(JSONB, default={})    # Deep GitHub analysis results
+    resume_data = Column(JSONB, default={})         # Parsed resume data
+    portfolio_data = Column(JSONB, default={})      # Parsed portfolio data
+
+    # Data from AI conversation
+    conversation_data = Column(JSONB, default={})   # Full conversation transcript + extracted data
+    career_preferences = Column(JSONB, default={})  # Work style, startup-fit, compensation, etc.
+    technical_assessment = Column(JSONB, default={}) # Technical verification results
+
+    # AI-generated profile
+    ai_summary = Column(Text, nullable=True)         # 3-4 sentence professional summary
+    detected_role = Column(String(100), nullable=True)  # Primary role e.g. "Backend Developer"
+    detected_roles = Column(JSONB, default=[])        # All applicable roles
+    seniority_level = Column(String(50), nullable=True) # Junior/Mid-Level/Senior/Staff/Expert
+    skills = Column(JSONB, default=[])                # Structured skills list with confidence
+
+    # Scores
+    engineering_maturity_score = Column(Integer, default=0)  # 0-100
+    profile_quality_score = Column(Integer, default=0)       # 0-100
+
+    # Match readiness
+    match_ready = Column(Boolean, default=False)  # True when profile is complete enough for matching
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationship
+    candidate = relationship("Candidate", back_populates="profile")
+
+class DiscoveredStartup(Base):
+    __tablename__ = "discovered_startups"
+
+    id = Column(Integer, primary_key=True, index=True)
+    company_name = Column(String(255), nullable=False)
+    domain = Column(String(255), nullable=True, unique=True, index=True)
+    description = Column(Text, nullable=True)
+    logo_url = Column(String(500), nullable=True)
+
+    # Funding info
+    funding_stage = Column(String(50), nullable=True)  # pre-seed, seed, series_a, series_b, etc.
+    funding_amount = Column(String(100), nullable=True)
+    investors = Column(JSONB, default=[])  # ["YC", "a16z", "Sequoia"]
+
+    # Company metadata
+    team_size = Column(String(50), nullable=True)  # "1-10", "11-50", "51-200", etc.
+    category = Column(String(100), nullable=True)  # "AI/ML", "fintech", "devtools", etc.
+    location = Column(String(255), nullable=True)
+    remote_policy = Column(String(50), nullable=True)  # "remote", "hybrid", "onsite"
+
+    # ATS info
+    ats_provider = Column(String(50), nullable=True)  # "greenhouse", "lever", "ashby", etc.
+    ats_slug = Column(String(255), nullable=True)
+    careers_url = Column(String(500), nullable=True)
+
+    # Tracking
+    source = Column(String(50), default="manual")  # "yc", "vc_portfolio", "funding_news", "manual"
+    is_active = Column(Boolean, default=True)
+    last_crawled_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+class JobPosting(Base):
+    __tablename__ = "job_postings"
+
+    id = Column(Integer, primary_key=True, index=True)
+    external_id = Column(String(255), nullable=True)  # ATS job ID for dedup
+    startup_id = Column(Integer, ForeignKey("discovered_startups.id", ondelete="SET NULL"), nullable=True)
+
+    # Company info (denormalized for jobs without a discovered_startup record)
+    company_name = Column(String(255), nullable=False)
+    company_domain = Column(String(255), nullable=True)
+    company_logo_url = Column(String(500), nullable=True)
+    funding_stage = Column(String(50), nullable=True)
+    investors_summary = Column(String(500), nullable=True)
+
+    # Job details
+    title = Column(String(255), nullable=False)
+    department = Column(String(100), nullable=True)
+    description_text = Column(Text, nullable=True)
+    description_html = Column(Text, nullable=True)
+
+    # Structured data (AI-extracted)
+    location = Column(String(255), nullable=True)
+    remote_policy = Column(String(50), nullable=True)  # "remote", "hybrid", "onsite"
+    seniority_level = Column(String(50), nullable=True)
+    required_stack = Column(JSONB, default=[])
+    salary_min = Column(Integer, nullable=True)
+    salary_max = Column(Integer, nullable=True)
+    salary_currency = Column(String(10), nullable=True)
+
+    # Source + tracking
+    ats_provider = Column(String(50), nullable=True)
+    ats_url = Column(String(500), nullable=True)
+    apply_url = Column(String(500), nullable=True)
+    source = Column(String(50), default="manual")  # "yc", "vc_portfolio", "greenhouse", "lever", "company_posted", "manual"
+
+    # Quality + freshness
+    quality_score = Column(Integer, default=50)  # 0-100, AI-scored
+    is_engineering = Column(Boolean, default=True)
+    is_active = Column(Boolean, default=True)
+    is_visible_on_homepage = Column(Boolean, default=True)
+
+    # Company-posted job extras (when companies post directly)
+    posted_by_email = Column(String(255), nullable=True)
+    posted_by_name = Column(String(255), nullable=True)
+    posted_by_phone = Column(String(50), nullable=True)
+    company_follow_up_data = Column(JSONB, default={})  # AI follow-up answers
+
+    first_seen_at = Column(DateTime(timezone=True), server_default=func.now())
+    last_seen_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    __table_args__ = (
+        Index('ix_job_postings_active_visible', 'is_active', 'is_visible_on_homepage'),
+        Index('ix_job_postings_company_title', 'company_domain', 'title'),
+    )
+
+class JobMatch(Base):
+    __tablename__ = "job_matches"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_posting_id = Column(Integer, ForeignKey("job_postings.id", ondelete="CASCADE"), nullable=False)
+    candidate_id = Column(Integer, ForeignKey("candidates.id", ondelete="CASCADE"), nullable=True)
+    github_developer_id = Column(Integer, ForeignKey("github_developers.id", ondelete="SET NULL"), nullable=True)
+
+    match_score = Column(Integer, default=0)  # 0-100
+    match_reasons = Column(JSONB, default={})  # {"technical_fit": 85, "startup_fit": 70, ...}
+
+    status = Column(String(50), default="matched")  # matched, sent_to_company, viewed, interview, hired, rejected
+    sent_at = Column(DateTime(timezone=True), nullable=True)
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
