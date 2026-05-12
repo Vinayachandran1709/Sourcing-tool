@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { startConversation, sendConversationMessage, completeConversation } from '../services/candidateApi';
-import CandidateNavbar from '../components/CandidateNavbar';
+import Navbar from '../components/Navbar';
 import { useCandidateAuth } from '../contexts/CandidateAuthContext';
 
 const CandidateConversationPage = () => {
@@ -109,7 +109,7 @@ const CandidateConversationPage = () => {
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F8FAFC', display: 'flex', flexDirection: 'column' }}>
-      <CandidateNavbar />
+      <Navbar />
       
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', maxWidth: '800px', margin: '0 auto', width: '100%', padding: '2rem 1rem' }}>
         
