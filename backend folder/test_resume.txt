@@ -1,0 +1,1 @@
+"John Doe - Software Engineer. 5 years experience at Google and Meta. Skills: Python, React, AWS, PostgreSQL. MS Computer Science from Stanford." 

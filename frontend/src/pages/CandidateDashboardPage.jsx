@@ -167,7 +167,7 @@ const CandidateDashboardPage = () => {
                           <span>{pct}%</span>
                         </div>
                         <div style={styles.langBarTrack}>
-                          <div style={{...styles.langBarFill, width: \`\${pct}%\`}}></div>
+                          <div style={{...styles.langBarFill, width: `${pct}%`}}></div>
                         </div>
                       </div>
                     ))}
