@@ -34,7 +34,7 @@ const Navbar = () => {
           <Link to="/pricing" style={styles.navLink}>Pricing</Link>
           <Link to="/contact" style={styles.navLink}>Contact</Link>
           */}
-          <Link to="/hire-free" style={styles.navLink}>For Companies</Link>
+          <Link to="/post-job" style={styles.navLink}>For Companies</Link>
           <Link to="/candidate/signup" style={styles.navLink}>For Developers</Link>
           {/* <Link to="/pricing" style={styles.navLink}>Pricing</Link> */}
           <Link to="/contact" style={styles.navLink}>Contact</Link>
@@ -61,7 +61,7 @@ const Navbar = () => {
           <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
           <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
           */}
-          <Link to="/hire-free" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Companies</Link>
+          <Link to="/post-job" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Companies</Link>
           <Link to="/candidate/signup" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Developers</Link>
           {/* <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link> */}
           <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>

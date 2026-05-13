@@ -2,29 +2,49 @@ import React, { useEffect, useState } from 'react';
 import { useCandidateAuth } from '../contexts/CandidateAuthContext';
 import Navbar from '../components/Navbar';
 import { useNavigate } from 'react-router-dom';
-import { getCandidateProfile } from '../services/candidateApi';
+import { getCandidateProfile, getMatchedJobs } from '../services/candidateApi';
 import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 const CandidateDashboardPage = () => {
   const { candidate, candidateLogout } = useCandidateAuth();
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
+  const [matchedJobs, setMatchedJobs] = useState([]);
+  const [jobsLoading, setJobsLoading] = useState(true);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchDashboardData = async () => {
       try {
-        const data = await getCandidateProfile();
-        if (data.success && data.candidate) {
-          setProfileData(data.candidate);
+        const [profileResponse, jobsResponse] = await Promise.allSettled([
+          getCandidateProfile(),
+          getMatchedJobs(),
+        ]);
+
+        if (profileResponse.status === 'fulfilled') {
+          const data = profileResponse.value;
+          if (data.success && data.candidate) {
+            setProfileData(data.candidate);
+          }
+        } else {
+          console.error('Failed to fetch profile', profileResponse.reason);
         }
-      } catch (err) {
-        console.error("Failed to fetch profile", err);
+
+        if (jobsResponse.status === 'fulfilled') {
+          const data = jobsResponse.value;
+          if (data.success && Array.isArray(data.jobs)) {
+            setMatchedJobs(data.jobs);
+          }
+        } else {
+          console.error('Failed to fetch matched jobs', jobsResponse.reason);
+        }
       } finally {
         setLoading(false);
+        setJobsLoading(false);
       }
     };
-    fetchProfile();
+
+    fetchDashboardData();
   }, []);
 
   const handleLogout = () => {
@@ -49,8 +69,11 @@ const CandidateDashboardPage = () => {
 
   // Use fresh profile data if available, fallback to context
   const user = profileData || candidate;
-  const isImported = user?.onboarding_status === 'github_imported';
+  const isImported = ['github_imported', 'conversation_started', 'conversation_complete', 'profile_ready'].includes(user?.onboarding_status);
   const profile = user?.profile || {};
+  const resumeData = profile?.resume_data || {};
+  const workHistory = Array.isArray(resumeData.work_history) ? resumeData.work_history : [];
+  const education = Array.isArray(resumeData.education) ? resumeData.education : [];
 
   return (
     <div style={styles.page}>
@@ -134,6 +157,44 @@ const CandidateDashboardPage = () => {
                         {proj.language && <span style={styles.projectLang}>{proj.language}</span>}
                       </div>
                     ))}
+                  </div>
+                </div>
+              )}
+
+              {workHistory.length > 0 && (
+                <div style={styles.card}>
+                  <h3 style={styles.sectionTitle}>Work Experience</h3>
+                  <div style={styles.experienceList}>
+                    {workHistory.map((item, idx) => (
+                      <div key={idx} style={styles.experienceCard}>
+                        <div style={styles.experienceLogo}>{(item.company || '?').charAt(0)}</div>
+                        <div style={{ flex: 1 }}>
+                          <h4 style={styles.experienceTitle}>
+                            {(item.title || 'Role')} {item.company ? `at ${item.company}` : ''}
+                          </h4>
+                          {item.duration && <p style={styles.experienceMeta}>Duration: {item.duration}</p>}
+                          {item.description && <p style={styles.experienceDescription}>{item.description}</p>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {education.length > 0 && (
+                <div style={styles.card}>
+                  <h3 style={styles.sectionTitle}>Education</h3>
+                  <div style={styles.educationList}>
+                    {education.map((item, idx) => {
+                      const degreeParts = [item.degree, item.field].filter(Boolean).join(' ');
+                      const schoolLine = [degreeParts, item.institution].filter(Boolean).join(' — ');
+                      const yearLine = item.year ? ` (${item.year})` : '';
+                      return (
+                        <div key={idx} style={styles.educationItem}>
+                          <p style={styles.educationText}>{schoolLine || item.institution || 'Education entry'}{yearLine}</p>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -269,6 +330,47 @@ const CandidateDashboardPage = () => {
             </div>
           </div>
         )}
+
+        <div style={styles.card}>
+          <div style={styles.jobsSectionHeader}>
+            <div>
+              <h2 style={{ ...styles.cardTitle, marginBottom: '8px' }}>Startup Jobs</h2>
+              <p style={styles.jobsIntroText}>
+                Fresh startup engineering roles from VC portfolios and funding signals.
+              </p>
+            </div>
+          </div>
+
+          {jobsLoading ? (
+            <p style={styles.jobsEmptyText}>Loading startup jobs...</p>
+          ) : matchedJobs.length > 0 ? (
+            <div style={styles.jobsList}>
+              {matchedJobs.map((job) => (
+                <div key={job.id} style={styles.jobCard}>
+                  <div style={styles.jobCardTop}>
+                    <div>
+                      <p style={styles.jobCompany}>{job.company_name}</p>
+                      <h3 style={styles.jobTitle}>{job.title}</h3>
+                    </div>
+                    <a href={job.apply_url} target="_blank" rel="noreferrer" style={styles.jobApplyBtn}>
+                      Apply →
+                    </a>
+                  </div>
+                  <div style={styles.jobMetaRow}>
+                    <span style={styles.jobMetaPill}>{job.location || job.remote_policy || 'Location TBD'}</span>
+                    <span style={styles.jobMetaPill}>{job.funding_stage || 'Startup'}</span>
+                    {job.seniority_level && <span style={styles.jobMetaPill}>{job.seniority_level}</span>}
+                  </div>
+                  <p style={styles.jobInvestors}>
+                    {job.investors_summary ? `Backed by ${job.investors_summary}` : 'Investor details coming soon'}
+                  </p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={styles.jobsEmptyText}>No startup jobs available yet. Check back soon!</p>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -321,6 +423,17 @@ const styles = {
   projectStars: { color: '#6b7280', fontSize: '0.9rem', fontWeight: '500' },
   projectDesc: { color: '#4b5563', fontSize: '0.9rem', margin: '0 0 12px 0', lineHeight: '1.5' },
   projectLang: { display: 'inline-block', fontSize: '0.8rem', color: '#FF6B35', background: '#fff0eb', padding: '2px 8px', borderRadius: '4px', fontWeight: '600' },
+
+  // Experience + education
+  experienceList: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  experienceCard: { display: 'flex', gap: '14px', alignItems: 'flex-start', padding: '16px', borderRadius: '12px', background: '#fffaf5', border: '1px solid #fed7aa' },
+  experienceLogo: { width: '42px', height: '42px', borderRadius: '12px', background: '#FF6B35', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '700', flexShrink: 0 },
+  experienceTitle: { margin: '0 0 6px 0', color: '#111827', fontSize: '1rem', fontWeight: '700' },
+  experienceMeta: { margin: '0 0 6px 0', color: '#c2410c', fontSize: '0.9rem', fontWeight: '600' },
+  experienceDescription: { margin: 0, color: '#4b5563', lineHeight: '1.6' },
+  educationList: { display: 'flex', flexDirection: 'column', gap: '12px' },
+  educationItem: { padding: '14px 16px', borderRadius: '12px', background: '#fffaf5', border: '1px solid #fed7aa' },
+  educationText: { margin: 0, color: '#1f2937', lineHeight: '1.6', fontWeight: '500' },
   
   // Signals
   signalsList: { display: 'flex', flexDirection: 'column', gap: '12px' },
@@ -336,7 +449,21 @@ const styles = {
   // Next step
   nextStepCard: { background: '#f8fafc', borderRadius: '16px', padding: '24px', border: '1px solid #e2e8f0', textAlign: 'center' },
   actionText: { color: '#475569', marginBottom: '16px', fontSize: '0.95rem', lineHeight: '1.5' },
-  disabledBtn: { padding: '12px', background: '#cbd5e1', color: '#f8fafc', borderRadius: '8px', border: 'none', fontSize: '1rem', fontWeight: '600', width: '100%', cursor: 'not-allowed' }
+  disabledBtn: { padding: '12px', background: '#cbd5e1', color: '#f8fafc', borderRadius: '8px', border: 'none', fontSize: '1rem', fontWeight: '600', width: '100%', cursor: 'not-allowed' },
+
+  // Jobs
+  jobsSectionHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' },
+  jobsIntroText: { margin: 0, color: '#6b7280', lineHeight: '1.6' },
+  jobsList: { display: 'flex', flexDirection: 'column', gap: '16px' },
+  jobCard: { background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '14px', padding: '18px 20px' },
+  jobCardTop: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '16px', marginBottom: '14px' },
+  jobCompany: { margin: '0 0 6px 0', color: '#c2410c', fontSize: '0.9rem', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.06em' },
+  jobTitle: { margin: 0, color: '#111827', fontSize: '1.15rem', fontWeight: '700' },
+  jobApplyBtn: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', padding: '10px 16px', background: '#FF6B35', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontWeight: '600' },
+  jobMetaRow: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '12px' },
+  jobMetaPill: { background: '#ffffff', border: '1px solid #fdba74', color: '#9a3412', borderRadius: '9999px', padding: '6px 10px', fontSize: '0.85rem', fontWeight: '600' },
+  jobInvestors: { margin: 0, color: '#7c2d12', lineHeight: '1.6' },
+  jobsEmptyText: { margin: 0, color: '#6b7280', lineHeight: '1.6' }
 };
 
 // Add media queries for responsive grid

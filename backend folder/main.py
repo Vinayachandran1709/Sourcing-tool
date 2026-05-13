@@ -814,6 +814,127 @@ async def search_profiles(
 from candidate_auth_middleware import get_current_candidate
 from models import CandidateProfile
 
+@app.post("/api/admin/run-job-pipeline")
+async def run_job_pipeline(
+    db: DbSession,
+    body: dict = Body(default={}),
+):
+    """
+    Manually trigger the job discovery pipeline.
+    Accepts optional body: {"vc_limit": 3, "company_limit": 10, "news_limit": 2, "skip_vc": false, "skip_careers": false, "skip_news": false}
+    No auth required for now (this is an admin-only endpoint — add auth later).
+    """
+    from job_discovery.job_pipeline import run_full_pipeline
+
+    result = await run_full_pipeline(db, options=body)
+    return {"success": True, "pipeline_result": result}
+
+
+@app.get("/api/jobs/feed")
+async def get_job_feed(
+    db: DbSession,
+    page: int = 1,
+    limit: int = 20,
+):
+    """Public endpoint: get active, visible job postings for homepage/feed."""
+    from models import JobPosting
+
+    page = max(page, 1)
+    limit = min(max(limit, 1), 100)
+    offset = (page - 1) * limit
+
+    base_query = db.query(JobPosting).filter(
+        JobPosting.is_active == True,
+        JobPosting.is_visible_on_homepage == True,
+        JobPosting.is_engineering == True
+    )
+
+    jobs = base_query.order_by(
+        JobPosting.created_at.desc()
+    ).offset(offset).limit(limit).all()
+
+    total = base_query.count()
+
+    return {
+        "success": True,
+        "jobs": [
+            {
+                "id": job.id,
+                "title": job.title,
+                "company_name": job.company_name,
+                "company_domain": job.company_domain,
+                "location": job.location,
+                "remote_policy": job.remote_policy,
+                "seniority_level": job.seniority_level,
+                "funding_stage": job.funding_stage,
+                "investors_summary": job.investors_summary,
+                "department": job.department,
+                "apply_url": job.apply_url,
+                "source": job.source,
+                "created_at": job.created_at.isoformat() if job.created_at else None
+            }
+            for job in jobs
+        ],
+        "total": total,
+        "page": page,
+        "pages": (total + limit - 1) // limit if total else 0
+    }
+
+
+@app.post("/api/company/post-job")
+async def post_company_job(
+    db: DbSession,
+    body: dict = Body(...),
+):
+    """Public endpoint: company posts a job for free."""
+    from job_discovery.utils import normalize_domain
+    from models import JobPosting
+
+    company_name = body.get("company_name", "").strip()
+    company_website = body.get("company_website", "").strip()
+    poster_name = body.get("poster_name", "").strip()
+    poster_email = body.get("poster_email", "").strip()
+    job_title = body.get("job_title", "").strip()
+
+    if not all([company_name, company_website, poster_name, poster_email, job_title]):
+        raise HTTPException(status_code=400, detail="Missing required fields")
+
+    domain = normalize_domain(company_website)
+
+    job = JobPosting(
+        company_name=company_name,
+        company_domain=domain,
+        title=job_title,
+        description_text=body.get("description", ""),
+        location=body.get("location"),
+        remote_policy=body.get("remote_policy"),
+        seniority_level=body.get("seniority_level"),
+        posted_by_name=poster_name,
+        posted_by_email=poster_email,
+        posted_by_phone=body.get("phone"),
+        company_follow_up_data={
+            "must_have_skills": body.get("must_have_skills", ""),
+            "team_info": body.get("team_info", ""),
+            "compensation_range": body.get("compensation_range", "")
+        },
+        apply_url=company_website,
+        source="company_posted",
+        is_engineering=True,
+        is_active=True,
+        is_visible_on_homepage=True,
+        quality_score=70
+    )
+    db.add(job)
+    db.commit()
+    db.refresh(job)
+
+    return {
+        "success": True,
+        "message": "Job posted successfully! We'll send matched candidates within 24 hours.",
+        "job_id": job.id
+    }
+
+
 @app.post("/api/candidate/import-data")
 async def trigger_candidate_import(
     db: DbSession,
@@ -876,6 +997,125 @@ async def get_candidate_profile(
             }
         }
     }
+
+
+@app.get("/api/candidate/matched-jobs")
+async def get_candidate_matched_jobs(
+    db: DbSession,
+    current_candidate = Depends(get_current_candidate),
+):
+    """Get jobs matched to the candidate's profile — role-aware ordering."""
+    from models import JobPosting, CandidateProfile
+
+    profile = db.query(CandidateProfile).filter(
+        CandidateProfile.candidate_id == current_candidate.id
+    ).first()
+
+    all_jobs = db.query(JobPosting).filter(
+        JobPosting.is_active == True,
+        JobPosting.is_engineering == True
+    ).order_by(
+        JobPosting.created_at.desc()
+    ).limit(100).all()
+
+    if not profile or not all_jobs:
+        return {"success": True, "jobs": [], "total": 0}
+
+    candidate_role = (profile.detected_role or "").lower()
+
+    candidate_skills = []
+    for skill in profile.skills or []:
+        if isinstance(skill, str):
+            candidate_skills.append(skill.lower())
+        elif isinstance(skill, dict):
+            name = skill.get("name") or skill.get("skill")
+            if name:
+                candidate_skills.append(str(name).lower())
+
+    candidate_roles = []
+    for role in profile.detected_roles or []:
+        if isinstance(role, str):
+            candidate_roles.append(role.lower())
+        elif isinstance(role, dict):
+            role_name = role.get("role") or role.get("name")
+            if role_name:
+                candidate_roles.append(str(role_name).lower())
+
+    role_keywords = {
+        "frontend": ["frontend", "front-end", "react", "vue", "angular", "ui", "ux", "css", "javascript", "typescript"],
+        "backend": ["backend", "back-end", "api", "server", "python", "java", "go", "node", "ruby", "django", "fastapi", "spring"],
+        "fullstack": ["full-stack", "fullstack", "full stack"],
+        "mobile": ["mobile", "ios", "android", "react native", "flutter", "swift", "kotlin"],
+        "devops": ["devops", "sre", "infrastructure", "cloud", "aws", "gcp", "azure", "kubernetes", "docker", "platform"],
+        "data": ["data engineer", "data science", "data analyst", "etl", "pipeline", "warehouse", "spark", "airflow"],
+        "ml": ["machine learning", "ml engineer", "ai", "deep learning", "nlp", "computer vision", "llm"],
+        "security": ["security", "cybersecurity", "appsec", "infosec", "penetration"],
+    }
+
+    candidate_categories = set()
+    for category, keywords in role_keywords.items():
+        if any(keyword in candidate_role for keyword in keywords):
+            candidate_categories.add(category)
+        for skill in candidate_skills:
+            if any(keyword in skill for keyword in keywords):
+                candidate_categories.add(category)
+        for role in candidate_roles:
+            if any(keyword in role for keyword in keywords):
+                candidate_categories.add(category)
+
+    scored_jobs = []
+    for job in all_jobs:
+        score = 50
+        job_text = f"{job.title} {job.department or ''} {job.description_text or ''}".lower()
+
+        for category in candidate_categories:
+            if any(keyword in job_text for keyword in role_keywords.get(category, [])):
+                score += 30
+                break
+
+        skill_matches = sum(1 for skill in candidate_skills if skill and skill in job_text)
+        score += min(skill_matches * 5, 25)
+
+        candidate_seniority = (profile.seniority_level or "").lower()
+        job_seniority = (job.seniority_level or "").lower()
+        if candidate_seniority and job_seniority and candidate_seniority in job_seniority:
+            score += 10
+
+        if job.created_at:
+            job_created_at = job.created_at
+            if job_created_at.tzinfo is None:
+                job_created_at = job_created_at.replace(tzinfo=timezone.utc)
+            if job_created_at > datetime.now(timezone.utc) - timedelta(days=7):
+                score += 10
+
+        scored_jobs.append((job, min(score, 100)))
+
+    scored_jobs.sort(key=lambda item: item[1], reverse=True)
+
+    return {
+        "success": True,
+        "jobs": [
+            {
+                "id": job.id,
+                "title": job.title,
+                "company_name": job.company_name,
+                "company_domain": job.company_domain,
+                "location": job.location,
+                "remote_policy": job.remote_policy,
+                "seniority_level": job.seniority_level,
+                "funding_stage": job.funding_stage,
+                "investors_summary": job.investors_summary,
+                "department": job.department,
+                "apply_url": job.apply_url,
+                "source": job.source,
+                "match_score": score,
+                "created_at": job.created_at.isoformat() if job.created_at else None
+            }
+            for job, score in scored_jobs[:50]
+        ],
+        "total": len(scored_jobs)
+    }
+
 
 @app.post("/api/candidate/upload-resume")
 async def upload_candidate_resume(

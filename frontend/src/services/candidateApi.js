@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const RAW_API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000';
+const API_BASE_URL = RAW_API_BASE_URL.replace(/\/+$/, '');
 
 const candidateApi = axios.create({
   baseURL: API_BASE_URL,
@@ -49,6 +50,16 @@ export const candidateLogin = async (email, password) => {
 
 export const getCandidateProfile = async () => {
   const response = await candidateApi.get('/api/candidate/profile');
+  return response.data;
+};
+
+export const getJobFeed = async (page = 1, limit = 20) => {
+  const response = await candidateApi.get(`/api/jobs/feed?page=${page}&limit=${limit}`);
+  return response.data;
+};
+
+export const getMatchedJobs = async () => {
+  const response = await candidateApi.get('/api/candidate/matched-jobs');
   return response.data;
 };
 

@@ -1,443 +1,274 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { API_BASE_URL } from '../services/api';
+import api from '../services/api';
 
-const ROLE_OPTIONS = [
-  '', 'Frontend Developer', 'Backend Developer', 'Full-Stack Developer',
-  'Mobile Developer', 'DevOps Engineer', 'Data Scientist', 'AI/ML Engineer',
-  'Data Engineer', 'Security Engineer', 'QA Engineer', 'Blockchain Developer',
-  'Game Developer', 'Embedded Engineer', 'Software Developer',
+const developerSteps = [
+  { number: '01', title: 'Sign up', description: 'Create your candidate account in minutes.' },
+  { number: '02', title: 'AI analyzes your GitHub & resume', description: 'We turn your code and experience into a structured profile.' },
+  { number: '03', title: 'Talk to our AI interviewer', description: 'A short async interview verifies your depth, strengths, and preferences.' },
+  { number: '04', title: 'Get matched to startup jobs', description: 'You see funded startup roles tuned to your background.' },
 ];
 
-const LOCATION_OPTIONS = [
-  '', 'San Francisco', 'New York', 'Seattle', 'Austin', 'Los Angeles',
-  'Boston', 'Chicago', 'Bangalore', 'Mumbai', 'Hyderabad', 'Delhi', 'Pune',
-  'London', 'Berlin', 'Amsterdam', 'Paris', 'Dublin', 'Singapore', 'Remote',
-];
-
-const EXPERIENCE_OPTIONS = [
-  { label: 'Any experience', value: 0 },
-  { label: '1+ years', value: 1 },
-  { label: '3+ years', value: 3 },
-  { label: '5+ years', value: 5 },
-  { label: '8+ years', value: 8 },
+const companySteps = [
+  { number: '01', title: 'Post your job for free', description: 'Share your role, requirements, and team context in one simple flow.' },
+  { number: '02', title: 'AI analyzes your requirements', description: 'We extract must-haves, seniority, and startup-fit signals.' },
+  { number: '03', title: 'Receive matched candidates in 24 hours', description: 'We send vetted profiles straight to your inbox.' },
 ];
 
 const HomePage = () => {
-  const [hireTab, setHireTab] = useState('quick');
-  const [hireForm, setHireForm] = useState({ role: '', location: '', skills: '', experience: 0, email: '', company: '' });
-  const [jdForm, setJdForm] = useState({ jd: '', email: '', company: '', filename: '' });
-  const [jdFileLoading, setJdFileLoading] = useState(false);
-  const fileInputRef = useRef(null);
-  const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState('');
-  const [hoveredCard, setHoveredCard] = useState(null);
-  const resultRef = useRef(null);
+  const [latestJobs, setLatestJobs] = useState([]);
+  const [jobsTotal, setJobsTotal] = useState(100);
 
-  useEffect(() => { window.scrollTo(0, 0); }, []);
+  useEffect(() => {
+    window.scrollTo(0, 0);
 
-  const submitHireFree = async (payload) => {
-    setLoading(true);
-    setError('');
-    setResult(null);
-    try {
-      const resp = await fetch(`${API_BASE_URL}/api/hire-free`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const data = await resp.json();
-      if (data.success) {
-        setResult(data);
-        setTimeout(() => resultRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
-      } else {
-        setError(data.detail || 'Something went wrong. Please try again.');
+    const fetchLatestJobs = async () => {
+      try {
+        const response = await api.get('/api/jobs/feed?limit=10');
+        if (response.data?.success) {
+          setLatestJobs(Array.isArray(response.data.jobs) ? response.data.jobs : []);
+          if (typeof response.data.total === 'number' && response.data.total > 0) {
+            setJobsTotal(response.data.total);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch public job feed', err);
       }
-    } catch {
-      setError('Network error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
 
-  const handleQuickSubmit = (e) => {
-    e.preventDefault();
-    if (!hireForm.email) { setError('Please enter your work email.'); return; }
-    const skills = hireForm.skills ? hireForm.skills.split(',').map(s => s.trim()).filter(Boolean) : [];
-    submitHireFree({
-      company_email: hireForm.email,
-      company_name: hireForm.company || undefined,
-      job_title: hireForm.role || 'Software Developer',
-      required_skills: skills,
-      preferred_location: hireForm.location || undefined,
-      experience_min: hireForm.experience || 0,
-    });
-  };
+    fetchLatestJobs();
+  }, []);
 
-  const handleJdFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setJdFileLoading(true);
-    setError('');
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const resp = await fetch(`${API_BASE_URL}/api/extract-jd-file`, { method: 'POST', body: formData });
-      const data = await resp.json();
-      if (data.success) {
-        setJdForm(p => ({ ...p, jd: data.text, filename: data.filename }));
-      } else {
-        setError(data.detail || 'Could not extract text from file.');
-      }
-    } catch {
-      setError('Failed to upload file. Please try again.');
-    } finally {
-      setJdFileLoading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+  const formatJobSummary = (job) => {
+    const location = job.location || job.remote_policy || 'Location TBD';
+    const fundingStage = job.funding_stage || 'Startup';
+    const investors = job.investors_summary ? ` (${job.investors_summary})` : '';
+    return `${job.title} at ${job.company_name} — ${location} — ${fundingStage}${investors}`;
   };
-
-  const handleJdSubmit = (e) => {
-    e.preventDefault();
-    if (!jdForm.email) { setError('Please enter your work email.'); return; }
-    if (!jdForm.jd || jdForm.jd.length < 50) { setError('Please paste or upload a job description (min 50 characters).'); return; }
-    submitHireFree({
-      company_email: jdForm.email,
-      company_name: jdForm.company || undefined,
-      job_title: 'Developer',
-      job_description: jdForm.jd,
-      jd_source: jdForm.filename ? 'uploaded' : 'pasted',
-      jd_filename: jdForm.filename || undefined,
-    });
-  };
-
-  const inputStyle = {
-    width: '100%', padding: '10px 14px', border: '1px solid #e5e7eb', borderRadius: '8px',
-    fontSize: '14px', fontFamily: "'Outfit', sans-serif", color: '#1a1a1a',
-    background: '#fff', boxSizing: 'border-box', outline: 'none',
-  };
-  const labelStyle = { display: 'block', fontSize: '13px', fontWeight: '600', color: '#374151', marginBottom: '6px' };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#ffffff', fontFamily: "'Outfit', sans-serif" }}>
+    <div style={styles.page}>
       <Navbar />
 
-      {/* ── HERO ── */}
-      <section style={{ padding: '5rem 2rem 3rem', background: 'linear-gradient(135deg, #fff 0%, #fff8f5 100%)', textAlign: 'center' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4rem)', fontWeight: '700', color: '#1a1a1a', marginBottom: '1rem', lineHeight: '1.15' }}>
-            The tech talent platform
-          </h1>
-          <p style={{ fontSize: '1.2rem', color: '#6b7280', maxWidth: '600px', margin: '0 auto 3rem', lineHeight: '1.7' }}>
-            Whether you're hiring developers or looking for your next role — we've got you.
-          </p>
-
-          {/* Split cards */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem', maxWidth: '860px', margin: '0 auto' }}>
-            {/* Recruiter card */}
-            <div
-              onMouseEnter={() => setHoveredCard('hire')}
-              onMouseLeave={() => setHoveredCard(null)}
-              style={{
-                background: '#E6F1FB', borderRadius: '20px', padding: '2.5rem 2rem',
-                textAlign: 'left', transition: 'all 0.2s',
-                transform: hoveredCard === 'hire' ? 'translateY(-6px)' : 'none',
-                boxShadow: hoveredCard === 'hire' ? '0 16px 40px rgba(12,68,124,0.15)' : '0 2px 8px rgba(0,0,0,0.04)',
-              }}
-            >
-              <div style={{ width: '52px', height: '52px', background: '#0C447C', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2"/>
-                </svg>
-              </div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#0C447C', marginBottom: '0.75rem' }}>I'm hiring developers</h2>
-              <p style={{ fontSize: '0.9375rem', color: '#1e5b9e', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-                Source, evaluate, and reach top tech talent from 200K+ verified developer profiles
-              </p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.75rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['Search 200K+ profiles', 'AI-scored candidates (0–100)', 'Built-in email outreach', 'Post jobs, get matched profiles'].map(f => (
-                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', color: '#1e5b9e' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0C447C" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/signup" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.75rem 1.5rem', background: '#0C447C', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontWeight: '600', fontSize: '0.9375rem' }}>
-                Start sourcing →
-              </Link>
+      <section style={styles.heroSection}>
+        <div style={styles.heroGrid} className="homepage-hero-grid">
+          <div>
+            <div style={styles.heroPill}>AI-matched startup hiring</div>
+            <h1 style={styles.heroTitle}>Your AI recruiter for startup jobs</h1>
+            <p style={styles.heroSubtitle}>
+              Get deeply evaluated by AI. Get matched to funded startup opportunities.
+            </p>
+            <div style={styles.heroCtas}>
+              <Link to="/candidate/signup" style={styles.primaryCta}>Join as Developer →</Link>
+              <Link to="/post-job" style={styles.secondaryCta}>Post a Job Free →</Link>
             </div>
+          </div>
 
-            {/* Developer card */}
-            <div
-              onMouseEnter={() => setHoveredCard('dev')}
-              onMouseLeave={() => setHoveredCard(null)}
-              style={{
-                background: '#E1F5EE', borderRadius: '20px', padding: '2.5rem 2rem',
-                textAlign: 'left', transition: 'all 0.2s',
-                transform: hoveredCard === 'dev' ? 'translateY(-6px)' : 'none',
-                boxShadow: hoveredCard === 'dev' ? '0 16px 40px rgba(8,80,65,0.15)' : '0 2px 8px rgba(0,0,0,0.04)',
-              }}
-            >
-              <div style={{ width: '52px', height: '52px', background: '#085041', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.25rem' }}>
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-                </svg>
+          <div style={styles.heroCard}>
+            <div style={styles.heroCardGlow} />
+            <div style={styles.heroMetricRow}>
+              <div>
+                <p style={styles.metricValue}>AI-evaluated</p>
+                <p style={styles.metricLabel}>GitHub + resume + interview in one profile</p>
               </div>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#085041', marginBottom: '0.75rem' }}>I'm a developer</h2>
-              <p style={{ fontSize: '0.9375rem', color: '#145c48', marginBottom: '1.5rem', lineHeight: '1.6' }}>
-                Create your verified developer card — powered by your actual code contributions
-              </p>
-              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 1.75rem', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {['AI-generated profile from GitHub', 'Verified tech stack from real code', 'Shareable DevCard for job applications', 'AI job agent coming soon'].map(f => (
-                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.875rem', color: '#145c48' }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#085041" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <Link to="/devcard" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '0.75rem 1.5rem', background: '#085041', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontWeight: '600', fontSize: '0.9375rem' }}>
-                Create your DevCard →
-              </Link>
+            </div>
+            <div style={styles.heroMiniCards}>
+              <div style={styles.heroMiniCard}>
+                <span style={styles.miniBadge}>Developer</span>
+                <p style={styles.miniTitle}>From profile to matched jobs</p>
+                <p style={styles.miniText}>Structured skills, role fit, startup preferences, and hiring-readiness.</p>
+              </div>
+              <div style={styles.heroMiniCard}>
+                <span style={{ ...styles.miniBadge, background: '#eef2ff', color: '#4338ca' }}>Company</span>
+                <p style={styles.miniTitle}>From job post to shortlisted talent</p>
+                <p style={styles.miniText}>Clearer role requirements and faster candidate delivery for startup teams.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* ── FIRST HIRE FREE ── */}
-      <section style={{ padding: '5rem 2rem', background: '#f9fafb' }}>
-        <div style={{ maxWidth: '780px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: '700', color: '#1a1a1a', textAlign: 'center', marginBottom: '0.5rem' }}>
-            Make your first tech hire — free
-          </h2>
-          <p style={{ fontSize: '1rem', color: '#6b7280', textAlign: 'center', marginBottom: '2rem', lineHeight: '1.7' }}>
-            Tell us what you're looking for. We'll match developer profiles from our database of 200,000+ and send them to your inbox.
-          </p>
+      <section style={styles.howSection}>
+        <div style={styles.sectionHeader}>
+          <h2 style={styles.sectionTitle}>How It Works</h2>
+          <p style={styles.sectionSubtitle}>Two simple flows, one marketplace built for startup hiring.</p>
+        </div>
 
-          {/* Tabs */}
-          <div style={{ display: 'flex', gap: '4px', background: '#e5e7eb', borderRadius: '10px', padding: '4px', marginBottom: '2rem', width: 'fit-content', margin: '0 auto 2rem' }}>
-            {[['quick', 'Quick search'], ['jd', 'Upload job description']].map(([key, label]) => (
-              <button key={key} onClick={() => { setHireTab(key); setError(''); setResult(null); }}
-                style={{ padding: '8px 20px', borderRadius: '7px', border: 'none', cursor: 'pointer', fontFamily: "'Outfit', sans-serif", fontSize: '14px', fontWeight: '600', transition: 'all 0.15s', background: hireTab === key ? '#fff' : 'transparent', color: hireTab === key ? '#1a1a1a' : '#6b7280', boxShadow: hireTab === key ? '0 1px 4px rgba(0,0,0,0.08)' : 'none' }}>
-                {label}
-              </button>
+        <div style={styles.dualGrid} className="homepage-dual-grid">
+          <div style={styles.flowCard}>
+            <div style={styles.flowEyebrow}>For Developers</div>
+            <h3 style={styles.flowTitle}>Go from import to startup matches</h3>
+            <div style={styles.stepList}>
+              {developerSteps.map((step) => (
+                <div key={step.number} style={styles.stepRow}>
+                  <div style={styles.stepIcon}>{step.number}</div>
+                  <div>
+                    <p style={styles.stepTitle}>{step.title}</p>
+                    <p style={styles.stepDescription}>{step.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={styles.flowCard}>
+            <div style={styles.flowEyebrow}>For Companies</div>
+            <h3 style={styles.flowTitle}>Post once, get matched fast</h3>
+            <div style={styles.stepList}>
+              {companySteps.map((step) => (
+                <div key={step.number} style={styles.stepRow}>
+                  <div style={{ ...styles.stepIcon, background: '#fff4ef', color: '#FF6B35' }}>{step.number}</div>
+                  <div>
+                    <p style={styles.stepTitle}>{step.title}</p>
+                    <p style={styles.stepDescription}>{step.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {latestJobs.length > 0 && (
+        <section style={styles.jobsSection}>
+          <div style={styles.sectionHeader}>
+            <h2 style={styles.sectionTitle}>Latest Startup Engineering Jobs</h2>
+            <p style={styles.sectionSubtitle}>Fresh roles discovered from funded startups and portfolio company hiring pages.</p>
+          </div>
+
+          <div style={styles.jobsList}>
+            {latestJobs.map((job) => (
+              <div key={job.id} style={styles.jobRow} className="homepage-job-row">
+                <div style={styles.jobInfo}>
+                  <p style={styles.jobSummary}>{formatJobSummary(job)}</p>
+                </div>
+                <a href={job.apply_url} target="_blank" rel="noreferrer" style={styles.jobButton}>
+                  Apply →
+                </a>
+              </div>
             ))}
           </div>
 
-          <div style={{ background: '#fff', borderRadius: '16px', border: '1px solid #e5e7eb', padding: '2rem' }}>
-            {hireTab === 'quick' ? (
-              <form onSubmit={handleQuickSubmit}>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div>
-                    <label style={labelStyle}>Role</label>
-                    <select value={hireForm.role} onChange={e => setHireForm(p => ({ ...p, role: e.target.value }))} style={inputStyle}>
-                      <option value="">Any role</option>
-                      {ROLE_OPTIONS.filter(Boolean).map(r => <option key={r} value={r}>{r}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Location</label>
-                    <select value={hireForm.location} onChange={e => setHireForm(p => ({ ...p, location: e.target.value }))} style={inputStyle}>
-                      <option value="">Any location</option>
-                      {LOCATION_OPTIONS.filter(Boolean).map(l => <option key={l} value={l}>{l}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
-                  <div>
-                    <label style={labelStyle}>Skills (comma separated)</label>
-                    <input type="text" placeholder="Python, FastAPI, PostgreSQL" value={hireForm.skills} onChange={e => setHireForm(p => ({ ...p, skills: e.target.value }))} style={inputStyle} />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Experience</label>
-                    <select value={hireForm.experience} onChange={e => setHireForm(p => ({ ...p, experience: parseInt(e.target.value) }))} style={inputStyle}>
-                      {EXPERIENCE_OPTIONS.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-                    </select>
-                  </div>
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                  <div>
-                    <label style={labelStyle}>Your work email *</label>
-                    <input type="email" placeholder="you@company.com" required value={hireForm.email} onChange={e => setHireForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Company name (optional)</label>
-                    <input type="text" placeholder="Acme Corp" value={hireForm.company} onChange={e => setHireForm(p => ({ ...p, company: e.target.value }))} style={inputStyle} />
-                  </div>
-                </div>
-                {error && <p style={{ color: '#dc2626', fontSize: '13px', marginBottom: '1rem' }}>{error}</p>}
-                <button type="submit" disabled={loading}
-                  style={{ width: '100%', padding: '12px', background: loading ? '#9ca3af' : '#FF6B35', color: '#fff', border: 'none', borderRadius: '10px', fontFamily: "'Outfit', sans-serif", fontSize: '15px', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}>
-                  {loading ? 'Finding matches...' : 'Find matched developers →'}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleJdSubmit}>
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={labelStyle}>Job description *</label>
-                  <textarea rows={5} placeholder="Paste your job description here (minimum 50 characters)..." value={jdForm.jd} onChange={e => setJdForm(p => ({ ...p, jd: e.target.value, filename: '' }))}
-                    style={{ ...inputStyle, resize: 'vertical', minHeight: '120px' }} />
-                </div>
-
-                {/* File upload */}
-                <div style={{ marginBottom: '1rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
-                    <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
-                    <span style={{ fontSize: '12px', color: '#9ca3af', fontWeight: '500' }}>OR UPLOAD FILE</span>
-                    <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
-                  </div>
-
-                  {jdForm.filename ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px' }}>
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                      <span style={{ fontSize: '13px', color: '#15803d', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{jdForm.filename}</span>
-                      <button type="button" onClick={() => setJdForm(p => ({ ...p, jd: '', filename: '' }))}
-                        style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6b7280', padding: '0', fontSize: '16px', lineHeight: 1 }}>×</button>
-                    </div>
-                  ) : (
-                    <div
-                      onClick={() => !jdFileLoading && fileInputRef.current?.click()}
-                      style={{ border: '2px dashed #d1d5db', borderRadius: '10px', padding: '16px', textAlign: 'center', cursor: jdFileLoading ? 'wait' : 'pointer', transition: 'border-color 0.15s' }}
-                      onMouseEnter={e => e.currentTarget.style.borderColor = '#FF6B35'}
-                      onMouseLeave={e => e.currentTarget.style.borderColor = '#d1d5db'}
-                    >
-                      {jdFileLoading ? (
-                        <span style={{ fontSize: '13px', color: '#6b7280' }}>Extracting text...</span>
-                      ) : (
-                        <>
-                          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" strokeWidth="1.5" style={{ marginBottom: '4px' }}>
-                            <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>
-                          </svg>
-                          <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>Click to upload <strong>.pdf</strong>, <strong>.docx</strong>, or <strong>.txt</strong></p>
-                        </>
-                      )}
-                    </div>
-                  )}
-                  <input ref={fileInputRef} type="file" accept=".pdf,.docx,.doc,.txt" style={{ display: 'none' }} onChange={handleJdFileUpload} />
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1.5rem' }}>
-                  <div>
-                    <label style={labelStyle}>Your work email *</label>
-                    <input type="email" placeholder="you@company.com" required value={jdForm.email} onChange={e => setJdForm(p => ({ ...p, email: e.target.value }))} style={inputStyle} />
-                  </div>
-                  <div>
-                    <label style={labelStyle}>Company name (optional)</label>
-                    <input type="text" placeholder="Acme Corp" value={jdForm.company} onChange={e => setJdForm(p => ({ ...p, company: e.target.value }))} style={inputStyle} />
-                  </div>
-                </div>
-                {error && <p style={{ color: '#dc2626', fontSize: '13px', marginBottom: '1rem' }}>{error}</p>}
-                <button type="submit" disabled={loading}
-                  style={{ width: '100%', padding: '12px', background: loading ? '#9ca3af' : '#FF6B35', color: '#fff', border: 'none', borderRadius: '10px', fontFamily: "'Outfit', sans-serif", fontSize: '15px', fontWeight: '600', cursor: loading ? 'not-allowed' : 'pointer', transition: 'all 0.2s' }}>
-                  {loading ? 'Finding matches...' : 'Find matches →'}
-                </button>
-              </form>
-            )}
+          <div style={{ marginTop: '20px' }}>
+            <Link to="/candidate/signup" style={styles.jobsFooterLink}>Join to see all matched jobs →</Link>
           </div>
+        </section>
+      )}
 
-          {/* Results */}
-          {result && (
-            <div ref={resultRef} style={{ marginTop: '2rem' }}>
-              <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '14px 18px', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ color: '#16a34a', fontSize: '18px' }}>✓</span>
-                <span style={{ fontSize: '14px', color: '#15803d', fontWeight: '500' }}>
-                  Found {result.matched_count} matching developers! Full profiles sent to {result.preview_profiles?.length > 0 ? (hireTab === 'quick' ? hireForm.email : jdForm.email) : 'your inbox'}.
-                </span>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-                {(result.preview_profiles || []).map((p, i) => (
-                  <div key={i} style={{ background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '1rem' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                      <div style={{ fontSize: '15px', fontWeight: '700', color: '#9ca3af', letterSpacing: '2px' }}>{p.name_preview}</div>
-                      <span style={{ background: '#f0fdf4', color: '#16a34a', fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '100px' }}>{p.developer_score}</span>
-                    </div>
-                    <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>{p.detected_role}</div>
-                    <div style={{ fontSize: '12px', color: '#9ca3af' }}>{p.location}</div>
-                    {p.languages?.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '8px' }}>
-                        {p.languages.slice(0, 3).map(l => <span key={l} style={{ fontSize: '11px', background: '#eef2ff', color: '#4338ca', borderRadius: '8px', padding: '2px 8px' }}>{l}</span>)}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-              <div style={{ textAlign: 'center', padding: '1.5rem', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '12px' }}>
-                <p style={{ fontSize: '15px', color: '#1a1a1a', fontWeight: '500', marginBottom: '1rem' }}>
-                  Want to search all 200,000+ profiles with advanced filters?
-                </p>
-                <Link to="/signup" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '10px 24px', background: '#FF6B35', color: '#fff', borderRadius: '8px', textDecoration: 'none', fontWeight: '600', fontSize: '14px' }}>
-                  Sign up free →
-                </Link>
-              </div>
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* ── STATS ── */}
-      <section style={{ padding: '4rem 2rem', background: '#ffffff' }}>
-        <div style={{ maxWidth: '700px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '2rem', textAlign: 'center' }}>
-          {[['200,000+', 'Profiles indexed'], ['50+', 'Cities covered'], ['30+', 'Programming languages']].map(([num, lbl]) => (
-            <div key={lbl} style={{ padding: '2rem 1rem', background: '#f9fafb', borderRadius: '16px' }}>
-              <div style={{ fontSize: '2.25rem', fontWeight: '800', color: '#FF6B35', marginBottom: '6px' }}>{num}</div>
-              <div style={{ fontSize: '0.9375rem', color: '#6b7280' }}>{lbl}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── HOW IT WORKS ── */}
-      <section style={{ padding: '5rem 2rem', background: '#f9fafb' }}>
-        <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: '700', color: '#1a1a1a', textAlign: 'center', marginBottom: '0.5rem' }}>How it works</h2>
-          <p style={{ fontSize: '1rem', color: '#6b7280', textAlign: 'center', marginBottom: '3rem' }}>Three simple steps to find your next hire</p>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'center', gap: '1.5rem', flexWrap: 'wrap' }}>
-            {[
-              ['1', 'Search by role & skills', 'Filter developers by role, location, programming language, and experience level.'],
-              ['2', 'Review scored profiles', 'Every developer is scored 0–100 based on verified code contributions, activity, and community impact.'],
-              ['3', 'Reach out directly', 'Send personalized emails to developers directly from the platform. Track responses.'],
-            ].map(([n, title, desc], i, arr) => (
-              <React.Fragment key={n}>
-                <div style={{ textAlign: 'center', maxWidth: '280px' }}>
-                  <div style={{ width: '52px', height: '52px', background: '#FF6B35', color: '#fff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.25rem', fontWeight: '700', margin: '0 auto 1rem' }}>{n}</div>
-                  <h3 style={{ fontSize: '1.125rem', fontWeight: '700', color: '#1a1a1a', marginBottom: '0.5rem' }}>{title}</h3>
-                  <p style={{ fontSize: '0.9375rem', color: '#6b7280', lineHeight: '1.6' }}>{desc}</p>
-                </div>
-                {i < arr.length - 1 && <div style={{ fontSize: '1.75rem', color: '#d1d5db', paddingTop: '1rem' }}>→</div>}
-              </React.Fragment>
-            ))}
+      <section style={styles.statsSection}>
+        <div style={styles.statsBar} className="homepage-stats-bar">
+          <div style={styles.statItem}>
+            <span style={styles.statNumber}>500+</span>
+            <span style={styles.statLabel}>developers registered</span>
+          </div>
+          <div style={styles.statDivider} className="homepage-stat-divider" />
+          <div style={styles.statItem}>
+            <span style={styles.statNumber}>{jobsTotal}+</span>
+            <span style={styles.statLabel}>startup jobs live</span>
+          </div>
+          <div style={styles.statDivider} className="homepage-stat-divider" />
+          <div style={styles.statItem}>
+            <span style={styles.statNumber}>50+</span>
+            <span style={styles.statLabel}>funded startups hiring</span>
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section style={{ padding: '5rem 2rem', background: 'linear-gradient(135deg, #FF6B35, #ff8a65)', textAlign: 'center' }}>
-        <div style={{ maxWidth: '600px', margin: '0 auto' }}>
-          <h2 style={{ fontSize: '2rem', fontWeight: '700', color: '#fff', marginBottom: '1rem' }}>Ready to find your next developer?</h2>
-          <p style={{ fontSize: '1.125rem', color: 'rgba(255,255,255,0.9)', marginBottom: '2rem' }}>Start free, no credit card required.</p>
-          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Link to="/signup" style={{ padding: '12px 28px', background: '#fff', color: '#FF6B35', borderRadius: '10px', textDecoration: 'none', fontWeight: '700', fontSize: '15px' }}>
-              Start sourcing →
-            </Link>
-            <Link to="/devcard" style={{ padding: '12px 28px', background: 'rgba(255,255,255,0.15)', color: '#fff', borderRadius: '10px', textDecoration: 'none', fontWeight: '600', fontSize: '15px', border: '1px solid rgba(255,255,255,0.4)' }}>
-              Create your DevCard →
-            </Link>
+      <section style={styles.companyCtaSection}>
+        <div style={styles.companyCtaCard} className="homepage-company-cta">
+          <div>
+            <p style={styles.flowEyebrow}>For Companies</p>
+            <h2 style={styles.companyCtaTitle}>Make your first tech hire — free</h2>
+            <p style={styles.companyCtaText}>
+              Tell us what you&apos;re looking for. Our AI matches developer profiles from our vetted talent pool and sends them to your inbox within 24 hours.
+            </p>
           </div>
+          <Link to="/post-job" style={styles.primaryCta}>Post a Job →</Link>
         </div>
       </section>
 
       <Footer />
 
       <style>{`
-        @media (max-width: 768px) {
-          .homepage-split { grid-template-columns: 1fr !important; }
-          .homepage-stats { grid-template-columns: 1fr !important; }
-          .hire-form-row { grid-template-columns: 1fr !important; }
+        @media (max-width: 900px) {
+          .homepage-hero-grid,
+          .homepage-dual-grid {
+            grid-template-columns: 1fr !important;
+          }
+          .homepage-stats-bar {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+          .homepage-stat-divider {
+            width: 100% !important;
+            height: 1px !important;
+          }
+          .homepage-job-row {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
+          .homepage-company-cta {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
         }
       `}</style>
     </div>
   );
+};
+
+const styles = {
+  page: { minHeight: '100vh', background: '#ffffff', fontFamily: "'Outfit', sans-serif" },
+  heroSection: { padding: '4.5rem 2rem 3rem', background: 'radial-gradient(circle at top left, #fff4ef 0%, #ffffff 48%, #fff8f4 100%)' },
+  heroGrid: { maxWidth: '1180px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1.1fr 0.9fr', gap: '28px', alignItems: 'center' },
+  heroPill: { display: 'inline-block', padding: '6px 14px', borderRadius: '999px', background: '#fff1eb', color: '#FF6B35', fontWeight: '700', fontSize: '0.88rem', marginBottom: '1rem' },
+  heroTitle: { margin: '0 0 14px 0', color: '#1a1a2e', fontSize: 'clamp(2.7rem, 5vw, 4.8rem)', lineHeight: '0.98', fontWeight: '800' },
+  heroSubtitle: { margin: '0 0 24px 0', maxWidth: '640px', color: '#52525b', fontSize: '1.12rem', lineHeight: '1.8' },
+  heroCtas: { display: 'flex', gap: '14px', flexWrap: 'wrap' },
+  primaryCta: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '14px 22px', borderRadius: '14px', background: '#FF6B35', color: '#fff', textDecoration: 'none', fontWeight: '700', fontSize: '1rem' },
+  secondaryCta: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', padding: '14px 22px', borderRadius: '14px', background: '#fff', color: '#1a1a2e', textDecoration: 'none', fontWeight: '700', fontSize: '1rem', border: '1px solid #e4e4e7' },
+  heroCard: { position: 'relative', overflow: 'hidden', background: '#1a1a2e', color: '#fff', borderRadius: '28px', padding: '28px', boxShadow: '0 24px 60px rgba(26, 26, 46, 0.18)' },
+  heroCardGlow: { position: 'absolute', inset: '-20% auto auto -10%', width: '220px', height: '220px', background: 'rgba(255, 107, 53, 0.24)', filter: 'blur(30px)', borderRadius: '50%' },
+  heroMetricRow: { position: 'relative', zIndex: 1, marginBottom: '22px' },
+  metricValue: { margin: '0 0 8px 0', fontSize: '1.7rem', fontWeight: '800' },
+  metricLabel: { margin: 0, color: 'rgba(255,255,255,0.78)', lineHeight: '1.7' },
+  heroMiniCards: { position: 'relative', zIndex: 1, display: 'grid', gap: '14px' },
+  heroMiniCard: { background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '18px', padding: '18px' },
+  miniBadge: { display: 'inline-block', marginBottom: '10px', padding: '5px 10px', borderRadius: '999px', background: '#fff1eb', color: '#FF6B35', fontWeight: '700', fontSize: '0.8rem' },
+  miniTitle: { margin: '0 0 6px 0', fontWeight: '700', fontSize: '1rem' },
+  miniText: { margin: 0, color: 'rgba(255,255,255,0.74)', lineHeight: '1.65' },
+  howSection: { padding: '4.5rem 2rem', background: '#ffffff' },
+  sectionHeader: { maxWidth: '960px', margin: '0 auto 26px', textAlign: 'center' },
+  sectionTitle: { margin: '0 0 10px 0', color: '#1a1a2e', fontSize: '2.25rem', fontWeight: '800' },
+  sectionSubtitle: { margin: 0, color: '#71717a', fontSize: '1rem', lineHeight: '1.7' },
+  dualGrid: { maxWidth: '1180px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' },
+  flowCard: { background: '#fff', border: '1px solid #f1f5f9', borderRadius: '24px', padding: '26px', boxShadow: '0 18px 44px rgba(15, 23, 42, 0.05)' },
+  flowEyebrow: { margin: '0 0 8px 0', color: '#FF6B35', fontWeight: '700', fontSize: '0.92rem', textTransform: 'uppercase', letterSpacing: '0.08em' },
+  flowTitle: { margin: '0 0 18px 0', color: '#1a1a2e', fontWeight: '800', fontSize: '1.55rem' },
+  stepList: { display: 'grid', gap: '16px' },
+  stepRow: { display: 'grid', gridTemplateColumns: '54px 1fr', gap: '14px', alignItems: 'flex-start' },
+  stepIcon: { width: '54px', height: '54px', borderRadius: '16px', background: '#1a1a2e', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '0.95rem' },
+  stepTitle: { margin: '2px 0 6px 0', color: '#18181b', fontWeight: '700', fontSize: '1rem' },
+  stepDescription: { margin: 0, color: '#71717a', lineHeight: '1.7' },
+  jobsSection: { padding: '0 2rem 4rem', background: '#ffffff', maxWidth: '1180px', margin: '0 auto' },
+  jobsList: { display: 'grid', gap: '12px' },
+  jobRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '18px', padding: '18px 20px', borderRadius: '18px', background: '#fffaf7', border: '1px solid #ffe1d5' },
+  jobInfo: { flex: 1 },
+  jobSummary: { margin: 0, color: '#1f2937', lineHeight: '1.7', fontWeight: '500' },
+  jobButton: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', whiteSpace: 'nowrap', padding: '11px 16px', borderRadius: '12px', background: '#FF6B35', color: '#fff', textDecoration: 'none', fontWeight: '700' },
+  jobsFooterLink: { color: '#FF6B35', textDecoration: 'none', fontWeight: '700', fontSize: '1rem' },
+  statsSection: { padding: '0 2rem 4rem', background: '#ffffff' },
+  statsBar: { maxWidth: '1180px', margin: '0 auto', background: '#1a1a2e', borderRadius: '24px', padding: '24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '18px' },
+  statItem: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' },
+  statNumber: { color: '#fff', fontWeight: '800', fontSize: '2rem', marginBottom: '4px' },
+  statLabel: { color: 'rgba(255,255,255,0.72)', fontSize: '0.98rem' },
+  statDivider: { width: '1px', alignSelf: 'stretch', background: 'rgba(255,255,255,0.12)' },
+  companyCtaSection: { padding: '0 2rem 5rem', background: '#ffffff' },
+  companyCtaCard: { maxWidth: '1180px', margin: '0 auto', background: 'linear-gradient(135deg, #fff5ef 0%, #ffffff 100%)', border: '1px solid #ffe0d4', borderRadius: '26px', padding: '28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '20px' },
+  companyCtaTitle: { margin: '0 0 10px 0', color: '#1a1a2e', fontSize: '2rem', fontWeight: '800' },
+  companyCtaText: { margin: 0, maxWidth: '760px', color: '#71717a', lineHeight: '1.8', fontSize: '1rem' },
 };
 
 export default HomePage;

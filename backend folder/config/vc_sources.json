@@ -1,0 +1,2231 @@
+[
+  {
+    "name": "Y Combinator",
+    "portfolio_url": "https://www.ycombinator.com/companies",
+    "region": "US",
+    "type": "accelerator"
+  },
+  {
+    "name": "Sequoia Capital",
+    "portfolio_url": "https://www.sequoiacap.com/our-companies/",
+    "region": "US"
+  },
+  {
+    "name": "Andreessen Horowitz",
+    "portfolio_url": "https://a16z.com/portfolio/",
+    "region": "US"
+  },
+  {
+    "name": "Accel",
+    "portfolio_url": "https://www.accel.com/portfolio",
+    "region": "Global"
+  },
+  {
+    "name": "Peak XV Partners",
+    "portfolio_url": "https://www.peakxv.com/companies/",
+    "region": "India"
+  },
+  {
+    "name": "Blume Ventures",
+    "portfolio_url": "https://blume.vc/portfolio",
+    "region": "India"
+  },
+  {
+    "name": "3one4 Capital",
+    "portfolio_url": "https://www.3one4capital.com/",
+    "region": "India"
+  },
+  {
+    "name": "Elevation Capital",
+    "portfolio_url": "https://www.elevationcapital.com/portfolio/",
+    "region": "India"
+  },
+  {
+    "name": "General Catalyst",
+    "portfolio_url": "https://www.generalcatalyst.com/portfolio",
+    "region": "US"
+  },
+  {
+    "name": "Lightspeed Venture Partners",
+    "portfolio_url": "https://lsvp.com/portfolio/",
+    "region": "Global"
+  },
+  {
+    "name": "Planet First Partners",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Bell Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Firgun Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "InBC Investment Corp.",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Mubadala Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "CCM Capital Markets",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Clear Street LLC",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Cobalt Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Boardman Bay Capital Management",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Mute Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Soren Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "JA Green",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "HarbourVest",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Mayfield",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Khosla Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Seligman Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "AICONIC",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Uncork Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Frist Cressey Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Moxxie Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Coalition Operators",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "247 VC",
+    "portfolio_url": "https://www.247vc.in/",
+    "website": "https://www.247vc.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "Deep Tech / Hard Science, Industrial / IoT / Robotics, Enterprise",
+    "portfolio_count": "0",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "2am VC",
+    "portfolio_url": "https://www.2amvc.com/",
+    "website": "https://www.2amvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "48",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "360 One Asset Management",
+    "portfolio_url": "https://www.360.one/",
+    "website": "https://www.360.one/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "85",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "4U Venture Partners",
+    "portfolio_url": "https://4uvp.com",
+    "website": "https://4uvp.com",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "AI / ML, Fintech, Enterprise",
+    "portfolio_count": "0",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "8i Ventures",
+    "portfolio_url": "https://www.8ivc.com/",
+    "website": "https://www.8ivc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Fintech, Consumer, Enterprise",
+    "portfolio_count": "28",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "8X Ventures",
+    "portfolio_url": "https://www.8xventures.co/",
+    "website": "https://www.8xventures.co/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Industrial / IoT / Robotics, Automotive / EV",
+    "portfolio_count": "18",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "a99 VC",
+    "portfolio_url": "https://a99.vc/",
+    "website": "https://a99.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Deep Tech / Hard Science, Industrial / IoT / Robotics, Energy",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Abyro Capital",
+    "portfolio_url": "https://abyrocapital.com",
+    "website": "https://abyrocapital.com",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Enterprise, Supply Chain / Logistics",
+    "portfolio_count": "3",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Accel India",
+    "portfolio_url": "https://www.accel.com/",
+    "website": "https://www.accel.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "AI / ML, Deep Tech / Hard Science, Consumer",
+    "portfolio_count": "250",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Advantedge Founders",
+    "portfolio_url": "https://www.advantedge.vc/",
+    "website": "https://www.advantedge.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Automotive / EV, Energy, Climate / Sustainability",
+    "portfolio_count": "45",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Alkemi Growth Capital",
+    "portfolio_url": "https://www.alkemivp.com/",
+    "website": "https://www.alkemivp.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "Biotech / Life sciences, Healthcare/Medtech, Consumer",
+    "portfolio_count": "16",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "All In Capital",
+    "portfolio_url": "https://allincapital.vc/",
+    "website": "https://allincapital.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Consumer, Deep Tech / Hard Science, AI / ML",
+    "portfolio_count": "70",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Alter Global",
+    "portfolio_url": "https://alter.vc/",
+    "website": "https://alter.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Alteria Capital",
+    "portfolio_url": "https://alteriacapital.com/",
+    "website": "https://alteriacapital.com/",
+    "region": "India",
+    "stages": "Series B, Series C, Debt",
+    "sectors": "No items found.",
+    "portfolio_count": "180",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Anchorage Capital",
+    "portfolio_url": "https://anchoragecap.in/index.html",
+    "website": "https://anchoragecap.in/index.html",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "10",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Anicut capital",
+    "portfolio_url": "https://www.anicutcapital.com/",
+    "website": "https://www.anicutcapital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "120",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Ankur Capital",
+    "portfolio_url": "https://www.ankurcapital.com/",
+    "website": "https://www.ankurcapital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, AI / ML, Agritech / Food",
+    "portfolio_count": "36",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Anthill Ventures",
+    "portfolio_url": "https://anthillventures.com/",
+    "website": "https://anthillventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "81",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Antler India",
+    "portfolio_url": "https://www.antler.co/",
+    "website": "https://www.antler.co/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "AI / ML, Fintech, Enterprise",
+    "portfolio_count": "110",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Arali Ventures",
+    "portfolio_url": "https://araliventures.in/",
+    "website": "https://araliventures.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Fintech, SaaS / DevOps / Marketplace, Industrial / IoT / Robotics",
+    "portfolio_count": "32",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Archerman Capital",
+    "portfolio_url": "https://www.archermancap.com/",
+    "website": "https://www.archermancap.com/",
+    "region": "India",
+    "stages": "Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "5",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Arkam Ventures",
+    "portfolio_url": "https://arkamvc.com/",
+    "website": "https://arkamvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Fintech, AI / ML, Deep Tech / Hard Science",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Astir Ventures",
+    "portfolio_url": "https://www.astir.vc/",
+    "website": "https://www.astir.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Enterprise, SaaS / DevOps / Marketplace, AI / ML",
+    "portfolio_count": "520",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Athera Venture Partners",
+    "portfolio_url": "https://www.atheravp.com/",
+    "website": "https://www.atheravp.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "AI / ML, Deep Tech / Hard Science, Consumer",
+    "portfolio_count": "44",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Atrium Angels",
+    "portfolio_url": "https://www.atriumangels.com/",
+    "website": "https://www.atriumangels.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "19",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Audacity VC",
+    "portfolio_url": "https://audacityvc.com/",
+    "website": "https://audacityvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "AI / ML, Media & Entertainment, Consumer",
+    "portfolio_count": "9",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "AUM Ventures",
+    "portfolio_url": "https://aumvc.com/",
+    "website": "https://aumvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "18",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Avataar Ventures",
+    "portfolio_url": "https://avataar.vc/",
+    "website": "https://avataar.vc/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "9",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Axilor Ventures",
+    "portfolio_url": "https://www.axilor.com/",
+    "website": "https://www.axilor.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Enterprise, Deep Tech / Hard Science, Healthcare/Medtech",
+    "portfolio_count": "70",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "BAce Capital",
+    "portfolio_url": "https://www.bace.vc/",
+    "website": "https://www.bace.vc/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "BEENEXT",
+    "portfolio_url": "https://www.beenext.com/",
+    "website": "https://www.beenext.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "105",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Bertelsmann India investments",
+    "portfolio_url": "https://www.biifund.com/",
+    "website": "https://www.biifund.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "Consumer, Fintech, Healthcare/Medtech",
+    "portfolio_count": "32",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Bessemer Venture Partners India",
+    "portfolio_url": "https://www.bvp.com/india",
+    "website": "https://www.bvp.com/india",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "AI / ML, Fintech, B2C / Ecommerce",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Beyond Next Ventures",
+    "portfolio_url": "https://beyondnextventures.com/",
+    "website": "https://beyondnextventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "14",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Blinc Invest",
+    "portfolio_url": "https://blincinvest.com/",
+    "website": "https://blincinvest.com/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "Fintech, Education, Healthcare/Medtech",
+    "portfolio_count": "10",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Blue Ashva Capital",
+    "portfolio_url": "https://www.blueashvacapital.com/",
+    "website": "https://www.blueashvacapital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Debt",
+    "sectors": "No items found.",
+    "portfolio_count": "18",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Bluehill VC",
+    "portfolio_url": "https://bluehillcapital.in/",
+    "website": "https://bluehillcapital.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Government / Defence",
+    "portfolio_count": "5",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "BlueLotus Ventures",
+    "portfolio_url": "https://bluelotus.vc/",
+    "website": "https://bluelotus.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "82",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "BoldCap",
+    "portfolio_url": "https://www.boldcap.com/",
+    "website": "https://www.boldcap.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "AI / ML, Enterprise, SaaS / DevOps / Marketplace",
+    "portfolio_count": "25",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Boundless Ventures",
+    "portfolio_url": "https://www.boundlessvc.com/",
+    "website": "https://www.boundlessvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "AI / ML, Industrial / IoT / Robotics, Deep Tech / Hard Science",
+    "portfolio_count": "9",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "BYT Capital",
+    "portfolio_url": "https://www.bytcapital.in/",
+    "website": "https://www.bytcapital.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Biotech / Life sciences, Government / Defence",
+    "portfolio_count": "4",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Cactus Venture Partners",
+    "portfolio_url": "https://www.cactusvp.com/",
+    "website": "https://www.cactusvp.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "5",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Campus Fund",
+    "portfolio_url": "https://yourcampusfund.com/",
+    "website": "https://yourcampusfund.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Deep Tech / Hard Science, AI / ML, Biotech / Life sciences",
+    "portfolio_count": "45",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Capital 2B",
+    "portfolio_url": "https://www.capital2b.com/",
+    "website": "https://www.capital2b.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "12",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Capital A",
+    "portfolio_url": "https://www.capital-a.in/",
+    "website": "https://www.capital-a.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Industrial / IoT / Robotics, Climate / Sustainability, Advanced Manufacturing",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Capria Ventures",
+    "portfolio_url": "https://capria.vc/",
+    "website": "https://capria.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "CDM Capital",
+    "portfolio_url": "https://cdmcapital.in/#portfolio",
+    "website": "https://cdmcapital.in/#portfolio",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "2",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Cedar Hill Capital",
+    "portfolio_url": "https://cedarhill.vc/",
+    "website": "https://cedarhill.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Enterprise, Fintech",
+    "portfolio_count": "2",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Centre Court Capital",
+    "portfolio_url": "https://centrecourtcapital.com/",
+    "website": "https://centrecourtcapital.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "Gaming, Health and Wellness",
+    "portfolio_count": "6",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Chakra Growth Fund",
+    "portfolio_url": "https://www.chakragrowthcapital.com/",
+    "website": "https://www.chakragrowthcapital.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "2",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Chanakya",
+    "portfolio_url": "https://chanakya.fyi/",
+    "website": "https://chanakya.fyi/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "5",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Chandigarh Angels Network",
+    "portfolio_url": "https://chandigarhangelsnetwork.com/",
+    "website": "https://chandigarhangelsnetwork.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Debt",
+    "sectors": "No items found.",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Chimera Venture Capitals",
+    "portfolio_url": "https://chimeravc.com/",
+    "website": "https://chimeravc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Gaming, SaaS / DevOps / Marketplace, Media & Entertainment",
+    "portfolio_count": "10",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Chiratae Ventures",
+    "portfolio_url": "https://www.chiratae.com/",
+    "website": "https://www.chiratae.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "75",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Colossa Ventures LLP",
+    "portfolio_url": "https://colossaventures.com/",
+    "website": "https://colossaventures.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "Deep Tech / Hard Science, Climate / Sustainability, Healthcare/Medtech",
+    "portfolio_count": "8",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Dallas Venture Capital",
+    "portfolio_url": "https://dallasvc.com/",
+    "website": "https://dallasvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "SaaS / DevOps / Marketplace, AI / ML, Fintech",
+    "portfolio_count": "33",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Day Zero Ventures",
+    "portfolio_url": "https://www.dzero.vc/",
+    "website": "https://www.dzero.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "AI / ML, SaaS / DevOps / Marketplace, Media & Entertainment",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Dexter Ventures",
+    "portfolio_url": "https://www.dexter.ventures/",
+    "website": "https://www.dexter.ventures/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Dholakia Ventures",
+    "portfolio_url": "https://www.dholakiaventures.com/",
+    "website": "https://www.dholakiaventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Climate / Sustainability, Fintech, Enterprise",
+    "portfolio_count": "75",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Dream Incubator India",
+    "portfolio_url": "https://www.dreamincubator.com/in/",
+    "website": "https://www.dreamincubator.com/in/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "DSG Consumer Partners",
+    "portfolio_url": "https://www.dsgcp.com/",
+    "website": "https://www.dsgcp.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "86",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "DST Global",
+    "portfolio_url": "https://dst-global.com/",
+    "website": "https://dst-global.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "250",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Eaglewings Ventures",
+    "portfolio_url": "https://eaglewings.vc/",
+    "website": "https://eaglewings.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Debt",
+    "sectors": "Enterprise, Supply Chain / Logistics, Consumer",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Earth Fund",
+    "portfolio_url": "https://www.earthfund.in/",
+    "website": "https://www.earthfund.in/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "Pitch Now",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Eight Roads Ventures",
+    "portfolio_url": "https://eightroads.com/en/",
+    "website": "https://eightroads.com/en/",
+    "region": "India",
+    "stages": "Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "300",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Elev8 Venture Partners",
+    "portfolio_url": "https://www.elev8vp.com/",
+    "website": "https://www.elev8vp.com/",
+    "region": "India",
+    "stages": "Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "2",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Emerge Capital",
+    "portfolio_url": "https://emergecapital.vc/",
+    "website": "https://emergecapital.vc/",
+    "region": "India",
+    "stages": "Series B, Series C, Debt",
+    "sectors": "Automotive / EV, Healthcare/Medtech",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Endiya partners",
+    "portfolio_url": "https://www.endiya.com/",
+    "website": "https://www.endiya.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "25",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Enzia Ventures",
+    "portfolio_url": "https://www.enzia.vc/",
+    "website": "https://www.enzia.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "14",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Equanimity Investments",
+    "portfolio_url": "https://www.equanimityinvestments.com/",
+    "website": "https://www.equanimityinvestments.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Equentis",
+    "portfolio_url": "https://www.equentis.com",
+    "website": "https://www.equentis.com",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "AI / ML, Enterprise, Deep Tech / Hard Science",
+    "portfolio_count": "14",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Exfinity venture partners",
+    "portfolio_url": "https://www.exfinityventures.com/",
+    "website": "https://www.exfinityventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Enterprise, Deep Tech / Hard Science, SaaS / DevOps / Marketplace",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Eximius Ventures",
+    "portfolio_url": "https://eximiusvc.com/",
+    "website": "https://eximiusvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "24",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Faad",
+    "portfolio_url": "https://www.faad.in/",
+    "website": "https://www.faad.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Debt",
+    "sectors": "Healthcare/Medtech, Deep Tech / Hard Science, Fintech",
+    "portfolio_count": "130",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "FinSight Ventures",
+    "portfolio_url": "https://www.finsightvc.com/",
+    "website": "https://www.finsightvc.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "50",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Finvolve Ventures",
+    "portfolio_url": "https://finvolve.co/",
+    "website": "https://finvolve.co/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Sector Agnostic",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Fireside Ventures",
+    "portfolio_url": "https://firesideventures.com/",
+    "website": "https://firesideventures.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "Healthcare/Medtech, Agritech / Food, B2C / Ecommerce",
+    "portfolio_count": "60",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Flourish ventures",
+    "portfolio_url": "https://flourishventures.com/",
+    "website": "https://flourishventures.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Pre-Seed",
+    "sectors": "Fintech, AI / ML, Cyber Security",
+    "portfolio_count": "100",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "FortyTwo.vc",
+    "portfolio_url": "https://www.fortytwo.vc/",
+    "website": "https://www.fortytwo.vc/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "10",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Fundalogical Ventures",
+    "portfolio_url": "https://www.fundalogical.com/",
+    "website": "https://www.fundalogical.com/",
+    "region": "India",
+    "stages": "Series A, Series B",
+    "sectors": "Logistics, Energy, B2B Commerce",
+    "portfolio_count": "1",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Gemba Capital",
+    "portfolio_url": "https://gembacapital.in/",
+    "website": "https://gembacapital.in/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "50",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Golden Sparrow",
+    "portfolio_url": "https://goldensparrow.vc/",
+    "website": "https://goldensparrow.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "Deep Tech / Hard Science, Biotech / Life sciences, AI / ML, SaaS / DevOps / Marketplace, Industrial / IoT / Robotics",
+    "portfolio_count": "19",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Good Capital",
+    "portfolio_url": "https://goodcapital.vc",
+    "website": "https://goodcapital.vc",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "B2C / Ecommerce, AI / ML, Consumer",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "gradCapital",
+    "portfolio_url": "https://www.gradcapital.in/",
+    "website": "https://www.gradcapital.in/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Granite Asia",
+    "portfolio_url": "https://www.graniteasia.com/",
+    "website": "https://www.graniteasia.com/",
+    "region": "India",
+    "stages": "Series A, Series B, Series C, Debt",
+    "sectors": "Consumer, Deep Tech / Hard Science, AI / ML",
+    "portfolio_count": "240",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Grayscale Ventures",
+    "portfolio_url": "https://grayscale.vc/",
+    "website": "https://grayscale.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "AI / ML, SaaS / DevOps / Marketplace, Enterprise",
+    "portfolio_count": "20",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "GrowthCap Ventures",
+    "portfolio_url": "https://growthcap.vc/",
+    "website": "https://growthcap.vc/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "1",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "GrowX ventures",
+    "portfolio_url": "https://growx.vc/",
+    "website": "https://growx.vc/",
+    "region": "India",
+    "stages": "Seed, Series B",
+    "sectors": "Deep Tech / Hard Science, Industrial / IoT / Robotics, Government / Defence",
+    "portfolio_count": "49",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Gruhas",
+    "portfolio_url": "https://gruhas.com",
+    "website": "https://gruhas.com",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "Climate / Sustainability, Deep Tech / Hard Science, Energy",
+    "portfolio_count": "55",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "HealthQuad",
+    "portfolio_url": "https://healthquad.com",
+    "website": "https://healthquad.com",
+    "region": "India",
+    "stages": "Series A, Series B, Series C",
+    "sectors": "Healthcare/Medtech, Biotech / Life sciences",
+    "portfolio_count": "20",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Himalayan Capital",
+    "portfolio_url": "https://www.himalayancapital.com/",
+    "website": "https://www.himalayancapital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Fintech, Enterprise, AI / ML",
+    "portfolio_count": "5",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Huddle Ventures",
+    "portfolio_url": "https://www.huddleventures.vc/",
+    "website": "https://www.huddleventures.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "32",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "IAN Group (formerly Indian Angel Network)",
+    "portfolio_url": "https://iangroup.vc/",
+    "website": "https://iangroup.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "225",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Ideaspring Capital",
+    "portfolio_url": "https://ideaspringcap.com/",
+    "website": "https://ideaspringcap.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Biotech / Life sciences, AI / ML",
+    "portfolio_count": "34",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Incubate Fund Asia",
+    "portfolio_url": "https://www.incubatefund.in/",
+    "website": "https://www.incubatefund.in/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "23",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Indian Silicon Valley",
+    "portfolio_url": "https://indiansiliconvalley.in/",
+    "website": "https://indiansiliconvalley.in/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "India Quotient",
+    "portfolio_url": "https://www.indiaquotient.in/",
+    "website": "https://www.indiaquotient.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "SaaS / DevOps / Marketplace, Enterprise, Consumer",
+    "portfolio_count": "120",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Infinyte Club Angel Fund",
+    "portfolio_url": "https://web.infinyte.club/",
+    "website": "https://web.infinyte.club/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Deep Tech / Hard Science, Consumer, AI / ML",
+    "portfolio_count": "150",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Inflexor",
+    "portfolio_url": "https://www.inflexor.vc/",
+    "website": "https://www.inflexor.vc/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "26",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Info Edge Ventures",
+    "portfolio_url": "https://www.infoedgeventures.in/",
+    "website": "https://www.infoedgeventures.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Enterprise, Fintech, B2C / Ecommerce",
+    "portfolio_count": "80",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Innoven Capital",
+    "portfolio_url": "https://www.innovencapital.com/index.php/Home_in?lang=in",
+    "website": "https://www.innovencapital.com/index.php/Home_in?lang=in",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "60",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Inuka Capital",
+    "portfolio_url": "https://www.inuka.vc/",
+    "website": "https://www.inuka.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "Deep Tech / Hard Science, Healthcare/Medtech, Consumer",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Inviga Healthcare Fund",
+    "portfolio_url": "https://inviga.in/",
+    "website": "https://inviga.in/",
+    "region": "India",
+    "stages": "Series A, Series B, Series C",
+    "sectors": "Biotech / Life sciences, Healthcare/Medtech",
+    "portfolio_count": "4",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Iron Pillar Fund",
+    "portfolio_url": "https://ironpillarfund.com/",
+    "website": "https://ironpillarfund.com/",
+    "region": "India",
+    "stages": "Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "iSeed",
+    "portfolio_url": "https://www.iseed.vc/",
+    "website": "https://www.iseed.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "160",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "ITI GO VC Fund",
+    "portfolio_url": "https://itigo.in/",
+    "website": "https://itigo.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Debt",
+    "sectors": "B2B Commerce, Industrial / IoT / Robotics, Fintech",
+    "portfolio_count": "28",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "IvyCap Ventures",
+    "portfolio_url": "https://ivycapventures.com/",
+    "website": "https://ivycapventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Sector Agnostic",
+    "portfolio_count": "65",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Java Capital",
+    "portfolio_url": "https://www.javacapital.co/",
+    "website": "https://www.javacapital.co/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Climate / Sustainability, Energy",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "JSW Ventures",
+    "portfolio_url": "https://jswvc.com/",
+    "website": "https://jswvc.com/",
+    "region": "India",
+    "stages": "Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "10",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "July Ventures",
+    "portfolio_url": "https://www.julyventures.com/",
+    "website": "https://www.julyventures.com/",
+    "region": "India",
+    "stages": "Series A, Series B, Series C",
+    "sectors": "Supply Chain / Logistics, Healthcare/Medtech, Fintech",
+    "portfolio_count": "11",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Jungle ventures",
+    "portfolio_url": "https://www.jungle.vc/",
+    "website": "https://www.jungle.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "20",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Kae Capital",
+    "portfolio_url": "https://kae-capital.com/",
+    "website": "https://kae-capital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "AI / ML, Consumer, Enterprise",
+    "portfolio_count": "100",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Kalaari Capital",
+    "portfolio_url": "https://kalaari.com",
+    "website": "https://kalaari.com",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "SaaS / DevOps / Marketplace, B2C / Ecommerce, Deep Tech / Hard Science",
+    "portfolio_count": "150",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "LC Nueva",
+    "portfolio_url": "https://www.lighthouse-canton.com/our-businesses/asset-management/private-market-funds/lc-nueva-fund",
+    "website": "https://www.lighthouse-canton.com/our-businesses/asset-management/private-market-funds/lc-nueva-fund",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Lead Angels Fund",
+    "portfolio_url": "https://leadangels.in/",
+    "website": "https://leadangels.in/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "95",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Leo Capital",
+    "portfolio_url": "https://leo.capital/",
+    "website": "https://leo.capital/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "AI / ML, Deep Tech / Hard Science, Fintech",
+    "portfolio_count": "65",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Lok Capital",
+    "portfolio_url": "https://www.lokcapital.com/",
+    "website": "https://www.lokcapital.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Macwise Capital",
+    "portfolio_url": "https://macwisecapital.com",
+    "website": "https://macwisecapital.com",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Debt",
+    "sectors": "Sector Agnostic",
+    "portfolio_count": "7",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Malpani Ventures",
+    "portfolio_url": "https://www.malpaniventures.com/",
+    "website": "https://www.malpaniventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Enterprise, Healthcare/Medtech, Supply Chain / Logistics",
+    "portfolio_count": "20",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Mars Growth Capital",
+    "portfolio_url": "https://www.marsgrowth.com/",
+    "website": "https://www.marsgrowth.com/",
+    "region": "India",
+    "stages": "Series C, Debt",
+    "sectors": "No items found.",
+    "portfolio_count": "36",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "MarsShot.VC",
+    "portfolio_url": "https://marsshot.vc/",
+    "website": "https://marsshot.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "80",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Mela Ventures",
+    "portfolio_url": "https://melaventures.in/",
+    "website": "https://melaventures.in/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "Deep Tech / Hard Science, SaaS / DevOps / Marketplace, Industrial / IoT / Robotics",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Merak Ventures",
+    "portfolio_url": "https://www.merakventures.com/",
+    "website": "https://www.merakventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "AI / ML, Deep Tech / Hard Science, Enterprise",
+    "portfolio_count": "25",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "MGA Ventures",
+    "portfolio_url": "https://www.mgaventures.in/",
+    "website": "https://www.mgaventures.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Fintech, AI / ML, Consumer",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Micelio Fund",
+    "portfolio_url": "https://www.axilor.com/",
+    "website": "https://www.axilor.com/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, Automotive / EV, Industrial / IoT / Robotics",
+    "portfolio_count": "13",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Momentum Capital",
+    "portfolio_url": "https://mvcapital.vc/index.html",
+    "website": "https://mvcapital.vc/index.html",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "Climate / Sustainability, Deep Tech / Hard Science, Energy",
+    "portfolio_count": "20",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Multiply Ventures",
+    "portfolio_url": "https://www.multiplyventures.com/web/",
+    "website": "https://www.multiplyventures.com/web/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "21",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "M Venture Partners",
+    "portfolio_url": "https://www.m-venturepartners.com/",
+    "website": "https://www.m-venturepartners.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Fintech, Healthcare/Medtech, Consumer",
+    "portfolio_count": "49",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "NEDfi venture capital limited",
+    "portfolio_url": "https://www.nedfiventure.com/",
+    "website": "https://www.nedfiventure.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Agritech / Food, Energy, Healthcare/Medtech",
+    "portfolio_count": "55",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Next Bharat Ventures",
+    "portfolio_url": "https://nextbharat.ventures/",
+    "website": "https://nextbharat.ventures/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Sector Agnostic",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Nexus Venture Partners",
+    "portfolio_url": "https://nexusvp.com/",
+    "website": "https://nexusvp.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Fintech, SaaS / DevOps / Marketplace, Consumer",
+    "portfolio_count": "140",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Omnivore",
+    "portfolio_url": "https://www.omnivore.vc",
+    "website": "https://www.omnivore.vc",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "Agritech / Food, B2C / Ecommerce, Biotech / Life sciences",
+    "portfolio_count": "33",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Orios Venture Partners",
+    "portfolio_url": "https://www.oriosvp.com/",
+    "website": "https://www.oriosvp.com/",
+    "region": "India",
+    "stages": "Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "50",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Ortella Global Capital",
+    "portfolio_url": "https://www.ogcapital.one/",
+    "website": "https://www.ogcapital.one/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "B2C / Ecommerce, Enterprise",
+    "portfolio_count": "5",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "OTP Ventures",
+    "portfolio_url": "https://otp.vc/",
+    "website": "https://otp.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "B2B Commerce, Fintech, Consumer",
+    "portfolio_count": "14",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Panthera Growth Partners",
+    "portfolio_url": "https://www.pantheragp.com/",
+    "website": "https://www.pantheragp.com/",
+    "region": "India",
+    "stages": "Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "12",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Paradigm Shift Capital",
+    "portfolio_url": "https://www.paradigmshift.vc/",
+    "website": "https://www.paradigmshift.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Pavestone VC",
+    "portfolio_url": "https://pavestone.vc/",
+    "website": "https://pavestone.vc/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "Enterprise, Deep Tech / Hard Science, Supply Chain / Logistics",
+    "portfolio_count": "8",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Peak Sustainability Ventures",
+    "portfolio_url": "https://www.peakventures.in/",
+    "website": "https://www.peakventures.in/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "19",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "PeerCapital",
+    "portfolio_url": "https://www.peercapital.in/",
+    "website": "https://www.peercapital.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "AI / ML, B2C / Ecommerce, Gaming",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Pegasus India Evolving Opportunities Fund",
+    "portfolio_url": "https://www.pegasusfininvest.com",
+    "website": "https://www.pegasusfininvest.com",
+    "region": "India",
+    "stages": "Series A, Series B, Series C",
+    "sectors": "Fintech, Climate / Sustainability, Deep Tech / Hard Science",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Pentathlon Ventures",
+    "portfolio_url": "https://pentathlon.vc/",
+    "website": "https://pentathlon.vc/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "Healthcare/Medtech, AI / ML, SaaS / DevOps / Marketplace",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Picus Capital",
+    "portfolio_url": "https://www.picuscap.com/",
+    "website": "https://www.picuscap.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Consumer, SaaS / DevOps / Marketplace, Energy",
+    "portfolio_count": "200",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Piper Serica Angel Fund",
+    "portfolio_url": "https://piperserica.vc/",
+    "website": "https://piperserica.vc/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "19",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "pi Ventures",
+    "portfolio_url": "https://www.piventures.in/",
+    "website": "https://www.piventures.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "23",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Powerhouse Ventures",
+    "portfolio_url": "https://www.powerhouseventures.com/portfolio",
+    "website": "https://www.powerhouseventures.com/portfolio",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "AI / ML, Fintech, Healthcare/Medtech",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Prath Ventures",
+    "portfolio_url": "https://www.prathventures.com/",
+    "website": "https://www.prathventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "B2B Commerce, Agritech / Food, Consumer",
+    "portfolio_count": "10",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Pravega Ventures",
+    "portfolio_url": "https://www.pravegavc.com/",
+    "website": "https://www.pravegavc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Fintech, AI / ML, Deep Tech / Hard Science",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Prime Venture partners",
+    "portfolio_url": "https://primevp.in/",
+    "website": "https://primevp.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "B2B Commerce, Fintech, AI / ML",
+    "portfolio_count": "50",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Prosus Ventures",
+    "portfolio_url": "https://www.prosus.com/prosus-ventures",
+    "website": "https://www.prosus.com/prosus-ventures",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "25",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Rainmatter Capital",
+    "portfolio_url": "https://rainmatter.com",
+    "website": "https://rainmatter.com",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Fintech, Healthcare/Medtech, Agritech / Food",
+    "portfolio_count": "160",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Razorpay Ventures",
+    "portfolio_url": "https://razorpay.com/m/ventures/",
+    "website": "https://razorpay.com/m/ventures/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "SaaS / DevOps / Marketplace, Fintech, AI / ML",
+    "portfolio_count": "10",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Rebright Partners",
+    "portfolio_url": "https://rebrightpartners.com/",
+    "website": "https://rebrightpartners.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "25",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Riverwalk Holdings",
+    "portfolio_url": "https://riverwalkholdings.com/",
+    "website": "https://riverwalkholdings.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "20",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Rockstud Capital",
+    "portfolio_url": "https://www.rockstudcap.com/",
+    "website": "https://www.rockstudcap.com/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "Automotive / EV, Consumer, Energy",
+    "portfolio_count": "6",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Roots Ventures",
+    "portfolio_url": "https://www.roots-ventures.com/",
+    "website": "https://www.roots-ventures.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "26",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Saama",
+    "portfolio_url": "https://saama.vc/",
+    "website": "https://saama.vc/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "80",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Sadev Ventures",
+    "portfolio_url": "https://www.sadev.ventures/",
+    "website": "https://www.sadev.ventures/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "Consumer, Fintech, Enterprise",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Samarthya Investments",
+    "portfolio_url": "https://www.samarthya.co.in/",
+    "website": "https://www.samarthya.co.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "16",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "SamVed Ventures",
+    "portfolio_url": "https://samved.vc/",
+    "website": "https://samved.vc/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "Agritech / Food, Healthcare/Medtech, Fintech",
+    "portfolio_count": "7",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Sauce.vc",
+    "portfolio_url": "https://sauce.vc/",
+    "website": "https://sauce.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "17",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Seafund",
+    "portfolio_url": "https://seafund.in/",
+    "website": "https://seafund.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "Deep Tech / Hard Science, AI / ML, Industrial / IoT / Robotics",
+    "portfolio_count": "23",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "SenseAI",
+    "portfolio_url": "https://www.senseai.ai/",
+    "website": "https://www.senseai.ai/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "AI / ML",
+    "portfolio_count": "16",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Sharrp Ventures",
+    "portfolio_url": "https://www.sharrpventures.com/",
+    "website": "https://www.sharrpventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "B2C / Ecommerce, Consumer, Healthcare/Medtech",
+    "portfolio_count": "34",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Shastra VC",
+    "portfolio_url": "https://www.shastra.vc/",
+    "website": "https://www.shastra.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Sector Agnostic",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Siana Capital",
+    "portfolio_url": "https://sianacapital.com/",
+    "website": "https://sianacapital.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "7",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "SIG Venture Capital",
+    "portfolio_url": "https://sig-asiavc.com/",
+    "website": "https://sig-asiavc.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "18",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Soonicorn Ventures",
+    "portfolio_url": "https://soonicornventures.com/",
+    "website": "https://soonicornventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Debt",
+    "sectors": "No items found.",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Sorin Investments",
+    "portfolio_url": "https://www.sorininvestments.com/",
+    "website": "https://www.sorininvestments.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "6",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Speciale Invest",
+    "portfolio_url": "https://www.specialeinvest.com/",
+    "website": "https://www.specialeinvest.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B",
+    "sectors": "Deep Tech / Hard Science, Biotech / Life sciences, Government / Defence",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Spring Marketing Capital",
+    "portfolio_url": "https://springmarketingcapital.com/",
+    "website": "https://springmarketingcapital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Consumer, B2C / Ecommerce, Healthcare/Medtech",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Stellaris Venture Partners",
+    "portfolio_url": "https://www.stellarisvp.com/",
+    "website": "https://www.stellarisvp.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "AI / ML, B2C / Ecommerce, Fintech",
+    "portfolio_count": "50",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Stride Ventures",
+    "portfolio_url": "https://www.strideventures.global/",
+    "website": "https://www.strideventures.global/",
+    "region": "India",
+    "stages": "Debt",
+    "sectors": "Consumer, Fintech, Climate / Sustainability",
+    "portfolio_count": "180",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "SucSEED Indovation",
+    "portfolio_url": "https://www.sucseed-indovation.com/",
+    "website": "https://www.sucseed-indovation.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "60",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Sunicon Ventures",
+    "portfolio_url": "https://sunicon.vc/",
+    "website": "https://sunicon.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Tanglin Venture Partners",
+    "portfolio_url": "https://www.tanglinvp.com/",
+    "website": "https://www.tanglinvp.com/",
+    "region": "India",
+    "stages": "Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "23",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "TDV Partners",
+    "portfolio_url": "https://www.tdv.partners/",
+    "website": "https://www.tdv.partners/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "Consumer, Fintech, B2C / Ecommerce",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Theia Ventures",
+    "portfolio_url": "https://www.theia-ventures.com/",
+    "website": "https://www.theia-ventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "Deep Tech / Hard Science, Energy, Industrial / IoT / Robotics",
+    "portfolio_count": "15",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Times Internet Limited",
+    "portfolio_url": "https://timesinternet.in/",
+    "website": "https://timesinternet.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Education, Fintech, B2C / Ecommerce",
+    "portfolio_count": "70",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Titan Capital",
+    "portfolio_url": "https://www.titancapital.vc/",
+    "website": "https://www.titancapital.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "300",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Transition VC",
+    "portfolio_url": "https://transitionventurecapital.com/",
+    "website": "https://transitionventurecapital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Climate / Sustainability, Automotive / EV, Energy",
+    "portfolio_count": "12",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Trifecta Capital",
+    "portfolio_url": "https://trifectacapital.in/",
+    "website": "https://trifectacapital.in/",
+    "region": "India",
+    "stages": "Series A, Series B, Series C, Debt",
+    "sectors": "No items found.",
+    "portfolio_count": "180",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Turbostart",
+    "portfolio_url": "https://turbostart.co/",
+    "website": "https://turbostart.co/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Deep Tech / Hard Science, AI / ML, Industrial / IoT / Robotics",
+    "portfolio_count": "62",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Unicorn Indian Ventures",
+    "portfolio_url": "https://unicornivc.com/",
+    "website": "https://unicornivc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "Deep Tech / Hard Science, Industrial / IoT / Robotics, Government / Defence",
+    "portfolio_count": "40",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Unilever Ventures",
+    "portfolio_url": "https://www.unileverventures.com/",
+    "website": "https://www.unileverventures.com/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "70",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "V3 Ventures",
+    "portfolio_url": "https://www.v3.ventures/",
+    "website": "https://www.v3.ventures/",
+    "region": "India",
+    "stages": "Pre-Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "11",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Valuable Partners",
+    "portfolio_url": "https://valuable.partners/",
+    "website": "https://valuable.partners/",
+    "region": "India",
+    "stages": "Series A, Series B, Series C, Debt",
+    "sectors": "No items found.",
+    "portfolio_count": "3",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Veltis Capital",
+    "portfolio_url": "https://veltiscapital.com/",
+    "website": "https://veltiscapital.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "B2B Commerce, Consumer, Deep Tech / Hard Science",
+    "portfolio_count": "18",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Ventana Ventures",
+    "portfolio_url": "https://ventanaventures.in/",
+    "website": "https://ventanaventures.in/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "Media & Entertainment, Gaming, Consumer",
+    "portfolio_count": "8",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "VenturEast",
+    "portfolio_url": "https://www.ventureast.net/",
+    "website": "https://www.ventureast.net/",
+    "region": "India",
+    "stages": "Seed, Series A, Series B",
+    "sectors": "No items found.",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Vertex Ventures",
+    "portfolio_url": "https://www.vertexventures.sg/",
+    "website": "https://www.vertexventures.sg/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A, Series B, Series C",
+    "sectors": "No items found.",
+    "portfolio_count": "80",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Volt VC",
+    "portfolio_url": "https://www.voltvc.com/",
+    "website": "https://www.voltvc.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed",
+    "sectors": "No items found.",
+    "portfolio_count": "Pitch Now",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "WaterBridge ventures",
+    "portfolio_url": "https://waterbridge.vc/",
+    "website": "https://waterbridge.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "B2C / Ecommerce, Deep Tech / Hard Science, Supply Chain / Logistics",
+    "portfolio_count": "35",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "WEH Ventures",
+    "portfolio_url": "https://www.wehventures.com/",
+    "website": "https://www.wehventures.com/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Westbridge Capital",
+    "portfolio_url": "https://westbridgecap.com",
+    "website": "https://westbridgecap.com",
+    "region": "India",
+    "stages": "Series A, Series B, Series C",
+    "sectors": "AI / ML, Consumer, Fintech, SaaS / DevOps / Marketplace",
+    "portfolio_count": "65",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "White Whale Partners",
+    "portfolio_url": "https://www.whitewhale.in/",
+    "website": "https://www.whitewhale.in/",
+    "region": "India",
+    "stages": "Series A, Series B, Series C",
+    "sectors": "Consumer, Fintech",
+    "portfolio_count": "14",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Windrose Capital",
+    "portfolio_url": "https://www.windrose.capital/",
+    "website": "https://www.windrose.capital/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "24",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Xeed Ventures",
+    "portfolio_url": "https://www.xeed.vc/",
+    "website": "https://www.xeed.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "SaaS / DevOps / Marketplace, AI / ML, Fintech",
+    "portfolio_count": "30",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "z21",
+    "portfolio_url": "https://z21.ventures/",
+    "website": "https://z21.ventures/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "AI / ML, SaaS / DevOps / Marketplace, Deep Tech / Hard Science",
+    "portfolio_count": "45",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Zephyr Peacock India",
+    "portfolio_url": "https://www.zephyrpeacock.com/",
+    "website": "https://www.zephyrpeacock.com/",
+    "region": "India",
+    "stages": "Seed, Series A",
+    "sectors": "No items found.",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  },
+  {
+    "name": "Zeropearl VC",
+    "portfolio_url": "https://zeropearl.vc/",
+    "website": "https://zeropearl.vc/",
+    "region": "India",
+    "stages": "Pre-Seed, Seed, Series A",
+    "sectors": "Consumer, B2C / Ecommerce, AI / ML",
+    "portfolio_count": "22",
+    "source": "indianvcs_directory"
+  }
+]

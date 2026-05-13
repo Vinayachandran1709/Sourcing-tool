@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Star, MapPin, Lock, Unlock, Code, Users, Flame, Briefcase, Sparkles } from 'lucide-react';
+import { API_BASE_URL } from '../services/api';
 
 const getScoreColor = (score) => {
   if (score >= 85) return '#10b981';
@@ -129,7 +130,7 @@ const ProfileCard = ({
 
     setIsGeneratingSummary(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/generate-profile-summary`, {
+      const response = await fetch(`${API_BASE_URL}/api/generate-profile-summary`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

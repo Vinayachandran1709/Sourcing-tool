@@ -1,0 +1,37 @@
+[
+  {
+    "name": "TechCrunch",
+    "url": "https://techcrunch.com/",
+    "region": "US"
+  },
+  {
+    "name": "FinSMEs",
+    "url": "https://www.finsmes.com/",
+    "region": "Global"
+  },
+  {
+    "name": "Tech.eu",
+    "url": "https://tech.eu/",
+    "region": "Europe"
+  },
+  {
+    "name": "YourStory Funding",
+    "url": "https://yourstory.com/category/funding",
+    "region": "India"
+  },
+  {
+    "name": "EU-Startups",
+    "url": "https://www.eu-startups.com/",
+    "region": "Europe"
+  },
+  {
+    "name": "The SaaS News",
+    "url": "https://www.thesaasnews.com/",
+    "region": "Global"
+  },
+  {
+    "name": "Entrackr",
+    "url": "https://entrackr.com/",
+    "region": "India"
+  }
+]

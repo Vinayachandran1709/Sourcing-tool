@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Search, RotateCcw } from 'lucide-react';
+import { API_BASE_URL } from '../services/api';
 
 // ===== CONSTANTS =====
 const ROLE_OPTIONS = [
@@ -281,7 +282,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     try {
       const formData = new FormData();
       formData.append('file', file);
-      const resp = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/extract-jd-file`, {
+      const resp = await fetch(`${API_BASE_URL}/api/extract-jd-file`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` },
         body: formData,
@@ -313,7 +314,7 @@ const FilterPanel = ({ onApplyFilters, initialFilters = {}, onReset }) => {
     setJdSuccess('');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || ''}/api/parse-job-description`, {
+      const response = await fetch(`${API_BASE_URL}/api/parse-job-description`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
