@@ -514,6 +514,44 @@ async def startup_event():
     except Exception as e:
         logger.error(f"Scheduler init failed: {e}")
 
+    # Schedule daily job pipeline (fast ATS poll + funding news) at 06:00 UTC
+    if os.getenv("ENABLE_DAILY_JOB_PIPELINE", "false").lower() == "true":
+        async def _daily_job_pipeline():
+            logger.info("Daily job pipeline starting...")
+            from database import SessionLocal
+            db = SessionLocal()
+            try:
+                from job_discovery.job_pipeline import run_full_pipeline
+                result = await run_full_pipeline(db, options={
+                    "skip_vc": True,
+                    "skip_getro": True,
+                    "skip_wellfound": True,
+                    "skip_ats_discovery": True,
+                    "skip_careers": True,
+                    "skip_ats_poll": False,
+                    "skip_news": False,
+                    "news_limit": None,
+                })
+                logger.info("Daily job pipeline completed: %s", result)
+            except Exception as exc:
+                logger.error("Daily job pipeline failed: %s", exc, exc_info=True)
+            finally:
+                db.close()
+
+        try:
+            from scheduler import scheduler as existing_scheduler
+            existing_scheduler.add_job(
+                _daily_job_pipeline,
+                'cron',
+                hour=6,
+                minute=0,
+                id='daily_job_pipeline',
+                replace_existing=True,
+            )
+            logger.info("Daily job pipeline scheduled at 06:00 UTC")
+        except Exception as exc:
+            logger.warning("Could not schedule daily job pipeline: %s", exc)
+
     # Initialize Redis cache
     await init_redis()
 
@@ -828,6 +866,38 @@ async def run_job_pipeline(
 
     result = await run_full_pipeline(db, options=body)
     return {"success": True, "pipeline_result": result}
+
+
+@app.post("/api/admin/run-daily-poll")
+async def run_daily_poll(
+    db: DbSession,
+    body: dict = Body(default={}),
+):
+    """Fast daily poll: ATS refresh + funding news only. No LLM, no scraping."""
+    from job_discovery.job_pipeline import run_full_pipeline
+    result = await run_full_pipeline(db, options={
+        "skip_vc": True,
+        "skip_getro": True,
+        "skip_wellfound": True,
+        "skip_ats_discovery": True,
+        "skip_careers": True,
+        "skip_ats_poll": False,
+        "skip_news": False,
+        **body,
+    })
+    return {"success": True, "pipeline_result": result}
+
+
+@app.post("/api/admin/discover-ats-slugs")
+async def discover_ats_slugs(
+    db: DbSession,
+    body: dict = Body(default={}),
+):
+    """One-time batch: discover ATS provider and slug for all companies without one."""
+    from job_discovery.ats_daily_poll import batch_discover_ats_slugs
+    limit = body.get("limit")
+    result = await batch_discover_ats_slugs(db, limit=limit)
+    return {"success": True, "result": result}
 
 
 @app.get("/api/jobs/feed")

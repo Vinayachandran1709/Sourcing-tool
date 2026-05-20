@@ -211,8 +211,8 @@ async def fetch_workable_jobs(slug: str) -> list[dict]:
         return []
 
 
-async def try_ats_apis(company_name: str, company_domain: str) -> tuple[str, list[dict]]:
-    """Try all ATS providers for a company. Returns (provider_name, jobs) on first hit."""
+async def try_ats_apis(company_name: str, company_domain: str) -> tuple[str, str, list[dict]]:
+    """Try all ATS providers for a company. Returns (provider_name, slug, jobs) on first hit."""
     slugs = _generate_slugs(company_name, company_domain)
     providers = [
         ("greenhouse", fetch_greenhouse_jobs),
@@ -225,5 +225,5 @@ async def try_ats_apis(company_name: str, company_domain: str) -> tuple[str, lis
             jobs = await fetch_fn(slug)
             if jobs:
                 logger.info("ATS hit: %s/%s → %d jobs", provider_name, slug, len(jobs))
-                return (provider_name, jobs)
-    return ("", [])
+                return (provider_name, slug, jobs)
+    return ("", "", [])

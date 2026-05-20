@@ -5,7 +5,7 @@ Stores jobs in the job_postings table.
 """
 
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Dict, List, Optional
 
 from sqlalchemy.orm import Session
@@ -145,14 +145,19 @@ RULES:
     return [job for job in jobs if job.get("is_engineering", True)]
 
 
-async def scrape_careers_for_startups(db: Session, limit: int = None) -> Dict:
+async def scrape_careers_for_startups(db: Session, limit: int = None, cooldown_days: int = 7) -> Dict:
     """
     For all discovered startups without career URLs or jobs, find and scrape their career pages.
+    Skips companies crawled within the cooldown window (default 7 days).
     """
+    cutoff = datetime.now(timezone.utc) - timedelta(days=cooldown_days)
+
     query = db.query(DiscoveredStartup).filter(
         DiscoveredStartup.is_active == True,
         DiscoveredStartup.domain != None,
         DiscoveredStartup.domain != "",
+    ).filter(
+        (DiscoveredStartup.last_crawled_at == None) | (DiscoveredStartup.last_crawled_at < cutoff)
     )
 
     startups = query.all()
@@ -169,10 +174,11 @@ async def scrape_careers_for_startups(db: Session, limit: int = None) -> Dict:
                 continue
 
             # --- ATS API first ---
-            ats_provider, ats_jobs = await try_ats_apis(startup.company_name, domain)
+            ats_provider, ats_slug, ats_jobs = await try_ats_apis(startup.company_name, domain)
             if ats_jobs:
                 stats["jobs_found"] += len(ats_jobs)
                 startup.ats_provider = ats_provider
+                startup.ats_slug = ats_slug
                 for job in ats_jobs:
                     title = (job.get("title") or "").strip()
                     if not title:

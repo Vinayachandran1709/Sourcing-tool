@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 
 from sqlalchemy.orm import Session
 
+from job_discovery.ats_daily_poll import batch_discover_ats_slugs, poll_known_ats_companies
 from job_discovery.company_career_scraper import scrape_careers_for_startups
 from job_discovery.funding_news_monitor import process_funding_news
 from job_discovery.getro_scraper import scrape_all_getro_boards
@@ -28,9 +29,14 @@ async def run_full_pipeline(db: Session, options: dict = None) -> dict:
         vc_limit: int - max VCs to scrape (None = all)
         company_limit: int - max companies to check careers for (None = all)
         news_limit: int - max news sources to check (None = all)
+        ats_discovery_limit: int - max companies for batch ATS discovery (None = all)
+        ats_poll_limit: int - max companies for daily ATS poll (None = all)
+        cooldown_days: int - skip companies crawled within this many days (default 7)
         skip_vc: bool - skip VC portfolio scraping
         skip_getro: bool - skip Getro board scraping
-        skip_careers: bool - skip career page scraping (includes ATS-first)
+        skip_ats_discovery: bool - skip batch ATS slug discovery
+        skip_ats_poll: bool - skip daily ATS poll
+        skip_careers: bool - skip career page scraping with LLM fallback
         skip_news: bool - skip funding news monitoring
         skip_wellfound: bool - skip Wellfound scraping
     """
@@ -39,6 +45,8 @@ async def run_full_pipeline(db: Session, options: dict = None) -> dict:
         "started_at": datetime.now(timezone.utc).isoformat(),
         "vc_scraping": None,
         "getro_scraping": None,
+        "ats_discovery": None,
+        "ats_daily_poll": None,
         "career_scraping": None,
         "funding_news": None,
         "wellfound_scraping": None,
@@ -65,10 +73,34 @@ async def run_full_pipeline(db: Session, options: dict = None) -> dict:
             logger.error("Getro scraping failed: %s", exc, exc_info=True)
             results["getro_scraping"] = {"error": str(exc)}
 
-    if not options.get("skip_careers"):
-        logger.info("=== Step 3: Scraping company career pages (ATS-first) ===")
+    if not options.get("skip_ats_discovery"):
+        logger.info("=== Step 3: Batch ATS slug discovery ===")
         try:
-            career_result = await scrape_careers_for_startups(db, limit=options.get("company_limit"))
+            discovery_result = await batch_discover_ats_slugs(db, limit=options.get("ats_discovery_limit"))
+            results["ats_discovery"] = discovery_result
+            logger.info("ATS discovery done: %s", discovery_result)
+        except Exception as exc:
+            logger.error("ATS discovery failed: %s", exc, exc_info=True)
+            results["ats_discovery"] = {"error": str(exc)}
+
+    if not options.get("skip_ats_poll"):
+        logger.info("=== Step 4: Daily ATS poll ===")
+        try:
+            poll_result = await poll_known_ats_companies(db, limit=options.get("ats_poll_limit"))
+            results["ats_daily_poll"] = poll_result
+            logger.info("ATS poll done: %s", poll_result)
+        except Exception as exc:
+            logger.error("ATS poll failed: %s", exc, exc_info=True)
+            results["ats_daily_poll"] = {"error": str(exc)}
+
+    if not options.get("skip_careers"):
+        logger.info("=== Step 5: Scraping company career pages (ATS-first with LLM fallback) ===")
+        try:
+            career_result = await scrape_careers_for_startups(
+                db,
+                limit=options.get("company_limit"),
+                cooldown_days=options.get("cooldown_days", 7),
+            )
             results["career_scraping"] = career_result
             logger.info("Career scraping done: %s", career_result)
         except Exception as exc:
@@ -76,7 +108,7 @@ async def run_full_pipeline(db: Session, options: dict = None) -> dict:
             results["career_scraping"] = {"error": str(exc)}
 
     if not options.get("skip_news"):
-        logger.info("=== Step 4: Processing funding news ===")
+        logger.info("=== Step 6: Processing funding news ===")
         try:
             news_result = await process_funding_news(db, limit_sources=options.get("news_limit"))
             results["funding_news"] = news_result
@@ -86,7 +118,7 @@ async def run_full_pipeline(db: Session, options: dict = None) -> dict:
             results["funding_news"] = {"error": str(exc)}
 
     if not options.get("skip_wellfound"):
-        logger.info("=== Step 5: Scraping Wellfound jobs ===")
+        logger.info("=== Step 7: Scraping Wellfound jobs ===")
         try:
             wellfound_result = await scrape_wellfound_jobs(db)
             results["wellfound_scraping"] = wellfound_result
