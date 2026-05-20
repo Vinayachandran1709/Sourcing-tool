@@ -33,5 +33,40 @@
     "name": "Entrackr",
     "url": "https://entrackr.com/",
     "region": "India"
+  },
+  {
+    "name": "Crunchbase News",
+    "url": "https://news.crunchbase.com/",
+    "region": "Global"
+  },
+  {
+    "name": "VCCircle",
+    "url": "https://www.vccircle.com/",
+    "region": "India"
+  },
+  {
+    "name": "DealStreetAsia",
+    "url": "https://www.dealstreetasia.com/",
+    "region": "Asia"
+  },
+  {
+    "name": "Sifted",
+    "url": "https://sifted.eu/",
+    "region": "Europe"
+  },
+  {
+    "name": "TechFundingNews",
+    "url": "https://techfundingnews.com/",
+    "region": "Global"
+  },
+  {
+    "name": "VC News Daily",
+    "url": "https://vcnewsdaily.com/",
+    "region": "US"
+  },
+  {
+    "name": "Top Startups Jobs",
+    "url": "https://topstartups.io/jobs/",
+    "region": "Global"
   }
 ]

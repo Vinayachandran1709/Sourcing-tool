@@ -2227,5 +2227,33 @@
     "sectors": "Consumer, B2C / Ecommerce, AI / ML",
     "portfolio_count": "22",
     "source": "indianvcs_directory"
+  },
+  {
+    "name": "Techstars",
+    "portfolio_url": "https://techstars.getro.com/jobs",
+    "region": "Global",
+    "type": "accelerator"
+  },
+  {
+    "name": "SOSV",
+    "portfolio_url": "https://sosv.getro.com/jobs",
+    "region": "Global",
+    "type": "accelerator"
+  },
+  {
+    "name": "Notation Capital",
+    "portfolio_url": "https://notation.getro.com/jobs",
+    "region": "US"
+  },
+  {
+    "name": "Goodwater Capital",
+    "portfolio_url": "https://goodwater.getro.com/jobs",
+    "region": "US"
+  },
+  {
+    "name": "500 Global",
+    "portfolio_url": "https://500global.getro.com/jobs",
+    "region": "Global",
+    "type": "accelerator"
   }
 ]

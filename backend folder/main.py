@@ -821,7 +821,7 @@ async def run_job_pipeline(
 ):
     """
     Manually trigger the job discovery pipeline.
-    Accepts optional body: {"vc_limit": 3, "company_limit": 10, "news_limit": 2, "skip_vc": false, "skip_careers": false, "skip_news": false}
+    Accepts optional body: {"vc_limit": 3, "company_limit": 10, "news_limit": 2, "skip_vc": false, "skip_getro": false, "skip_careers": false, "skip_news": false, "skip_wellfound": false}
     No auth required for now (this is an admin-only endpoint — add auth later).
     """
     from job_discovery.job_pipeline import run_full_pipeline
