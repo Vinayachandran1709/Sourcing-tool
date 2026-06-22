@@ -7,7 +7,7 @@ import { SpeedInsights } from '@vercel/speed-insights/react';
 import './App.css';
 
 // Public Pages
-import HomePage from './pages/HomePage';
+import WaitlistPage from './pages/WaitlistPage';
 import ForCompaniesPage from './pages/ForCompaniesPage';
 import ForCandidatesPage from './pages/ForCandidatesPage';
 import HireFreePage from './pages/HireFreePage';
@@ -46,7 +46,7 @@ function App() {
           <div className="App">
             <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<WaitlistPage />} />
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/login" element={<LoginPage />} />

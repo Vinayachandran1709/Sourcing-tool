@@ -2077,6 +2077,12 @@ class FreeHireRequest(BaseModel):
     jd_filename: Optional[str] = None
 
 
+class CandidateWaitlistRequest(BaseModel):
+    name: str
+    phone: str
+    source: Optional[str] = "homepage_waitlist"
+
+
 # ===== DEVCARD ENDPOINTS =====
 
 def _calculate_devcard_score(followers: int, public_repos: int, total_stars: int, bio: str, email: str, primary_languages: list) -> int:
@@ -2487,6 +2493,72 @@ def _detect_role_from_title(job_title: str) -> str:
     if "embedded" in title_lower or "firmware" in title_lower or "iot" in title_lower:
         return "Embedded Engineer"
     return "Software Developer"
+
+
+@app.post("/api/waitlist/candidate")
+def join_candidate_waitlist(payload: CandidateWaitlistRequest, db: DbSession):
+    from sqlalchemy import text as sql_text
+    import re
+
+    name = (payload.name or "").strip()
+    phone = (payload.phone or "").strip()
+    source = (payload.source or "homepage_waitlist").strip() or "homepage_waitlist"
+
+    if not name:
+        raise HTTPException(status_code=400, detail="Please enter your full name.")
+
+    if not phone:
+        raise HTTPException(status_code=400, detail="Please enter your WhatsApp number.")
+
+    if not re.fullmatch(r"[+\-\s\d]+", phone):
+        raise HTTPException(status_code=400, detail="Please enter a valid WhatsApp number.")
+
+    normalized_phone = re.sub(r"\D", "", phone)
+    if len(normalized_phone) < 8:
+        raise HTTPException(status_code=400, detail="Please enter a valid WhatsApp number.")
+
+    db.execute(sql_text("""
+        CREATE TABLE IF NOT EXISTS candidate_waitlist (
+            id SERIAL PRIMARY KEY,
+            email VARCHAR(255),
+            name VARCHAR(255),
+            github_username VARCHAR(255),
+            linkedin_url VARCHAR(500),
+            phone VARCHAR(50),
+            source VARCHAR(50) DEFAULT 'homepage_waitlist',
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        )
+    """))
+    db.execute(sql_text("""
+        CREATE INDEX IF NOT EXISTS idx_waitlist_email ON candidate_waitlist(email)
+    """))
+
+    existing_rows = db.execute(sql_text("""
+        SELECT phone
+        FROM candidate_waitlist
+        WHERE phone IS NOT NULL
+    """)).fetchall()
+
+    for row in existing_rows:
+        existing_phone = (row[0] or "").strip()
+        existing_normalized_phone = re.sub(r"\D", "", existing_phone)
+        if existing_phone == phone or (
+            existing_normalized_phone
+            and existing_normalized_phone == normalized_phone
+        ):
+            return {"success": True, "message": "Joined waitlist successfully"}
+
+    db.execute(sql_text("""
+        INSERT INTO candidate_waitlist (name, phone, source)
+        VALUES (:name, :phone, :source)
+    """), {
+        "name": name,
+        "phone": phone,
+        "source": source[:50],
+    })
+    db.commit()
+
+    return {"success": True, "message": "Joined waitlist successfully"}
 
 
 @app.post("/api/hire-free")
