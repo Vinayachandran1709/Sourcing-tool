@@ -25,12 +25,13 @@ const Footer = () => {
               <Package size={28} color="#FF6B35" />
               <span style={styles.logoText}>TalentBox</span>
             </a>
-            <p style={styles.tagline}>AI-powered developer sourcing that actually works.</p>
+            <p style={styles.tagline}>Private beta for startup hiring built around high-signal candidates.</p>
           </div>
 
           <div style={styles.linksSection}>
-            <h4 style={styles.linksTitle}>Product</h4>
-            <Link to="/pricing" style={styles.link}>Pricing</Link>
+            <h4 style={styles.linksTitle}>Explore</h4>
+            <Link to="/" style={styles.link}>Waitlist</Link>
+            <Link to="/candidate/login" style={styles.link}>Candidate Login</Link>
             <Link to="/contact" style={styles.link}>Contact</Link>
           </div>
 

@@ -1,13 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Package, Menu, X } from 'lucide-react';
-import { useAuth } from '../contexts/AuthContext';
 
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuth();
 
   const handleLogoClick = (e) => {
     e.preventDefault();
@@ -28,24 +26,9 @@ const Navbar = () => {
         </a>
 
         <div style={styles.navLinks}>
-          {/* HIDDEN: old recruiter nav
-          <Link to="/for-companies" style={styles.navLink}>For Companies</Link>
-          <Link to="/for-candidates" style={styles.navLink}>For Developers</Link>
-          <Link to="/pricing" style={styles.navLink}>Pricing</Link>
-          <Link to="/contact" style={styles.navLink}>Contact</Link>
-          */}
-          <Link to="/post-job" style={styles.navLink}>For Companies</Link>
-          <Link to="/candidate/signup" style={styles.navLink}>For Developers</Link>
-          {/* <Link to="/pricing" style={styles.navLink}>Pricing</Link> */}
-          <Link to="/contact" style={styles.navLink}>Contact</Link>
-          {isAuthenticated ? (
-            <Link to="/dashboard/search" style={styles.signupBtn}>Recruiter Dashboard</Link>
-          ) : (
-            <>
-              <Link to="/candidate/login" style={styles.navLink}>Candidate Login</Link>
-              <Link to="/candidate/signup" style={styles.signupBtn}>Join as Developer</Link>
-            </>
-          )}
+          <Link to="/post-job" style={styles.navLink}>Post Job</Link>
+          <Link to="/candidate/login" style={styles.navLink}>Candidate Login</Link>
+          <Link to="/" style={styles.signupBtn}>Join Waitlist</Link>
         </div>
 
         <button style={styles.mobileMenuBtn} onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
@@ -55,24 +38,9 @@ const Navbar = () => {
 
       {mobileMenuOpen && (
         <div style={styles.mobileMenu}>
-          {/* HIDDEN: old recruiter nav
-          <Link to="/for-companies" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Companies</Link>
-          <Link to="/for-candidates" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Developers</Link>
-          <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link>
-          <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-          */}
-          <Link to="/post-job" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Companies</Link>
-          <Link to="/candidate/signup" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>For Developers</Link>
-          {/* <Link to="/pricing" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Pricing</Link> */}
-          <Link to="/contact" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Contact</Link>
-          {isAuthenticated ? (
-            <Link to="/dashboard/search" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Recruiter Dashboard</Link>
-          ) : (
-            <>
-              <Link to="/candidate/login" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Candidate Login</Link>
-              <Link to="/candidate/signup" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Join as Developer</Link>
-            </>
-          )}
+          <Link to="/post-job" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Post Job</Link>
+          <Link to="/candidate/login" style={styles.mobileLink} onClick={() => setMobileMenuOpen(false)}>Candidate Login</Link>
+          <Link to="/" style={styles.mobileSignupBtn} onClick={() => setMobileMenuOpen(false)}>Join Waitlist</Link>
         </div>
       )}
     </nav>
