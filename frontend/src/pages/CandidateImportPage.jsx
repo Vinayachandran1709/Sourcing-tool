@@ -4,6 +4,13 @@ import Navbar from '../components/Navbar';
 import { triggerCandidateImport } from '../services/candidateApi';
 import { Loader2, CheckCircle2, XCircle, SkipForward } from 'lucide-react';
 
+const IMPORT_STEPS = [
+  'Analyzing your GitHub profile...',
+  'Parsing your resume...',
+  'Fetching portfolio data...',
+  'Building your developer profile...',
+];
+
 const CandidateImportPage = () => {
   const [status, setStatus] = useState('loading'); // loading, complete, error
   const [results, setResults] = useState(null);
@@ -11,22 +18,15 @@ const CandidateImportPage = () => {
   const navigate = useNavigate();
   const hasTriggered = useRef(false);
 
-  const steps = [
-    "Analyzing your GitHub profile...",
-    "Parsing your resume...",
-    "Fetching portfolio data...",
-    "Building your developer profile..."
-  ];
-
   useEffect(() => {
     // Animation for steps
     if (status === 'loading') {
       const interval = setInterval(() => {
-        setCurrentStep((prev) => (prev < steps.length - 1 ? prev + 1 : prev));
+        setCurrentStep((prev) => (prev < IMPORT_STEPS.length - 1 ? prev + 1 : prev));
       }, 3000);
       return () => clearInterval(interval);
     }
-  }, [status, steps.length]);
+  }, [status]);
 
   useEffect(() => {
     // Only trigger once
@@ -38,7 +38,7 @@ const CandidateImportPage = () => {
         const result = await triggerCandidateImport();
         setResults(result);
         setStatus('complete');
-        setCurrentStep(steps.length - 1);
+        setCurrentStep(IMPORT_STEPS.length - 1);
       } catch (err) {
         console.error("Import failed:", err);
         setStatus('error');
@@ -96,7 +96,7 @@ const CandidateImportPage = () => {
                 <Loader2 size={48} color="#FF6B35" style={styles.spinner} />
               </div>
               <h2 style={styles.title}>Creating your profile...</h2>
-              <p style={styles.stepText}>{steps[currentStep]}</p>
+              <p style={styles.stepText}>{IMPORT_STEPS[currentStep]}</p>
               <p style={styles.disclaimer}>This usually takes 15-30 seconds. Please don't close this page.</p>
             </div>
           )}
