@@ -612,6 +612,8 @@ class JobPosting(Base):
     __table_args__ = (
         Index('ix_job_postings_active_visible', 'is_active', 'is_visible_on_homepage'),
         Index('ix_job_postings_company_title', 'company_domain', 'title'),
+        Index('ix_job_postings_ats_external', 'ats_provider', 'external_id'),
+        Index('ix_job_postings_fallback_lookup', 'company_domain', 'title', 'location'),
     )
 
 class JobMatch(Base):
@@ -628,4 +630,4 @@ class JobMatch(Base):
     status = Column(String(50), default="matched")  # matched, sent_to_company, viewed, interview, hired, rejected
     sent_at = Column(DateTime(timezone=True), nullable=True)
 
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

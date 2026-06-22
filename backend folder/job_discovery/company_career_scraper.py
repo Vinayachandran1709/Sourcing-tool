@@ -11,6 +11,7 @@ from typing import Dict, List, Optional
 from sqlalchemy.orm import Session
 
 from job_discovery.ats_api_scraper import try_ats_apis
+from job_discovery.ats_job_store import upsert_ats_job
 from job_discovery.utils import (
     call_groq,
     extract_links_from_html,
@@ -179,46 +180,14 @@ async def scrape_careers_for_startups(db: Session, limit: int = None, cooldown_d
                 stats["jobs_found"] += len(ats_jobs)
                 startup.ats_provider = ats_provider
                 startup.ats_slug = ats_slug
+                seen_at = datetime.now(timezone.utc)
                 for job in ats_jobs:
-                    title = (job.get("title") or "").strip()
-                    if not title:
-                        continue
-                    existing_job = db.query(JobPosting).filter(
-                        JobPosting.company_domain == domain,
-                        JobPosting.title == title,
-                    ).first()
-                    if existing_job:
-                        existing_job.last_seen_at = datetime.now(timezone.utc)
-                        existing_job.apply_url = job.get("apply_url") or existing_job.apply_url
-                        continue
-                    location = job.get("location")
-                    apply_url = job.get("apply_url", "")
-                    new_job = JobPosting(
-                        startup_id=startup.id,
-                        company_name=startup.company_name,
-                        company_domain=domain,
-                        company_logo_url=startup.logo_url,
-                        funding_stage=startup.funding_stage,
-                        investors_summary=", ".join(startup.investors or [])[:500],
-                        title=title,
-                        department=job.get("department"),
-                        location=location,
-                        remote_policy=_infer_remote_policy(location),
-                        seniority_level=job.get("seniority"),
-                        ats_provider=ats_provider,
-                        apply_url=apply_url or None,
-                        source="ats_api",
-                        is_engineering=True,
-                        is_active=True,
-                        is_visible_on_homepage=True,
-                        quality_score=75,
-                        first_seen_at=datetime.now(timezone.utc),
-                        last_seen_at=datetime.now(timezone.utc),
-                    )
-                    db.add(new_job)
-                    stats["jobs_new"] += 1
+                    job["remote_policy"] = _infer_remote_policy(job.get("location"))
+                    _, created = upsert_ats_job(db, startup, ats_provider, job, seen_at=seen_at)
+                    if created:
+                        stats["jobs_new"] += 1
                     stats["ats_api_jobs"] += 1
-                startup.last_crawled_at = datetime.now(timezone.utc)
+                startup.last_crawled_at = seen_at
                 db.commit()
                 continue
 

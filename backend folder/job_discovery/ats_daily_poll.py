@@ -11,23 +11,26 @@ from typing import Dict
 
 from sqlalchemy.orm import Session
 
-from models import DiscoveredStartup, JobPosting
+from models import DiscoveredStartup
 from job_discovery.ats_api_scraper import (
-    fetch_greenhouse_jobs,
-    fetch_lever_jobs,
-    fetch_ashby_jobs,
-    fetch_workable_jobs,
-    _is_engineering_role,
-    _infer_seniority,
+    fetch_greenhouse_jobs_result,
+    fetch_lever_jobs_result,
+    fetch_ashby_jobs_result,
+    fetch_workable_jobs_result,
+)
+from job_discovery.ats_job_store import (
+    build_seen_identifiers,
+    deactivate_missing_ats_jobs,
+    upsert_ats_job,
 )
 
 logger = logging.getLogger(__name__)
 
 PROVIDER_FETCHERS = {
-    "greenhouse": fetch_greenhouse_jobs,
-    "lever": fetch_lever_jobs,
-    "ashby": fetch_ashby_jobs,
-    "workable": fetch_workable_jobs,
+    "greenhouse": fetch_greenhouse_jobs_result,
+    "lever": fetch_lever_jobs_result,
+    "ashby": fetch_ashby_jobs_result,
+    "workable": fetch_workable_jobs_result,
 }
 
 
@@ -45,7 +48,7 @@ def _infer_remote_policy(location: str | None) -> str | None:
 async def poll_known_ats_companies(db: Session, limit: int = None) -> Dict:
     """
     Poll ATS APIs for all companies with known ats_provider + ats_slug.
-    This is FAST — no slug guessing, no website visits, no LLM calls.
+    This is FAST - no slug guessing, no website visits, no LLM calls.
     Designed to run daily.
     """
     query = db.query(DiscoveredStartup).filter(
@@ -72,82 +75,45 @@ async def poll_known_ats_companies(db: Session, limit: int = None) -> Dict:
         try:
             provider = startup.ats_provider.lower()
             slug = startup.ats_slug
-            domain = startup.domain
 
             fetch_fn = PROVIDER_FETCHERS.get(provider)
             if not fetch_fn:
                 continue
 
             stats["companies_polled"] += 1
-            jobs = await fetch_fn(slug)
+            result = await fetch_fn(slug)
 
-            if not jobs:
-                # API returned empty — might mean all jobs filled, or slug changed
-                # Don't deactivate immediately — could be temporary
+            if not result.success:
+                logger.warning(
+                    "Skipping ATS deactivation for %s because %s/%s did not complete successfully",
+                    startup.company_name,
+                    provider,
+                    slug,
+                )
+                stats["errors"].append(f"{startup.company_name}: fetch failed for provider={provider} slug={slug}")
                 continue
 
+            jobs = result.jobs
             stats["jobs_found"] += len(jobs)
-
-            seen_titles = set()
+            seen_at = datetime.now(timezone.utc)
 
             for job in jobs:
-                title = (job.get("title") or "").strip()
-                if not title:
-                    continue
-                seen_titles.add(title.lower())
+                job["remote_policy"] = _infer_remote_policy(job.get("location"))
+                job["ats_url"] = job.get("ats_url") or result.ats_url
+                _, created = upsert_ats_job(db, startup, provider, job, seen_at=seen_at)
+                if created:
+                    stats["jobs_new"] += 1
 
-                existing = db.query(JobPosting).filter(
-                    JobPosting.company_domain == domain,
-                    JobPosting.title == title,
-                ).first()
+            seen_external_ids, seen_fallback_keys = build_seen_identifiers(startup.domain, jobs)
+            stats["jobs_deactivated"] += deactivate_missing_ats_jobs(
+                db,
+                startup=startup,
+                provider=provider,
+                seen_external_ids=seen_external_ids,
+                seen_fallback_keys=seen_fallback_keys,
+            )
 
-                if existing:
-                    existing.last_seen_at = datetime.now(timezone.utc)
-                    existing.is_active = True
-                    if job.get("apply_url"):
-                        existing.apply_url = job["apply_url"]
-                    continue
-
-                location = job.get("location")
-                new_job = JobPosting(
-                    startup_id=startup.id,
-                    company_name=startup.company_name,
-                    company_domain=domain,
-                    company_logo_url=startup.logo_url,
-                    funding_stage=startup.funding_stage,
-                    investors_summary=", ".join(startup.investors or [])[:500],
-                    title=title,
-                    department=job.get("department"),
-                    location=location,
-                    remote_policy=_infer_remote_policy(location),
-                    seniority_level=job.get("seniority"),
-                    ats_provider=provider,
-                    apply_url=job.get("apply_url") or None,
-                    source="ats_api",
-                    is_engineering=True,
-                    is_active=True,
-                    is_visible_on_homepage=True,
-                    quality_score=75,
-                    first_seen_at=datetime.now(timezone.utc),
-                    last_seen_at=datetime.now(timezone.utc),
-                )
-                db.add(new_job)
-                stats["jobs_new"] += 1
-
-            # Deactivate jobs from this company that weren't seen in this poll
-            existing_active_jobs = db.query(JobPosting).filter(
-                JobPosting.company_domain == domain,
-                JobPosting.is_active == True,
-                JobPosting.source == "ats_api",
-            ).all()
-
-            for old_job in existing_active_jobs:
-                if old_job.title.lower() not in seen_titles:
-                    old_job.is_active = False
-                    old_job.is_visible_on_homepage = False
-                    stats["jobs_deactivated"] += 1
-
-            startup.last_crawled_at = datetime.now(timezone.utc)
+            startup.last_crawled_at = seen_at
             db.commit()
 
         except Exception as exc:
@@ -162,7 +128,7 @@ async def batch_discover_ats_slugs(db: Session, limit: int = None) -> Dict:
     """
     Run ATS slug discovery on all companies that DON'T yet have a known ATS provider.
     This is the one-time batch job to populate ats_provider + ats_slug.
-    Slower than daily poll (tries 4 APIs × N slugs per company) but only runs once per company.
+    Slower than daily poll (tries 4 APIs x N slugs per company) but only runs once per company.
     """
     from job_discovery.ats_api_scraper import try_ats_apis
 
@@ -195,45 +161,13 @@ async def batch_discover_ats_slugs(db: Session, limit: int = None) -> Dict:
                 startup.ats_slug = slug
                 stats["ats_found"] += 1
                 stats["providers"][provider] = stats["providers"].get(provider, 0) + 1
+                seen_at = datetime.now(timezone.utc)
 
                 for job in jobs:
-                    title = (job.get("title") or "").strip()
-                    if not title:
-                        continue
-                    existing = db.query(JobPosting).filter(
-                        JobPosting.company_domain == startup.domain,
-                        JobPosting.title == title,
-                    ).first()
-                    if existing:
-                        existing.last_seen_at = datetime.now(timezone.utc)
-                        continue
+                    job["remote_policy"] = _infer_remote_policy(job.get("location"))
+                    upsert_ats_job(db, startup, provider, job, seen_at=seen_at)
 
-                    location = job.get("location")
-                    new_job = JobPosting(
-                        startup_id=startup.id,
-                        company_name=startup.company_name,
-                        company_domain=startup.domain,
-                        company_logo_url=startup.logo_url,
-                        funding_stage=startup.funding_stage,
-                        investors_summary=", ".join(startup.investors or [])[:500],
-                        title=title,
-                        department=job.get("department"),
-                        location=location,
-                        remote_policy=_infer_remote_policy(location),
-                        seniority_level=job.get("seniority"),
-                        ats_provider=provider,
-                        apply_url=job.get("apply_url") or None,
-                        source="ats_api",
-                        is_engineering=True,
-                        is_active=True,
-                        is_visible_on_homepage=True,
-                        quality_score=75,
-                        first_seen_at=datetime.now(timezone.utc),
-                        last_seen_at=datetime.now(timezone.utc),
-                    )
-                    db.add(new_job)
-
-                startup.last_crawled_at = datetime.now(timezone.utc)
+                startup.last_crawled_at = seen_at
                 db.commit()
             else:
                 stats["ats_not_found"] += 1

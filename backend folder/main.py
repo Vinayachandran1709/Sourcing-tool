@@ -476,6 +476,8 @@ async def startup_event():
                     );
                     CREATE INDEX IF NOT EXISTS ix_job_postings_active_visible ON job_postings(is_active, is_visible_on_homepage);
                     CREATE INDEX IF NOT EXISTS ix_job_postings_company_title ON job_postings(company_domain, title);
+                    CREATE INDEX IF NOT EXISTS ix_job_postings_ats_external ON job_postings(ats_provider, external_id);
+                    CREATE INDEX IF NOT EXISTS ix_job_postings_fallback_lookup ON job_postings(company_domain, title, location);
                 """))
 
                 conn.execute(sa_text("""
