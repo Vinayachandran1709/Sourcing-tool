@@ -44,7 +44,7 @@ Recruiters search by role, location, skills, experience level, and contribution 
 ## Folder Structure
 
 ```
-Sourcing-tool/
+talentbox/
 ├── backend folder/            # FastAPI backend
 │   ├── main.py                # App entry point, all core routes
 │   ├── config.py              # Env var loading
