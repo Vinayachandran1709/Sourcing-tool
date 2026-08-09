@@ -2255,5 +2255,605 @@
     "portfolio_url": "https://500global.getro.com/jobs",
     "region": "Global",
     "type": "accelerator"
+  },
+  {
+    "name": "FIGR Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Sorven Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Giles Brook",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "B Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Bessemer Venture Partners",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Micron",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "MediaTek",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Ericsson",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "ScOp",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "One Peak",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Morgan Stanley Expansion Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Zeev Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Angular Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Heavybit",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Jibe",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "JLO Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Portfolia Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Lumentum",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Salesforce Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "20SALES",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Ritual Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Adverb Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Stewart Butterfield",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Scott Woody",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Lakestar",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "201 Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Lux Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Northzone",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Gradient",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "SignalFire",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "K5 Global",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Godard Abel",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Wes McKinney",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Alex Dean",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "F-Prime",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Cherryrock Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Companyon Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Urban Innovation Fund (UIF)",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "CP Overture",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Standard Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "YCombinator",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Moonfire",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Burst Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "IrregEx",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "the Agent Fund",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "TCEE Fund IV",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Endeavor Catalyst",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Impetus",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "MFG Invest",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Dimitar Ratchev",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Saepio Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Blue Heron Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Revolution's Rise of the Rest Seed Fund",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "S3 Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Chicago Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "111\u00b0 West Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "First Round Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Pioneer Fund",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "GoAhead Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "North Coast Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Field Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Flybridge Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Tip Top VC",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Front Porch Venture Partners",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "SpringTide Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "WRF Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Tacoma Venture Fund",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "HeartX",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Transform Health Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Precursor Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Version One Ventures",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Night Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Todd & Rahul Capital",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Lenny Rachitsky",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
+  },
+  {
+    "name": "Ben Tossell",
+    "portfolio_url": "",
+    "website": "",
+    "region": "Unknown",
+    "source": "auto_discovered",
+    "needs_url": true
   }
 ]
